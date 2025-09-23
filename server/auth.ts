@@ -102,6 +102,39 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
   return res.status(401).json({ message: "Unauthorized" });
 };
 
+// Admin middleware - requires authentication and admin role
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  // First check if user is authenticated (using JWT)
+  if (req.user) {
+    if (req.user.isAdmin) {
+      return next();
+    } else {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+  }
+  
+  // Fallback to session-based auth - need to fetch user from database
+  if (req.session && req.session.userId) {
+    // This is async, so we need to handle it properly
+    storage.getUser(req.session.userId)
+      .then(user => {
+        if (user?.isAdmin) {
+          next();
+        } else {
+          res.status(403).json({ message: "Admin access required" });
+        }
+      })
+      .catch(error => {
+        console.error('Error checking admin status:', error);
+        res.status(500).json({ message: "Internal server error" });
+      });
+    return; // Important: return here to prevent further execution
+  }
+  
+  // Not authenticated at all
+  return res.status(401).json({ message: "Unauthorized" });
+};
+
 // Initialize admin user - only runs in development or when explicitly enabled
 export async function initializeAdminUser() {
   // Only run in development or when explicitly enabled
