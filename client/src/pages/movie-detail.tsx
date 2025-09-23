@@ -370,14 +370,14 @@ export default function MovieDetail() {
                   {movie.credits?.crew && (
                     <div>
                       <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
-                      <div className="space-y-4" data-testid="crew-list">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="crew-grid">
                         {movie.credits.crew
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Screenplay'].includes(person.job))
-                          .slice(0, 8)
-                          .map((person: any, index: number) => (
-                            <Link key={`${person.id}-${index}`} href={"/person/" + person.id}>
-                              <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 cursor-pointer group transition-all duration-200">
-                                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                          .slice(0, 6)
+                          .map((person: any) => (
+                            <Link key={person.id} href={"/person/" + person.id}>
+                              <div className="text-center cursor-pointer group hover:scale-105 transition-transform">
+                                <div className="w-full aspect-[2/3] bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
                                   {person.profile_path ? (
                                     <img
                                       src={getImageUrl(person.profile_path, 'w200')}
@@ -386,18 +386,16 @@ export default function MovieDetail() {
                                       data-testid={`crew-image-${person.id}`}
                                     />
                                   ) : (
-                                    <Users className="w-8 h-8 text-muted-foreground" />
+                                    <Users className="w-12 h-12 text-muted-foreground" />
                                   )}
                                 </div>
-                                <div>
-                                  <h4 className="font-semibold group-hover:text-primary transition-colors" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
-                                  <p className="text-sm text-muted-foreground" data-testid={`crew-job-${person.id}`}>
-                                    {person.job}
-                                  </p>
-                                </div>
+                                <h4 className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
+                                <p className="text-xs text-muted-foreground mt-1" data-testid={`crew-job-${person.id}`}>
+                                  {person.job}
+                                </p>
                               </div>
                             </Link>
-                          ))
+                          ))}
                       </div>
                     </div>
                   )}
