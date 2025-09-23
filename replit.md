@@ -43,7 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Database Hosting**: Neon serverless PostgreSQL
 - **Authentication**: Replit's OIDC authentication service
 - **UI Components**: Radix UI primitives for accessible components
-- **Styling**: Tailwind CSS with custom design tokens and Font Awesome icons
+- **Styling**: Tailwind CSS with custom design tokens and Lucide React icons
 - **Development**: Vite with hot module replacement and TypeScript support
 
 The architecture follows a modern full-stack pattern with clear separation of concerns, type safety throughout the stack, and scalable data management. The application supports both authenticated and unauthenticated users with different feature sets, and includes admin functionality for user management and analytics.
@@ -69,22 +69,33 @@ The architecture follows a modern full-stack pattern with clear separation of co
    ```
 
 3. **Environment Configuration:**
-   Create a `.env` file in the root directory with the following variables:
+   Create a `.env` file in the root directory with the required variables:
    ```env
+   # Required
    DATABASE_URL=your_postgresql_connection_string
    TMDB_API_KEY=your_tmdb_api_key
-   REPLIT_ID=your_replit_id
+   
+   # Required for JWT authentication
+   JWT_ACCESS_SECRET=your_jwt_access_secret
+   JWT_REFRESH_SECRET=your_jwt_refresh_secret
+   
+   # Required in production
    SESSION_SECRET=your_session_secret_key
+   
+   # Optional OAuth providers (leave blank if not using)
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
+   
+   # Development only
    NODE_ENV=development
    ```
 
 4. **Database Setup:**
    ```bash
-   # Push the database schema
+   # Push the database schema to your PostgreSQL database
    npm run db:push
-   
-   # Optional: Seed the database with initial data
-   npm run db:seed
    ```
 
 5. **Start Development Server:**
@@ -98,10 +109,9 @@ The architecture follows a modern full-stack pattern with clear separation of co
 
 ### Additional Commands
 - `npm run build` - Build the application for production
-- `npm run preview` - Preview the production build locally
-- `npm run db:studio` - Open Drizzle Studio for database management
-- `npm run lint` - Run ESLint for code quality checks
-- `npm run type-check` - Run TypeScript type checking
+- `npm run start` - Start the production server
+- `npm run check` - Run TypeScript type checking
+- `npm run db:push` - Push database schema changes
 
 ### External Services Setup
 - **TMDB API**: Register at [The Movie Database](https://www.themoviedb.org/settings/api) to get your API key

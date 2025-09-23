@@ -8,7 +8,7 @@ import CategoryGrid from "@/components/movie/category-grid";
 import FeaturedCollections from "@/components/movie/featured-collections";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Link } from "wouter";
-import { List, Bot, Bell } from "lucide-react";
+import { List, Bot, Bell, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Landing() {
@@ -81,7 +81,7 @@ export default function Landing() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="absolute bottom-4 left-4 right-4">
                                 <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
+                                  <Star className="w-4 h-4 text-secondary fill-current" />
                                   <span data-testid={`trending-movie-rating-${movie.id}`}>{movie.vote_average.toFixed(1)}</span>
                                 </div>
                               </div>
@@ -133,7 +133,7 @@ export default function Landing() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="absolute bottom-4 left-4 right-4">
                                 <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
+                                  <Star className="w-4 h-4 text-secondary fill-current" />
                                   <span data-testid={`trending-tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
                                 </div>
                               </div>
@@ -210,7 +210,7 @@ export default function Landing() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="absolute bottom-4 left-4 right-4">
                                 <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
+                                  <Star className="w-4 h-4 text-secondary fill-current" />
                                   <span data-testid={`popular-movie-rating-${movie.id}`}>{movie.vote_average.toFixed(1)}</span>
                                 </div>
                               </div>
@@ -262,7 +262,7 @@ export default function Landing() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="absolute bottom-4 left-4 right-4">
                                 <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
+                                  <Star className="w-4 h-4 text-secondary fill-current" />
                                   <span data-testid={`popular-tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
                                 </div>
                               </div>
