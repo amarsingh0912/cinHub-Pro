@@ -11,20 +11,29 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Users, Activity, Star, List, BarChart3, Settings, Shield } from "lucide-react";
+import type { User } from "@shared/schema";
+
+// Type definitions for admin data
+interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalReviews: number;
+  totalWatchlists: number;
+}
 
 export default function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { toast } = useToast();
 
-  const { data: adminStats, isLoading: statsLoading } = useQuery<any>({
+  const { data: adminStats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: !!isAuthenticated && !!user?.isAdmin,
     retry: false,
   });
 
-  const { data: allUsers, isLoading: usersLoading } = useQuery<any[]>({
+  const { data: allUsers, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: !!isAuthenticated && !!user?.isAdmin,
     retry: false,
   });
 
@@ -189,7 +198,7 @@ export default function AdminDashboard() {
                     User Management
                   </h2>
                   <div className="text-sm text-muted-foreground">
-                    Total: {allUsers?.length || 0} users
+                    Total: {allUsers?.length ?? 0} users
                   </div>
                 </div>
 
@@ -198,7 +207,7 @@ export default function AdminDashboard() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     <span className="ml-2 text-muted-foreground">Loading users...</span>
                   </div>
-                ) : allUsers?.length > 0 ? (
+                ) : (allUsers?.length ?? 0) > 0 ? (
                   <Card data-testid="users-table-card">
                     <CardHeader>
                       <CardTitle>Recent Users</CardTitle>
@@ -215,7 +224,7 @@ export default function AdminDashboard() {
                           </TableRow>
                         </TableHeader>
                         <TableBody data-testid="users-table-body">
-                          {allUsers.slice(0, 10).map((user) => (
+                          {allUsers?.slice(0, 10).map((user) => (
                             <TableRow key={user.id} data-testid={`user-row-${user.id}`}>
                               <TableCell>
                                 <div className="flex items-center gap-3">
@@ -244,7 +253,7 @@ export default function AdminDashboard() {
                                 {user.email || 'Not provided'}
                               </TableCell>
                               <TableCell data-testid={`user-joined-${user.id}`}>
-                                {new Date(user.createdAt).toLocaleDateString()}
+                                {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                               </TableCell>
                               <TableCell>
                                 <Badge variant={user.isAdmin ? "destructive" : "secondary"} data-testid={`user-role-${user.id}`}>
