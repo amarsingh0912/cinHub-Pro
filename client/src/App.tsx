@@ -1,9 +1,10 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -24,7 +25,30 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const [location, setLocation] = useLocation();
+
+  // Role-based redirect logic
+  useEffect(() => {
+    // Only redirect if user is authenticated and we're on the root path
+    if (!isLoading && isAuthenticated && user && location === '/') {
+      // Check for OAuth success/failure query params first
+      const urlParams = new URLSearchParams(window.location.search);
+      const authParam = urlParams.get('auth');
+      
+      if (authParam === 'success' || authParam === 'failed') {
+        // Clear the query parameter
+        window.history.replaceState({}, document.title, '/');
+      }
+      
+      // Redirect based on user role
+      if (user.isAdmin) {
+        setLocation('/admin');
+      } else {
+        setLocation('/dashboard');
+      }
+    }
+  }, [isAuthenticated, isLoading, user, location, setLocation]);
 
   return (
     <Switch>
