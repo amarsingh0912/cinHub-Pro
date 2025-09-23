@@ -32,7 +32,7 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { signUpSchema } from "@shared/schema";
+import { baseSignUpSchema } from "@shared/schema";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -47,7 +47,7 @@ const signinFormSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-const signupFormSchema = signUpSchema.extend({
+const signupFormSchema = baseSignUpSchema.extend({
   confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
   profilePhoto: z.any().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
