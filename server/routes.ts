@@ -20,6 +20,7 @@ import {
   signInSchema,
   signUpSchema,
 } from "@shared/schema";
+import { sendOTP } from "./services/otpService";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles');
@@ -213,8 +214,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt,
       });
       
-      // TODO: Send OTP via email/SMS
-      console.log(`Signup verification OTP for ${verificationTarget}: ${otpCode}`);
+      // Send OTP via email or SMS
+      const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
+      if (!otpResult.success) {
+        console.error(`Failed to send signup OTP to ${verificationTarget}:`, otpResult.error);
+        // Don't fail the signup, but log the issue
+      }
       
       // Don't set session - user needs to verify first
       res.status(201).json({ 
@@ -251,7 +256,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt,
           });
           
-          console.log(`Account verification OTP for ${verificationTarget}: ${otpCode}`);
+          // Send OTP via email or SMS
+          const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
+          if (!otpResult.success) {
+            console.error(`Failed to send signin verification OTP to ${verificationTarget}:`, otpResult.error);
+          }
         }
         
         return res.status(403).json({ 
@@ -318,8 +327,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt,
       });
       
-      // TODO: Send OTP via email/SMS
-      console.log(`Password reset OTP for ${identifier}: ${otpCode}`);
+      // Send OTP via email or SMS
+      const otpResult = await sendOTP(identifier, otpCode, 'reset');
+      if (!otpResult.success) {
+        console.error(`Failed to send password reset OTP to ${identifier}:`, otpResult.error);
+        // Still proceed, but user may need to try again or contact support
+      }
       
       res.json({ message: "Password reset code sent successfully" });
     } catch (error) {
@@ -443,7 +456,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt,
           });
           
-          console.log(`Account verification OTP for ${verificationTarget}: ${otpCode}`);
+          // Send OTP via email or SMS
+          const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
+          if (!otpResult.success) {
+            console.error(`Failed to send signin verification OTP to ${verificationTarget}:`, otpResult.error);
+          }
         }
         
         return res.status(403).json({ 
