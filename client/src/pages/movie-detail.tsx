@@ -600,6 +600,90 @@ export default function MovieDetail() {
             </Tabs>
           </div>
         </section>
+
+        {/* Similar and Recommended Movies Section */}
+        <section className="container mx-auto px-4 py-8">
+          <Tabs defaultValue="recommended" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="recommended" data-testid="tab-recommended">Recommended</TabsTrigger>
+              <TabsTrigger value="similar" data-testid="tab-similar">Similar</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="recommended" className="mt-6">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended Movies</h2>
+                {movie?.recommendations?.results && movie.recommendations.results.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {movie.recommendations.results.slice(0, 12).map((rec: any) => (
+                      <div key={rec.id} className="space-y-2" data-testid={`recommended-movie-${rec.id}`}>
+                        <a href={`/movie/${rec.id}`} className="block group">
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
+                            <img
+                              src={rec.poster_path ? getImageUrl(rec.poster_path, 'w500') : '/placeholder-movie.jpg'}
+                              alt={rec.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              data-testid={`recommended-poster-${rec.id}`}
+                            />
+                          </div>
+                          <h3 className="text-sm font-medium line-clamp-2 group-hover:text-primary transition-colors" data-testid={`recommended-title-${rec.id}`}>
+                            {rec.title}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span data-testid={`recommended-rating-${rec.id}`}>
+                              {rec.vote_average?.toFixed(1) || 'N/A'}
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
+                    No recommended movies available.
+                  </p>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="similar" className="mt-6">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar Movies</h2>
+                {movie?.similar?.results && movie.similar.results.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {movie.similar.results.slice(0, 12).map((sim: any) => (
+                      <div key={sim.id} className="space-y-2" data-testid={`similar-movie-${sim.id}`}>
+                        <a href={`/movie/${sim.id}`} className="block group">
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
+                            <img
+                              src={sim.poster_path ? getImageUrl(sim.poster_path, 'w500') : '/placeholder-movie.jpg'}
+                              alt={sim.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              data-testid={`similar-poster-${sim.id}`}
+                            />
+                          </div>
+                          <h3 className="text-sm font-medium line-clamp-2 group-hover:text-primary transition-colors" data-testid={`similar-title-${sim.id}`}>
+                            {sim.title}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span data-testid={`similar-rating-${sim.id}`}>
+                              {sim.vote_average?.toFixed(1) || 'N/A'}
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
+                    No similar movies available.
+                  </p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </section>
       </main>
       
       <Footer />

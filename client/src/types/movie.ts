@@ -30,6 +30,7 @@ export interface MovieDetails extends Movie {
   credits?: Credits;
   videos?: Videos;
   similar?: MovieResponse;
+  recommendations?: MovieResponse;
 }
 
 export interface Genre {
@@ -154,6 +155,7 @@ export interface TVShowDetails extends TVShow {
   credits?: Credits;
   videos?: Videos;
   similar?: TVResponse;
+  recommendations?: TVResponse;
 }
 
 export interface TVResponse {
