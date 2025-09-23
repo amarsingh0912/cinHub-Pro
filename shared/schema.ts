@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   phoneNumber: varchar("phone_number").unique(),
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: boolean("is_admin").default(false),
+  isVerified: boolean("is_verified").default(false), // Account verification status
   preferences: jsonb("preferences"), // Store movie preferences as JSON
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
