@@ -11,7 +11,8 @@ import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Heart, Plus, Star, Calendar, Play, Tv } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 
 export default function TVDetail() {
@@ -28,6 +29,12 @@ export default function TVDetail() {
   const { data: favoriteStatus } = useQuery<{ isFavorite: boolean }>({
     queryKey: ["/api/favorites", id, "check"],
     enabled: !!id && isAuthenticated,
+    retry: false,
+  });
+
+  const { data: reviews, isLoading: reviewsLoading } = useQuery<any[]>({
+    queryKey: ["/api/reviews", "tv", id],
+    enabled: !!id,
     retry: false,
   });
 
@@ -279,119 +286,259 @@ export default function TVDetail() {
           </div>
         </section>
         
-        {/* Content Section */}
-        <section className="py-16" data-testid="tv-content-section">
+        {/* TV Show Content */}
+        <section className="py-12" data-testid="tv-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* Overview */}
-                <div data-testid="tv-overview-section">
-                  <h2 className="text-2xl font-display font-bold mb-4">Overview</h2>
-                  <p className="text-muted-foreground leading-relaxed" data-testid="tv-overview">
-                    {tvShow.overview || "No overview available for this TV show."}
-                  </p>
-                </div>
-                
-                {/* Cast */}
-                {tvShow.credits?.cast && tvShow.credits.cast.length > 0 && (
-                  <div data-testid="tv-cast-section">
-                    <h2 className="text-2xl font-display font-bold mb-6">Cast</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {tvShow.credits.cast.slice(0, 10).map((actor) => (
-                        <div key={actor.id} className="text-center group" data-testid={`cast-member-${actor.id}`}>
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent mb-2">
-                            {actor.profile_path ? (
-                              <img
-                                src={getImageUrl(actor.profile_path, 'w200')}
-                                alt={actor.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs">No Photo</span>
-                              </div>
-                            )}
+            {/* Overview */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-display font-bold mb-4" data-testid="overview-title">Overview</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed" data-testid="tv-overview">
+                {tvShow.overview || "No overview available for this TV show."}
+              </p>
+            </div>
+
+            {/* Tabs */}
+            <Tabs defaultValue="cast" className="w-full" data-testid="tv-tabs">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="cast" className="flex items-center gap-2" data-testid="tab-cast">
+                  <Users className="w-4 h-4" />
+                  Cast & Crew
+                </TabsTrigger>
+                <TabsTrigger value="reviews" className="flex items-center gap-2" data-testid="tab-reviews">
+                  <MessageSquare className="w-4 h-4" />
+                  Reviews
+                </TabsTrigger>
+                <TabsTrigger value="details" className="flex items-center gap-2" data-testid="tab-details">
+                  <Info className="w-4 h-4" />
+                  Details
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Cast & Crew Tab */}
+              <TabsContent value="cast" className="mt-6" data-testid="content-cast">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Cast */}
+                  {tvShow.credits?.cast && (
+                    <div>
+                      <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="cast-grid">
+                        {tvShow.credits.cast.slice(0, 12).map((actor: any) => (
+                          <div key={actor.id} className="text-center">
+                            <div className="w-full aspect-[2/3] bg-muted rounded-lg mb-2 overflow-hidden flex items-center justify-center">
+                              {actor.profile_path ? (
+                                <img
+                                  src={getImageUrl(actor.profile_path, 'w200')}
+                                  alt={actor.name}
+                                  className="w-full h-full object-cover"
+                                  data-testid={`actor-image-${actor.id}`}
+                                />
+                              ) : (
+                                <Users className="w-8 h-8 text-muted-foreground" />
+                              )}
+                            </div>
+                            <h4 className="font-medium text-sm" data-testid={`actor-name-${actor.id}`}>{actor.name}</h4>
+                            <p className="text-xs text-muted-foreground" data-testid={`actor-character-${actor.id}`}>
+                              {actor.character}
+                            </p>
                           </div>
-                          <h3 className="font-semibold text-sm truncate" data-testid={`actor-name-${actor.id}`}>
-                            {actor.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground truncate" data-testid={`character-name-${actor.id}`}>
-                            {actor.character}
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Crew */}
+                  {tvShow.credits?.crew && (
+                    <div>
+                      <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
+                      <div className="space-y-4" data-testid="crew-list">
+                        {tvShow.credits.crew
+                          .filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job))
+                          .slice(0, 8)
+                          .map((person: any, index: number) => (
+                            <div key={`${person.id}-${index}`} className="flex items-center gap-4">
+                              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center overflow-hidden">
+                                {person.profile_path ? (
+                                  <img
+                                    src={getImageUrl(person.profile_path, 'w200')}
+                                    alt={person.name}
+                                    className="w-full h-full object-cover"
+                                    data-testid={`crew-image-${person.id}`}
+                                  />
+                                ) : (
+                                  <Users className="w-6 h-6 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-medium" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
+                                <p className="text-sm text-muted-foreground" data-testid={`crew-job-${person.id}`}>
+                                  {person.job}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Reviews Tab */}
+              <TabsContent value="reviews" className="mt-6" data-testid="content-reviews">
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold" data-testid="reviews-title">User Reviews</h3>
+                  {reviewsLoading ? (
+                    <div className="text-center py-8" data-testid="reviews-loading">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading reviews...</p>
+                    </div>
+                  ) : reviews && reviews.length > 0 ? (
+                    <div className="space-y-4" data-testid="reviews-list">
+                      {reviews.map((review: any) => (
+                        <div key={review.id} className="bg-card rounded-lg p-6 border border-border">
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <h4 className="font-medium" data-testid={`review-author-${review.id}`}>
+                                {review.author_name || 'Anonymous'}
+                              </h4>
+                              {review.rating && (
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                  <span className="text-sm" data-testid={`review-rating-${review.id}`}>
+                                    {review.rating}/10
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-sm text-muted-foreground" data-testid={`review-date-${review.id}`}>
+                              {new Date(review.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-muted-foreground" data-testid={`review-content-${review.id}`}>
+                            {review.content}
                           </p>
                         </div>
                       ))}
                     </div>
+                  ) : (
+                    <div className="text-center py-8" data-testid="no-reviews">
+                      <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No reviews available for this TV show.</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              {/* Details Tab */}
+              <TabsContent value="details" className="mt-6" data-testid="content-details">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-card rounded-lg p-6 border border-border" data-testid="tv-info-card">
+                    <h3 className="text-xl font-semibold mb-4">TV Show Information</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium text-muted-foreground">First Air Date</h4>
+                        <p data-testid="tv-release-date">
+                          {tvShow.first_air_date ? new Date(tvShow.first_air_date).toLocaleDateString() : 'TBA'}
+                        </p>
+                      </div>
+                      
+                      {tvShow.last_air_date && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium text-muted-foreground">Last Air Date</h4>
+                            <p data-testid="tv-last-air-date">
+                              {new Date(tvShow.last_air_date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                      
+                      <Separator />
+                      
+                      <div>
+                        <h4 className="font-medium text-muted-foreground">Status</h4>
+                        <p data-testid="tv-status">{tvShow.status}</p>
+                      </div>
+                      
+                      {tvShow.type && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium text-muted-foreground">Type</h4>
+                            <p data-testid="tv-type">{tvShow.type}</p>
+                          </div>
+                        </>
+                      )}
+                      
+                      <Separator />
+                      
+                      <div>
+                        <h4 className="font-medium text-muted-foreground">Episodes</h4>
+                        <p data-testid="tv-episodes">{tvShow.number_of_episodes}</p>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div>
+                        <h4 className="font-medium text-muted-foreground">Seasons</h4>
+                        <p data-testid="tv-seasons-count">{tvShow.number_of_seasons}</p>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-              
-              {/* Sidebar */}
-              <div className="space-y-8">
-                {/* TV Show Details */}
-                <div data-testid="tv-details-sidebar">
-                  <h3 className="text-xl font-display font-bold mb-4">TV Show Details</h3>
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="font-semibold text-muted-foreground">First Air Date:</span>
-                      <p data-testid="tv-release-date">
-                        {tvShow.first_air_date ? new Date(tvShow.first_air_date).toLocaleDateString() : 'TBA'}
-                      </p>
-                    </div>
+
+                  <div className="bg-card rounded-lg p-6 border border-border" data-testid="production-info-card">
+                    <h3 className="text-xl font-semibold mb-4">Production</h3>
                     
-                    {tvShow.last_air_date && (
+                    <div className="space-y-4">
                       <div>
-                        <span className="font-semibold text-muted-foreground">Last Air Date:</span>
-                        <p data-testid="tv-last-air-date">
-                          {new Date(tvShow.last_air_date).toLocaleDateString()}
-                        </p>
+                        <h4 className="font-medium text-muted-foreground">Episode Runtime</h4>
+                        <p data-testid="tv-episode-runtime">{formatRuntime(tvShow.episode_run_time)}</p>
                       </div>
-                    )}
-                    
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Status:</span>
-                      <p data-testid="tv-status">{tvShow.status}</p>
-                    </div>
-                    
-                    {tvShow.type && (
+                      
+                      <Separator />
+                      
                       <div>
-                        <span className="font-semibold text-muted-foreground">Type:</span>
-                        <p data-testid="tv-type">{tvShow.type}</p>
+                        <h4 className="font-medium text-muted-foreground">Original Language</h4>
+                        <p data-testid="tv-language">{tvShow.original_language.toUpperCase()}</p>
                       </div>
-                    )}
-                    
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Episodes:</span>
-                      <p data-testid="tv-episodes">{tvShow.number_of_episodes}</p>
+                      
+                      {tvShow.networks && tvShow.networks.length > 0 && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium text-muted-foreground">Networks</h4>
+                            <div className="space-y-1">
+                              {tvShow.networks.map((network: any) => (
+                                <p key={network.id} data-testid={`network-${network.id}`}>
+                                  {network.name}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      
+                      {tvShow.production_companies && tvShow.production_companies.length > 0 && (
+                        <>
+                          <Separator />
+                          <div>
+                            <h4 className="font-medium text-muted-foreground">Production Companies</h4>
+                            <div className="space-y-1">
+                              {tvShow.production_companies.slice(0, 5).map((company: any) => (
+                                <p key={company.id} data-testid={`company-${company.id}`}>
+                                  {company.name}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Seasons:</span>
-                      <p data-testid="tv-seasons-count">{tvShow.number_of_seasons}</p>
-                    </div>
-                    
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Episode Runtime:</span>
-                      <p data-testid="tv-episode-runtime">{formatRuntime(tvShow.episode_run_time)}</p>
-                    </div>
-                    
-                    <div>
-                      <span className="font-semibold text-muted-foreground">Original Language:</span>
-                      <p data-testid="tv-language">{tvShow.original_language.toUpperCase()}</p>
-                    </div>
-                    
-                    {tvShow.networks && tvShow.networks.length > 0 && (
-                      <div>
-                        <span className="font-semibold text-muted-foreground">Networks:</span>
-                        <p data-testid="tv-networks">
-                          {tvShow.networks.map(network => network.name).join(', ')}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </section>
       </main>
