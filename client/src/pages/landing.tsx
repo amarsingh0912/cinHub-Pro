@@ -8,6 +8,7 @@ import CategoryGrid from "@/components/movie/category-grid";
 import FeaturedCollections from "@/components/movie/featured-collections";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Link } from "wouter";
+import { List, Bot, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Landing() {
@@ -307,7 +308,7 @@ export default function Landing() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="features-grid">
               <div className="text-center group">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                  <i className="fas fa-list text-2xl text-primary"></i>
+                  <List className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-display font-semibold mb-3" data-testid="feature-watchlists-title">
                   Personal Watchlists
@@ -319,7 +320,7 @@ export default function Landing() {
               
               <div className="text-center group">
                 <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-secondary/20 transition-colors">
-                  <i className="fas fa-robot text-2xl text-secondary"></i>
+                  <Bot className="w-6 h-6 text-secondary" />
                 </div>
                 <h3 className="text-xl font-display font-semibold mb-3" data-testid="feature-recommendations-title">
                   Smart Recommendations
@@ -331,7 +332,7 @@ export default function Landing() {
               
               <div className="text-center group">
                 <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/20 transition-colors">
-                  <i className="fas fa-bell text-2xl text-blue-500"></i>
+                  <Bell className="w-6 h-6 text-blue-500" />
                 </div>
                 <h3 className="text-xl font-display font-semibold mb-3" data-testid="feature-notifications-title">
                   Release Notifications
