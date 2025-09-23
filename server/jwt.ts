@@ -21,6 +21,7 @@ function getJWTSecrets() {
 // JWT Token Types
 export interface AccessTokenPayload {
   sub: string; // user ID
+  isAdmin: boolean; // user role
   iat?: number;
   exp?: number;
 }
@@ -32,11 +33,12 @@ export interface RefreshTokenPayload {
 }
 
 // Access Token Operations
-export function signAccessToken(user: { id: string }): string {
+export function signAccessToken(user: { id: string; isAdmin: boolean }): string {
   const { accessSecret } = getJWTSecrets();
   
   const payload: AccessTokenPayload = {
     sub: user.id,
+    isAdmin: user.isAdmin,
   };
   
   return jwt.sign(payload, accessSecret, {

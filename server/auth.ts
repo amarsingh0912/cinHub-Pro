@@ -59,6 +59,7 @@ declare global {
     interface Request {
       user?: {
         id: string;
+        isAdmin: boolean;
       };
     }
   }
@@ -77,6 +78,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     const payload = verifyAccessToken(token);
     req.user = {
       id: payload.sub,
+      isAdmin: payload.isAdmin,
     };
     next();
   } catch (error) {
@@ -169,7 +171,7 @@ export async function signInWithTokens(credentials: SignInData) {
   // Generate session ID and tokens
   const sessionId: string = generateSessionId();
   const refreshToken = signRefreshToken(sessionId);
-  const accessToken = signAccessToken({ id: user.id });
+  const accessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin });
   const refreshTokenHash = await hashRefreshToken(refreshToken);
   
   // Store refresh token session in database
@@ -215,7 +217,7 @@ export async function refreshAccessToken(refreshToken: string) {
     // Generate new tokens (rotate refresh token)
     const newSessionId: string = generateSessionId();
     const newRefreshToken = signRefreshToken(newSessionId);
-    const newAccessToken = signAccessToken({ id: user.id });
+    const newAccessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin });
     const newRefreshTokenHash = await hashRefreshToken(newRefreshToken);
     
     // Update session with new refresh token hash
