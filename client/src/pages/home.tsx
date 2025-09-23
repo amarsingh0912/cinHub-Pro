@@ -161,9 +161,9 @@ export default function Home() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Link href="/movies">
-                    <Button variant="outline" data-testid="button-view-all-movies">
-                      View All Movies
+                  <Link href="/movies?category=trending">
+                    <Button variant="outline" data-testid="button-view-all-trending-movies">
+                      View All Trending Movies
                     </Button>
                   </Link>
                 </div>
@@ -211,9 +211,11 @@ export default function Home() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Button variant="outline" disabled data-testid="button-view-all-tv">
-                    View All TV Shows (Coming Soon)
-                  </Button>
+                  <Link href="/tv-shows?category=trending">
+                    <Button variant="outline" data-testid="button-view-all-trending-tv">
+                      View All Trending TV Shows
+                    </Button>
+                  </Link>
                 </div>
               </TabsContent>
             </Tabs>

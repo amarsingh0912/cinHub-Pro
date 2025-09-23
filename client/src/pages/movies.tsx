@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import type { MovieResponse, TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -117,20 +118,38 @@ interface ContentFilters {
 }
 
 export default function Movies() {
+  const [location] = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState<ContentFilters>({
-    contentType: 'movies',
-    category: 'discover',
-    sortBy: 'popularity.desc',
-    genres: [],
-    releaseYear: '',
-    minRating: 0,
-    maxRating: 10,
-    language: 'all',
-    certificate: 'all',
-    status: 'all'
-  });
+  
+  // Parse URL parameters to set initial filters
+  const getInitialFilters = () => {
+    const searchParams = new URLSearchParams(location.split('?')[1] || '');
+    const categoryParam = searchParams.get('category');
+    const contentTypeParam = searchParams.get('contentType');
+    
+    // Validate category parameter
+    const validMovieCategories = ['discover', 'trending', 'popular', 'upcoming', 'now_playing'];
+    const validTVCategories = ['discover', 'trending', 'popular', 'airing_today', 'on_the_air'];
+    const contentType = (contentTypeParam === 'tv') ? 'tv' : 'movies';
+    const validCategories = contentType === 'movies' ? validMovieCategories : validTVCategories;
+    const category = (categoryParam && validCategories.includes(categoryParam)) ? categoryParam : 'discover';
+    
+    return {
+      contentType: contentType as ContentType,
+      category: category as MovieCategory | TVCategory,
+      sortBy: 'popularity.desc',
+      genres: [],
+      releaseYear: '',
+      minRating: 0,
+      maxRating: 10,
+      language: 'all',
+      certificate: 'all',
+      status: 'all'
+    };
+  };
+  
+  const [filters, setFilters] = useState<ContentFilters>(getInitialFilters);
   
   // Get available categories based on content type
   const getAvailableCategories = () => {
