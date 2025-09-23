@@ -37,7 +37,7 @@ export default function AdminDashboard() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = isAuthenticated ? "/" : "/api/login";
+        window.location.href = "/";
       }, 1500);
       return;
     }

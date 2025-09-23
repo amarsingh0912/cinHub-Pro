@@ -510,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Watchlist endpoints
   app.get('/api/watchlists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const watchlists = await storage.getUserWatchlists(userId);
       res.json(watchlists);
     } catch (error) {
@@ -521,7 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/watchlists', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const data = insertWatchlistSchema.parse({ ...req.body, userId });
       const watchlist = await storage.createWatchlist(data);
       res.json(watchlist);
@@ -570,7 +570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Favorites endpoints
   app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const favorites = await storage.getUserFavorites(userId);
       res.json(favorites);
     } catch (error) {
@@ -581,7 +581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const data = insertFavoriteSchema.parse({ ...req.body, userId });
       const favorite = await storage.addFavorite(data);
       res.json(favorite);
@@ -593,7 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/favorites/:mediaType/:mediaId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const mediaType = req.params.mediaType;
       const mediaId = parseInt(req.params.mediaId);
       await storage.removeFavorite(userId, mediaType, mediaId);
@@ -606,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/favorites/:mediaType/:mediaId/check', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const mediaType = req.params.mediaType;
       const mediaId = parseInt(req.params.mediaId);
       const isFavorite = await storage.isFavorite(userId, mediaType, mediaId);
@@ -620,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reviews endpoints
   app.get('/api/reviews/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const reviews = await storage.getUserReviews(userId);
       res.json(reviews);
     } catch (error) {
@@ -744,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const data = insertReviewSchema.parse({ ...req.body, userId });
       const review = await storage.createReview(data);
       res.json(review);
@@ -757,7 +757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin endpoints
   app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.session.userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: 'Admin access required' });
       }
@@ -771,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.session.userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: 'Admin access required' });
       }
