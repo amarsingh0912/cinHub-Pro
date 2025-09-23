@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MovieDetails } from "@/types/movie";
@@ -12,7 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send } from "lucide-react";
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 
 export default function MovieDetail() {
@@ -36,6 +39,51 @@ export default function MovieDetail() {
     queryKey: ["/api/reviews", "movie", id],
     enabled: !!id,
     retry: false,
+  });
+
+  // Review form state
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState<string>("");
+
+  // Submit review mutation
+  const submitReviewMutation = useMutation({
+    mutationFn: async () => {
+      if (!movie || !reviewText.trim() || !reviewRating) return;
+      await apiRequest("POST", "/api/reviews", {
+        mediaType: 'movie',
+        mediaId: movie.id,
+        rating: parseInt(reviewRating),
+        review: reviewText.trim(),
+        isPublic: true
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", "movie", id] });
+      setReviewText("");
+      setReviewRating("");
+      toast({
+        title: "Review Submitted",
+        description: "Your review has been submitted successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const addToFavoritesMutation = useMutation({
@@ -348,7 +396,56 @@ export default function MovieDetail() {
               {/* Reviews Tab */}
               <TabsContent value="reviews" className="mt-6" data-testid="content-reviews">
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold" data-testid="reviews-title">User Reviews</h3>
+                  <h3 className="text-xl font-semibold" data-testid="reviews-title">Reviews</h3>
+                  
+                  {/* Review Form for Authenticated Users */}
+                  {isAuthenticated && (
+                    <Card data-testid="review-form-card">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Write a Review</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="md:col-span-1">
+                            <label className="text-sm font-medium mb-2 block">Rating</label>
+                            <Select value={reviewRating} onValueChange={setReviewRating} data-testid="review-rating-select">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Rate 1-10" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {[1,2,3,4,5,6,7,8,9,10].map((rating) => (
+                                  <SelectItem key={rating} value={rating.toString()}>
+                                    {rating}/10
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="md:col-span-3">
+                            <label className="text-sm font-medium mb-2 block">Review</label>
+                            <Textarea
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                              placeholder="Share your thoughts about this movie..."
+                              className="min-h-[100px]"
+                              data-testid="review-text-input"
+                            />
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => submitReviewMutation.mutate()}
+                          disabled={!reviewText.trim() || !reviewRating || submitReviewMutation.isPending}
+                          className="flex items-center gap-2"
+                          data-testid="submit-review-button"
+                        >
+                          <Send className="w-4 h-4" />
+                          {submitReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Reviews List */}
                   {reviewsLoading ? (
                     <div className="text-center py-8" data-testid="reviews-loading">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
@@ -357,35 +454,51 @@ export default function MovieDetail() {
                   ) : reviews && reviews.length > 0 ? (
                     <div className="space-y-4" data-testid="reviews-list">
                       {reviews.map((review: any) => (
-                        <div key={review.id} className="bg-card rounded-lg p-6 border border-border">
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h4 className="font-medium" data-testid={`review-author-${review.id}`}>
-                                {review.author_name || 'Anonymous'}
-                              </h4>
-                              {review.rating && (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                  <span className="text-sm" data-testid={`review-rating-${review.id}`}>
-                                    {review.rating}/10
-                                  </span>
+                        <Card key={review.id} className={`${review.source === 'tmdb' ? 'border-blue-200 dark:border-blue-800' : 'border-green-200 dark:border-green-800'}`}>
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-medium" data-testid={`review-author-${review.id}`}>
+                                      {review.author_name || 'Anonymous'}
+                                    </h4>
+                                    <Badge 
+                                      variant={review.source === 'tmdb' ? 'secondary' : 'outline'}
+                                      className={`text-xs ${review.source === 'tmdb' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}
+                                      data-testid={`review-source-${review.id}`}
+                                    >
+                                      {review.source === 'tmdb' ? 'TMDB' : 'User'}
+                                    </Badge>
+                                  </div>
+                                  {review.rating && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                      <span className="text-sm" data-testid={`review-rating-${review.id}`}>
+                                        {review.rating}/10
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
+                              </div>
+                              <span className="text-sm text-muted-foreground" data-testid={`review-date-${review.id}`}>
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
                             </div>
-                            <span className="text-sm text-muted-foreground" data-testid={`review-date-${review.id}`}>
-                              {new Date(review.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground" data-testid={`review-content-${review.id}`}>
-                            {review.content}
-                          </p>
-                        </div>
+                            <p className="text-muted-foreground leading-relaxed" data-testid={`review-content-${review.id}`}>
+                              {review.content}
+                            </p>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-8" data-testid="no-reviews">
                       <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                       <p className="text-muted-foreground">No reviews available for this movie.</p>
+                      {isAuthenticated && (
+                        <p className="text-sm text-muted-foreground mt-2">Be the first to write a review!</p>
+                      )}
                     </div>
                   )}
                 </div>
