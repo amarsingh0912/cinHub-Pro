@@ -5,8 +5,17 @@ import {
   favorites,
   reviews,
   otpVerifications,
+  authSessions,
+  socialAccounts,
   type User,
   type UpsertUser,
+  type InsertUser,
+  type AuthSession,
+  type InsertAuthSession,
+  type OtpVerification,
+  type InsertOtpVerification,
+  type SocialAccount,
+  type InsertSocialAccount,
   type Watchlist,
   type InsertWatchlist,
   type WatchlistItem,
@@ -26,8 +35,35 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByPhoneNumber(phoneNumber: string): Promise<User | undefined>;
-  createUser(user: UpsertUser): Promise<User>;
-  updateUser(id: string, updates: Partial<UpsertUser>): Promise<User>;
+  getUserByIdentifier(identifier: string): Promise<User | undefined>; // For email/username/phone lookup
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<InsertUser>): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>; // For social account linking
+  
+  // Auth Session operations
+  createAuthSession(session: InsertAuthSession): Promise<AuthSession>;
+  getAuthSession(refreshTokenHash: string): Promise<AuthSession | undefined>;
+  getUserAuthSessions(userId: string): Promise<AuthSession[]>;
+  updateAuthSession(id: string, updates: Partial<InsertAuthSession>): Promise<AuthSession>;
+  deleteAuthSession(id: string): Promise<void>;
+  deleteUserAuthSessions(userId: string): Promise<void>;
+  cleanupExpiredSessions(): Promise<void>;
+  
+  // OTP operations
+  createOtp(otp: InsertOtpVerification): Promise<OtpVerification>;
+  getOtp(target: string, purpose: 'signup' | 'reset' | 'login'): Promise<OtpVerification | undefined>;
+  verifyOtp(target: string, code: string, purpose: 'signup' | 'reset' | 'login'): Promise<boolean>;
+  consumeOtp(id: string): Promise<void>;
+  incrementOtpAttempts(id: string): Promise<void>;
+  deleteOtp(target: string, purpose: 'signup' | 'reset' | 'login'): Promise<void>;
+  cleanupExpiredOtps(): Promise<void>;
+  
+  // Social Account operations
+  createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
+  getSocialAccount(provider: string, providerUserId: string): Promise<SocialAccount | undefined>;
+  getUserSocialAccounts(userId: string): Promise<SocialAccount[]>;
+  getUserSocialAccount(userId: string, provider: string): Promise<SocialAccount | undefined>;
+  deleteSocialAccount(userId: string, provider: string): Promise<void>;
   
   // Watchlist operations
   getUserWatchlists(userId: string): Promise<Watchlist[]>;
@@ -57,11 +93,6 @@ export interface IStorage {
     totalReviews: number;
     totalWatchlists: number;
   }>;
-  
-  // OTP operations
-  createOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<string>;
-  verifyOtp(identifier: string, otp: string, type: 'signup' | 'forgot-password'): Promise<boolean>;
-  deleteOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -88,7 +119,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: UpsertUser): Promise<User> {
+  async createUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
@@ -96,13 +127,91 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User> {
+  async updateUser(id: string, updates: Partial<InsertUser>): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async getUserByIdentifier(identifier: string): Promise<User | undefined> {
+    // Try to find user by email, username, or phone number
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        sql`${users.email} = ${identifier} OR ${users.username} = ${identifier} OR ${users.phoneNumber} = ${identifier}`
+      );
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Auth Session operations
+  async createAuthSession(sessionData: InsertAuthSession): Promise<AuthSession> {
+    const [session] = await db
+      .insert(authSessions)
+      .values(sessionData)
+      .returning();
+    return session;
+  }
+
+  async getAuthSession(refreshTokenHash: string): Promise<AuthSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(authSessions)
+      .where(eq(authSessions.refreshTokenHash, refreshTokenHash));
+    return session;
+  }
+
+  async getUserAuthSessions(userId: string): Promise<AuthSession[]> {
+    return await db
+      .select()
+      .from(authSessions)
+      .where(eq(authSessions.userId, userId))
+      .orderBy(desc(authSessions.createdAt));
+  }
+
+  async updateAuthSession(id: string, updates: Partial<InsertAuthSession>): Promise<AuthSession> {
+    const [session] = await db
+      .update(authSessions)
+      .set(updates)
+      .where(eq(authSessions.id, id))
+      .returning();
+    return session;
+  }
+
+  async deleteAuthSession(id: string): Promise<void> {
+    await db
+      .delete(authSessions)
+      .where(eq(authSessions.id, id));
+  }
+
+  async deleteUserAuthSessions(userId: string): Promise<void> {
+    await db
+      .delete(authSessions)
+      .where(eq(authSessions.userId, userId));
+  }
+
+  async cleanupExpiredSessions(): Promise<void> {
+    await db
+      .delete(authSessions)
+      .where(sql`expires_at < NOW()`);
   }
 
   // Watchlist operations
@@ -277,61 +386,159 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // OTP operations
-  async createOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<string> {
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // OTP operations with new schema
+  async createOtp(otpData: InsertOtpVerification): Promise<OtpVerification> {
+    // Delete any existing active OTP for this target and purpose
+    await this.deleteOtp(otpData.target, otpData.purpose as 'signup' | 'reset' | 'login');
     
-    // Delete any existing OTP for this identifier and type
-    await this.deleteOtp(identifier, type);
-    
-    // Create new OTP with 10-minute expiration
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    
-    await db.insert(otpVerifications).values({
-      identifier,
-      otp,
-      type,
-      expiresAt,
-    });
-    
+    const [otp] = await db
+      .insert(otpVerifications)
+      .values(otpData)
+      .returning();
     return otp;
   }
 
-  async verifyOtp(identifier: string, otp: string, type: 'signup' | 'forgot-password'): Promise<boolean> {
-    const [verification] = await db
+  async getOtp(target: string, purpose: 'signup' | 'reset' | 'login'): Promise<OtpVerification | undefined> {
+    const [otp] = await db
       .select()
       .from(otpVerifications)
       .where(
         and(
-          eq(otpVerifications.identifier, identifier),
-          eq(otpVerifications.otp, otp),
-          eq(otpVerifications.type, type)
+          eq(otpVerifications.target, target),
+          eq(otpVerifications.purpose, purpose),
+          sql`consumed_at IS NULL`,
+          sql`expires_at > NOW()`
         )
       );
+    return otp;
+  }
 
-    if (!verification) {
+  async verifyOtp(target: string, code: string, purpose: 'signup' | 'reset' | 'login'): Promise<boolean> {
+    const otp = await this.getOtp(target, purpose);
+    
+    if (!otp) {
       return false;
     }
 
-    // Check if OTP has expired
-    if (new Date() > verification.expiresAt) {
-      await this.deleteOtp(identifier, type);
+    // Check if too many attempts already made
+    const currentAttempts = otp.attempts ?? 0;
+    if (currentAttempts >= 3) {
+      await this.deleteOtp(target, purpose);
       return false;
     }
 
-    // OTP is valid, delete it
-    await this.deleteOtp(identifier, type);
+    // Check if code matches
+    if (otp.code !== code) {
+      const nextAttempts = currentAttempts + 1;
+      if (nextAttempts >= 3) {
+        // Too many attempts, delete the OTP
+        await this.deleteOtp(target, purpose);
+      } else {
+        // Increment attempts
+        await this.incrementOtpAttempts(otp.id);
+      }
+      return false;
+    }
+
+    // Code matches and attempts are valid, consume the OTP
+    await this.consumeOtp(otp.id);
     return true;
   }
 
-  async deleteOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<void> {
+  async consumeOtp(id: string): Promise<void> {
+    await db
+      .update(otpVerifications)
+      .set({ consumedAt: new Date() })
+      .where(eq(otpVerifications.id, id));
+  }
+
+  async incrementOtpAttempts(id: string): Promise<void> {
+    await db
+      .update(otpVerifications)
+      .set({ attempts: sql`attempts + 1` })
+      .where(eq(otpVerifications.id, id));
+  }
+
+  async deleteOtp(target: string, purpose: 'signup' | 'reset' | 'login'): Promise<void> {
     await db
       .delete(otpVerifications)
       .where(
         and(
-          eq(otpVerifications.identifier, identifier),
-          eq(otpVerifications.type, type)
+          eq(otpVerifications.target, target),
+          eq(otpVerifications.purpose, purpose)
+        )
+      );
+  }
+
+  async cleanupExpiredOtps(): Promise<void> {
+    await db
+      .delete(otpVerifications)
+      .where(sql`expires_at < NOW()`);
+  }
+
+  // Social Account operations
+  async createSocialAccount(accountData: InsertSocialAccount): Promise<SocialAccount> {
+    try {
+      const [account] = await db
+        .insert(socialAccounts)
+        .values(accountData)
+        .returning();
+      return account;
+    } catch (error: any) {
+      // Handle unique constraint violations gracefully
+      if (error.code === '23505') { // PostgreSQL unique constraint violation
+        // Check if account already exists and return it
+        const existing = await this.getSocialAccount(accountData.provider, accountData.providerUserId);
+        if (existing) {
+          return existing;
+        }
+        // If we can't find it, re-throw the error
+      }
+      throw error;
+    }
+  }
+
+  async getSocialAccount(provider: string, providerUserId: string): Promise<SocialAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(socialAccounts)
+      .where(
+        and(
+          eq(socialAccounts.provider, provider),
+          eq(socialAccounts.providerUserId, providerUserId)
+        )
+      );
+    return account;
+  }
+
+  async getUserSocialAccounts(userId: string): Promise<SocialAccount[]> {
+    return await db
+      .select()
+      .from(socialAccounts)
+      .where(eq(socialAccounts.userId, userId))
+      .orderBy(desc(socialAccounts.createdAt));
+  }
+
+  async getUserSocialAccount(userId: string, provider: string): Promise<SocialAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(socialAccounts)
+      .where(
+        and(
+          eq(socialAccounts.userId, userId),
+          eq(socialAccounts.provider, provider)
+        )
+      );
+    return account;
+  }
+
+  async deleteSocialAccount(userId: string, provider: string): Promise<void> {
+    await db
+      .delete(socialAccounts)
+      .where(
+        and(
+          eq(socialAccounts.userId, userId),
+          eq(socialAccounts.provider, provider)
         )
       );
   }
