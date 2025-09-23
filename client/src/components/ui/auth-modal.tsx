@@ -132,13 +132,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const signinMutation = useMutation({
     mutationFn: async (data: SignInFormData) => {
-      // Determine login type based on input format
-      const loginType = data.loginValue.includes('@') ? 'email' : 
-                       data.loginValue.startsWith('+') ? 'phone' : 'username';
-      
       const payload = {
-        loginType,
-        loginValue: data.loginValue,
+        identifier: data.loginValue,
         password: data.password
       };
       
