@@ -1,13 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, signUp, signIn } from "./auth";
 import { z } from "zod";
 import {
   insertWatchlistSchema,
   insertWatchlistItemSchema,
   insertFavoriteSchema,
   insertReviewSchema,
+  signInSchema,
+  signUpSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -17,13 +19,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session.userId;
       const user = await storage.getUser(userId);
-      res.json(user);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      // Return user without password
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
+  });
+
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const userData = signUpSchema.parse(req.body);
+      const user = await signUp(userData);
+      
+      // Set session
+      req.session.userId = user.id;
+      
+      res.status(201).json({ user, message: "Account created successfully" });
+    } catch (error) {
+      console.error("Signup error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(400).json({ message: error instanceof Error ? error.message : "Signup failed" });
+    }
+  });
+
+  app.post('/api/auth/signin', async (req, res) => {
+    try {
+      const credentials = signInSchema.parse(req.body);
+      const user = await signIn(credentials);
+      
+      // Set session
+      req.session.userId = user.id;
+      
+      res.json({ user, message: "Signed in successfully" });
+    } catch (error) {
+      console.error("Signin error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(401).json({ message: error instanceof Error ? error.message : "Signin failed" });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie('connect.sid');
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // TMDB proxy endpoints (to avoid CORS and secure API key)

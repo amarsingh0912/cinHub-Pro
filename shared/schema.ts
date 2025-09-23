@@ -25,13 +25,15 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table.
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// User storage table for custom authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
+  username: varchar("username").unique(),
+  password: varchar("password").notNull(), // Hashed password
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  phoneNumber: varchar("phone_number").unique(),
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: boolean("is_admin").default(false),
   preferences: jsonb("preferences"), // Store movie preferences as JSON
@@ -146,9 +148,39 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   updatedAt: true,
 });
 
+// Authentication schemas
+export const signUpSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be less than 20 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  phoneNumber: z.string().regex(/^\+[1-9]\d{1,14}$/, "Phone number must be in E.164 format (e.g., +15551234567)").optional(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().min(1, "First name is required").optional(),
+  lastName: z.string().min(1, "Last name is required").optional(),
+});
+
+export const signInSchema = z.discriminatedUnion("loginType", [
+  z.object({
+    loginType: z.literal("email"),
+    loginValue: z.string().email("Please enter a valid email address"),
+    password: z.string().min(1, "Password is required"),
+  }),
+  z.object({
+    loginType: z.literal("phone"),
+    loginValue: z.string().regex(/^\+[1-9]\d{1,14}$/, "Phone number must be in E.164 format (e.g., +15551234567)"),
+    password: z.string().min(1, "Password is required"),
+  }),
+  z.object({
+    loginType: z.literal("username"),
+    loginValue: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be less than 20 characters"),
+    password: z.string().min(1, "Password is required"),
+  }),
+]);
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type SignUpData = z.infer<typeof signUpSchema>;
+export type SignInData = z.infer<typeof signInSchema>;
 export type Watchlist = typeof watchlists.$inferSelect;
 export type InsertWatchlist = z.infer<typeof insertWatchlistSchema>;
 export type WatchlistItem = typeof watchlistItems.$inferSelect;
