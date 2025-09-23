@@ -75,4 +75,42 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Graceful shutdown handling
+  const gracefulShutdown = (signal: string) => {
+    log(`Received ${signal}. Starting graceful shutdown...`);
+    
+    server.close(() => {
+      log('HTTP server closed.');
+      
+      // Close database connections if any
+      // Add any other cleanup here
+      
+      log('Graceful shutdown completed.');
+      process.exit(0);
+    });
+    
+    // Force close server after 10 seconds
+    setTimeout(() => {
+      log('Could not close connections in time, forcefully shutting down');
+      process.exit(1);
+    }, 10000);
+  };
+
+  // Listen for termination signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    log(`Uncaught exception: ${error.message}`);
+    console.error(error);
+    gracefulShutdown('uncaughtException');
+  });
+  
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason, promise) => {
+    log(`Unhandled rejection at: ${promise}, reason: ${reason}`);
+    gracefulShutdown('unhandledRejection');
+  });
 })();
