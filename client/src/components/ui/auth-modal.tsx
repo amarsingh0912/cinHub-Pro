@@ -91,7 +91,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const signinForm = useForm<SignInFormData>({
     resolver: zodResolver(signinFormSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       loginValue: "",
       password: "",
@@ -100,7 +100,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const signupForm = useForm<SignUpFormData>({
     resolver: zodResolver(signupFormSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       email: "",
       username: "",
@@ -115,7 +115,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const forgotPasswordForm = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       identifier: "",
     },
@@ -123,7 +123,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const otpForm = useForm<OtpVerificationFormData>({
     resolver: zodResolver(otpVerificationSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       otp: "",
     },
@@ -131,7 +131,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const resetPasswordForm = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       newPassword: "",
       confirmPassword: "",
@@ -520,7 +520,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="w-full"
                   size="lg"
                   data-testid="button-signin"
-                  disabled={isLoading || !signinForm.formState.isValid}
+                  disabled={isLoading}
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   {isLoading ? "Signing in..." : "Sign In"}
@@ -726,7 +726,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="w-full"
                   size="lg"
                   data-testid="button-signup"
-                  disabled={isLoading || !signupForm.formState.isValid}
+                  disabled={isLoading}
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   {isLoading ? "Creating account..." : "Create Account"}
@@ -768,7 +768,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="w-full"
                   size="lg"
                   data-testid="button-send-reset"
-                  disabled={isLoading || !forgotPasswordForm.formState.isValid}
+                  disabled={isLoading}
                 >
                   <Key className="mr-2 h-4 w-4" />
                   {isLoading ? "Sending..." : "Send Reset Code"}
@@ -806,7 +806,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="w-full"
                   size="lg"
                   data-testid="button-verify-otp"
-                  disabled={isLoading || !otpForm.formState.isValid}
+                  disabled={isLoading}
                 >
                   {isLoading ? "Verifying..." : "Verify Code"}
                 </Button>
@@ -891,7 +891,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   className="w-full"
                   size="lg"
                   data-testid="button-reset-password"
-                  disabled={isLoading || !resetPasswordForm.formState.isValid}
+                  disabled={isLoading}
                 >
                   <Key className="mr-2 h-4 w-4" />
                   {isLoading ? "Resetting Password..." : "Reset Password"}
