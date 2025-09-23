@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import cookieParser from "cookie-parser";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, signUp, signIn } from "./auth";
+import { setupAuth, isAuthenticated, signUp, signIn, signInWithTokens, refreshAccessToken, logoutWithToken, hashPassword } from "./auth";
 import { z } from "zod";
 import {
   insertWatchlistSchema,
@@ -13,13 +14,22 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Cookie parser middleware for JWT refresh tokens
+  app.use(cookieParser());
+  
   // Auth middleware
   await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+      
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -102,11 +112,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Generate OTP
-      const otp = await storage.createOtp(identifier, 'forgot-password');
+      // Generate 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      
+      const otp = await storage.createOtp({
+        target: identifier,
+        purpose: 'reset',
+        code: otpCode,
+        expiresAt,
+      });
       
       // TODO: Send OTP via email/SMS
-      console.log(`Password reset OTP for ${identifier}: ${otp}`);
+      console.log(`Password reset OTP for ${identifier}: ${otpCode}`);
       
       res.json({ message: "Password reset code sent successfully" });
     } catch (error) {
@@ -123,17 +141,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "OTP and identifier are required" });
       }
 
-      // Verify OTP for both signup and forgot-password types
+      // Verify OTP for both signup and reset types
       const isValidSignup = await storage.verifyOtp(identifier, otp, 'signup');
-      const isValidForgotPassword = await storage.verifyOtp(identifier, otp, 'forgot-password');
+      const isValidReset = await storage.verifyOtp(identifier, otp, 'reset');
 
-      if (!isValidSignup && !isValidForgotPassword) {
+      if (!isValidSignup && !isValidReset) {
         return res.status(401).json({ message: "Invalid or expired OTP" });
       }
 
       res.json({ 
         message: "OTP verified successfully",
-        type: isValidSignup ? 'signup' : 'forgot-password'
+        type: isValidSignup ? 'signup' : 'reset'
       });
     } catch (error) {
       console.error("OTP verification error:", error);
@@ -143,10 +161,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/reset-password', async (req, res) => {
     try {
-      const { identifier, newPassword } = req.body;
+      const { identifier, newPassword, otpCode } = req.body;
       
-      if (!identifier || !newPassword) {
-        return res.status(400).json({ message: "Identifier and new password are required" });
+      if (!identifier || !newPassword || !otpCode) {
+        return res.status(400).json({ message: "Identifier, new password, and OTP code are required" });
       }
 
       if (newPassword.length < 8) {
@@ -167,16 +185,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Verify OTP for password reset
+      const isValidOtp = await storage.verifyOtp(identifier, otpCode, 'reset');
+      if (!isValidOtp) {
+        return res.status(400).json({ message: "Invalid or expired OTP code" });
+      }
+
       // Hash new password and update
-      const bcrypt = require('bcrypt');
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const hashedPassword = await hashPassword(newPassword);
       
       await storage.updateUser(user.id, { password: hashedPassword });
+      
+      // Invalidate the OTP after successful password reset
+      await storage.deleteOtp(identifier, 'reset');
       
       res.json({ message: "Password reset successfully" });
     } catch (error) {
       console.error("Password reset error:", error);
       res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // JWT-based authentication routes
+  app.post('/api/auth/signin-jwt', async (req, res) => {
+    try {
+      const credentials = signInSchema.parse(req.body);
+      const result = await signInWithTokens(credentials);
+      
+      // Set refresh token as httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/api/auth'
+      });
+      
+      res.json({ 
+        user: result.user, 
+        accessToken: result.accessToken,
+        message: "Signed in successfully" 
+      });
+    } catch (error) {
+      console.error("JWT signin error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(401).json({ message: error instanceof Error ? error.message : "Signin failed" });
+    }
+  });
+
+  app.post('/api/auth/refresh', async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      
+      if (!refreshToken) {
+        return res.status(401).json({ message: "No refresh token provided" });
+      }
+      
+      const result = await refreshAccessToken(refreshToken);
+      
+      // Set new refresh token as httpOnly cookie
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/api/auth'
+      });
+      
+      res.json({ accessToken: result.accessToken });
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      res.clearCookie('refreshToken', { 
+        path: '/api/auth',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
+      res.status(401).json({ message: "Failed to refresh token" });
+    }
+  });
+
+  app.post('/api/auth/logout-jwt', async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      
+      if (refreshToken) {
+        await logoutWithToken(refreshToken);
+      }
+      
+      res.clearCookie('refreshToken', { 
+        path: '/api/auth',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
+      res.json({ message: "Logged out successfully" });
+    } catch (error) {
+      console.error("JWT logout error:", error);
+      // Still clear cookie and succeed for security
+      res.clearCookie('refreshToken', { 
+        path: '/api/auth',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      });
+      res.json({ message: "Logged out successfully" });
     }
   });
 

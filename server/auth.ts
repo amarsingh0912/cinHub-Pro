@@ -4,6 +4,16 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { signInSchema, signUpSchema, type SignInData, type SignUpData } from "@shared/schema";
+import { 
+  verifyAccessToken, 
+  extractBearerToken, 
+  signAccessToken, 
+  signRefreshToken, 
+  verifyRefreshToken,
+  hashRefreshToken,
+  generateSessionId,
+  type AccessTokenPayload 
+} from "./jwt";
 
 const SALT_ROUNDS = 12;
 
@@ -40,12 +50,53 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
+  app.use(authenticateJWT); // Add JWT middleware to all routes
 }
 
+// Extend Request type to include user from JWT
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+      };
+    }
+  }
+}
+
+// JWT Authentication Middleware
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = extractBearerToken(authHeader);
+  
+  if (!token) {
+    return next(); // Continue without user - let dual-mode handle it
+  }
+  
+  try {
+    const payload = verifyAccessToken(token);
+    req.user = {
+      id: payload.sub,
+    };
+    next();
+  } catch (error) {
+    // Invalid JWT - don't set user but continue for dual-mode fallback
+    next();
+  }
+};
+
+// Dual-mode authentication: prefer JWT, fallback to session
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+  // Check JWT first
+  if (req.user) {
+    return next();
+  }
+  
+  // Fallback to session-based auth
   if (req.session && req.session.userId) {
     return next();
   }
+  
   return res.status(401).json({ message: "Unauthorized" });
 };
 
@@ -87,23 +138,16 @@ export async function signUp(userData: SignUpData) {
 }
 
 export async function signIn(credentials: SignInData) {
-  let user = null;
-
-  // Find user by login type
-  switch (credentials.loginType) {
-    case "email":
-      user = await storage.getUserByEmail(credentials.loginValue);
-      break;
-    case "username":
-      user = await storage.getUserByUsername(credentials.loginValue);
-      break;
-    case "phone":
-      user = await storage.getUserByPhoneNumber(credentials.loginValue);
-      break;
-  }
+  // Use the new getUserByIdentifier method that handles email/username/phone
+  const user = await storage.getUserByIdentifier(credentials.identifier);
 
   if (!user) {
     throw new Error("Invalid credentials");
+  }
+
+  // Check if user has a password (some users might be social-only)
+  if (!user.password) {
+    throw new Error("Please sign in using your social account");
   }
 
   // Verify password
@@ -115,6 +159,95 @@ export async function signIn(credentials: SignInData) {
   // Return user without password
   const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;
+}
+
+// JWT-based signin with token generation
+export async function signInWithTokens(credentials: SignInData) {
+  // Get user and verify password (reuse existing logic)
+  const user = await signIn(credentials);
+  
+  // Generate session ID and tokens
+  const sessionId: string = generateSessionId();
+  const refreshToken = signRefreshToken(sessionId);
+  const accessToken = signAccessToken({ id: user.id });
+  const refreshTokenHash = await hashRefreshToken(refreshToken);
+  
+  // Store refresh token session in database
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  await storage.createAuthSession({
+    userId: user.id,
+    refreshTokenHash,
+    expiresAt,
+  });
+  
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
+}
+
+// Refresh access token using refresh token
+export async function refreshAccessToken(refreshToken: string) {
+  try {
+    // Verify refresh token
+    const payload = verifyRefreshToken(refreshToken);
+    const refreshTokenHash = await hashRefreshToken(refreshToken);
+    
+    // Find session in database
+    const session = await storage.getAuthSession(refreshTokenHash);
+    if (!session) {
+      throw new Error("Invalid refresh token - session not found");
+    }
+    
+    // Check if session is expired
+    if (new Date() > session.expiresAt) {
+      await storage.deleteAuthSession(session.id);
+      throw new Error("Refresh token expired");
+    }
+    
+    // Get user for new access token
+    const user = await storage.getUser(session.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Generate new tokens (rotate refresh token)
+    const newSessionId: string = generateSessionId();
+    const newRefreshToken = signRefreshToken(newSessionId);
+    const newAccessToken = signAccessToken({ id: user.id });
+    const newRefreshTokenHash = await hashRefreshToken(newRefreshToken);
+    
+    // Update session with new refresh token hash
+    await storage.updateAuthSession(session.id, {
+      refreshTokenHash: newRefreshTokenHash,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Extend expiry
+    });
+    
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    };
+  } catch (error) {
+    throw new Error("Failed to refresh token");
+  }
+}
+
+// Logout and invalidate refresh token
+export async function logoutWithToken(refreshToken: string) {
+  try {
+    const refreshTokenHash = await hashRefreshToken(refreshToken);
+    const session = await storage.getAuthSession(refreshTokenHash);
+    
+    if (session) {
+      await storage.deleteAuthSession(session.id);
+    }
+    
+    return true;
+  } catch (error) {
+    // Even if logout fails, we should succeed silently for security
+    return true;
+  }
 }
 
 // Extend session type to include userId
