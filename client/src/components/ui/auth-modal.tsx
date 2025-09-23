@@ -74,6 +74,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<ModalMode>("signin");
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
   const [otpSentTo, setOtpSentTo] = useState<string>("");
+  const [otpPurpose, setOtpPurpose] = useState<'signup' | 'reset'>('signup');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -148,12 +149,24 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       onClose();
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Sign in failed",
-        description: error.message || "Please check your credentials and try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Handle unverified user case (403 status)
+      if (error.status === 403 && error.body?.requiresVerification) {
+        setMode("otp-verification");
+        setOtpSentTo(error.body.verificationTarget || "");
+        setOtpPurpose('signup');
+        toast({
+          title: "Account Verification Required",
+          description: error.body.message || "Please verify your account first.",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Sign in failed",
+          description: error.message || "Please check your credentials and try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -165,13 +178,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const response = await apiRequest("POST", "/api/auth/signup", signupData);
       return response.json();
     },
-    onSuccess: () => {
-      // Move to OTP verification instead of direct success
+    onSuccess: (data) => {
+      // Move to OTP verification for account verification
       setMode("otp-verification");
-      setOtpSentTo(signupForm.getValues().email || signupForm.getValues().phoneNumber || "");
+      setOtpSentTo(data.verificationTarget || signupForm.getValues().email || signupForm.getValues().phoneNumber || "");
+      setOtpPurpose('signup');
       toast({
         title: "Verify Your Account",
-        description: "Please check your email or phone for the verification code.",
+        description: data.message || "Please check your email or phone for the verification code.",
       });
     },
     onError: (error: Error) => {
@@ -192,6 +206,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     onSuccess: () => {
       setMode("otp-verification");
       setOtpSentTo(forgotPasswordForm.getValues().identifier);
+      setOtpPurpose('reset');
       toast({
         title: "Reset Code Sent",
         description: "Please check your email or phone for the password reset code.",
@@ -208,20 +223,28 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const otpMutation = useMutation({
     mutationFn: async (data: OtpVerificationFormData) => {
-      // TODO: Implement OTP verification API
       const response = await apiRequest("POST", "/api/auth/verify-otp", {
         otp: data.otp,
-        identifier: otpSentTo
+        identifier: otpSentTo,
+        purpose: otpPurpose
       });
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Verification Complete!",
-        description: "Your account has been verified successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      onClose();
+    onSuccess: (data) => {
+      if (data.type === 'signup') {
+        toast({
+          title: "Account Verified!",
+          description: "Your account has been verified and you are now signed in.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        onClose();
+      } else {
+        toast({
+          title: "Verification Complete!",
+          description: "You can now reset your password.",
+        });
+        // For reset, could transition to password reset form
+      }
     },
     onError: (error: Error) => {
       toast({

@@ -48,10 +48,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = signUpSchema.parse(req.body);
       const user = await signUp(userData);
       
-      // Set session
-      req.session.userId = user.id;
+      // Generate OTP for verification (email or phone)
+      const verificationTarget = userData.email || userData.phoneNumber;
+      if (!verificationTarget) {
+        return res.status(400).json({ message: "Either email or phone number is required for verification" });
+      }
       
-      res.status(201).json({ user, message: "Account created successfully" });
+      // Generate 6-digit OTP
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      
+      await storage.createOtp({
+        target: verificationTarget,
+        purpose: 'signup',
+        code: otpCode,
+        expiresAt,
+      });
+      
+      // TODO: Send OTP via email/SMS
+      console.log(`Signup verification OTP for ${verificationTarget}: ${otpCode}`);
+      
+      // Don't set session - user needs to verify first
+      res.status(201).json({ 
+        message: "Account created successfully. Please verify your account with the OTP sent to your email or phone.",
+        verificationTarget,
+        requiresVerification: true
+      });
     } catch (error) {
       console.error("Signup error:", error);
       if (error instanceof z.ZodError) {
@@ -66,7 +88,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const credentials = signInSchema.parse(req.body);
       const user = await signIn(credentials);
       
-      // Set session
+      // Check if user is verified - block unverified users
+      if (!user.isVerified) {
+        // Generate new OTP for verification
+        const verificationTarget = user.email || user.phoneNumber;
+        if (verificationTarget) {
+          const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+          
+          await storage.createOtp({
+            target: verificationTarget,
+            purpose: 'signup',
+            code: otpCode,
+            expiresAt,
+          });
+          
+          console.log(`Account verification OTP for ${verificationTarget}: ${otpCode}`);
+        }
+        
+        return res.status(403).json({ 
+          message: "Please verify your account first. Check your email or phone for the verification code.",
+          requiresVerification: true,
+          verificationTarget: verificationTarget
+        });
+      }
+      
+      // Set session only for verified users
       req.session.userId = user.id;
       
       res.json({ user, message: "Signed in successfully" });
@@ -135,24 +182,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/verify-otp', async (req, res) => {
     try {
-      const { otp, identifier } = req.body;
+      const { otp, identifier, purpose } = req.body;
       
-      if (!otp || !identifier) {
-        return res.status(400).json({ message: "OTP and identifier are required" });
+      if (!otp || !identifier || !purpose) {
+        return res.status(400).json({ message: "OTP, identifier, and purpose are required" });
       }
 
-      // Verify OTP for both signup and reset types
-      const isValidSignup = await storage.verifyOtp(identifier, otp, 'signup');
-      const isValidReset = await storage.verifyOtp(identifier, otp, 'reset');
+      // Verify OTP for the specified purpose
+      const isValid = await storage.verifyOtp(identifier, otp, purpose);
 
-      if (!isValidSignup && !isValidReset) {
+      if (!isValid) {
         return res.status(401).json({ message: "Invalid or expired OTP" });
       }
 
-      res.json({ 
-        message: "OTP verified successfully",
-        type: isValidSignup ? 'signup' : 'reset'
-      });
+      // If this is signup verification, log the user in and mark as verified
+      if (purpose === 'signup') {
+        const user = await storage.getUserByIdentifier(identifier);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Mark user as verified
+        await storage.updateUser(user.id, { isVerified: true });
+
+        // Delete the OTP to prevent replay attacks
+        await storage.deleteOtp(identifier, 'signup');
+
+        // Set session to log user in
+        req.session.userId = user.id;
+
+        // Return updated user data
+        const updatedUser = await storage.getUser(user.id);
+        const { password, ...userWithoutPassword } = updatedUser!;
+
+        res.json({ 
+          message: "Account verified and signed in successfully",
+          user: userWithoutPassword,
+          type: 'signup'
+        });
+      } else {
+        // For reset verification, just confirm verification (don't delete OTP yet - needed for password reset)
+        res.json({ 
+          message: "OTP verified successfully",
+          type: purpose
+        });
+      }
     } catch (error) {
       console.error("OTP verification error:", error);
       res.status(500).json({ message: "Failed to verify OTP" });
@@ -210,6 +284,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/signin-jwt', async (req, res) => {
     try {
       const credentials = signInSchema.parse(req.body);
+      
+      // First verify credentials (without creating tokens yet)
+      const user = await signIn(credentials);
+      
+      // Check if user is verified - block unverified users
+      if (!user.isVerified) {
+        // Generate new OTP for verification
+        const verificationTarget = user.email || user.phoneNumber;
+        if (verificationTarget) {
+          const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+          
+          await storage.createOtp({
+            target: verificationTarget,
+            purpose: 'signup',
+            code: otpCode,
+            expiresAt,
+          });
+          
+          console.log(`Account verification OTP for ${verificationTarget}: ${otpCode}`);
+        }
+        
+        return res.status(403).json({ 
+          message: "Please verify your account first. Check your email or phone for the verification code.",
+          requiresVerification: true,
+          verificationTarget: verificationTarget
+        });
+      }
+      
+      // Only create tokens for verified users
       const result = await signInWithTokens(credentials);
       
       // Set refresh token as httpOnly cookie
