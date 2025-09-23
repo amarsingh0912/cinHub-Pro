@@ -84,6 +84,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
   const [otpSentTo, setOtpSentTo] = useState<string>("");
   const [otpPurpose, setOtpPurpose] = useState<'signup' | 'reset'>('signup');
+  const [signinError, setSigninError] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -160,6 +161,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return response.json();
     },
     onSuccess: () => {
+      // Clear any previous errors
+      setSigninError("");
       toast({
         title: "Success!",
         description: "You have been signed in successfully.",
@@ -170,6 +173,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     onError: (error: any) => {
       // Handle unverified user case (403 status)
       if (error.status === 403 && error.body?.requiresVerification) {
+        setSigninError("");
         setMode("otp-verification");
         setOtpSentTo(error.body.verificationTarget || "");
         setOtpPurpose('signup');
@@ -179,11 +183,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           variant: "default",
         });
       } else {
-        toast({
-          title: "Sign in failed",
-          description: error.message || "Please check your credentials and try again.",
-          variant: "destructive",
-        });
+        // Set error message and keep modal open
+        const errorMessage = error.message || "Invalid email/username or password. Please try again.";
+        setSigninError(errorMessage);
+        
+        // Show toast with delay
+        setTimeout(() => {
+          toast({
+            title: "Sign in failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }, 100);
       }
     },
   });
@@ -331,6 +342,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleSubmit = async () => {
     switch (mode) {
       case "signin":
+        // Clear any previous errors before submitting
+        setSigninError("");
         const signinValid = await signinForm.trigger();
         if (!signinValid) return;
         signinMutation.mutate(signinForm.getValues());
@@ -421,7 +434,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setMode("signin")}
+              onClick={() => {
+                setMode("signin");
+                setSigninError(""); // Clear errors when switching modes
+              }}
               className="self-start -ml-2"
               data-testid="button-back"
             >
@@ -491,6 +507,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     </FormItem>
                   )}
                 />
+
+                {/* Sign-in Error Display */}
+                {signinError && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md" data-testid="signin-error">
+                    <p className="text-sm text-destructive font-medium">{signinError}</p>
+                  </div>
+                )}
 
                 <Button
                   onClick={handleSubmit}
@@ -884,7 +907,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <div className="text-center">
                 <Button
                   variant="link"
-                  onClick={() => setMode("forgot-password")}
+                  onClick={() => {
+                    setMode("forgot-password");
+                    setSigninError(""); // Clear errors when switching modes
+                  }}
                   className="text-sm text-primary hover:text-primary/80"
                   data-testid="link-forgot-password"
                 >
@@ -899,7 +925,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </span>
                 <Button
                   variant="link"
-                  onClick={() => setMode("signup")}
+                  onClick={() => {
+                    setMode("signup");
+                    setSigninError(""); // Clear errors when switching modes
+                  }}
                   className="text-sm text-primary hover:text-primary/80 p-0"
                   data-testid="link-create-account"
                 >
