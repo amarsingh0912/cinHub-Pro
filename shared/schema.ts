@@ -41,6 +41,16 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// OTP verification table for password reset and account verification
+export const otpVerifications = pgTable("otp_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  identifier: varchar("identifier").notNull(), // email, username, or phone
+  otp: varchar("otp").notNull(), // 6-digit OTP code
+  type: varchar("type").notNull(), // 'signup' or 'forgot-password'
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // User movie watchlists
 export const watchlists = pgTable("watchlists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

@@ -4,6 +4,7 @@ import {
   watchlistItems,
   favorites,
   reviews,
+  otpVerifications,
   type User,
   type UpsertUser,
   type Watchlist,
@@ -56,6 +57,11 @@ export interface IStorage {
     totalReviews: number;
     totalWatchlists: number;
   }>;
+  
+  // OTP operations
+  createOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<string>;
+  verifyOtp(identifier: string, otp: string, type: 'signup' | 'forgot-password'): Promise<boolean>;
+  deleteOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -269,6 +275,65 @@ export class DatabaseStorage implements IStorage {
       totalReviews: Number(totalReviewsResult.count),
       totalWatchlists: Number(totalWatchlistsResult.count),
     };
+  }
+
+  // OTP operations
+  async createOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<string> {
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Delete any existing OTP for this identifier and type
+    await this.deleteOtp(identifier, type);
+    
+    // Create new OTP with 10-minute expiration
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    
+    await db.insert(otpVerifications).values({
+      identifier,
+      otp,
+      type,
+      expiresAt,
+    });
+    
+    return otp;
+  }
+
+  async verifyOtp(identifier: string, otp: string, type: 'signup' | 'forgot-password'): Promise<boolean> {
+    const [verification] = await db
+      .select()
+      .from(otpVerifications)
+      .where(
+        and(
+          eq(otpVerifications.identifier, identifier),
+          eq(otpVerifications.otp, otp),
+          eq(otpVerifications.type, type)
+        )
+      );
+
+    if (!verification) {
+      return false;
+    }
+
+    // Check if OTP has expired
+    if (new Date() > verification.expiresAt) {
+      await this.deleteOtp(identifier, type);
+      return false;
+    }
+
+    // OTP is valid, delete it
+    await this.deleteOtp(identifier, type);
+    return true;
+  }
+
+  async deleteOtp(identifier: string, type: 'signup' | 'forgot-password'): Promise<void> {
+    await db
+      .delete(otpVerifications)
+      .where(
+        and(
+          eq(otpVerifications.identifier, identifier),
+          eq(otpVerifications.type, type)
+        )
+      );
   }
 }
 

@@ -5,7 +5,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SearchModal from "@/components/ui/search-modal";
-import SignInModal from "@/components/ui/sign-in-modal";
+import AuthModal from "@/components/ui/auth-modal";
 import { Search, Moon, Sun, Film, Menu, X } from "lucide-react";
 
 export default function Header() {
@@ -166,7 +166,7 @@ export default function Header() {
       </header>
       
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-      <SignInModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+      <AuthModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
     </>
   );
 }

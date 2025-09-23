@@ -1,0 +1,812 @@
+import { useState, useRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Phone, 
+  User, 
+  LogIn, 
+  UserPlus, 
+  Upload, 
+  Camera,
+  Key,
+  ArrowLeft
+} from "lucide-react";
+import { FaGoogle, FaFacebook, FaTwitter, FaGithub } from "react-icons/fa";
+import { Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { signUpSchema } from "@shared/schema";
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+type ModalMode = "signin" | "signup" | "forgot-password" | "otp-verification";
+
+// Form schemas for different authentication flows
+const signinFormSchema = z.object({
+  loginValue: z.string().min(1, "Email, username, or phone number is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const signupFormSchema = signUpSchema.extend({
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+  profilePhoto: z.any().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, "Email, username, or phone number is required"),
+});
+
+const otpVerificationSchema = z.object({
+  otp: z.string().length(6, "OTP must be 6 digits"),
+});
+
+type SignInFormData = z.infer<typeof signinFormSchema>;
+type SignUpFormData = z.infer<typeof signupFormSchema>;
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+type OtpVerificationFormData = z.infer<typeof otpVerificationSchema>;
+
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [mode, setMode] = useState<ModalMode>("signin");
+  const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const [otpSentTo, setOtpSentTo] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const signinForm = useForm<SignInFormData>({
+    resolver: zodResolver(signinFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      loginValue: "",
+      password: "",
+    },
+  });
+
+  const signupForm = useForm<SignUpFormData>({
+    resolver: zodResolver(signupFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      profilePhoto: undefined,
+    },
+  });
+
+  const forgotPasswordForm = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: "onChange",
+    defaultValues: {
+      identifier: "",
+    },
+  });
+
+  const otpForm = useForm<OtpVerificationFormData>({
+    resolver: zodResolver(otpVerificationSchema),
+    mode: "onChange",
+    defaultValues: {
+      otp: "",
+    },
+  });
+
+  const handleProfilePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      signupForm.setValue("profilePhoto", file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProfilePhotoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const signinMutation = useMutation({
+    mutationFn: async (data: SignInFormData) => {
+      // Determine login type based on input format
+      const loginType = data.loginValue.includes('@') ? 'email' : 
+                       data.loginValue.startsWith('+') ? 'phone' : 'username';
+      
+      const payload = {
+        loginType,
+        loginValue: data.loginValue,
+        password: data.password
+      };
+      
+      const response = await apiRequest("POST", "/api/auth/signin", payload);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "You have been signed in successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Sign in failed",
+        description: error.message || "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (data: SignUpFormData) => {
+      const { confirmPassword, profilePhoto, ...signupData } = data;
+      
+      // TODO: Handle profile photo upload
+      const response = await apiRequest("POST", "/api/auth/signup", signupData);
+      return response.json();
+    },
+    onSuccess: () => {
+      // Move to OTP verification instead of direct success
+      setMode("otp-verification");
+      setOtpSentTo(signupForm.getValues().email || signupForm.getValues().phoneNumber || "");
+      toast({
+        title: "Verify Your Account",
+        description: "Please check your email or phone for the verification code.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Sign up failed",
+        description: error.message || "Please check your information and try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: ForgotPasswordFormData) => {
+      // TODO: Implement forgot password API
+      const response = await apiRequest("POST", "/api/auth/forgot-password", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      setMode("otp-verification");
+      setOtpSentTo(forgotPasswordForm.getValues().identifier);
+      toast({
+        title: "Reset Code Sent",
+        description: "Please check your email or phone for the password reset code.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Request failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const otpMutation = useMutation({
+    mutationFn: async (data: OtpVerificationFormData) => {
+      // TODO: Implement OTP verification API
+      const response = await apiRequest("POST", "/api/auth/verify-otp", {
+        otp: data.otp,
+        identifier: otpSentTo
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification Complete!",
+        description: "Your account has been verified successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Please check your code and try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = async () => {
+    switch (mode) {
+      case "signin":
+        const signinValid = await signinForm.trigger();
+        if (!signinValid) return;
+        signinMutation.mutate(signinForm.getValues());
+        break;
+      case "signup":
+        const signupValid = await signupForm.trigger();
+        if (!signupValid) return;
+        signupMutation.mutate(signupForm.getValues());
+        break;
+      case "forgot-password":
+        const forgotValid = await forgotPasswordForm.trigger();
+        if (!forgotValid) return;
+        forgotPasswordMutation.mutate(forgotPasswordForm.getValues());
+        break;
+      case "otp-verification":
+        const otpValid = await otpForm.trigger();
+        if (!otpValid) return;
+        otpMutation.mutate(otpForm.getValues());
+        break;
+    }
+  };
+
+  const isLoading = signinMutation.isPending || signupMutation.isPending || 
+                   forgotPasswordMutation.isPending || otpMutation.isPending;
+
+  const handleSocialAuth = (provider: string) => {
+    // TODO: Implement social authentication
+    toast({
+      title: "Coming Soon",
+      description: `${provider} authentication will be available soon.`,
+      variant: "default",
+    });
+  };
+
+  const getModalTitle = () => {
+    switch (mode) {
+      case "signin":
+        return "Welcome Back";
+      case "signup":
+        return "Join CineHub Pro";
+      case "forgot-password":
+        return "Reset Password";
+      case "otp-verification":
+        return "Verify Your Account";
+      default:
+        return "Welcome Back";
+    }
+  };
+
+  const getModalDescription = () => {
+    switch (mode) {
+      case "signin":
+        return "Sign in to access your personalized movie experience, create watchlists, and get recommendations.";
+      case "signup":
+        return "Create your account to start building watchlists, writing reviews, and discovering great content.";
+      case "forgot-password":
+        return "Enter your email, username, or phone number to receive a password reset code.";
+      case "otp-verification":
+        return `Enter the 6-digit verification code sent to ${otpSentTo}.`;
+      default:
+        return "Sign in to access your account.";
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md" data-testid="auth-modal">
+        <DialogHeader>
+          <DialogTitle className="text-center text-2xl font-display font-bold mb-2">
+            {getModalTitle()}
+          </DialogTitle>
+          <DialogDescription className="text-center text-muted-foreground">
+            {getModalDescription()}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-6 pt-4">
+          {/* Back button for non-signin modes */}
+          {mode !== "signin" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMode("signin")}
+              className="self-start -ml-2"
+              data-testid="button-back"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Sign In
+            </Button>
+          )}
+
+          {/* Sign In Form */}
+          {mode === "signin" && (
+            <Form {...signinForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={signinForm.control}
+                  name="loginValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email, Username, or Phone</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <Input
+                            {...field}
+                            placeholder="Enter your email, username, or phone"
+                            className="pl-10"
+                            data-testid="input-login-credential"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={signinForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            className="pr-10"
+                            data-testid="input-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            data-testid="button-toggle-password"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  size="lg"
+                  data-testid="button-signin"
+                  disabled={isLoading || !signinForm.formState.isValid}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {/* Sign Up Form */}
+          {mode === "signup" && (
+            <Form {...signupForm}>
+              <form className="space-y-4">
+                {/* Profile Photo Upload */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <Avatar className="w-20 h-20">
+                      <AvatarImage src={profilePhotoPreview || ""} />
+                      <AvatarFallback>
+                        <Camera className="w-8 h-8 text-muted-foreground" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="absolute -bottom-2 -right-2 rounded-full p-2"
+                      onClick={() => fileInputRef.current?.click()}
+                      data-testid="button-upload-photo"
+                    >
+                      <Upload className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfilePhotoChange}
+                    className="hidden"
+                    data-testid="input-profile-photo"
+                  />
+                  <p className="text-xs text-muted-foreground text-center">
+                    Upload your profile photo (optional)
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={signupForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="John" data-testid="input-firstname" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={signupForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Doe" data-testid="input-lastname" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={signupForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="john.doe@example.com"
+                          data-testid="input-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={signupForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="johndoe"
+                          data-testid="input-username"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={signupForm.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="+1234567890"
+                          data-testid="input-phone"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Use E.164 format (e.g., +15551234567)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={signupForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your password"
+                            className="pr-10"
+                            data-testid="input-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            data-testid="button-toggle-password"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={signupForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm your password"
+                            className="pr-10"
+                            data-testid="input-confirm-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            data-testid="button-toggle-confirm-password"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  size="lg"
+                  data-testid="button-signup"
+                  disabled={isLoading || !signupForm.formState.isValid}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  {isLoading ? "Creating account..." : "Create Account"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {/* Forgot Password Form */}
+          {mode === "forgot-password" && (
+            <Form {...forgotPasswordForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={forgotPasswordForm.control}
+                  name="identifier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email, Username, or Phone</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <Input
+                            {...field}
+                            placeholder="Enter your email, username, or phone"
+                            className="pl-10"
+                            data-testid="input-forgot-identifier"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  size="lg"
+                  data-testid="button-send-reset"
+                  disabled={isLoading || !forgotPasswordForm.formState.isValid}
+                >
+                  <Key className="mr-2 h-4 w-4" />
+                  {isLoading ? "Sending..." : "Send Reset Code"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {/* OTP Verification Form */}
+          {mode === "otp-verification" && (
+            <Form {...otpForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={otpForm.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Verification Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter 6-digit code"
+                          maxLength={6}
+                          className="text-center text-lg tracking-widest"
+                          data-testid="input-otp"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  size="lg"
+                  data-testid="button-verify-otp"
+                  disabled={isLoading || !otpForm.formState.isValid}
+                >
+                  {isLoading ? "Verifying..." : "Verify Code"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {/* Sign In Modal Footer */}
+          {mode === "signin" && (
+            <div className="space-y-4">
+              {/* Forgot Password Link */}
+              <div className="text-center">
+                <Button
+                  variant="link"
+                  onClick={() => setMode("forgot-password")}
+                  className="text-sm text-primary hover:text-primary/80"
+                  data-testid="link-forgot-password"
+                >
+                  Forgot Password?
+                </Button>
+              </div>
+
+              {/* Create Account Link */}
+              <div className="text-center">
+                <span className="text-sm text-muted-foreground">
+                  Don't have an account?{" "}
+                </span>
+                <Button
+                  variant="link"
+                  onClick={() => setMode("signup")}
+                  className="text-sm text-primary hover:text-primary/80 p-0"
+                  data-testid="link-create-account"
+                >
+                  Create Account
+                </Button>
+              </div>
+
+              {/* Social Authentication */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialAuth("Google")}
+                    data-testid="button-google-auth"
+                  >
+                    <FaGoogle className="mr-2 h-4 w-4" />
+                    Google
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialAuth("Facebook")}
+                    data-testid="button-facebook-auth"
+                  >
+                    <FaFacebook className="mr-2 h-4 w-4" />
+                    Facebook
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialAuth("X")}
+                    data-testid="button-x-auth"
+                  >
+                    <FaTwitter className="mr-2 h-4 w-4" />
+                    X
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleSocialAuth("GitHub")}
+                    data-testid="button-github-auth"
+                  >
+                    <FaGithub className="mr-2 h-4 w-4" />
+                    GitHub
+                  </Button>
+                </div>
+              </div>
+
+              {/* Terms and Privacy */}
+              <div className="text-center text-xs text-muted-foreground">
+                <p>
+                  By signing in, you agree to our{" "}
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80" data-testid="link-terms">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80" data-testid="link-privacy">
+                    Privacy Policy
+                  </Link>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Sign Up Modal Footer */}
+          {mode === "signup" && (
+            <div className="space-y-4">
+              {/* Terms and Privacy */}
+              <div className="text-center text-xs text-muted-foreground">
+                <p>
+                  By creating an account, you agree to our{" "}
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80" data-testid="link-terms">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80" data-testid="link-privacy">
+                    Privacy Policy
+                  </Link>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

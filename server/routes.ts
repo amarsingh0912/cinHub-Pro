@@ -80,6 +80,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { identifier } = req.body;
+      
+      if (!identifier) {
+        return res.status(400).json({ message: "Email, username, or phone number is required" });
+      }
+
+      // Check if user exists
+      let user = null;
+      if (identifier.includes('@')) {
+        user = await storage.getUserByEmail(identifier);
+      } else if (identifier.startsWith('+')) {
+        user = await storage.getUserByPhoneNumber(identifier);
+      } else {
+        user = await storage.getUserByUsername(identifier);
+      }
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate OTP
+      const otp = await storage.createOtp(identifier, 'forgot-password');
+      
+      // TODO: Send OTP via email/SMS
+      console.log(`Password reset OTP for ${identifier}: ${otp}`);
+      
+      res.json({ message: "Password reset code sent successfully" });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Failed to send password reset code" });
+    }
+  });
+
+  app.post('/api/auth/verify-otp', async (req, res) => {
+    try {
+      const { otp, identifier } = req.body;
+      
+      if (!otp || !identifier) {
+        return res.status(400).json({ message: "OTP and identifier are required" });
+      }
+
+      // Verify OTP for both signup and forgot-password types
+      const isValidSignup = await storage.verifyOtp(identifier, otp, 'signup');
+      const isValidForgotPassword = await storage.verifyOtp(identifier, otp, 'forgot-password');
+
+      if (!isValidSignup && !isValidForgotPassword) {
+        return res.status(401).json({ message: "Invalid or expired OTP" });
+      }
+
+      res.json({ 
+        message: "OTP verified successfully",
+        type: isValidSignup ? 'signup' : 'forgot-password'
+      });
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      res.status(500).json({ message: "Failed to verify OTP" });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { identifier, newPassword } = req.body;
+      
+      if (!identifier || !newPassword) {
+        return res.status(400).json({ message: "Identifier and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters" });
+      }
+
+      // Find user
+      let user = null;
+      if (identifier.includes('@')) {
+        user = await storage.getUserByEmail(identifier);
+      } else if (identifier.startsWith('+')) {
+        user = await storage.getUserByPhoneNumber(identifier);
+      } else {
+        user = await storage.getUserByUsername(identifier);
+      }
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Hash new password and update
+      const bcrypt = require('bcrypt');
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await storage.updateUser(user.id, { password: hashedPassword });
+      
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
   // TMDB proxy endpoints (to avoid CORS and secure API key)
   app.get('/api/movies/trending', async (req, res) => {
     try {
