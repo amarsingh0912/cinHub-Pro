@@ -97,6 +97,8 @@ export interface IStorage {
     totalReviews: number;
     totalWatchlists: number;
   }>;
+  findAdminUser(): Promise<User | undefined>;
+  updateUser(userId: string, updates: Partial<InsertUser>): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -388,6 +390,15 @@ export class DatabaseStorage implements IStorage {
       totalReviews: Number(totalReviewsResult.count),
       totalWatchlists: Number(totalWatchlistsResult.count),
     };
+  }
+
+  async findAdminUser(): Promise<User | undefined> {
+    const [adminUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.isAdmin, true))
+      .limit(1);
+    return adminUser;
   }
 
   // OTP operations with new schema

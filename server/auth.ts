@@ -102,6 +102,81 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
   return res.status(401).json({ message: "Unauthorized" });
 };
 
+// Initialize admin user - only runs in development or when explicitly enabled
+export async function initializeAdminUser() {
+  // Only run in development or when explicitly enabled
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const seedAdmin = process.env.SEED_ADMIN === 'true';
+  
+  if (!isDevelopment && !seedAdmin) {
+    return null;
+  }
+
+  try {
+    // Check if any admin user already exists (efficient query)
+    const existingAdmin = await storage.findAdminUser();
+    
+    if (existingAdmin) {
+      console.log('Admin user already exists:', existingAdmin.username || existingAdmin.email);
+      return existingAdmin;
+    }
+
+    // Get admin credentials from environment or use development defaults
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || (isDevelopment ? 'admin123' : null);
+    
+    if (!adminPassword) {
+      console.log('No admin user exists. To create one, set ADMIN_PASSWORD environment variable.');
+      return null;
+    }
+
+    // Check if user with admin username exists but isn't admin
+    const existingUser = await storage.getUserByUsername(adminUsername);
+    if (existingUser) {
+      if (!existingUser.isAdmin) {
+        // Promote existing user to admin
+        const promotedUser = await storage.updateUser(existingUser.id, { 
+          isAdmin: true, 
+          isVerified: true 
+        });
+        console.log(`Promoted existing user '${adminUsername}' to admin`);
+        return promotedUser;
+      }
+      return existingUser;
+    }
+
+    // Create new admin user
+    const hashedPassword = await hashPassword(adminPassword);
+    
+    const adminUser = await storage.createUser({
+      username: adminUsername,
+      email: adminEmail,
+      password: hashedPassword,
+      firstName: 'Admin',
+      lastName: 'User',
+      isAdmin: true,
+      isVerified: true,
+    });
+
+    if (isDevelopment) {
+      console.log('\n=== ADMIN USER CREATED ===');
+      console.log('Username:', adminUsername);
+      console.log('Email:', adminEmail);
+      console.log('Password: [Check ADMIN_PASSWORD env or use default: admin123]');
+      console.log('Please change credentials after first login!');
+      console.log('==========================\n');
+    } else {
+      console.log('Admin user created successfully');
+    }
+    
+    return adminUser;
+  } catch (error) {
+    console.error('Error initializing admin user:', error);
+    return null;
+  }
+}
+
 export async function signUp(userData: SignUpData) {
   // Check if user already exists
   const existingUserByEmail = userData.email ? await storage.getUserByEmail(userData.email) : null;
@@ -171,7 +246,7 @@ export async function signInWithTokens(credentials: SignInData) {
   // Generate session ID and tokens
   const sessionId: string = generateSessionId();
   const refreshToken = signRefreshToken(sessionId);
-  const accessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin });
+  const accessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin || false });
   const refreshTokenHash = await hashRefreshToken(refreshToken);
   
   // Store refresh token session in database
@@ -217,7 +292,7 @@ export async function refreshAccessToken(refreshToken: string) {
     // Generate new tokens (rotate refresh token)
     const newSessionId: string = generateSessionId();
     const newRefreshToken = signRefreshToken(newSessionId);
-    const newAccessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin });
+    const newAccessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin || false });
     const newRefreshTokenHash = await hashRefreshToken(newRefreshToken);
     
     // Update session with new refresh token hash
