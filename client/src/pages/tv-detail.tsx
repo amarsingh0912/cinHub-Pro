@@ -108,7 +108,7 @@ export default function TVDetail() {
     }
   }, [tvShow]);
 
-  if (tvLoading || authLoading) {
+  if (tvLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground" data-testid="tv-loading">
         <Header />

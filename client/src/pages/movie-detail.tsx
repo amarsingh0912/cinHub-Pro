@@ -101,22 +101,14 @@ export default function MovieDetail() {
     },
   });
 
-  // Redirect to home if not authenticated
+  // Set page title when movie loads
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
+    if (movie) {
+      document.title = `${movie.title} - StreamFlix`;
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [movie]);
 
-  if (authLoading || movieLoading) {
+  if (movieLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground" data-testid="movie-detail-loading">
         <Header />
