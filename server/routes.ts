@@ -92,19 +92,14 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// CSRF protection middleware for session-based auth
+// CSRF protection middleware - require X-Requested-With header for all state-changing requests
 const requireCSRFHeader = (req: any, res: any, next: any) => {
   // Skip CSRF check for GET requests (safe methods)
   if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
     return next();
   }
   
-  // Skip if JWT auth is being used (no session)
-  if (!req.session || !req.session.userId) {
-    return next();
-  }
-  
-  // Require CSRF header for state-changing session-authenticated requests
+  // Require CSRF header for ALL state-changing requests (authenticated or not)
   const csrfHeader = req.headers['x-requested-with'];
   if (!csrfHeader || csrfHeader !== 'XMLHttpRequest') {
     return res.status(403).json({ message: 'CSRF protection: Invalid request' });
@@ -156,13 +151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api', apiLimiter);
   app.use('/api/auth', authLimiter);
   
-  // Apply CSRF protection to API routes (except auth routes which have specific handling)
-  app.use('/api', (req, res, next) => {
-    if (req.path.startsWith('/auth')) {
-      return next(); // Auth routes handle CSRF individually
-    }
-    requireCSRFHeader(req, res, next);
-  });
+  // Apply CSRF protection to ALL API routes (now that session is available)
+  app.use('/api', requireCSRFHeader);
   
   
   // Cookie parser middleware for JWT refresh tokens
@@ -171,7 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded images statically
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   
-  // Auth middleware
+  // Auth middleware - MUST be before CSRF middleware so req.session is available
   await setupAuth(app);
   
   // Initialize passport for OAuth
@@ -201,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/signup', requireCSRFHeader, async (req, res) => {
+  app.post('/api/auth/signup', async (req, res) => {
     try {
       const userData = signUpSchema.parse(req.body);
       const user = await signUp(userData);
@@ -241,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/signin', requireCSRFHeader, async (req, res) => {
+  app.post('/api/auth/signin', async (req, res) => {
     try {
       const credentials = signInSchema.parse(req.body);
       const user = await signIn(credentials);
@@ -284,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/logout', requireCSRFHeader, (req, res) => {
+  app.post('/api/auth/logout', (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error("Logout error:", err);

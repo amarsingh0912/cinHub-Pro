@@ -26,8 +26,14 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  // Fail fast in production if SESSION_SECRET is missing
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret && process.env.NODE_ENV === 'production') {
+    throw new Error('SESSION_SECRET must be set in production');
+  }
+  
   return session({
-    secret: process.env.SESSION_SECRET || "fallback-dev-secret",
+    secret: sessionSecret || "fallback-dev-secret",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
