@@ -449,7 +449,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Sign In Form */}
           {mode === "signin" && (
             <Form {...signinForm}>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <FormField
                   control={signinForm.control}
                   name="loginValue"
@@ -516,7 +516,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 )}
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="w-full"
                   size="lg"
                   data-testid="button-signin"
@@ -532,7 +532,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Sign Up Form */}
           {mode === "signup" && (
             <Form {...signupForm}>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 {/* Profile Photo Upload */}
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
@@ -722,7 +722,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 />
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="w-full"
                   size="lg"
                   data-testid="button-signup"
@@ -738,7 +738,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Forgot Password Form */}
           {mode === "forgot-password" && (
             <Form {...forgotPasswordForm}>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <FormField
                   control={forgotPasswordForm.control}
                   name="identifier"
@@ -764,7 +764,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 />
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="w-full"
                   size="lg"
                   data-testid="button-send-reset"
@@ -780,7 +780,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* OTP Verification Form */}
           {mode === "otp-verification" && (
             <Form {...otpForm}>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <FormField
                   control={otpForm.control}
                   name="otp"
@@ -802,7 +802,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 />
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="w-full"
                   size="lg"
                   data-testid="button-verify-otp"
@@ -817,7 +817,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Reset Password Form */}
           {mode === "reset-password" && (
             <Form {...resetPasswordForm}>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <FormField
                   control={resetPasswordForm.control}
                   name="newPassword"
@@ -887,7 +887,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 />
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   className="w-full"
                   size="lg"
                   data-testid="button-reset-password"
