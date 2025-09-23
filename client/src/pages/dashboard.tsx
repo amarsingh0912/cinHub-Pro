@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
+import { ExpandableText } from "@/components/ui/expandable-text";
 
 export default function Dashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
@@ -602,9 +603,10 @@ export default function Dashboard() {
                                     </div>
                                   </div>
                                   {review.review && (
-                                    <p className="text-muted-foreground" data-testid={`review-text-${review.id}`}>
-                                      {review.review}
-                                    </p>
+                                    <ExpandableText 
+                                      text={review.review}
+                                      testId={`review-text-${review.id}`}
+                                    />
                                   )}
                                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                     <span data-testid={`review-date-${review.id}`}>
@@ -674,9 +676,10 @@ export default function Dashboard() {
                                     </div>
                                   </div>
                                   {review.review && (
-                                    <p className="text-muted-foreground" data-testid={`review-text-${review.id}`}>
-                                      {review.review}
-                                    </p>
+                                    <ExpandableText 
+                                      text={review.review}
+                                      testId={`review-text-${review.id}`}
+                                    />
                                   )}
                                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                     <span data-testid={`review-date-${review.id}`}>

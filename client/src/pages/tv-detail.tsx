@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
+import { ExpandableText } from "@/components/ui/expandable-text";
 
 export default function TVDetail() {
   const { id } = useParams();
@@ -413,9 +414,10 @@ export default function TVDetail() {
                               {new Date(review.created_at).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-muted-foreground" data-testid={`review-content-${review.id}`}>
-                            {review.content}
-                          </p>
+                          <ExpandableText 
+                            text={review.content}
+                            testId={`review-content-${review.id}`}
+                          />
                         </div>
                       ))}
                     </div>

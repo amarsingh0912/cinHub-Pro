@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send } from "lucide-react";
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
+import { ExpandableText } from "@/components/ui/expandable-text";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -485,9 +486,10 @@ export default function MovieDetail() {
                                 {new Date(review.created_at).toLocaleDateString()}
                               </span>
                             </div>
-                            <p className="text-muted-foreground leading-relaxed" data-testid={`review-content-${review.id}`}>
-                              {review.content}
-                            </p>
+                            <ExpandableText 
+                              text={review.content}
+                              testId={`review-content-${review.id}`}
+                            />
                           </CardContent>
                         </Card>
                       ))}
