@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Play, Info } from "lucide-react";
+import { Link } from "wouter";
 
 export default function HeroSection() {
   return (
@@ -25,14 +26,18 @@ export default function HeroSection() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button size="lg" className="flex items-center gap-2" data-testid="button-start-exploring">
-              <Play className="w-5 h-5" />
-              Start Exploring
-            </Button>
-            <Button size="lg" variant="outline" className="flex items-center gap-2" data-testid="button-learn-more">
-              <Info className="w-5 h-5" />
-              Learn More
-            </Button>
+            <Link href="/search">
+              <Button size="lg" className="flex items-center gap-2" data-testid="button-start-exploring">
+                <Play className="w-5 h-5" />
+                Start Exploring
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button size="lg" variant="outline" className="flex items-center gap-2" data-testid="button-learn-more">
+                <Info className="w-5 h-5" />
+                Learn More
+              </Button>
+            </Link>
           </div>
           
           {/* Quick Stats */}
