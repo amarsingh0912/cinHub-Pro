@@ -14,6 +14,8 @@ import MovieDetail from "@/pages/movie-detail";
 import TVDetail from "@/pages/tv-detail";
 import Search from "@/pages/search";
 import Collection from "@/pages/collection";
+import Genre from "@/pages/genre";
+import Person from "@/pages/person";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import About from "@/pages/about";
@@ -33,6 +35,8 @@ function Router() {
       <Route path="/tv/:id" component={TVDetail} />
       <Route path="/search" component={Search} />
       <Route path="/collection/:category" component={Collection} />
+      <Route path="/genre/:genreId" component={Genre} />
+      <Route path="/person/:personId" component={Person} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />

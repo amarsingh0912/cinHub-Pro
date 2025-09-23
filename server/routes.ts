@@ -1008,6 +1008,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Movies by genre ID endpoint
+  app.get('/api/movies/genre/:genreId', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const genreId = req.params.genreId;
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&with_genres=${genreId}&page=${page}&sort_by=popularity.desc`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching movies by genre:', error);
+      res.status(500).json({ message: 'Failed to fetch movies by genre' });
+    }
+  });
+
+  // TV shows by genre ID endpoint
+  app.get('/api/tv/genre/:genreId', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const genreId = req.params.genreId;
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.TMDB_API_KEY}&with_genres=${genreId}&page=${page}&sort_by=popularity.desc`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching TV shows by genre:', error);
+      res.status(500).json({ message: 'Failed to fetch TV shows by genre' });
+    }
+  });
+
+  // Person filmography endpoint
+  app.get('/api/person/:personId/filmography', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const personId = req.params.personId;
+      const [movieCreditsResponse, tvCreditsResponse, personDetailsResponse] = await Promise.all([
+        fetch(`https://api.themoviedb.org/3/person/${personId}/movie_credits?api_key=${process.env.TMDB_API_KEY}`),
+        fetch(`https://api.themoviedb.org/3/person/${personId}/tv_credits?api_key=${process.env.TMDB_API_KEY}`),
+        fetch(`https://api.themoviedb.org/3/person/${personId}?api_key=${process.env.TMDB_API_KEY}`)
+      ]);
+      
+      const [movieCredits, tvCredits, personDetails] = await Promise.all([
+        movieCreditsResponse.json(),
+        tvCreditsResponse.json(),
+        personDetailsResponse.json()
+      ]);
+
+      res.json({
+        person: personDetails,
+        movieCredits,
+        tvCredits
+      });
+    } catch (error) {
+      console.error('Error fetching person filmography:', error);
+      res.status(500).json({ message: 'Failed to fetch person filmography' });
+    }
+  });
+
   // Watchlist endpoints
   app.get('/api/watchlists', isAuthenticated, async (req: any, res) => {
     try {
