@@ -55,6 +55,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/movies/top-rated', async (req, res) => {
+    try {
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching top rated movies:', error);
+      res.status(500).json({ message: 'Failed to fetch top rated movies' });
+    }
+  });
+
+  app.get('/api/movies/upcoming', async (req, res) => {
+    try {
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching upcoming movies:', error);
+      res.status(500).json({ message: 'Failed to fetch upcoming movies' });
+    }
+  });
+
+  app.get('/api/movies/now-playing', async (req, res) => {
+    try {
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching now playing movies:', error);
+      res.status(500).json({ message: 'Failed to fetch now playing movies' });
+    }
+  });
+
+  // Comprehensive movie discovery endpoint with all TMDB filters
+  app.get('/api/movies/discover', async (req, res) => {
+    try {
+      const {
+        page = 1,
+        sort_by = 'popularity.desc',
+        with_genres,
+        primary_release_year,
+        'vote_average.gte': minRating,
+        'vote_average.lte': maxRating,
+        'vote_count.gte': minVotes,
+        'with_runtime.gte': minRuntime,
+        'with_runtime.lte': maxRuntime,
+        'primary_release_date.gte': releaseDateFrom,
+        'primary_release_date.lte': releaseDateTo,
+        with_original_language,
+        region,
+        with_keywords,
+        without_genres,
+        certification_country,
+        'certification.lte': certification
+      } = req.query;
+
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}&sort_by=${sort_by}`;
+      
+      // Add optional parameters
+      if (with_genres) url += `&with_genres=${with_genres}`;
+      if (primary_release_year) url += `&primary_release_year=${primary_release_year}`;
+      if (minRating) url += `&vote_average.gte=${minRating}`;
+      if (maxRating) url += `&vote_average.lte=${maxRating}`;
+      if (minVotes) url += `&vote_count.gte=${minVotes}`;
+      if (minRuntime) url += `&with_runtime.gte=${minRuntime}`;
+      if (maxRuntime) url += `&with_runtime.lte=${maxRuntime}`;
+      if (releaseDateFrom) url += `&primary_release_date.gte=${releaseDateFrom}`;
+      if (releaseDateTo) url += `&primary_release_date.lte=${releaseDateTo}`;
+      if (with_original_language) url += `&with_original_language=${with_original_language}`;
+      if (region) url += `&region=${region}`;
+      if (with_keywords) url += `&with_keywords=${with_keywords}`;
+      if (without_genres) url += `&without_genres=${without_genres}`;
+      if (certification_country) url += `&certification_country=${certification_country}`;
+      if (certification) url += `&certification.lte=${certification}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error discovering movies:', error);
+      res.status(500).json({ message: 'Failed to discover movies' });
+    }
+  });
+
   app.get('/api/movies/search', async (req, res) => {
     try {
       const query = req.query.query;
