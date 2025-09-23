@@ -1,14 +1,27 @@
 import { Movie } from "@/types/movie";
 import MovieCard from "./movie-card";
+import MovieGridSkeleton from "./movie-grid-skeleton";
 
 interface MovieGridProps {
   movies: Movie[];
   title?: string;
   showViewAll?: boolean;
   viewAllHref?: string;
+  isLoading?: boolean;
+  skeletonCount?: number;
 }
 
-export default function MovieGrid({ movies, title, showViewAll, viewAllHref }: MovieGridProps) {
+export default function MovieGrid({ movies, title, showViewAll, viewAllHref, isLoading, skeletonCount = 12 }: MovieGridProps) {
+  if (isLoading) {
+    return (
+      <MovieGridSkeleton 
+        title={title} 
+        showViewAll={showViewAll} 
+        count={skeletonCount} 
+      />
+    );
+  }
+
   if (!movies.length) {
     return (
       <div className="text-center py-12" data-testid="empty-movies">

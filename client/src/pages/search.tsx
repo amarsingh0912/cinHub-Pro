@@ -4,6 +4,7 @@ import type { MovieResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
+import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
@@ -74,9 +75,10 @@ export default function SearchPage() {
         <section className="py-8" data-testid="search-results-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12" data-testid="search-loading">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Searching...</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="search-loading">
+                {Array.from({ length: 12 }, (_, index) => (
+                  <MovieCardSkeleton key={index} />
+                ))}
               </div>
             ) : searchTerm && searchResults ? (
               <>

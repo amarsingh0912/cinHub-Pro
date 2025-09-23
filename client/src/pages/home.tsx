@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
+import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Link } from "wouter";
 import { Plus, Heart, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Home() {
   const { user } = useAuth();
   
-  const { data: trendingMovies } = useQuery<MovieResponse>({
+  const { data: trendingMovies, isLoading: trendingMoviesLoading } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/trending"],
     staleTime: 1000 * 60 * 15, // 15 minutes
   });
 
-  const { data: trendingTVShows } = useQuery<TVResponse>({
+  const { data: trendingTVShows, isLoading: trendingTVShowsLoading } = useQuery<TVResponse>({
     queryKey: ["/api/tv/trending"],
     staleTime: 1000 * 60 * 15, // 15 minutes
   });
@@ -118,7 +119,13 @@ export default function Home() {
               </TabsList>
               
               <TabsContent value="movies" data-testid="movies-tab-content">
-                {trendingMovies?.results && (
+                {trendingMoviesLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {Array.from({ length: 12 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : trendingMovies?.results && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {trendingMovies.results.slice(0, 12).map((movie) => (
                       <Link key={movie.id} href={`/movie/${movie.id}`}>
@@ -170,7 +177,13 @@ export default function Home() {
               </TabsContent>
               
               <TabsContent value="tv" data-testid="tv-tab-content">
-                {trendingTVShows?.results && (
+                {trendingTVShowsLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {Array.from({ length: 12 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : trendingTVShows?.results && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {trendingTVShows.results.slice(0, 12).map((show) => (
                       <div key={show.id} className="tv-card group cursor-pointer">

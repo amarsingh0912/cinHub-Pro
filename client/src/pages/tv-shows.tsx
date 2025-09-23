@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import type { TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
@@ -62,9 +63,10 @@ export default function TVShows() {
               
               <TabsContent value="trending" data-testid="trending-tv-content">
                 {trendingLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="trending-tv-loading">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Loading trending TV shows...</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-loading">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
                   </div>
                 ) : trendingTVShows?.results && trendingTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-grid">
@@ -116,9 +118,10 @@ export default function TVShows() {
               
               <TabsContent value="popular" data-testid="popular-tv-content">
                 {popularLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="popular-tv-loading">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Loading popular TV shows...</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-loading">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
                   </div>
                 ) : popularTVShows?.results && popularTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-grid">
@@ -170,9 +173,10 @@ export default function TVShows() {
               
               <TabsContent value="top-rated" data-testid="top-rated-tv-content">
                 {topRatedLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="top-rated-tv-loading">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                    <span className="ml-2 text-muted-foreground">Loading top rated TV shows...</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-loading">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
                   </div>
                 ) : topRatedTVShows?.results && topRatedTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-grid">

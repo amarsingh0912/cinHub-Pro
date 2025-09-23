@@ -1,7 +1,9 @@
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import type { MovieResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { CATEGORIES } from "@/types/movie";
 import { Loader2 } from "lucide-react";
 
@@ -10,7 +12,7 @@ export default function Collection() {
   
   const categoryInfo = CATEGORIES.find(cat => cat.slug === category);
   
-  const { data: moviesData, isLoading } = useQuery({
+  const { data: moviesData, isLoading } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/discover", category],
     enabled: !!category,
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -57,15 +59,16 @@ export default function Collection() {
         <section className="py-8" data-testid="collection-movies">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12" data-testid="collection-loading">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Loading {categoryInfo.name.toLowerCase()} movies...</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="collection-loading">
+                {Array.from({ length: 18 }, (_, index) => (
+                  <MovieCardSkeleton key={index} />
+                ))}
               </div>
             ) : (
               <>
-                {moviesData?.results?.length > 0 ? (
+                {moviesData?.results && moviesData.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="collection-movies-grid">
-                    {moviesData.results.map((movie) => (
+                    {moviesData.results.map((movie: any) => (
                       <div key={movie.id} className="movie-card group cursor-pointer">
                         <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                           <img
