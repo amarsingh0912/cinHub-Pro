@@ -471,11 +471,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/watchlists/:id/items/:movieId', isAuthenticated, async (req, res) => {
+  app.delete('/api/watchlists/:id/items/:mediaType/:mediaId', isAuthenticated, async (req, res) => {
     try {
       const watchlistId = req.params.id;
-      const movieId = parseInt(req.params.movieId);
-      await storage.removeWatchlistItem(watchlistId, movieId);
+      const mediaType = req.params.mediaType;
+      const mediaId = parseInt(req.params.mediaId);
+      await storage.removeWatchlistItem(watchlistId, mediaType, mediaId);
       res.json({ success: true });
     } catch (error) {
       console.error('Error removing watchlist item:', error);
@@ -507,11 +508,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/favorites/:movieId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/favorites/:mediaType/:mediaId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const movieId = parseInt(req.params.movieId);
-      await storage.removeFavorite(userId, movieId);
+      const mediaType = req.params.mediaType;
+      const mediaId = parseInt(req.params.mediaId);
+      await storage.removeFavorite(userId, mediaType, mediaId);
       res.json({ success: true });
     } catch (error) {
       console.error('Error removing favorite:', error);
@@ -519,11 +521,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/favorites/:movieId/check', isAuthenticated, async (req: any, res) => {
+  app.get('/api/favorites/:mediaType/:mediaId/check', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const movieId = parseInt(req.params.movieId);
-      const isFavorite = await storage.isFavorite(userId, movieId);
+      const mediaType = req.params.mediaType;
+      const mediaId = parseInt(req.params.mediaId);
+      const isFavorite = await storage.isFavorite(userId, mediaType, mediaId);
       res.json({ isFavorite });
     } catch (error) {
       console.error('Error checking favorite status:', error);
@@ -543,14 +546,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/reviews/movie/:movieId', async (req, res) => {
+  app.get('/api/reviews/:mediaType/:mediaId', async (req, res) => {
     try {
-      const movieId = parseInt(req.params.movieId);
-      const reviews = await storage.getMovieReviews(movieId);
+      const mediaType = req.params.mediaType;
+      const mediaId = parseInt(req.params.mediaId);
+      const reviews = await storage.getMediaReviews(mediaType, mediaId);
       res.json(reviews);
     } catch (error) {
-      console.error('Error fetching movie reviews:', error);
-      res.status(500).json({ message: 'Failed to fetch movie reviews' });
+      console.error('Error fetching media reviews:', error);
+      res.status(500).json({ message: 'Failed to fetch media reviews' });
     }
   });
 

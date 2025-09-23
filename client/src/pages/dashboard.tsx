@@ -81,14 +81,14 @@ export default function Dashboard() {
   });
 
   const removeFavoriteMutation = useMutation({
-    mutationFn: async (movieId: number) => {
-      await apiRequest("DELETE", `/api/favorites/${movieId}`, {});
+    mutationFn: async ({mediaType, mediaId}: {mediaType: string, mediaId: number}) => {
+      await apiRequest("DELETE", `/api/favorites/${mediaType}/${mediaId}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
         title: "Removed from Favorites",
-        description: "Movie has been removed from your favorites.",
+        description: "Item has been removed from your favorites.",
       });
     },
     onError: (error) => {
@@ -183,7 +183,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Favorite Movies</CardTitle>
+                  <CardTitle className="text-sm font-medium">Favorites</CardTitle>
                   <Heart className="w-4 h-4 text-red-500" />
                 </CardHeader>
                 <CardContent>
@@ -233,62 +233,124 @@ export default function Dashboard() {
               <TabsContent value="favorites" className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-display font-bold" data-testid="favorites-title">
-                    Your Favorite Movies
+                    Your Favorites
                   </h2>
                 </div>
 
-                {favoritesLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="favorites-loading">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <span className="ml-2 text-muted-foreground">Loading favorites...</span>
-                  </div>
-                ) : favorites?.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-grid">
-                    {favorites.map((favorite) => (
-                      <div key={favorite.id} className="group">
-                        <Link href={`/movie/${favorite.movieId}`}>
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
-                            <img
-                              src={getImageUrl(favorite.moviePosterPath)}
-                              alt={favorite.movieTitle}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            />
-                          </div>
-                        </Link>
-                        <div className="mt-2 space-y-1">
-                          <h3 className="font-semibold truncate text-sm" data-testid={`favorite-title-${favorite.id}`}>
-                            {favorite.movieTitle}
-                          </h3>
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs text-muted-foreground">
-                              {favorite.movieReleaseDate ? new Date(favorite.movieReleaseDate).getFullYear() : 'TBA'}
-                            </p>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFavoriteMutation.mutate(favorite.movieId)}
-                              disabled={removeFavoriteMutation.isPending}
-                              data-testid={`remove-favorite-${favorite.id}`}
-                            >
-                              <Trash2 className="w-3 h-3 text-destructive" />
-                            </Button>
-                          </div>
-                        </div>
+                <Tabs defaultValue="movies" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 max-w-md">
+                    <TabsTrigger value="movies" data-testid="favorites-tab-movies">Movies</TabsTrigger>
+                    <TabsTrigger value="tv" data-testid="favorites-tab-tv">TV Shows</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="movies" className="mt-6">
+                    {favoritesLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="favorites-movies-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading favorites...</span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="favorites-empty">
-                    <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">No favorites yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Start adding movies to your favorites to see them here
-                    </p>
-                    <Link href="/movies">
-                      <Button>Browse Movies</Button>
-                    </Link>
-                  </div>
-                )}
+                    ) : favorites?.filter(f => f.mediaType === 'movie').length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-movies-grid">
+                        {favorites.filter(f => f.mediaType === 'movie').map((favorite) => (
+                          <div key={favorite.id} className="group">
+                            <Link href={`/${favorite.mediaType}/${favorite.mediaId}`}>
+                              <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
+                                <img
+                                  src={getImageUrl(favorite.mediaPosterPath)}
+                                  alt={favorite.mediaTitle}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                              </div>
+                            </Link>
+                            <div className="mt-2 space-y-1">
+                              <h3 className="font-semibold truncate text-sm" data-testid={`favorite-title-${favorite.id}`}>
+                                {favorite.mediaTitle}
+                              </h3>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-muted-foreground">
+                                  {favorite.mediaReleaseDate ? new Date(favorite.mediaReleaseDate).getFullYear() : 'TBA'}
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFavoriteMutation.mutate({mediaType: favorite.mediaType, mediaId: favorite.mediaId})}
+                                  disabled={removeFavoriteMutation.isPending}
+                                  data-testid={`remove-favorite-${favorite.id}`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="favorites-movies-empty">
+                        <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No favorite movies yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Start adding movies to your favorites to see them here
+                        </p>
+                        <Link href="/movies">
+                          <Button>Browse Movies</Button>
+                        </Link>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="tv" className="mt-6">
+                    {favoritesLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="favorites-tv-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading favorites...</span>
+                      </div>
+                    ) : favorites?.filter(f => f.mediaType === 'tv').length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-tv-grid">
+                        {favorites.filter(f => f.mediaType === 'tv').map((favorite) => (
+                          <div key={favorite.id} className="group">
+                            <Link href={`/${favorite.mediaType}/${favorite.mediaId}`}>
+                              <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
+                                <img
+                                  src={getImageUrl(favorite.mediaPosterPath)}
+                                  alt={favorite.mediaTitle}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                              </div>
+                            </Link>
+                            <div className="mt-2 space-y-1">
+                              <h3 className="font-semibold truncate text-sm" data-testid={`favorite-title-${favorite.id}`}>
+                                {favorite.mediaTitle}
+                              </h3>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs text-muted-foreground">
+                                  {favorite.mediaReleaseDate ? new Date(favorite.mediaReleaseDate).getFullYear() : 'TBA'}
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeFavoriteMutation.mutate({mediaType: favorite.mediaType, mediaId: favorite.mediaId})}
+                                  disabled={removeFavoriteMutation.isPending}
+                                  data-testid={`remove-favorite-${favorite.id}`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-destructive" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="favorites-tv-empty">
+                        <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No favorite TV shows yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Start adding TV shows to your favorites to see them here
+                        </p>
+                        <Button disabled>Browse TV Shows (Coming Soon)</Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="watchlists" className="space-y-6">
@@ -359,143 +421,297 @@ export default function Dashboard() {
                   </Dialog>
                 </div>
 
-                {watchlistsLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="watchlists-loading">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <span className="ml-2 text-muted-foreground">Loading watchlists...</span>
-                  </div>
-                ) : watchlists?.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-grid">
-                    {watchlists.map((watchlist) => (
-                      <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-lg" data-testid={`watchlist-name-${watchlist.id}`}>
-                                {watchlist.name}
-                              </CardTitle>
-                              {watchlist.description && (
-                                <p className="text-sm text-muted-foreground mt-1" data-testid={`watchlist-description-${watchlist.id}`}>
-                                  {watchlist.description}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {watchlist.isPublic ? (
-                                <Eye className="w-4 h-4 text-green-500" />
-                              ) : (
-                                <EyeOff className="w-4 h-4 text-muted-foreground" />
-                              )}
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <Badge variant="secondary" data-testid={`watchlist-count-${watchlist.id}`}>
-                              0 movies
-                            </Badge>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" data-testid={`edit-watchlist-${watchlist.id}`}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" data-testid={`delete-watchlist-${watchlist.id}`}>
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="watchlists-empty">
-                    <Plus className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">No watchlists yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Create your first watchlist to organize your movies
-                    </p>
-                    <Button onClick={() => setIsCreateWatchlistOpen(true)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Watchlist
-                    </Button>
-                  </div>
-                )}
+                <Tabs defaultValue="movies" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 max-w-md">
+                    <TabsTrigger value="movies" data-testid="watchlists-tab-movies">Movies</TabsTrigger>
+                    <TabsTrigger value="tv" data-testid="watchlists-tab-tv">TV Shows</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="movies" className="mt-6">
+                    {watchlistsLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="watchlists-movies-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading watchlists...</span>
+                      </div>
+                    ) : watchlists?.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-movies-grid">
+                        {watchlists.map((watchlist) => (
+                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
+                            <CardHeader>
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <CardTitle className="text-lg" data-testid={`watchlist-name-${watchlist.id}`}>
+                                    {watchlist.name}
+                                  </CardTitle>
+                                  {watchlist.description && (
+                                    <p className="text-sm text-muted-foreground mt-1" data-testid={`watchlist-description-${watchlist.id}`}>
+                                      {watchlist.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {watchlist.isPublic ? (
+                                    <Eye className="w-4 h-4 text-green-500" />
+                                  ) : (
+                                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                                  )}
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between">
+                                <Badge variant="secondary" data-testid={`watchlist-count-${watchlist.id}`}>
+                                  0 items
+                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" data-testid={`edit-watchlist-${watchlist.id}`}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" data-testid={`delete-watchlist-${watchlist.id}`}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="watchlists-movies-empty">
+                        <Plus className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No movie watchlists yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Create your first watchlist to organize your movies
+                        </p>
+                        <Button onClick={() => setIsCreateWatchlistOpen(true)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Watchlist
+                        </Button>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="tv" className="mt-6">
+                    {watchlistsLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="watchlists-tv-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading watchlists...</span>
+                      </div>
+                    ) : watchlists?.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-tv-grid">
+                        {watchlists.map((watchlist) => (
+                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
+                            <CardHeader>
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <CardTitle className="text-lg" data-testid={`watchlist-name-${watchlist.id}`}>
+                                    {watchlist.name}
+                                  </CardTitle>
+                                  {watchlist.description && (
+                                    <p className="text-sm text-muted-foreground mt-1" data-testid={`watchlist-description-${watchlist.id}`}>
+                                      {watchlist.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {watchlist.isPublic ? (
+                                    <Eye className="w-4 h-4 text-green-500" />
+                                  ) : (
+                                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                                  )}
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between">
+                                <Badge variant="secondary" data-testid={`watchlist-count-${watchlist.id}`}>
+                                  0 items
+                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" data-testid={`edit-watchlist-${watchlist.id}`}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" data-testid={`delete-watchlist-${watchlist.id}`}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="watchlists-tv-empty">
+                        <Plus className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No TV show watchlists yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Create your first watchlist to organize your TV shows
+                        </p>
+                        <Button onClick={() => setIsCreateWatchlistOpen(true)}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Watchlist
+                        </Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
 
               <TabsContent value="reviews" className="space-y-6">
-                <h2 className="text-2xl font-display font-bold" data-testid="reviews-title">
-                  Your Reviews
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-display font-bold" data-testid="reviews-title">
+                    Your Reviews
+                  </h2>
+                </div>
 
-                {reviewsLoading ? (
-                  <div className="flex items-center justify-center py-12" data-testid="reviews-loading">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <span className="ml-2 text-muted-foreground">Loading reviews...</span>
-                  </div>
-                ) : userReviews?.length > 0 ? (
-                  <div className="space-y-4" data-testid="reviews-list">
-                    {userReviews.map((review) => (
-                      <Card key={review.id} data-testid={`review-card-${review.id}`}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-semibold" data-testid={`review-movie-${review.id}`}>
-                                  Movie #{review.movieId}
-                                </h3>
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${
-                                        i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
-                                      }`}
-                                    />
-                                  ))}
-                                  <span className="text-sm text-muted-foreground ml-1" data-testid={`review-rating-${review.id}`}>
-                                    {review.rating}/10
-                                  </span>
+                <Tabs defaultValue="movies" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 max-w-md">
+                    <TabsTrigger value="movies" data-testid="reviews-tab-movies">Movies</TabsTrigger>
+                    <TabsTrigger value="tv" data-testid="reviews-tab-tv">TV Shows</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="movies" className="mt-6">
+                    {reviewsLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="reviews-movies-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading reviews...</span>
+                      </div>
+                    ) : userReviews?.filter(r => r.mediaType === 'movie').length > 0 ? (
+                      <div className="space-y-4" data-testid="reviews-movies-list">
+                        {userReviews.filter(r => r.mediaType === 'movie').map((review) => (
+                          <Card key={review.id} data-testid={`review-card-${review.id}`}>
+                            <CardContent className="pt-6">
+                              <div className="flex items-start gap-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold" data-testid={`review-media-${review.id}`}>
+                                      Movie #{review.mediaId}
+                                    </h3>
+                                    <div className="flex items-center gap-1">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star
+                                          key={i}
+                                          className={`w-4 h-4 ${
+                                            i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
+                                          }`}
+                                        />
+                                      ))}
+                                      <span className="text-sm text-muted-foreground ml-1" data-testid={`review-rating-${review.id}`}>
+                                        {review.rating}/10
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {review.review && (
+                                    <p className="text-muted-foreground" data-testid={`review-text-${review.id}`}>
+                                      {review.review}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                    <span data-testid={`review-date-${review.id}`}>
+                                      {new Date(review.createdAt).toLocaleDateString()}
+                                    </span>
+                                    <Badge variant={review.isPublic ? "default" : "secondary"}>
+                                      {review.isPublic ? "Public" : "Private"}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" data-testid={`edit-review-${review.id}`}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" data-testid={`delete-review-${review.id}`}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
                                 </div>
                               </div>
-                              {review.review && (
-                                <p className="text-muted-foreground" data-testid={`review-text-${review.id}`}>
-                                  {review.review}
-                                </p>
-                              )}
-                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                <span data-testid={`review-date-${review.id}`}>
-                                  {new Date(review.createdAt).toLocaleDateString()}
-                                </span>
-                                <Badge variant={review.isPublic ? "default" : "secondary"}>
-                                  {review.isPublic ? "Public" : "Private"}
-                                </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="reviews-movies-empty">
+                        <Star className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No movie reviews yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Start reviewing movies to share your thoughts with others
+                        </p>
+                        <Link href="/movies">
+                          <Button>Browse Movies</Button>
+                        </Link>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="tv" className="mt-6">
+                    {reviewsLoading ? (
+                      <div className="flex items-center justify-center py-12" data-testid="reviews-tv-loading">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading reviews...</span>
+                      </div>
+                    ) : userReviews?.filter(r => r.mediaType === 'tv').length > 0 ? (
+                      <div className="space-y-4" data-testid="reviews-tv-list">
+                        {userReviews.filter(r => r.mediaType === 'tv').map((review) => (
+                          <Card key={review.id} data-testid={`review-card-${review.id}`}>
+                            <CardContent className="pt-6">
+                              <div className="flex items-start gap-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold" data-testid={`review-media-${review.id}`}>
+                                      TV Show #{review.mediaId}
+                                    </h3>
+                                    <div className="flex items-center gap-1">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star
+                                          key={i}
+                                          className={`w-4 h-4 ${
+                                            i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
+                                          }`}
+                                        />
+                                      ))}
+                                      <span className="text-sm text-muted-foreground ml-1" data-testid={`review-rating-${review.id}`}>
+                                        {review.rating}/10
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {review.review && (
+                                    <p className="text-muted-foreground" data-testid={`review-text-${review.id}`}>
+                                      {review.review}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                    <span data-testid={`review-date-${review.id}`}>
+                                      {new Date(review.createdAt).toLocaleDateString()}
+                                    </span>
+                                    <Badge variant={review.isPublic ? "default" : "secondary"}>
+                                      {review.isPublic ? "Public" : "Private"}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" data-testid={`edit-review-${review.id}`}>
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" data-testid={`delete-review-${review.id}`}>
+                                    <Trash2 className="w-4 h-4 text-destructive" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" data-testid={`edit-review-${review.id}`}>
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" data-testid={`delete-review-${review.id}`}>
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="reviews-empty">
-                    <Star className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">No reviews yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Start reviewing movies to share your thoughts with others
-                    </p>
-                    <Link href="/movies">
-                      <Button>Browse Movies</Button>
-                    </Link>
-                  </div>
-                )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12" data-testid="reviews-tv-empty">
+                        <Star className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-semibold mb-2">No TV show reviews yet</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Start reviewing TV shows to share your thoughts with others
+                        </p>
+                        <Button disabled>Browse TV Shows (Coming Soon)</Button>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
             </Tabs>
           </div>
