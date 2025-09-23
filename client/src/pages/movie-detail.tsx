@@ -25,7 +25,7 @@ export default function MovieDetail() {
     enabled: !!id,
   });
 
-  const { data: favoriteStatus } = useQuery({
+  const { data: favoriteStatus } = useQuery<{ isFavorite: boolean }>({
     queryKey: ["/api/favorites", id, "check"],
     enabled: !!id && isAuthenticated,
     retry: false,
