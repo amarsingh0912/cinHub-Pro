@@ -546,12 +546,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get TMDB reviews for a movie or TV show
+  app.get('/api/reviews/:mediaType/:mediaId/tmdb', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const mediaType = req.params.mediaType;
+      const mediaId = req.params.mediaId;
+      
+      // Validate mediaType
+      if (!['movie', 'tv'].includes(mediaType)) {
+        return res.status(400).json({ message: 'Media type must be either "movie" or "tv"' });
+      }
+      
+      // Validate mediaId
+      if (isNaN(Number(mediaId))) {
+        return res.status(400).json({ message: 'Media ID must be a valid number' });
+      }
+      
+      const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+      const response = await fetch(
+        `https://api.themoviedb.org/3/${endpoint}/${mediaId}/reviews?api_key=${process.env.TMDB_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`TMDB API responded with status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform TMDB reviews to match our expected format
+      const tmdbReviews = data.results?.map((review: any) => ({
+        id: `tmdb-${review.id}`,
+        author_name: review.author,
+        rating: review.author_details?.rating ? Math.round(review.author_details.rating) : null,
+        content: review.content,
+        created_at: review.created_at,
+        source: 'tmdb'
+      })) || [];
+      
+      res.json(tmdbReviews);
+    } catch (error) {
+      console.error('Error fetching TMDB reviews:', error);
+      res.status(500).json({ message: 'Failed to fetch TMDB reviews' });
+    }
+  });
+
+  // Get all reviews (both user and TMDB) for a movie or TV show
   app.get('/api/reviews/:mediaType/:mediaId', async (req, res) => {
     try {
       const mediaType = req.params.mediaType;
-      const mediaId = parseInt(req.params.mediaId);
-      const reviews = await storage.getMediaReviews(mediaType, mediaId);
-      res.json(reviews);
+      const mediaIdParam = req.params.mediaId;
+      
+      // Validate mediaType
+      if (!['movie', 'tv'].includes(mediaType)) {
+        return res.status(400).json({ message: 'Media type must be either "movie" or "tv"' });
+      }
+      
+      // Validate mediaId
+      const mediaId = parseInt(mediaIdParam);
+      if (isNaN(mediaId)) {
+        return res.status(400).json({ message: 'Media ID must be a valid number' });
+      }
+      
+      // Get user reviews from database
+      const userReviews = await storage.getMediaReviews(mediaType, mediaId);
+      const formattedUserReviews = userReviews.map((review: any) => ({
+        id: review.id,
+        author_name: 'User Review', // We could get actual usernames if we join with users table
+        rating: review.rating,
+        content: review.review,
+        created_at: review.createdAt,
+        source: 'user'
+      }));
+      
+      // Get TMDB reviews
+      let tmdbReviews: any[] = [];
+      if (process.env.TMDB_API_KEY) {
+        try {
+          const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+          const response = await fetch(
+            `https://api.themoviedb.org/3/${endpoint}/${mediaId}/reviews?api_key=${process.env.TMDB_API_KEY}`
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            tmdbReviews = data.results?.map((review: any) => ({
+              id: `tmdb-${review.id}`,
+              author_name: review.author,
+              rating: review.author_details?.rating ? Math.round(review.author_details.rating) : null,
+              content: review.content,
+              created_at: review.created_at,
+              source: 'tmdb'
+            })) || [];
+          }
+        } catch (tmdbError) {
+          console.error('Error fetching TMDB reviews:', tmdbError);
+          // Continue without TMDB reviews if there's an error
+        }
+      }
+      
+      // Combine and sort reviews by creation date (newest first)
+      const allReviews = [...formattedUserReviews, ...tmdbReviews].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      res.json(allReviews);
     } catch (error) {
       console.error('Error fetching media reviews:', error);
       res.status(500).json({ message: 'Failed to fetch media reviews' });
