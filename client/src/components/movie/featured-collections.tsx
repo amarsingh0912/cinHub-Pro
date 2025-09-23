@@ -6,21 +6,21 @@ export default function FeaturedCollections() {
       title: "Action Movies",
       description: "Explosive action and thrilling adventures",
       href: "/collection/action",
-      image: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=450",
+      image: "/action-collection.jpg",
       count: "500+ Movies"
     },
     {
       title: "Classic Movies",
       description: "Timeless films from cinema history",
       href: "/collection/drama",
-      image: "https://images.unsplash.com/photo-1596727147705-61a532a659bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=450",
+      image: "/classic-collection.jpg",
       count: "200+ Movies"
     },
     {
       title: "Award Winners",
       description: "Oscar and Emmy winning films",
       href: "/movies?filter=top-rated",
-      image: "https://pixabay.com/get/g49469a5d87780eedcabcb4afd5a896d0a3de250c15f5b26a7763e3ca6cd728717c9e4cb7dfe33768d80b85a1460f5da3131ee2be8a603a92dcfb811f3f243a78_1280.jpg",
+      image: "/award-collection.jpg",
       count: "150+ Movies"
     }
   ];

@@ -187,11 +187,13 @@ export const GENRE_MAP: Record<string, number> = {
   western: 37
 };
 
+import { Zap, Heart, Bot, Ghost, Smile, Mountain } from 'lucide-react';
+
 export const CATEGORIES = [
-  { name: 'Action', slug: 'action', icon: 'mask', color: 'from-red-500 to-red-600' },
-  { name: 'Romance', slug: 'romance', icon: 'heart', color: 'from-pink-500 to-pink-600' },
-  { name: 'Sci-Fi', slug: 'science-fiction', icon: 'robot', color: 'from-blue-500 to-blue-600' },
-  { name: 'Horror', slug: 'horror', icon: 'ghost', color: 'from-purple-500 to-purple-600' },
-  { name: 'Comedy', slug: 'comedy', icon: 'laugh', color: 'from-green-500 to-green-600' },
-  { name: 'Adventure', slug: 'adventure', icon: 'mountain', color: 'from-orange-500 to-orange-600' },
+  { name: 'Action', slug: 'action', icon: Zap, color: 'from-red-500 to-red-600' },
+  { name: 'Romance', slug: 'romance', icon: Heart, color: 'from-pink-500 to-pink-600' },
+  { name: 'Sci-Fi', slug: 'science-fiction', icon: Bot, color: 'from-blue-500 to-blue-600' },
+  { name: 'Horror', slug: 'horror', icon: Ghost, color: 'from-purple-500 to-purple-600' },
+  { name: 'Comedy', slug: 'comedy', icon: Smile, color: 'from-green-500 to-green-600' },
+  { name: 'Adventure', slug: 'adventure', icon: Mountain, color: 'from-orange-500 to-orange-600' },
 ];

@@ -7,7 +7,7 @@ export default function HeroSection() {
       {/* Hero movie backdrop */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://pixabay.com/get/g2906a9583a89721239819c82b96993463e31c41f783e7c386edc7230c070d4f03a8280695a3f7b108693bcbc2abe7a4365650384edeae58d2bcabdee0023550b_1280.jpg"
+          src="/hero-background.jpg"
           alt="Epic movie scene with dramatic lighting and cinematic atmosphere"
           className="w-full h-full object-cover opacity-20"
         />

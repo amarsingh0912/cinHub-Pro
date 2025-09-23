@@ -12,7 +12,7 @@ export default function CategoryGrid() {
             <Link key={category.slug} href={`/collection/${category.slug}`} data-testid={`category-${category.slug}`}>
               <div className="group cursor-pointer">
                 <div className={`aspect-square rounded-xl bg-gradient-to-br ${category.color} p-6 flex items-center justify-center hover:scale-105 transition-transform`}>
-                  <i className={`fas fa-${category.icon} text-4xl text-white`}></i>
+                  <category.icon className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-center mt-3 font-medium" data-testid={`category-name-${category.slug}`}>
                   {category.name}

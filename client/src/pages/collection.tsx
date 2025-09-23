@@ -5,7 +5,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { CATEGORIES } from "@/types/movie";
-import { Loader2, Film } from "lucide-react";
+import { Loader2, Film, Star } from "lucide-react";
 
 export default function Collection() {
   const { category } = useParams();
@@ -43,7 +43,7 @@ export default function Collection() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <div className={`w-20 h-20 bg-gradient-to-br ${categoryInfo.color} rounded-full flex items-center justify-center mx-auto mb-6`}>
-                <i className={`fas fa-${categoryInfo.icon} text-3xl text-white`}></i>
+                <categoryInfo.icon className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-4xl font-display font-bold mb-4" data-testid="collection-title">
                 {categoryInfo.name} Movies
@@ -86,7 +86,7 @@ export default function Collection() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="absolute bottom-4 left-4 right-4">
                               <div className="flex items-center gap-2 text-white">
-                                <i className="fas fa-star text-secondary"></i>
+                                <Star className="w-4 h-4 text-secondary fill-current" />
                                 <span data-testid={`movie-rating-${movie.id}`}>{movie.vote_average.toFixed(1)}</span>
                               </div>
                             </div>
@@ -106,7 +106,7 @@ export default function Collection() {
                 ) : (
                   <div className="text-center py-12" data-testid="collection-empty">
                     <div className={`w-16 h-16 bg-gradient-to-br ${categoryInfo.color} opacity-50 rounded-full flex items-center justify-center mx-auto mb-4`}>
-                      <i className={`fas fa-${categoryInfo.icon} text-2xl text-white`}></i>
+                      <categoryInfo.icon className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold mb-2">No movies found</h3>
                     <p className="text-muted-foreground">
