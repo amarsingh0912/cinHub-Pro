@@ -75,7 +75,7 @@ export default function Movies() {
     maxRating: 10,
     minRuntime: '',
     maxRuntime: '',
-    language: '',
+    language: 'all',
     minVotes: ''
   });
 
@@ -104,7 +104,7 @@ export default function Movies() {
     if (filters.maxRuntime) {
       params['with_runtime.lte'] = filters.maxRuntime;
     }
-    if (filters.language) {
+    if (filters.language && filters.language !== 'all') {
       params.with_original_language = filters.language;
     }
     if (filters.minVotes) {
@@ -146,14 +146,14 @@ export default function Movies() {
       maxRating: 10,
       minRuntime: '',
       maxRuntime: '',
-      language: '',
+      language: 'all',
       minVotes: ''
     });
   };
 
   const hasActiveFilters = filters.genres.length > 0 || filters.releaseYear || 
     filters.minRating > 0 || filters.maxRating < 10 || filters.minRuntime || 
-    filters.maxRuntime || filters.language || filters.minVotes;
+    filters.maxRuntime || (filters.language && filters.language !== 'all') || filters.minVotes;
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="movies-page">
@@ -329,7 +329,7 @@ export default function Movies() {
                               <SelectValue placeholder="Any language" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="" data-testid="language-any">Any Language</SelectItem>
+                              <SelectItem value="all" data-testid="language-any">Any Language</SelectItem>
                               {LANGUAGES.map((lang) => (
                                 <SelectItem key={lang.code} value={lang.code} data-testid={`language-${lang.code}`}>
                                   {lang.name}

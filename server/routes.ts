@@ -30,8 +30,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/movies/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const response = await fetch(
-        `https://api.themoviedb.org/3/trending/movie/${timeWindow}?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}`
+        `https://api.themoviedb.org/3/trending/movie/${timeWindow}?api_key=${process.env.TMDB_API_KEY}`
       );
       const data = await response.json();
       res.json(data);
@@ -43,9 +46,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/popular', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const page = req.query.page || 1;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+        `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
       const data = await response.json();
       res.json(data);
@@ -57,9 +63,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/top-rated', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const page = req.query.page || 1;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
       const data = await response.json();
       res.json(data);
@@ -71,9 +80,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/upcoming', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const page = req.query.page || 1;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+        `https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
       const data = await response.json();
       res.json(data);
@@ -85,9 +97,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/now-playing', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const page = req.query.page || 1;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`
+        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
       const data = await response.json();
       res.json(data);
@@ -100,6 +115,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Comprehensive movie discovery endpoint with all TMDB filters
   app.get('/api/movies/discover', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const {
         page = 1,
         sort_by = 'popularity.desc',
@@ -120,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'certification.lte': certification
       } = req.query;
 
-      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}&sort_by=${sort_by}`;
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&page=${page}&sort_by=${sort_by}`;
       
       // Add optional parameters
       if (with_genres) url += `&with_genres=${with_genres}`;
@@ -150,13 +168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/search', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const query = req.query.query;
       const page = req.query.page || 1;
       if (!query) {
         return res.status(400).json({ message: 'Search query is required' });
       }
       const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&query=${encodeURIComponent(query as string)}&page=${page}`
+        `https://api.themoviedb.org/3/search/movie?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query as string)}&page=${page}`
       );
       const data = await response.json();
       res.json(data);
@@ -168,9 +189,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/:id', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const movieId = req.params.id;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&append_to_response=credits,videos,similar`
+        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar`
       );
       const data = await response.json();
       res.json(data);
@@ -182,9 +206,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/discover/:category', async (req, res) => {
     try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
       const category = req.params.category;
       const page = req.query.page || 1;
-      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY || '771da65ab04f1369dddd0cb01ad76800'}&page=${page}`;
+      let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&page=${page}`;
       
       // Map categories to genre IDs
       const genreMap: Record<string, string> = {
