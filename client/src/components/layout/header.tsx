@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SearchModal from "@/components/ui/search-modal";
 import SignInModal from "@/components/ui/sign-in-modal";
-import { Search, Moon, Film, Menu, X } from "lucide-react";
+import { Search, Moon, Sun, Film, Menu, X } from "lucide-react";
 
 export default function Header() {
   const [location] = useLocation();
   const { isAuthenticated, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -67,9 +69,19 @@ export default function Header() {
                 <Search className="w-5 h-5" />
               </Button>
               
-              {/* Dark Mode Toggle */}
-              <Button variant="ghost" size="icon" data-testid="button-theme">
-                <Moon className="w-5 h-5" />
+              {/* Theme Toggle */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleTheme}
+                data-testid="button-theme"
+                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
               </Button>
               
               {/* Mobile Menu Toggle */}
