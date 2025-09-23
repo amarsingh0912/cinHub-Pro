@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Movies from "@/pages/movies";
+import TVShows from "@/pages/tv-shows";
 import MovieDetail from "@/pages/movie-detail";
 import Search from "@/pages/search";
 import Collection from "@/pages/collection";
@@ -23,6 +24,7 @@ function Router() {
     <Switch>
       {/* Routes available to everyone */}
       <Route path="/movies" component={Movies} />
+      <Route path="/tv-shows" component={TVShows} />
       <Route path="/movie/:id" component={MovieDetail} />
       <Route path="/search" component={Search} />
       <Route path="/collection/:category" component={Collection} />

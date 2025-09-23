@@ -150,9 +150,11 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Button variant="outline" disabled data-testid="button-view-all-trending-tv">
-                    View All Trending TV Shows (Coming Soon)
-                  </Button>
+                  <Link href="/tv-shows?category=trending">
+                    <Button variant="outline" data-testid="button-view-all-trending-tv">
+                      View All Trending TV Shows
+                    </Button>
+                  </Link>
                 </div>
               </TabsContent>
             </Tabs>
@@ -275,9 +277,11 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Button variant="outline" disabled data-testid="button-view-all-popular-tv">
-                    View All Popular TV Shows (Coming Soon)
-                  </Button>
+                  <Link href="/tv-shows?category=popular">
+                    <Button variant="outline" data-testid="button-view-all-popular-tv">
+                      View All Popular TV Shows
+                    </Button>
+                  </Link>
                 </div>
               </TabsContent>
             </Tabs>
