@@ -61,6 +61,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/tv/popular', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching popular TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch popular TV shows' });
+    }
+  });
+
+  app.get('/api/tv/top-rated', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/top_rated?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching top rated TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch top rated TV shows' });
+    }
+  });
+
+  app.get('/api/tv/on-the-air', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/on_the_air?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching on-the-air TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch on-the-air TV shows' });
+    }
+  });
+
+  app.get('/api/tv/airing-today', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching airing today TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch airing today TV shows' });
+    }
+  });
+
+  // Comprehensive TV show discovery endpoint with all TMDB filters
+  app.get('/api/tv/discover', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const {
+        page = 1,
+        sort_by = 'popularity.desc',
+        with_genres,
+        first_air_date_year,
+        'vote_average.gte': minRating,
+        'vote_average.lte': maxRating,
+        'vote_count.gte': minVotes,
+        'with_runtime.gte': minRuntime,
+        'with_runtime.lte': maxRuntime,
+        'first_air_date.gte': airDateFrom,
+        'first_air_date.lte': airDateTo,
+        with_original_language,
+        with_keywords,
+        without_genres,
+        with_networks,
+        with_companies
+      } = req.query;
+
+      let url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.TMDB_API_KEY}&page=${page}&sort_by=${sort_by}`;
+      
+      // Add optional parameters
+      if (with_genres) url += `&with_genres=${with_genres}`;
+      if (first_air_date_year) url += `&first_air_date_year=${first_air_date_year}`;
+      if (minRating) url += `&vote_average.gte=${minRating}`;
+      if (maxRating) url += `&vote_average.lte=${maxRating}`;
+      if (minVotes) url += `&vote_count.gte=${minVotes}`;
+      if (minRuntime) url += `&with_runtime.gte=${minRuntime}`;
+      if (maxRuntime) url += `&with_runtime.lte=${maxRuntime}`;
+      if (airDateFrom) url += `&first_air_date.gte=${airDateFrom}`;
+      if (airDateTo) url += `&first_air_date.lte=${airDateTo}`;
+      if (with_original_language) url += `&with_original_language=${with_original_language}`;
+      if (with_keywords) url += `&with_keywords=${with_keywords}`;
+      if (without_genres) url += `&without_genres=${without_genres}`;
+      if (with_networks) url += `&with_networks=${with_networks}`;
+      if (with_companies) url += `&with_companies=${with_companies}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error discovering TV shows:', error);
+      res.status(500).json({ message: 'Failed to discover TV shows' });
+    }
+  });
+
+  app.get('/api/tv/search', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const query = req.query.query;
+      const page = req.query.page || 1;
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/tv?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query as string)}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching TV shows:', error);
+      res.status(500).json({ message: 'Failed to search TV shows' });
+    }
+  });
+
+  app.get('/api/tv/:id', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const tvId = req.params.id;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/${tvId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching TV show details:', error);
+      res.status(500).json({ message: 'Failed to fetch TV show details' });
+    }
+  });
+
   app.get('/api/movies/popular', async (req, res) => {
     try {
       if (!process.env.TMDB_API_KEY) {
