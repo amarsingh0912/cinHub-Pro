@@ -990,6 +990,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
