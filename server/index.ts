@@ -7,6 +7,10 @@ import { setupVite, serveStatic, log } from "./vite";
 import { initializeAdminUser } from "./auth";
 
 const app = express();
+
+// Trust proxy for secure cookies and accurate client IP behind reverse proxy
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -23,10 +27,15 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
+    if (path.startsWith("/api") && !path.startsWith("/api/auth")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        // Redact sensitive data from logs
+        const safeResponse = { ...capturedJsonResponse };
+        if (safeResponse.accessToken) safeResponse.accessToken = "[REDACTED]";
+        if (safeResponse.refreshToken) safeResponse.refreshToken = "[REDACTED]";
+        if (safeResponse.password) safeResponse.password = "[REDACTED]";
+        logLine += ` :: ${JSON.stringify(safeResponse)}`;
       }
 
       if (logLine.length > 80) {
@@ -49,9 +58,19 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+    
+    // Log the error safely without exposing sensitive data
+    console.error(`Error ${status}:`, {
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      url: _req.url,
+      method: _req.method
+    });
 
-    res.status(status).json({ message });
-    throw err;
+    // Send error response and end - don't throw to avoid crashing process
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   // importantly only setup vite in development and after

@@ -40,14 +40,24 @@ const multerStorage = multer.diskStorage({
   }
 });
 
+// Safe file extensions and MIME types
+const allowedImageTypes = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/webp': ['.webp']
+};
+
 const upload = multer({
   storage: multerStorage,
   fileFilter: (req, file, cb) => {
-    // Only allow image files
-    if (file.mimetype.startsWith('image/')) {
+    // Check MIME type and extension
+    const allowedExtensions = allowedImageTypes[file.mimetype];
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    
+    if (allowedExtensions && allowedExtensions.includes(fileExt)) {
       cb(null, true);
     } else {
-      const error = new Error('Only image files are allowed!') as any;
+      const error = new Error('Only JPEG, PNG, and WebP images are allowed!') as any;
       error.code = 'INVALID_FILE_TYPE';
       cb(error, false);
     }
@@ -82,16 +92,38 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// CSRF protection middleware for session-based auth
+const requireCSRFHeader = (req: any, res: any, next: any) => {
+  // Skip CSRF check for GET requests (safe methods)
+  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    return next();
+  }
+  
+  // Skip if JWT auth is being used (no session)
+  if (!req.session || !req.session.userId) {
+    return next();
+  }
+  
+  // Require CSRF header for state-changing session-authenticated requests
+  const csrfHeader = req.headers['x-requested-with'];
+  if (!csrfHeader || csrfHeader !== 'XMLHttpRequest') {
+    return res.status(403).json({ message: 'CSRF protection: Invalid request' });
+  }
+  
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Security headers
+  // Security headers - stricter CSP for production
+  const isProduction = process.env.NODE_ENV === 'production';
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Keep for CSS-in-JS frameworks
+        scriptSrc: isProduction ? ["'self'"] : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com"],
-        connectSrc: ["'self'", "wss:"],
+        connectSrc: ["'self'", "wss:", ...(isProduction ? [] : ['https://api.themoviedb.org'])], // Allow TMDB API in dev for debugging
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -104,12 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enable compression
   app.use(compression());
   
-  // Apply rate limiting
-  app.use(generalLimiter);
-  app.use('/api', apiLimiter);
-  app.use('/api/auth', authLimiter);
-  
-  // Health check endpoint
+  // Health check endpoint - before rate limiting for monitoring
   app.get('/health', (req, res) => {
     res.status(200).json({ 
       status: 'ok', 
@@ -118,6 +145,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       environment: process.env.NODE_ENV || 'development'
     });
   });
+  
+  // Apply rate limiting (excluding health check)
+  app.use((req, res, next) => {
+    if (req.path === '/health') {
+      return next();
+    }
+    generalLimiter(req, res, next);
+  });
+  app.use('/api', apiLimiter);
+  app.use('/api/auth', authLimiter);
+  
+  // Apply CSRF protection to API routes (except auth routes which have specific handling)
+  app.use('/api', (req, res, next) => {
+    if (req.path.startsWith('/auth')) {
+      return next(); // Auth routes handle CSRF individually
+    }
+    requireCSRFHeader(req, res, next);
+  });
+  
   
   // Cookie parser middleware for JWT refresh tokens
   app.use(cookieParser());
@@ -155,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/signup', async (req, res) => {
+  app.post('/api/auth/signup', requireCSRFHeader, async (req, res) => {
     try {
       const userData = signUpSchema.parse(req.body);
       const user = await signUp(userData);
@@ -195,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/signin', async (req, res) => {
+  app.post('/api/auth/signin', requireCSRFHeader, async (req, res) => {
     try {
       const credentials = signInSchema.parse(req.body);
       const user = await signIn(credentials);
@@ -238,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/auth/logout', (req, res) => {
+  app.post('/api/auth/logout', requireCSRFHeader, (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error("Logout error:", err);
@@ -445,6 +491,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/refresh', async (req, res) => {
     try {
+      // CSRF protection: require custom header for token refresh
+      const csrfHeader = req.headers['x-requested-with'];
+      if (!csrfHeader || csrfHeader !== 'XMLHttpRequest') {
+        return res.status(403).json({ message: "Invalid request" });
+      }
+      
       const refreshToken = req.cookies.refreshToken;
       
       if (!refreshToken) {
