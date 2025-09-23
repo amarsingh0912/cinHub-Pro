@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const tvId = req.params.id;
       const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${tvId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar`
+        `https://api.themoviedb.org/3/tv/${tvId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar,recommendations`
       );
       const data = await response.json();
       res.json(data);
@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const movieId = req.params.id;
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar`
+        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar,recommendations`
       );
       const data = await response.json();
       res.json(data);
