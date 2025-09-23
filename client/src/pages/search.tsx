@@ -7,7 +7,7 @@ import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Film } from "lucide-react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -96,12 +96,18 @@ export default function SearchPage() {
                     {searchResults.results.map((movie) => (
                       <div key={movie.id} className="movie-card group cursor-pointer">
                         <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                          <img
-                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                            alt={movie.title}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
+                          {movie.poster_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                              alt={movie.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                              <Film className="w-16 h-16 text-muted-foreground" />
+                            </div>
+                          )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="absolute bottom-4 left-4 right-4">
                               <div className="flex items-center gap-2 text-white">

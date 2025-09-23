@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Film } from "lucide-react";
 import { Movie } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
 
@@ -69,11 +69,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
                     onClick={handleClose}
                   >
-                    <img
-                      src={getImageUrl(movie.poster_path, 'w200')}
-                      alt={movie.title}
-                      className="w-12 h-18 object-cover rounded"
-                    />
+                    {movie.poster_path ? (
+                      <img
+                        src={getImageUrl(movie.poster_path, 'w200')}
+                        alt={movie.title}
+                        className="w-12 h-18 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-12 h-18 bg-muted rounded flex items-center justify-center">
+                        <Film className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate" data-testid={`search-title-${movie.id}`}>
                         {movie.title}

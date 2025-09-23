@@ -6,7 +6,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, Film } from "lucide-react";
 import { Link } from "wouter";
 
 export default function TVShows() {
@@ -83,9 +83,7 @@ export default function TVShows() {
                               />
                             ) : (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs text-center p-2">
-                                  No Image
-                                </span>
+                                <Film className="w-16 h-16 text-muted-foreground" />
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -138,9 +136,7 @@ export default function TVShows() {
                               />
                             ) : (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs text-center p-2">
-                                  No Image
-                                </span>
+                                <Film className="w-16 h-16 text-muted-foreground" />
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -193,9 +189,7 @@ export default function TVShows() {
                               />
                             ) : (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs text-center p-2">
-                                  No Image
-                                </span>
+                                <Film className="w-16 h-16 text-muted-foreground" />
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">

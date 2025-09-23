@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Star } from "lucide-react";
+import { Star, Film } from "lucide-react";
 import { Movie } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
 
@@ -12,12 +12,18 @@ export default function MovieCard({ movie }: MovieCardProps) {
     <Link href={`/movie/${movie.id}`} data-testid={`movie-card-${movie.id}`}>
       <div className="movie-card group cursor-pointer">
         <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-          <img
-            src={getImageUrl(movie.poster_path)}
-            alt={movie.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          {movie.poster_path ? (
+            <img
+              src={getImageUrl(movie.poster_path)}
+              alt={movie.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <Film className="w-16 h-16 text-muted-foreground" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="absolute bottom-4 left-4 right-4">
               <div className="flex items-center gap-2 text-white">

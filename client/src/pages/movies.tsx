@@ -14,7 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Filter, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Filter, X, ChevronDown, ChevronUp, Film } from "lucide-react";
 import { Link } from "wouter";
 
 // Movie genres
@@ -615,9 +615,7 @@ export default function Movies() {
                               />
                             ) : (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs text-center p-2">
-                                  No Image
-                                </span>
+                                <Film className="w-16 h-16 text-muted-foreground" />
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">

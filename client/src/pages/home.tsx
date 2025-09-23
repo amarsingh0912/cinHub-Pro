@@ -6,7 +6,7 @@ import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Link } from "wouter";
-import { Plus, Heart, Clock } from "lucide-react";
+import { Plus, Heart, Clock, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -140,9 +140,7 @@ export default function Home() {
                               />
                             ) : (
                               <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-muted-foreground text-xs text-center p-2">
-                                  No Image
-                                </span>
+                                <Film className="w-16 h-16 text-muted-foreground" />
                               </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
@@ -197,9 +195,7 @@ export default function Home() {
                             />
                           ) : (
                             <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-muted-foreground text-xs text-center p-2">
-                                No Image
-                              </span>
+                              <Film className="w-16 h-16 text-muted-foreground" />
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
