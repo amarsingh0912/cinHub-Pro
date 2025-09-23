@@ -117,6 +117,45 @@ export interface TVShow {
   origin_country: string[];
 }
 
+export interface TVShowDetails extends TVShow {
+  number_of_episodes: number;
+  number_of_seasons: number;
+  episode_run_time: number[];
+  first_air_date: string;
+  last_air_date: string;
+  tagline: string;
+  homepage: string;
+  status: string;
+  type: string;
+  genres: Genre[];
+  created_by: Array<{
+    id: number;
+    name: string;
+    profile_path: string | null;
+  }>;
+  networks: Array<{
+    id: number;
+    name: string;
+    logo_path: string | null;
+    origin_country: string;
+  }>;
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  spoken_languages: SpokenLanguage[];
+  seasons: Array<{
+    id: number;
+    name: string;
+    overview: string;
+    poster_path: string | null;
+    season_number: number;
+    episode_count: number;
+    air_date: string;
+  }>;
+  credits?: Credits;
+  videos?: Videos;
+  similar?: TVResponse;
+}
+
 export interface TVResponse {
   page: number;
   results: TVShow[];

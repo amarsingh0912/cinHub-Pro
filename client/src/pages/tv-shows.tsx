@@ -69,40 +69,42 @@ export default function TVShows() {
                 ) : trendingTVShows?.results && trendingTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-grid">
                     {trendingTVShows.results.map((show) => (
-                      <div key={show.id} className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                          {show.poster_path ? (
-                            <img
-                              src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                              alt={show.name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-muted-foreground text-xs text-center p-2">
-                                No Image
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-4 left-4 right-4">
-                              <div className="flex items-center gap-2 text-white">
-                                <i className="fas fa-star text-secondary"></i>
-                                <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                      <Link key={show.id} href={`/tv/${show.id}`}>
+                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
+                            {show.poster_path ? (
+                              <img
+                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                                alt={show.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <span className="text-muted-foreground text-xs text-center p-2">
+                                  No Image
+                                </span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-4 left-4 right-4">
+                                <div className="flex items-center gap-2 text-white">
+                                  <i className="fas fa-star text-secondary"></i>
+                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div className="mt-3">
+                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
+                              {show.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
+                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="mt-3">
-                          <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                            {show.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                            {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                          </p>
-                        </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
@@ -121,40 +123,42 @@ export default function TVShows() {
                 ) : popularTVShows?.results && popularTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-grid">
                     {popularTVShows.results.map((show) => (
-                      <div key={show.id} className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                          {show.poster_path ? (
-                            <img
-                              src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                              alt={show.name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-muted-foreground text-xs text-center p-2">
-                                No Image
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-4 left-4 right-4">
-                              <div className="flex items-center gap-2 text-white">
-                                <i className="fas fa-star text-secondary"></i>
-                                <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                      <Link key={show.id} href={`/tv/${show.id}`}>
+                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
+                            {show.poster_path ? (
+                              <img
+                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                                alt={show.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <span className="text-muted-foreground text-xs text-center p-2">
+                                  No Image
+                                </span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-4 left-4 right-4">
+                                <div className="flex items-center gap-2 text-white">
+                                  <i className="fas fa-star text-secondary"></i>
+                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div className="mt-3">
+                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
+                              {show.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
+                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="mt-3">
-                          <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                            {show.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                            {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                          </p>
-                        </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
@@ -173,40 +177,42 @@ export default function TVShows() {
                 ) : topRatedTVShows?.results && topRatedTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-grid">
                     {topRatedTVShows.results.map((show) => (
-                      <div key={show.id} className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                          {show.poster_path ? (
-                            <img
-                              src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                              alt={show.name}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <span className="text-muted-foreground text-xs text-center p-2">
-                                No Image
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-4 left-4 right-4">
-                              <div className="flex items-center gap-2 text-white">
-                                <i className="fas fa-star text-secondary"></i>
-                                <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                      <Link key={show.id} href={`/tv/${show.id}`}>
+                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
+                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
+                            {show.poster_path ? (
+                              <img
+                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                                alt={show.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <span className="text-muted-foreground text-xs text-center p-2">
+                                  No Image
+                                </span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-4 left-4 right-4">
+                                <div className="flex items-center gap-2 text-white">
+                                  <i className="fas fa-star text-secondary"></i>
+                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                          <div className="mt-3">
+                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
+                              {show.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
+                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="mt-3">
-                          <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                            {show.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                            {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                          </p>
-                        </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (

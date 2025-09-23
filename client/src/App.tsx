@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Movies from "@/pages/movies";
 import TVShows from "@/pages/tv-shows";
 import MovieDetail from "@/pages/movie-detail";
+import TVDetail from "@/pages/tv-detail";
 import Search from "@/pages/search";
 import Collection from "@/pages/collection";
 import Dashboard from "@/pages/dashboard";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/movies" component={Movies} />
       <Route path="/tv-shows" component={TVShows} />
       <Route path="/movie/:id" component={MovieDetail} />
+      <Route path="/tv/:id" component={TVDetail} />
       <Route path="/search" component={Search} />
       <Route path="/collection/:category" component={Collection} />
       <Route path="/about" component={About} />
