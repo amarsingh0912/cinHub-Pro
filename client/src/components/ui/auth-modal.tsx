@@ -403,17 +403,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md" data-testid="auth-modal">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-display font-bold mb-2">
-            {getModalTitle()}
-          </DialogTitle>
-          <DialogDescription className="text-center text-muted-foreground">
-            {getModalDescription()}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-6 pt-4">
+      <DialogContent className="w-[min(100vw-1rem,36rem)] sm:w-[36rem] p-0 sm:p-6 sm:rounded-xl overflow-hidden" data-testid="auth-modal">
+        <div className="flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[90dvh]">
+          <DialogHeader className="shrink-0 px-6 pt-6 sm:px-0 sm:pt-0">
+            <DialogTitle className="text-center text-2xl font-display font-bold mb-2">
+              {getModalTitle()}
+            </DialogTitle>
+            <DialogDescription className="text-center text-muted-foreground">
+              {getModalDescription()}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto px-6 pb-4 overscroll-contain" role="region" aria-label="Authentication form">
+            <div className="space-y-6 pt-4">
           {/* Back button for non-signin modes */}
           {mode !== "signin" && (
             <Button
@@ -511,7 +513,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 {/* Profile Photo Upload */}
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
-                    <Avatar className="w-20 h-20">
+                    <Avatar className="w-16 h-16 sm:w-20 sm:h-20">
                       <AvatarImage src={profilePhotoPreview || ""} />
                       <AvatarFallback>
                         <Camera className="w-8 h-8 text-muted-foreground" />
@@ -541,7 +543,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={signupForm.control}
                     name="firstName"
