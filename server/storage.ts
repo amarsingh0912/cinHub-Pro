@@ -61,9 +61,13 @@ export interface IStorage {
   // Social Account operations
   createSocialAccount(account: InsertSocialAccount): Promise<SocialAccount>;
   getSocialAccount(provider: string, providerUserId: string): Promise<SocialAccount | undefined>;
+  getSocialAccountByProvider(provider: string, providerUserId: string): Promise<SocialAccount | undefined>;
   getUserSocialAccounts(userId: string): Promise<SocialAccount[]>;
   getUserSocialAccount(userId: string, provider: string): Promise<SocialAccount | undefined>;
   deleteSocialAccount(userId: string, provider: string): Promise<void>;
+  
+  // Backwards compatibility methods for passport
+  getUserById(id: string): Promise<User | undefined>;
   
   // Watchlist operations
   getUserWatchlists(userId: string): Promise<Watchlist[]>;
@@ -541,6 +545,16 @@ export class DatabaseStorage implements IStorage {
           eq(socialAccounts.provider, provider)
         )
       );
+  }
+
+  // Additional social account methods
+  async getSocialAccountByProvider(provider: string, providerUserId: string): Promise<SocialAccount | undefined> {
+    return this.getSocialAccount(provider, providerUserId);
+  }
+
+  // Backwards compatibility for passport
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id);
   }
 }
 

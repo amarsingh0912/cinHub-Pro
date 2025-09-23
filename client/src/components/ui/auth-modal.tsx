@@ -39,7 +39,7 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
-type ModalMode = "signin" | "signup" | "forgot-password" | "otp-verification";
+type ModalMode = "signin" | "signup" | "forgot-password" | "otp-verification" | "reset-password";
 
 // Form schemas for different authentication flows
 const signinFormSchema = z.object({
@@ -63,10 +63,19 @@ const otpVerificationSchema = z.object({
   otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
+const resetPasswordSchema = z.object({
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type SignInFormData = z.infer<typeof signinFormSchema>;
 type SignUpFormData = z.infer<typeof signupFormSchema>;
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 type OtpVerificationFormData = z.infer<typeof otpVerificationSchema>;
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -116,6 +125,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     mode: "onChange",
     defaultValues: {
       otp: "",
+    },
+  });
+
+  const resetPasswordForm = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: "onChange",
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -263,18 +281,48 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         onClose();
-      } else {
+      } else if (data.type === 'reset') {
         toast({
           title: "Verification Complete!",
-          description: "You can now reset your password.",
+          description: "You can now set your new password.",
         });
-        // For reset, could transition to password reset form
+        // Transition to password reset form
+        setMode("reset-password");
       }
     },
     onError: (error: Error) => {
       toast({
         title: "Verification failed",
         description: error.message || "Please check your code and try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: ResetPasswordFormData) => {
+      const response = await apiRequest("POST", "/api/auth/reset-password", {
+        identifier: otpSentTo,
+        newPassword: data.newPassword,
+        otpCode: otpForm.getValues().otp
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset Successfully!",
+        description: "Your password has been updated. You can now sign in with your new password.",
+      });
+      setMode("signin");
+      // Clear forms
+      resetPasswordForm.reset();
+      otpForm.reset();
+      forgotPasswordForm.reset();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Password reset failed",
+        description: error.message || "Please try again.",
         variant: "destructive",
       });
     },
@@ -302,19 +350,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         if (!otpValid) return;
         otpMutation.mutate(otpForm.getValues());
         break;
+      case "reset-password":
+        const resetValid = await resetPasswordForm.trigger();
+        if (!resetValid) return;
+        resetPasswordMutation.mutate(resetPasswordForm.getValues());
+        break;
     }
   };
 
   const isLoading = signinMutation.isPending || signupMutation.isPending || 
-                   forgotPasswordMutation.isPending || otpMutation.isPending;
+                   forgotPasswordMutation.isPending || otpMutation.isPending || resetPasswordMutation.isPending;
 
   const handleSocialAuth = (provider: string) => {
-    // TODO: Implement social authentication
-    toast({
-      title: "Coming Soon",
-      description: `${provider} authentication will be available soon.`,
-      variant: "default",
-    });
+    // Redirect to OAuth endpoint
+    const authUrl = `/api/auth/${provider.toLowerCase()}`;
+    window.location.href = authUrl;
   };
 
   const getModalTitle = () => {
@@ -327,6 +377,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         return "Reset Password";
       case "otp-verification":
         return "Verify Your Account";
+      case "reset-password":
+        return "Reset Your Password";
       default:
         return "Welcome Back";
     }
@@ -342,6 +394,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         return "Enter your email, username, or phone number to receive a password reset code.";
       case "otp-verification":
         return `Enter the 6-digit verification code sent to ${otpSentTo}.`;
+      case "reset-password":
+        return "Enter your new password below. Make sure it's secure and easy to remember.";
       default:
         return "Sign in to access your account.";
     }
@@ -730,6 +784,92 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   disabled={isLoading || !otpForm.formState.isValid}
                 >
                   {isLoading ? "Verifying..." : "Verify Code"}
+                </Button>
+              </form>
+            </Form>
+          )}
+
+          {/* Reset Password Form */}
+          {mode === "reset-password" && (
+            <Form {...resetPasswordForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter your new password"
+                            className="pr-10"
+                            data-testid="input-new-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            data-testid="button-toggle-new-password"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Confirm your new password"
+                            className="pr-10"
+                            data-testid="input-confirm-new-password"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            data-testid="button-toggle-confirm-new-password"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  size="lg"
+                  data-testid="button-reset-password"
+                  disabled={isLoading || !resetPasswordForm.formState.isValid}
+                >
+                  <Key className="mr-2 h-4 w-4" />
+                  {isLoading ? "Resetting Password..." : "Reset Password"}
                 </Button>
               </form>
             </Form>

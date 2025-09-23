@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, signUp, signIn, signInWithTokens, refreshAccessToken, logoutWithToken, hashPassword } from "./auth";
+import passport from "./passport";
 import { z } from "zod";
 import {
   insertWatchlistSchema,
@@ -62,6 +63,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth middleware
   await setupAuth(app);
+  
+  // Initialize passport for OAuth
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
@@ -288,24 +293,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Password must be at least 8 characters" });
       }
 
-      // Find user
-      let user = null;
-      if (identifier.includes('@')) {
-        user = await storage.getUserByEmail(identifier);
-      } else if (identifier.startsWith('+')) {
-        user = await storage.getUserByPhoneNumber(identifier);
-      } else {
-        user = await storage.getUserByUsername(identifier);
-      }
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Verify OTP for password reset
+      // Verify OTP for password reset first
       const isValidOtp = await storage.verifyOtp(identifier, otpCode, 'reset');
       if (!isValidOtp) {
         return res.status(400).json({ message: "Invalid or expired OTP code" });
+      }
+
+      // Find user by identifier
+      const user = await storage.getUserByIdentifier(identifier);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       // Hash new password and update
@@ -441,6 +438,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Logged out successfully" });
     }
   });
+
+  // Social Authentication Routes
+
+  // Google OAuth
+  app.get('/api/auth/google', passport.authenticate('google'));
+  
+  app.get('/api/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/?auth=failed' }),
+    (req: any, res) => {
+      // Set session for authenticated user
+      if (req.user) {
+        req.session.userId = req.user.id;
+        res.redirect('/?auth=success');
+      } else {
+        res.redirect('/?auth=failed');
+      }
+    }
+  );
+
+  // Facebook OAuth
+  app.get('/api/auth/facebook', passport.authenticate('facebook'));
+  
+  app.get('/api/auth/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: '/?auth=failed' }),
+    (req: any, res) => {
+      if (req.user) {
+        req.session.userId = req.user.id;
+        res.redirect('/?auth=success');
+      } else {
+        res.redirect('/?auth=failed');
+      }
+    }
+  );
+
+  // GitHub OAuth
+  app.get('/api/auth/github', passport.authenticate('github'));
+  
+  app.get('/api/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/?auth=failed' }),
+    (req: any, res) => {
+      if (req.user) {
+        req.session.userId = req.user.id;
+        res.redirect('/?auth=success');
+      } else {
+        res.redirect('/?auth=failed');
+      }
+    }
+  );
+
+  // Twitter OAuth  
+  app.get('/api/auth/twitter', passport.authenticate('twitter'));
+  
+  app.get('/api/auth/twitter/callback',
+    passport.authenticate('twitter', { failureRedirect: '/?auth=failed' }),
+    (req: any, res) => {
+      if (req.user) {
+        req.session.userId = req.user.id;
+        res.redirect('/?auth=success');
+      } else {
+        res.redirect('/?auth=failed');
+      }
+    }
+  );
 
   // Simple rate limiting for uploads (in production, use proper rate limiter like express-rate-limit)
   const uploadAttempts = new Map<string, { count: number; resetTime: number }>();

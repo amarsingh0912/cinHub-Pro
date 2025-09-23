@@ -3,7 +3,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { Strategy as TwitterStrategy } from '@superfaceai/passport-twitter-oauth2';
-import { storage } from './storage.js';
+import { storage } from './storage';
 import type { User } from '@shared/schema.js';
 
 // Serialize user for sessions
@@ -27,27 +27,29 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/api/auth/google/callback',
-    scope: ['profile', 'email']
-  }, async (accessToken, refreshToken, profile, done) => {
+    scope: ['profile', 'email'],
+    state: true
+  }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       // Check if user exists by email or social account
       let user = await storage.getUserByEmail(profile.emails?.[0]?.value || '');
       
       if (user) {
         // User exists, link social account if not already linked
-        const existingSocialAccount = await storage.getSocialAccount(user.id, 'google');
+        const existingSocialAccount = await storage.getUserSocialAccount(user.id, 'google');
         if (!existingSocialAccount) {
           await storage.createSocialAccount({
             userId: user.id,
             provider: 'google',
-            providerId: profile.id,
-            email: profile.emails?.[0]?.value,
-            displayName: profile.displayName,
-            profileUrl: profile.profileUrl,
-            avatarUrl: profile.photos?.[0]?.value,
-            accessToken,
-            refreshToken
+            providerUserId: profile.id
           });
+          // Update user's providers array
+          const currentProviders = user.providers || [];
+          if (!currentProviders.includes('google')) {
+            await storage.updateUser(user.id, { 
+              providers: [...currentProviders, 'google'] 
+            });
+          }
         }
       } else {
         // Create new user
@@ -67,13 +69,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         await storage.createSocialAccount({
           userId: user.id,
           provider: 'google',
-          providerId: profile.id,
-          email: profile.emails?.[0]?.value,
-          displayName: profile.displayName,
-          profileUrl: profile.profileUrl,
-          avatarUrl: profile.photos?.[0]?.value,
-          accessToken,
-          refreshToken
+          providerUserId: profile.id
         });
       }
       
@@ -91,24 +87,19 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
     clientID: process.env.FACEBOOK_CLIENT_ID,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     callbackURL: '/api/auth/facebook/callback',
-    profileFields: ['id', 'displayName', 'photos', 'email', 'name']
-  }, async (accessToken, refreshToken, profile, done) => {
+    profileFields: ['id', 'displayName', 'photos', 'email', 'name'],
+    enableProof: true
+  }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       let user = await storage.getUserByEmail(profile.emails?.[0]?.value || '');
       
       if (user) {
-        const existingSocialAccount = await storage.getSocialAccount(user.id, 'facebook');
+        const existingSocialAccount = await storage.getUserSocialAccount(user.id, 'facebook');
         if (!existingSocialAccount) {
           await storage.createSocialAccount({
             userId: user.id,
             provider: 'facebook',
-            providerId: profile.id,
-            email: profile.emails?.[0]?.value,
-            displayName: profile.displayName,
-            profileUrl: profile.profileUrl,
-            avatarUrl: profile.photos?.[0]?.value,
-            accessToken,
-            refreshToken
+            providerUserId: profile.id
           });
         }
       } else {
@@ -127,13 +118,7 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
         await storage.createSocialAccount({
           userId: user.id,
           provider: 'facebook',
-          providerId: profile.id,
-          email: profile.emails?.[0]?.value,
-          displayName: profile.displayName,
-          profileUrl: profile.profileUrl,
-          avatarUrl: profile.photos?.[0]?.value,
-          accessToken,
-          refreshToken
+          providerUserId: profile.id
         });
       }
       
@@ -151,24 +136,19 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
     callbackURL: '/api/auth/github/callback',
-    scope: ['user:email']
-  }, async (accessToken, refreshToken, profile, done) => {
+    scope: ['user:email'],
+    state: true
+  }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       let user = await storage.getUserByEmail(profile.emails?.[0]?.value || '');
       
       if (user) {
-        const existingSocialAccount = await storage.getSocialAccount(user.id, 'github');
+        const existingSocialAccount = await storage.getUserSocialAccount(user.id, 'github');
         if (!existingSocialAccount) {
           await storage.createSocialAccount({
             userId: user.id,
             provider: 'github',
-            providerId: profile.id,
-            email: profile.emails?.[0]?.value,
-            displayName: profile.displayName || profile.username,
-            profileUrl: profile.profileUrl,
-            avatarUrl: profile.photos?.[0]?.value,
-            accessToken,
-            refreshToken
+            providerUserId: profile.id
           });
         }
       } else {
@@ -186,13 +166,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
         await storage.createSocialAccount({
           userId: user.id,
           provider: 'github',
-          providerId: profile.id,
-          email: profile.emails?.[0]?.value,
-          displayName: profile.displayName || profile.username,
-          profileUrl: profile.profileUrl,
-          avatarUrl: profile.photos?.[0]?.value,
-          accessToken,
-          refreshToken
+          providerUserId: profile.id
         });
       }
       
@@ -210,8 +184,9 @@ if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
     clientID: process.env.TWITTER_CLIENT_ID,
     clientSecret: process.env.TWITTER_CLIENT_SECRET,
     callbackURL: '/api/auth/twitter/callback',
+    clientType: 'confidential',
     scope: ['tweet.read', 'users.read']
-  }, async (accessToken, refreshToken, profile, done) => {
+  }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       // Twitter OAuth 2.0 doesn't provide email by default
       // We'll need to handle users without email
@@ -241,12 +216,7 @@ if (process.env.TWITTER_CLIENT_ID && process.env.TWITTER_CLIENT_SECRET) {
         await storage.createSocialAccount({
           userId: user.id,
           provider: 'twitter',
-          providerId: profile.id,
-          displayName: profile.displayName,
-          profileUrl: profile.profileUrl,
-          avatarUrl: profile.photos?.[0]?.value,
-          accessToken,
-          refreshToken
+          providerUserId: profile.id
         });
       }
       
