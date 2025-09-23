@@ -21,7 +21,8 @@ export default function Header() {
     { href: "/", label: "Home" },
     { href: "/movies", label: "Movies" },
     { href: "/tv-shows", label: "TV Shows" },
-    { href: "/search", label: "Search" },
+    { href: "/about", label: "About Us" },
+    { href: "/contact", label: "Contact Us" },
   ];
 
   if (isAuthenticated) {
