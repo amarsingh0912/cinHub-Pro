@@ -62,6 +62,7 @@ interface MovieFilters {
   maxRuntime: string;
   language: string;
   minVotes: string;
+  status: string;
 }
 
 export default function Movies() {
@@ -76,7 +77,8 @@ export default function Movies() {
     minRuntime: '',
     maxRuntime: '',
     language: 'all',
-    minVotes: ''
+    minVotes: '',
+    status: 'all'
   });
 
   // Create query parameters from filters
@@ -109,6 +111,14 @@ export default function Movies() {
     }
     if (filters.minVotes) {
       params['vote_count.gte'] = filters.minVotes;
+    }
+    if (filters.status && filters.status !== 'all') {
+      // Map our status filter to TMDB's release date filters
+      if (filters.status === 'released') {
+        params['primary_release_date.lte'] = new Date().toISOString().split('T')[0];
+      } else if (filters.status === 'upcoming') {
+        params['primary_release_date.gte'] = new Date().toISOString().split('T')[0];
+      }
     }
 
     return params;
@@ -147,13 +157,15 @@ export default function Movies() {
       minRuntime: '',
       maxRuntime: '',
       language: 'all',
-      minVotes: ''
+      minVotes: '',
+      status: 'all'
     });
   };
 
   const hasActiveFilters = filters.genres.length > 0 || filters.releaseYear || 
     filters.minRating > 0 || filters.maxRating < 10 || filters.minRuntime || 
-    filters.maxRuntime || (filters.language && filters.language !== 'all') || filters.minVotes;
+    filters.maxRuntime || (filters.language && filters.language !== 'all') || 
+    filters.minVotes || (filters.status && filters.status !== 'all');
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="movies-page">
@@ -350,6 +362,24 @@ export default function Movies() {
                             onChange={(e) => setFilters(prev => ({ ...prev, minVotes: e.target.value }))}
                             data-testid="input-min-votes"
                           />
+                        </div>
+                        
+                        {/* Release Status */}
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">Release Status</Label>
+                          <Select 
+                            value={filters.status} 
+                            onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                          >
+                            <SelectTrigger data-testid="select-status">
+                              <SelectValue placeholder="Any status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all" data-testid="status-all">All Movies</SelectItem>
+                              <SelectItem value="released" data-testid="status-released">Released</SelectItem>
+                              <SelectItem value="upcoming" data-testid="status-upcoming">Upcoming</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     </CardContent>
