@@ -21,25 +21,25 @@ function Router() {
 
   return (
     <Switch>
+      {/* Routes available to everyone */}
+      <Route path="/movies" component={Movies} />
+      <Route path="/movie/:id" component={MovieDetail} />
+      <Route path="/search" component={Search} />
+      <Route path="/collection/:category" component={Collection} />
+      <Route path="/about" component={About} />
+      <Route path="/contact" component={Contact} />
+      
+      {/* Conditional home page based on authentication */}
       {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
-        </>
+        <Route path="/" component={Landing} />
       ) : (
         <>
           <Route path="/" component={Home} />
-          <Route path="/movies" component={Movies} />
-          <Route path="/movie/:id" component={MovieDetail} />
-          <Route path="/search" component={Search} />
-          <Route path="/collection/:category" component={Collection} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/admin" component={AdminDashboard} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
         </>
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );
