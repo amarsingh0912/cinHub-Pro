@@ -99,6 +99,31 @@ export interface MovieResponse {
 
 export interface SearchResponse extends MovieResponse {}
 
+// TV Show interfaces
+export interface TVShow {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  first_air_date: string;
+  vote_average: number;
+  vote_count: number;
+  genre_ids: number[];
+  adult: boolean;
+  original_language: string;
+  original_name: string;
+  popularity: number;
+  origin_country: string[];
+}
+
+export interface TVResponse {
+  page: number;
+  results: TVShow[];
+  total_pages: number;
+  total_results: number;
+}
+
 export const GENRE_MAP: Record<string, number> = {
   action: 28,
   adventure: 12,

@@ -44,6 +44,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/tv/trending', async (req, res) => {
+    try {
+      const timeWindow = req.query.time_window || 'week';
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const response = await fetch(
+        `https://api.themoviedb.org/3/trending/tv/${timeWindow}?api_key=${process.env.TMDB_API_KEY}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching trending TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch trending TV shows' });
+    }
+  });
+
   app.get('/api/movies/popular', async (req, res) => {
     try {
       if (!process.env.TMDB_API_KEY) {
