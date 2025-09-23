@@ -54,29 +54,32 @@ export const watchlists = pgTable("watchlists", {
 export const watchlistItems = pgTable("watchlist_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   watchlistId: varchar("watchlist_id").notNull(),
-  movieId: integer("movie_id").notNull(), // TMDB movie ID
-  movieTitle: varchar("movie_title").notNull(),
-  moviePosterPath: varchar("movie_poster_path"),
-  movieReleaseDate: varchar("movie_release_date"),
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
+  mediaTitle: varchar("media_title").notNull(),
+  mediaPosterPath: varchar("media_poster_path"),
+  mediaReleaseDate: varchar("media_release_date"), // release_date for movies, first_air_date for TV shows
   addedAt: timestamp("added_at").defaultNow(),
 });
 
-// User movie favorites
+// User media favorites
 export const favorites = pgTable("favorites", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
-  movieId: integer("movie_id").notNull(), // TMDB movie ID
-  movieTitle: varchar("movie_title").notNull(),
-  moviePosterPath: varchar("movie_poster_path"),
-  movieReleaseDate: varchar("movie_release_date"),
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
+  mediaTitle: varchar("media_title").notNull(),
+  mediaPosterPath: varchar("media_poster_path"),
+  mediaReleaseDate: varchar("media_release_date"), // release_date for movies, first_air_date for TV shows
   addedAt: timestamp("added_at").defaultNow(),
 });
 
-// User movie ratings and reviews
+// User media ratings and reviews
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
-  movieId: integer("movie_id").notNull(), // TMDB movie ID
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
   rating: integer("rating").notNull(), // 1-10 scale
   review: text("review"),
   isPublic: boolean("is_public").default(true),

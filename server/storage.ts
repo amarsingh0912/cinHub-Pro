@@ -30,17 +30,17 @@ export interface IStorage {
   createWatchlist(watchlist: InsertWatchlist): Promise<Watchlist>;
   getWatchlistItems(watchlistId: string): Promise<WatchlistItem[]>;
   addWatchlistItem(item: InsertWatchlistItem): Promise<WatchlistItem>;
-  removeWatchlistItem(watchlistId: string, movieId: number): Promise<void>;
+  removeWatchlistItem(watchlistId: string, mediaType: string, mediaId: number): Promise<void>;
   
   // Favorites operations
   getUserFavorites(userId: string): Promise<Favorite[]>;
   addFavorite(favorite: InsertFavorite): Promise<Favorite>;
-  removeFavorite(userId: string, movieId: number): Promise<void>;
-  isFavorite(userId: string, movieId: number): Promise<boolean>;
+  removeFavorite(userId: string, mediaType: string, mediaId: number): Promise<void>;
+  isFavorite(userId: string, mediaType: string, mediaId: number): Promise<boolean>;
   
   // Review operations
   getUserReviews(userId: string): Promise<Review[]>;
-  getMovieReviews(movieId: number): Promise<Review[]>;
+  getMediaReviews(mediaType: string, mediaId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
   updateReview(reviewId: string, updates: Partial<InsertReview>): Promise<Review>;
   deleteReview(reviewId: string): Promise<void>;
@@ -112,13 +112,14 @@ export class DatabaseStorage implements IStorage {
     return newItem;
   }
 
-  async removeWatchlistItem(watchlistId: string, movieId: number): Promise<void> {
+  async removeWatchlistItem(watchlistId: string, mediaType: string, mediaId: number): Promise<void> {
     await db
       .delete(watchlistItems)
       .where(
         and(
           eq(watchlistItems.watchlistId, watchlistId),
-          eq(watchlistItems.movieId, movieId)
+          eq(watchlistItems.mediaType, mediaType),
+          eq(watchlistItems.mediaId, mediaId)
         )
       );
   }
@@ -140,25 +141,27 @@ export class DatabaseStorage implements IStorage {
     return newFavorite;
   }
 
-  async removeFavorite(userId: string, movieId: number): Promise<void> {
+  async removeFavorite(userId: string, mediaType: string, mediaId: number): Promise<void> {
     await db
       .delete(favorites)
       .where(
         and(
           eq(favorites.userId, userId),
-          eq(favorites.movieId, movieId)
+          eq(favorites.mediaType, mediaType),
+          eq(favorites.mediaId, mediaId)
         )
       );
   }
 
-  async isFavorite(userId: string, movieId: number): Promise<boolean> {
+  async isFavorite(userId: string, mediaType: string, mediaId: number): Promise<boolean> {
     const [favorite] = await db
       .select()
       .from(favorites)
       .where(
         and(
           eq(favorites.userId, userId),
-          eq(favorites.movieId, movieId)
+          eq(favorites.mediaType, mediaType),
+          eq(favorites.mediaId, mediaId)
         )
       );
     return !!favorite;
@@ -173,11 +176,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(reviews.createdAt));
   }
 
-  async getMovieReviews(movieId: number): Promise<Review[]> {
+  async getMediaReviews(mediaType: string, mediaId: number): Promise<Review[]> {
     return await db
       .select()
       .from(reviews)
-      .where(eq(reviews.movieId, movieId))
+      .where(
+        and(
+          eq(reviews.mediaType, mediaType),
+          eq(reviews.mediaId, mediaId)
+        )
+      )
       .orderBy(desc(reviews.createdAt));
   }
 
