@@ -174,8 +174,33 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     mutationFn: async (data: SignUpFormData) => {
       const { confirmPassword, profilePhoto, ...signupData } = data;
       
-      // TODO: Handle profile photo upload
-      const response = await apiRequest("POST", "/api/auth/signup", signupData);
+      let profileImageUrl = "";
+      
+      // Handle profile photo upload if a file is selected
+      if (profilePhoto && profilePhoto instanceof File) {
+        const formData = new FormData();
+        formData.append('profilePhoto', profilePhoto);
+        
+        const uploadResponse = await fetch('/api/auth/upload-profile-photo', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload profile photo');
+        }
+        
+        const uploadResult = await uploadResponse.json();
+        profileImageUrl = uploadResult.profileImageUrl;
+      }
+      
+      // Include profile image URL in signup data
+      const finalSignupData = {
+        ...signupData,
+        ...(profileImageUrl && { profileImageUrl })
+      };
+      
+      const response = await apiRequest("POST", "/api/auth/signup", finalSignupData);
       return response.json();
     },
     onSuccess: (data) => {

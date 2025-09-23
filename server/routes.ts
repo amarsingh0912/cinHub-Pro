@@ -1,6 +1,10 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated, signUp, signIn, signInWithTokens, refreshAccessToken, logoutWithToken, hashPassword } from "./auth";
 import { z } from "zod";
@@ -13,9 +17,48 @@ import {
   signUpSchema,
 } from "@shared/schema";
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer configuration for profile photo uploads
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename: timestamp + original extension
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, `profile-${uniqueSuffix}${ext}`);
+  }
+});
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: (req, file, cb) => {
+    // Only allow image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      const error = new Error('Only image files are allowed!') as any;
+      error.code = 'INVALID_FILE_TYPE';
+      cb(error, false);
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cookie parser middleware for JWT refresh tokens
   app.use(cookieParser());
+  
+  // Serve uploaded images statically
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
   
   // Auth middleware
   await setupAuth(app);
@@ -396,6 +439,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sameSite: 'lax'
       });
       res.json({ message: "Logged out successfully" });
+    }
+  });
+
+  // Simple rate limiting for uploads (in production, use proper rate limiter like express-rate-limit)
+  const uploadAttempts = new Map<string, { count: number; resetTime: number }>();
+  
+  const checkUploadRateLimit = (req: any, res: any, next: any) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    const now = Date.now();
+    const resetInterval = 15 * 60 * 1000; // 15 minutes
+    const maxUploads = 5; // 5 uploads per 15 minutes per IP
+    
+    if (!uploadAttempts.has(ip)) {
+      uploadAttempts.set(ip, { count: 1, resetTime: now + resetInterval });
+      return next();
+    }
+    
+    const attempt = uploadAttempts.get(ip)!;
+    if (now > attempt.resetTime) {
+      // Reset the counter
+      uploadAttempts.set(ip, { count: 1, resetTime: now + resetInterval });
+      return next();
+    }
+    
+    if (attempt.count >= maxUploads) {
+      return res.status(429).json({ message: "Too many upload attempts. Please try again later." });
+    }
+    
+    attempt.count++;
+    next();
+  };
+
+  // Profile photo upload route with basic rate limiting
+  app.post('/api/auth/upload-profile-photo', checkUploadRateLimit, upload.single('profilePhoto'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Generate the URL for the uploaded file
+      const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+
+      res.json({ 
+        message: "Profile photo uploaded successfully",
+        profileImageUrl 
+      });
+    } catch (error) {
+      console.error("Profile photo upload error:", error);
+      res.status(500).json({ message: "Failed to upload profile photo" });
+    }
+  });
+
+  // Update user profile photo route (for authenticated users)
+  app.post('/api/auth/update-profile-photo', isAuthenticated, upload.single('profilePhoto'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      // Generate the URL for the uploaded file
+      const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+
+      // Update user's profile image in database
+      await storage.updateUser(userId, { profileImageUrl });
+
+      res.json({ 
+        message: "Profile photo updated successfully",
+        profileImageUrl 
+      });
+    } catch (error) {
+      console.error("Profile photo update error:", error);
+      res.status(500).json({ message: "Failed to update profile photo" });
     }
   });
 
