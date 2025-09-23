@@ -112,6 +112,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add alias with underscore for frontend compatibility  
+  app.get('/api/tv/airing_today', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching airing today TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch airing today TV shows' });
+    }
+  });
+
   app.get('/api/tv/airing-today', async (req, res) => {
     try {
       if (!process.env.TMDB_API_KEY) {
@@ -142,9 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         first_air_date_year,
         'vote_average.gte': minRating,
         'vote_average.lte': maxRating,
-        'vote_count.gte': minVotes,
-        'with_runtime.gte': minRuntime,
-        'with_runtime.lte': maxRuntime,
+        // Removed runtime and vote count filters per requirements (TV shows don't support certification)
         'first_air_date.gte': airDateFrom,
         'first_air_date.lte': airDateTo,
         with_original_language,
@@ -161,9 +177,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (first_air_date_year) url += `&first_air_date_year=${first_air_date_year}`;
       if (minRating) url += `&vote_average.gte=${minRating}`;
       if (maxRating) url += `&vote_average.lte=${maxRating}`;
-      if (minVotes) url += `&vote_count.gte=${minVotes}`;
-      if (minRuntime) url += `&with_runtime.gte=${minRuntime}`;
-      if (maxRuntime) url += `&with_runtime.lte=${maxRuntime}`;
+      // Runtime and minimum votes filters removed per user requirements
+      // TV shows do not support certification filters
       if (airDateFrom) url += `&first_air_date.gte=${airDateFrom}`;
       if (airDateTo) url += `&first_air_date.lte=${airDateTo}`;
       if (with_original_language) url += `&with_original_language=${with_original_language}`;
@@ -270,6 +285,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add alias with underscore for frontend compatibility
+  app.get('/api/movies/now_playing', async (req, res) => {
+    try {
+      if (!process.env.TMDB_API_KEY) {
+        return res.status(500).json({ message: 'TMDB API key not configured' });
+      }
+      const page = req.query.page || 1;
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY}&page=${page}`
+      );
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching now playing movies:', error);
+      res.status(500).json({ message: 'Failed to fetch now playing movies' });
+    }
+  });
+
   app.get('/api/movies/now-playing', async (req, res) => {
     try {
       if (!process.env.TMDB_API_KEY) {
@@ -300,9 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primary_release_year,
         'vote_average.gte': minRating,
         'vote_average.lte': maxRating,
-        'vote_count.gte': minVotes,
-        'with_runtime.gte': minRuntime,
-        'with_runtime.lte': maxRuntime,
+        // Removed runtime and vote count filters per requirements
         'primary_release_date.gte': releaseDateFrom,
         'primary_release_date.lte': releaseDateTo,
         with_original_language,
@@ -320,9 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (primary_release_year) url += `&primary_release_year=${primary_release_year}`;
       if (minRating) url += `&vote_average.gte=${minRating}`;
       if (maxRating) url += `&vote_average.lte=${maxRating}`;
-      if (minVotes) url += `&vote_count.gte=${minVotes}`;
-      if (minRuntime) url += `&with_runtime.gte=${minRuntime}`;
-      if (maxRuntime) url += `&with_runtime.lte=${maxRuntime}`;
+      // Runtime and minimum votes filters removed per user requirements
       if (releaseDateFrom) url += `&primary_release_date.gte=${releaseDateFrom}`;
       if (releaseDateTo) url += `&primary_release_date.lte=${releaseDateTo}`;
       if (with_original_language) url += `&with_original_language=${with_original_language}`;
