@@ -24,6 +24,7 @@ import { sendOTP } from "./services/otpService";
 import { generateUploadSignature, validateCloudinaryUrl, isCloudinaryConfigured } from "./services/cloudinaryService";
 import { tmdbCacheService } from "./services/tmdbCache.js";
 import { imageCacheService } from "./services/imageCache.js";
+import { websocketService } from "./services/websocketService.js";
 
 // Robust TMDB API helper function with retry logic
 async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {}): Promise<any> {
@@ -1904,5 +1905,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket service for real-time cache status updates
+  websocketService.initialize(httpServer);
+  
   return httpServer;
 }

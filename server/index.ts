@@ -99,6 +99,10 @@ app.use((req, res, next) => {
     server.close(() => {
       log('HTTP server closed.');
       
+      // Close WebSocket connections
+      const { websocketService } = require('./services/websocketService');
+      websocketService.shutdown();
+      
       // Close database connections if any
       // Add any other cleanup here
       
