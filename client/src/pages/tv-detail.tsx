@@ -286,9 +286,15 @@ export default function TVDetail() {
                 {tvShow.genres && tvShow.genres.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-8 justify-center lg:justify-start" data-testid="tv-genres">
                     {tvShow.genres.map((genre) => (
-                      <Badge key={genre.id} variant="secondary" className="text-sm">
-                        {genre.name}
-                      </Badge>
+                      <Link key={genre.id} href={`/genre/${genre.id}`}>
+                        <Badge 
+                          variant="secondary" 
+                          className="text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                          data-testid={`genre-${genre.id}`}
+                        >
+                          {genre.name}
+                        </Badge>
+                      </Link>
                     ))}
                   </div>
                 )}
