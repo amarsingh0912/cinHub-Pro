@@ -21,6 +21,7 @@ import {
   signUpSchema,
 } from "@shared/schema";
 import { sendOTP } from "./services/otpService";
+import { generateUploadSignature, validateCloudinaryUrl, isCloudinaryConfigured } from "./services/cloudinaryService";
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles');
@@ -118,8 +119,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"], // Keep for CSS-in-JS frameworks
         scriptSrc: isProduction ? ["'self'"] : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com"],
-        connectSrc: ["'self'", "wss:", ...(isProduction ? [] : ['https://api.themoviedb.org'])], // Allow TMDB API in dev for debugging
+        imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com", "https://res.cloudinary.com"],
+        connectSrc: ["'self'", "wss:", "https://api.cloudinary.com", "https://upload.cloudinary.com", ...(isProduction ? [] : ['https://api.themoviedb.org'])], // Allow TMDB API in dev for debugging
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
@@ -753,6 +754,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Profile photo update error:", error);
       res.status(500).json({ message: "Failed to update profile photo" });
+    }
+  });
+
+  // Cloudinary signed upload endpoint
+  app.post('/api/profile/avatar/sign', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!isCloudinaryConfigured()) {
+        return res.status(503).json({ 
+          message: "Image upload service not configured",
+          useLocalUpload: true 
+        });
+      }
+
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      // Generate unique public_id for the user's avatar
+      const publicId = `profile_pictures/${userId}_${Date.now()}`;
+
+      const signatureData = generateUploadSignature({
+        public_id: publicId,
+        folder: 'profile_pictures'
+      });
+
+      res.json(signatureData);
+    } catch (error) {
+      console.error("Cloudinary signature error:", error);
+      res.status(500).json({ message: "Failed to generate upload signature" });
+    }
+  });
+
+  // Update profile picture URL after Cloudinary upload
+  app.patch('/api/profile/avatar', isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      const { secure_url } = req.body;
+
+      if (!secure_url || typeof secure_url !== 'string') {
+        return res.status(400).json({ message: "Valid secure_url is required" });
+      }
+
+      // Validate that the URL is from our configured Cloudinary account and belongs to this user
+      if (!validateCloudinaryUrl(secure_url, userId)) {
+        return res.status(400).json({ message: "Invalid image URL or unauthorized access" });
+      }
+
+      // Update user's profile image in database
+      await storage.updateUser(userId, { profileImageUrl: secure_url });
+
+      // Get updated user to return
+      const updatedUser = await storage.getUser(userId);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ 
+        message: "Profile picture updated successfully",
+        profileImageUrl: secure_url,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Profile picture update error:", error);
+      res.status(500).json({ message: "Failed to update profile picture" });
     }
   });
 

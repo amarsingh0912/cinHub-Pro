@@ -193,6 +193,10 @@ export async function sendEmailOTP({ to, otpCode, purpose }: EmailOTPParams): Pr
 
 export async function sendSMSOTP({ to, otpCode, purpose }: SMSOTPParams): Promise<{ success: boolean; error?: string }> {
   if (!twilioClient || (!process.env.TWILIO_PHONE_NUMBER && !process.env.TWILIO_MESSAGING_SERVICE_SID)) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('SMS OTP delivery failed in production - Twilio not configured');
+      return { success: false, error: 'SMS service not available. Please use email verification instead.' };
+    }
     console.log(`[DEV MODE] SMS OTP for ${to}: ${otpCode} (${purpose})`);
     return { success: true };
   }
