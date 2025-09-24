@@ -308,3 +308,215 @@ export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+// TMDB Data Cache Tables
+// Movies cache - stores complete TMDB movie data
+export const moviesCache = pgTable("movies_cache", {
+  id: integer("id").primaryKey(), // TMDB movie ID
+  title: varchar("title").notNull(),
+  overview: text("overview"),
+  releaseDate: varchar("release_date"),
+  runtime: integer("runtime"),
+  voteAverage: integer("vote_average"), // Store as integer (multiply by 10)
+  voteCount: integer("vote_count"),
+  popularity: integer("popularity"), // Store as integer (multiply by 100)
+  budget: integer("budget"),
+  revenue: integer("revenue"),
+  status: varchar("status"),
+  tagline: text("tagline"),
+  originalLanguage: varchar("original_language"),
+  originalTitle: varchar("original_title"),
+  adult: boolean("adult"),
+  // Image paths (Cloudinary URLs after processing)
+  posterUrl: varchar("poster_url"), // Processed Cloudinary URL
+  backdropUrl: varchar("backdrop_url"), // Processed Cloudinary URL
+  // Raw TMDB data for additional fields
+  tmdbData: jsonb("tmdb_data"), // Complete TMDB response
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// TV Shows cache - stores complete TMDB TV show data  
+export const tvShowsCache = pgTable("tv_shows_cache", {
+  id: integer("id").primaryKey(), // TMDB TV show ID
+  name: varchar("name").notNull(),
+  overview: text("overview"),
+  firstAirDate: varchar("first_air_date"),
+  lastAirDate: varchar("last_air_date"),
+  numberOfSeasons: integer("number_of_seasons"),
+  numberOfEpisodes: integer("number_of_episodes"),
+  voteAverage: integer("vote_average"), // Store as integer (multiply by 10)
+  voteCount: integer("vote_count"),
+  popularity: integer("popularity"), // Store as integer (multiply by 100)
+  status: varchar("status"),
+  tagline: text("tagline"),
+  type: varchar("type"),
+  originalLanguage: varchar("original_language"),
+  originalName: varchar("original_name"),
+  adult: boolean("adult"),
+  inProduction: boolean("in_production"),
+  // Image paths (Cloudinary URLs after processing)
+  posterUrl: varchar("poster_url"), // Processed Cloudinary URL
+  backdropUrl: varchar("backdrop_url"), // Processed Cloudinary URL
+  // Raw TMDB data for additional fields
+  tmdbData: jsonb("tmdb_data"), // Complete TMDB response
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Cast and Crew cache - stores person details
+export const peopleCache = pgTable("people_cache", {
+  id: integer("id").primaryKey(), // TMDB person ID
+  name: varchar("name").notNull(),
+  biography: text("biography"),
+  birthday: varchar("birthday"),
+  deathday: varchar("deathday"),
+  placeOfBirth: varchar("place_of_birth"),
+  popularity: integer("popularity"), // Store as integer (multiply by 100)
+  knownForDepartment: varchar("known_for_department"),
+  adult: boolean("adult"),
+  // Image paths (Cloudinary URLs after processing)
+  profileUrl: varchar("profile_url"), // Processed Cloudinary URL
+  // Raw TMDB data for additional fields
+  tmdbData: jsonb("tmdb_data"), // Complete TMDB response
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Cast/Crew relationships for movies and TV shows
+export const mediaCredits = pgTable("media_credits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
+  personId: integer("person_id").notNull(), // TMDB person ID
+  creditType: varchar("credit_type").notNull(), // 'cast' or 'crew'
+  character: varchar("character"), // For cast members
+  job: varchar("job"), // For crew members
+  department: varchar("department"), // For crew members
+  order: integer("order"), // Cast order
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// TMDB Reviews cache (separate from user reviews)
+export const tmdbReviewsCache = pgTable("tmdb_reviews_cache", {
+  id: varchar("id").primaryKey(), // TMDB review ID
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
+  author: varchar("author").notNull(),
+  authorUsername: varchar("author_username"),
+  content: text("content").notNull(),
+  rating: integer("rating"), // Author's rating if provided
+  url: varchar("url"), // TMDB review URL
+  // Raw TMDB data
+  tmdbData: jsonb("tmdb_data"), // Complete TMDB review response
+  // Cache metadata
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Images cache - tracks processed Cloudinary URLs
+export const imagesCache = pgTable("images_cache", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tmdbPath: varchar("tmdb_path").unique().notNull(), // Original TMDB image path
+  imageType: varchar("image_type").notNull(), // 'poster', 'backdrop', 'profile'
+  cloudinaryUrl: varchar("cloudinary_url").notNull(), // Full Cloudinary URL
+  publicId: varchar("public_id").notNull(), // Cloudinary public ID
+  width: integer("width"),
+  height: integer("height"),
+  fileSize: integer("file_size"), // In bytes
+  format: varchar("format"), // 'jpg', 'png', 'webp'
+  // Cache metadata
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("images_cache_tmdb_path_idx").on(table.tmdbPath),
+  index("images_cache_type_idx").on(table.imageType),
+]);
+
+// Add relations for the new cache tables
+export const moviesCacheRelations = relations(moviesCache, ({ many }) => ({
+  credits: many(mediaCredits),
+  reviews: many(tmdbReviewsCache),
+}));
+
+export const tvShowsCacheRelations = relations(tvShowsCache, ({ many }) => ({
+  credits: many(mediaCredits),
+  reviews: many(tmdbReviewsCache),
+}));
+
+export const peopleCacheRelations = relations(peopleCache, ({ many }) => ({
+  credits: many(mediaCredits),
+}));
+
+export const mediaCreditsRelations = relations(mediaCredits, ({ one }) => ({
+  person: one(peopleCache, {
+    fields: [mediaCredits.personId],
+    references: [peopleCache.id],
+  }),
+}));
+
+export const tmdbReviewsCacheRelations = relations(tmdbReviewsCache, ({ one }) => ({
+  movie: one(moviesCache, {
+    fields: [tmdbReviewsCache.mediaId],
+    references: [moviesCache.id],
+  }),
+  tvShow: one(tvShowsCache, {
+    fields: [tmdbReviewsCache.mediaId],
+    references: [tvShowsCache.id],
+  }),
+}));
+
+// Cache table insert schemas
+export const insertMovieCacheSchema = createInsertSchema(moviesCache).omit({
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export const insertTvShowCacheSchema = createInsertSchema(tvShowsCache).omit({
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export const insertPersonCacheSchema = createInsertSchema(peopleCache).omit({
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export const insertMediaCreditSchema = createInsertSchema(mediaCredits).omit({
+  id: true,
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export const insertTmdbReviewCacheSchema = createInsertSchema(tmdbReviewsCache).omit({
+  lastUpdated: true,
+  createdAt: true,
+});
+
+export const insertImageCacheSchema = createInsertSchema(imagesCache).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Cache table types
+export type MovieCache = typeof moviesCache.$inferSelect;
+export type InsertMovieCache = z.infer<typeof insertMovieCacheSchema>;
+
+export type TvShowCache = typeof tvShowsCache.$inferSelect;
+export type InsertTvShowCache = z.infer<typeof insertTvShowCacheSchema>;
+
+export type PersonCache = typeof peopleCache.$inferSelect;
+export type InsertPersonCache = z.infer<typeof insertPersonCacheSchema>;
+
+export type MediaCredit = typeof mediaCredits.$inferSelect;
+export type InsertMediaCredit = z.infer<typeof insertMediaCreditSchema>;
+
+export type TmdbReviewCache = typeof tmdbReviewsCache.$inferSelect;
+export type InsertTmdbReviewCache = z.infer<typeof insertTmdbReviewCacheSchema>;
+
+export type ImageCache = typeof imagesCache.$inferSelect;
+export type InsertImageCache = z.infer<typeof insertImageCacheSchema>;
