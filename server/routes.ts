@@ -998,9 +998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/trending/tv/${timeWindow}?api_key=${process.env.TMDB_API_KEY}`
-      );
+      const data = await fetchFromTMDB(`/trending/tv/${timeWindow}`);
       res.json(data);
     } catch (error) {
       console.error('Error fetching trending TV shows:', error);
@@ -1011,9 +1009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/popular', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/tv/popular', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching popular TV shows:', error);
@@ -1024,9 +1020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/top-rated', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/top_rated?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/tv/top_rated', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching top rated TV shows:', error);
@@ -1144,9 +1138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!query) {
         return res.status(400).json({ message: 'Search query is required' });
       }
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/search/multi?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query as string)}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/search/multi', { query: query as string, page });
       res.json(data);
     } catch (error) {
       console.error('Error searching movies and TV shows:', error);
