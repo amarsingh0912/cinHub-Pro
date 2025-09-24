@@ -13,11 +13,22 @@ if (process.env.SENDGRID_API_KEY) {
 
 // Initialize Twilio
 let twilioClient: any = null;
-if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
-  twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+  if (process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_MESSAGING_SERVICE_SID) {
+    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    console.log('Twilio client initialized successfully');
+    if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
+      console.log('Using Twilio Messaging Service SID for SMS delivery');
+    } else {
+      console.log(`Using Twilio phone number for SMS delivery: ${process.env.TWILIO_PHONE_NUMBER}`);
+    }
+  } else {
+    console.warn("Twilio SMS delivery disabled - missing phone number or messaging service");
+    console.warn("Required: Either TWILIO_PHONE_NUMBER or TWILIO_MESSAGING_SERVICE_SID");
+  }
 } else {
   console.warn("Twilio environment variables not set - SMS OTP delivery will be disabled");
-  console.warn("Required: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER");
+  console.warn("Required: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN");
 }
 
 interface EmailOTPParams {
@@ -181,30 +192,86 @@ export async function sendEmailOTP({ to, otpCode, purpose }: EmailOTPParams): Pr
 }
 
 export async function sendSMSOTP({ to, otpCode, purpose }: SMSOTPParams): Promise<{ success: boolean; error?: string }> {
-  if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
+  if (!twilioClient || (!process.env.TWILIO_PHONE_NUMBER && !process.env.TWILIO_MESSAGING_SERVICE_SID)) {
     console.log(`[DEV MODE] SMS OTP for ${to}: ${otpCode} (${purpose})`);
     return { success: true };
+  }
+
+  // Validate phone number format more strictly
+  if (!to.startsWith('+') || !/^\+[1-9]\d{1,14}$/.test(to)) {
+    const error = `Invalid phone number format: ${to}. Must be in E.164 format (e.g., +15551234567)`;
+    console.error(error);
+    return { success: false, error };
   }
 
   try {
     const message = getSMSTemplate(purpose, otpCode);
     
-    await twilioClient.messages.create({
+    // Prepare message options - prefer messaging service SID if available
+    const messageOptions: any = {
       body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
       to: to,
-    });
+    };
 
-    console.log(`SMS OTP sent successfully to ${to}`);
+    if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
+      messageOptions.messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+    } else {
+      messageOptions.from = process.env.TWILIO_PHONE_NUMBER;
+    }
+
+    console.log(`Attempting to send SMS to ${to} using ${process.env.TWILIO_MESSAGING_SERVICE_SID ? 'Messaging Service' : 'Phone Number'}`);
+    
+    const result = await twilioClient.messages.create(messageOptions);
+    
+    console.log(`SMS OTP sent successfully to ${to}. SID: ${result.sid}, Status: ${result.status}`);
     return { success: true };
   } catch (error: any) {
-    console.error('Twilio SMS error:', error);
+    // Enhanced Twilio error logging
+    console.error('Twilio SMS error details:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      moreInfo: error.moreInfo,
+      details: error.details,
+      to: to,
+      purpose: purpose
+    });
+
+    let userFriendlyError = 'Failed to send SMS verification code';
+    
+    // Handle specific Twilio error codes
+    if (error.code) {
+      switch (error.code) {
+        case 21211:
+          userFriendlyError = 'Invalid phone number format. Please check and try again.';
+          break;
+        case 21408:
+          userFriendlyError = 'Cannot send SMS to this number. It may be unverified (trial account) or blocked.';
+          break;
+        case 21610:
+          userFriendlyError = 'This phone number has opted out of receiving SMS messages.';
+          break;
+        case 21614:
+          userFriendlyError = 'Invalid phone number format for your region.';
+          break;
+        case 30007:
+          userFriendlyError = 'Message delivery failed. The number may be unreachable or invalid.';
+          break;
+        case 30008:
+          userFriendlyError = 'Message delivery blocked by carrier. Try a different number.';
+          break;
+        default:
+          userFriendlyError = `SMS delivery failed (${error.code}). Please try again or use email verification.`;
+      }
+    }
+
     // Fallback to console in development
     if (process.env.NODE_ENV === 'development') {
       console.log(`[DEV FALLBACK] SMS OTP for ${to}: ${otpCode} (${purpose})`);
       return { success: true };
     }
-    return { success: false, error: error.message || 'Failed to send SMS' };
+    
+    return { success: false, error: userFriendlyError };
   }
 }
 
