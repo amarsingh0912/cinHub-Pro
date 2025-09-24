@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { useCacheStatus } from "@/hooks/useCacheStatus";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send } from "lucide-react";
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
+import { CacheStatus } from "@/components/ui/cache-status";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -30,6 +32,9 @@ export default function MovieDetail() {
     queryKey: ["/api/movies", id],
     enabled: !!id,
   });
+
+  // Cache status for image optimization
+  const cacheStatus = useCacheStatus('movie', parseInt(id || '0'));
 
   const { data: favoriteStatus } = useQuery<{ isFavorite: boolean }>({
     queryKey: ["/api/favorites", "movie", id, "check"],
@@ -270,12 +275,26 @@ export default function MovieDetail() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-end">
               <div className="lg:col-span-1">
-                <img
-                  src={getImageUrl(movie.poster_path, 'w500')}
-                  alt={movie.title}
-                  className="w-full max-w-sm mx-auto lg:mx-0 rounded-lg shadow-2xl"
-                  data-testid="movie-poster"
-                />
+                <div className="relative">
+                  <img
+                    src={getImageUrl(movie.poster_path, 'w500')}
+                    alt={movie.title}
+                    className="w-full max-w-sm mx-auto lg:mx-0 rounded-lg shadow-2xl"
+                    data-testid="movie-poster"
+                  />
+                  
+                  {/* Cache Status Indicator */}
+                  <div className="absolute top-3 left-3">
+                    <CacheStatus
+                      isOptimizing={cacheStatus.isOptimizing}
+                      isCompleted={cacheStatus.isCompleted}
+                      isFailed={cacheStatus.isFailed}
+                      progress={cacheStatus.progress}
+                      error={cacheStatus.error}
+                      showDetails={false}
+                    />
+                  </div>
+                </div>
               </div>
               
               <div className="lg:col-span-2 text-center lg:text-left">
@@ -322,7 +341,7 @@ export default function MovieDetail() {
                   ))}
                 </div>
                 
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-4">
                   {trailer && (
                     <Button size="lg" className="flex items-center gap-2" data-testid="button-watch-trailer">
                       <Play className="w-5 h-5" />
@@ -357,6 +376,17 @@ export default function MovieDetail() {
                     </>
                   )}
                 </div>
+                
+                {/* Detailed Cache Status */}
+                <CacheStatus
+                  isOptimizing={cacheStatus.isOptimizing}
+                  isCompleted={cacheStatus.isCompleted}
+                  isFailed={cacheStatus.isFailed}
+                  progress={cacheStatus.progress}
+                  error={cacheStatus.error}
+                  showDetails={true}
+                  className="justify-center lg:justify-start"
+                />
               </div>
             </div>
           </div>
