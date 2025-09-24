@@ -152,6 +152,12 @@ export default function Movies() {
   
   const [filters, setFilters] = useState<ContentFilters>(getInitialFilters);
   
+  // Update filters when URL changes
+  useEffect(() => {
+    const newFilters = getInitialFilters();
+    setFilters(newFilters);
+  }, [location]);
+  
   // Get available categories based on content type
   const getAvailableCategories = () => {
     return filters.contentType === 'movies' ? MOVIE_CATEGORIES : TV_CATEGORIES;
