@@ -25,6 +25,7 @@ import { generateUploadSignature, validateCloudinaryUrl, isCloudinaryConfigured 
 import { tmdbCacheService } from "./services/tmdbCache.js";
 import { imageCacheService } from "./services/imageCache.js";
 import { websocketService } from "./services/websocketService.js";
+import { cacheQueueService } from "./services/cacheQueue.js";
 
 // Robust TMDB API helper function with retry logic
 async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {}): Promise<any> {
@@ -1161,6 +1162,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (cached) {
         console.log(`Returning cached TV show: ${cached.name} (ID: ${tvId})`);
         const response = tmdbCacheService.buildTVShowResponse(cached);
+        
+        // Enqueue background caching with low priority for cache refresh if stale
+        cacheQueueService.enqueueJob('tv', tvId, 1);
+        
         return res.json(response);
       }
 
@@ -1170,9 +1175,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         append_to_response: 'credits,videos,similar,recommendations' 
       });
 
-      // Cache the result
-      await tmdbCacheService.cacheTVShow(data);
+      // Enqueue background caching with high priority for new content
+      cacheQueueService.enqueueJob('tv', tvId, 10);
 
+      // Return data immediately without waiting for caching
       res.json(data);
     } catch (error) {
       console.error('Error fetching TV show details:', error);
@@ -1343,6 +1349,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (cached) {
         console.log(`Returning cached movie: ${cached.title} (ID: ${movieId})`);
         const response = tmdbCacheService.buildMovieResponse(cached);
+        
+        // Enqueue background caching with low priority for cache refresh if stale
+        cacheQueueService.enqueueJob('movie', movieId, 1);
+        
         return res.json(response);
       }
 
@@ -1352,9 +1362,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         append_to_response: 'credits,videos,similar,recommendations' 
       });
 
-      // Cache the result
-      await tmdbCacheService.cacheMovie(data);
+      // Enqueue background caching with high priority for new content
+      cacheQueueService.enqueueJob('movie', movieId, 10);
 
+      // Return data immediately without waiting for caching
       res.json(data);
     } catch (error) {
       console.error('Error fetching movie details:', error);

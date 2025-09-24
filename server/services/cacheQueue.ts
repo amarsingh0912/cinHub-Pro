@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import { tmdbCacheService } from './tmdbCache.js';
-import { TMDBService } from './tmdb.js';
 
 export interface CacheJob {
   id: string;
@@ -219,21 +218,51 @@ export class CacheQueueService extends EventEmitter {
   }
 
   /**
+   * Fetch data from TMDB API
+   */
+  private async fetchFromTMDB(endpoint: string, params: Record<string, any> = {}): Promise<any> {
+    if (!process.env.TMDB_API_KEY) {
+      throw new Error('TMDB API key not configured');
+    }
+
+    const searchParams = new URLSearchParams({
+      api_key: process.env.TMDB_API_KEY,
+      ...params
+    });
+    const url = `https://api.themoviedb.org/3${endpoint}?${searchParams}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'CineHub/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`TMDB API returned ${response.status}: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
    * Process a single cache job
    */
   private async processCacheJob(job: CacheJob) {
-    const tmdbService = new TMDBService();
-    
     if (job.mediaType === 'movie') {
       this.updateJobStatus(job.id, 'active', 'Fetching movie data from TMDB...');
-      const movieData = await tmdbService.getMovieDetails(job.mediaId);
+      const movieData = await this.fetchFromTMDB(`/movie/${job.mediaId}`, { 
+        append_to_response: 'credits,videos,similar,recommendations' 
+      });
       
       this.updateJobStatus(job.id, 'active', 'Processing and caching images...');
       await tmdbCacheService.cacheMovie(movieData);
       
     } else if (job.mediaType === 'tv') {
       this.updateJobStatus(job.id, 'active', 'Fetching TV show data from TMDB...');
-      const tvData = await tmdbService.getTVShowDetails(job.mediaId);
+      const tvData = await this.fetchFromTMDB(`/tv/${job.mediaId}`, { 
+        append_to_response: 'credits,videos,similar,recommendations' 
+      });
       
       this.updateJobStatus(job.id, 'active', 'Processing and caching images...');
       await tmdbCacheService.cacheTVShow(tvData);
