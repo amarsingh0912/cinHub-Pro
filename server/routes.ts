@@ -1162,9 +1162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/movies/popular', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/movie/popular', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching popular movies:', error);
