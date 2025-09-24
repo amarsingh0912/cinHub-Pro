@@ -388,6 +388,7 @@ export class TMDBCacheService {
    */
   buildMovieResponse(movie: MovieCache): any {
     const tmdbData = movie.tmdbData as any; // Cast to any since it's JSON from database
+    
     const response = {
       ...tmdbData,
       // Override with cached Cloudinary URLs
