@@ -1380,27 +1380,27 @@ export default function Dashboard() {
                       <h3 className="font-medium text-sm line-clamp-2" data-testid={`watchlist-item-title-${item.id}`}>
                         {item.mediaTitle}
                       </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {item.mediaReleaseDate ? new Date(item.mediaReleaseDate).getFullYear() : 'TBA'}
-                      </p>
                       <Badge variant="outline" className="text-xs">
                         {item.mediaType === 'movie' ? 'Movie' : 'TV Show'}
                       </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeWatchlistItemMutation.mutate({
-                          watchlistId: viewingWatchlist.id,
-                          mediaType: item.mediaType,
-                          mediaId: item.mediaId
-                        })}
-                        disabled={removeWatchlistItemMutation.isPending}
-                        className="w-full text-xs"
-                        data-testid={`remove-watchlist-item-${item.id}`}
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Remove
-                      </Button>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          {item.mediaReleaseDate ? new Date(item.mediaReleaseDate).getFullYear() : 'TBA'}
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeWatchlistItemMutation.mutate({
+                            watchlistId: viewingWatchlist.id,
+                            mediaType: item.mediaType,
+                            mediaId: item.mediaId
+                          })}
+                          disabled={removeWatchlistItemMutation.isPending}
+                          data-testid={`remove-watchlist-item-${item.id}`}
+                        >
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
