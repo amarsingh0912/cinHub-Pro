@@ -382,7 +382,7 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading favorites...</span>
                       </div>
-                    ) : favorites?.filter(f => f.mediaType === 'movie')?.length > 0 ? (
+                    ) : (favorites?.filter(f => f.mediaType === 'movie')?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-movies-grid">
                         {favorites?.filter(f => f.mediaType === 'movie')?.map((favorite) => (
                           <div key={favorite.id} className="group">
@@ -437,7 +437,7 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading favorites...</span>
                       </div>
-                    ) : favorites?.filter(f => f.mediaType === 'tv')?.length > 0 ? (
+                    ) : (favorites?.filter(f => f.mediaType === 'tv')?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-tv-grid">
                         {favorites?.filter(f => f.mediaType === 'tv')?.map((favorite) => (
                           <div key={favorite.id} className="group">
@@ -765,7 +765,7 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading reviews...</span>
                       </div>
-                    ) : userReviews?.filter(r => r.mediaType === 'movie')?.length > 0 ? (
+                    ) : (userReviews?.filter(r => r.mediaType === 'movie')?.length ?? 0) > 0 ? (
                       <div className="space-y-4" data-testid="reviews-movies-list">
                         {userReviews?.filter(r => r.mediaType === 'movie')?.map((review) => (
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
@@ -838,7 +838,7 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading reviews...</span>
                       </div>
-                    ) : userReviews?.filter(r => r.mediaType === 'tv')?.length > 0 ? (
+                    ) : (userReviews?.filter(r => r.mediaType === 'tv')?.length ?? 0) > 0 ? (
                       <div className="space-y-4" data-testid="reviews-tv-list">
                         {userReviews?.filter(r => r.mediaType === 'tv')?.map((review) => (
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
