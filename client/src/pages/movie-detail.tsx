@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send } from "lucide-react";
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
@@ -42,9 +43,19 @@ export default function MovieDetail() {
     retry: false,
   });
 
+  const { data: watchlists } = useQuery<any[]>({
+    queryKey: ["/api/watchlists"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
   // Review form state
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState<string>("");
+
+  // Watchlist dialog state
+  const [isWatchlistDialogOpen, setIsWatchlistDialogOpen] = useState(false);
+  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string>("");
 
   // Submit review mutation
   const submitReviewMutation = useMutation({
@@ -153,6 +164,46 @@ export default function MovieDetail() {
       toast({
         title: "Error",
         description: "Failed to remove movie from favorites.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addToWatchlistMutation = useMutation({
+    mutationFn: async () => {
+      if (!movie || !selectedWatchlistId) return;
+      await apiRequest("POST", `/api/watchlists/${selectedWatchlistId}/items`, {
+        mediaType: "movie",
+        mediaId: movie.id,
+        mediaTitle: movie.title,
+        mediaPosterPath: movie.poster_path,
+        mediaReleaseDate: movie.release_date,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      setIsWatchlistDialogOpen(false);
+      setSelectedWatchlistId("");
+      toast({
+        title: "Added to Watchlist",
+        description: `${movie?.title} has been added to your watchlist.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to add movie to watchlist.",
         variant: "destructive",
       });
     },
@@ -293,7 +344,13 @@ export default function MovieDetail() {
                         {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                       </Button>
                       
-                      <Button variant="outline" size="lg" className="flex items-center gap-2" data-testid="button-add-to-watchlist">
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="flex items-center gap-2" 
+                        onClick={() => setIsWatchlistDialogOpen(true)}
+                        data-testid="button-add-to-watchlist"
+                      >
                         <Plus className="w-5 h-5" />
                         Add to Watchlist
                       </Button>
@@ -694,6 +751,71 @@ export default function MovieDetail() {
           </Tabs>
         </section>
       </main>
+
+      {/* Add to Watchlist Dialog */}
+      <Dialog open={isWatchlistDialogOpen} onOpenChange={setIsWatchlistDialogOpen}>
+        <DialogContent data-testid="add-to-watchlist-dialog">
+          <DialogHeader>
+            <DialogTitle>Add to Watchlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select a watchlist to add "{movie?.title}" to:
+            </p>
+            {watchlists && watchlists.length > 0 ? (
+              <>
+                <Select value={selectedWatchlistId} onValueChange={setSelectedWatchlistId}>
+                  <SelectTrigger data-testid="select-watchlist">
+                    <SelectValue placeholder="Choose a watchlist" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {watchlists.map((watchlist: any) => (
+                      <SelectItem key={watchlist.id} value={watchlist.id} data-testid={`watchlist-option-${watchlist.id}`}>
+                        {watchlist.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsWatchlistDialogOpen(false);
+                      setSelectedWatchlistId("");
+                    }}
+                    data-testid="button-cancel-watchlist"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => addToWatchlistMutation.mutate()}
+                    disabled={!selectedWatchlistId || addToWatchlistMutation.isPending}
+                    data-testid="button-add-to-selected-watchlist"
+                  >
+                    Add to Watchlist
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  You don't have any watchlists yet. Create one first to add movies.
+                </p>
+                <Button
+                  onClick={() => {
+                    setIsWatchlistDialogOpen(false);
+                    // Navigate to dashboard or show create watchlist dialog
+                    window.location.href = '/dashboard';
+                  }}
+                  data-testid="button-go-to-dashboard"
+                >
+                  Go to Dashboard
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>

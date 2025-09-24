@@ -20,6 +20,30 @@ import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
 import { ExpandableText } from "@/components/ui/expandable-text";
 
+// Component to display watchlist item count
+function WatchlistItemCount({ watchlistId }: { watchlistId: string }) {
+  const { data: items, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/watchlists", watchlistId, "items"],
+    enabled: !!watchlistId,
+    retry: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Badge variant="secondary" data-testid={`watchlist-count-${watchlistId}`}>
+        Loading...
+      </Badge>
+    );
+  }
+
+  const count = items?.length || 0;
+  return (
+    <Badge variant="secondary" data-testid={`watchlist-count-${watchlistId}`}>
+      {count} {count === 1 ? 'item' : 'items'}
+    </Badge>
+  );
+}
+
 export default function Dashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { toast } = useToast();
@@ -629,9 +653,7 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="flex items-center justify-between">
-                                <Badge variant="secondary" data-testid={`watchlist-count-${watchlist.id}`}>
-                                  0 items
-                                </Badge>
+                                <WatchlistItemCount watchlistId={watchlist.id} />
                                 <div className="flex items-center gap-2">
                                   <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
@@ -693,9 +715,7 @@ export default function Dashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="flex items-center justify-between">
-                                <Badge variant="secondary" data-testid={`watchlist-count-${watchlist.id}`}>
-                                  0 items
-                                </Badge>
+                                <WatchlistItemCount watchlistId={watchlist.id} />
                                 <div className="flex items-center gap-2">
                                   <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
