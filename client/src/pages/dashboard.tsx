@@ -381,17 +381,27 @@ export default function Dashboard() {
 
     try {
       // Get signed upload parameters
-      const signatureData = await getCloudinarySignatureMutation.mutateAsync();
+      const signatureResponse = await getCloudinarySignatureMutation.mutateAsync();
+      const signatureData = await signatureResponse.json();
+      
+      // Validate signature data
+      if (!signatureData || 
+          !signatureData.api_key || 
+          !signatureData.timestamp || 
+          !signatureData.signature || 
+          !signatureData.cloud_name) {
+        throw new Error('Invalid signature data received from server');
+      }
       
       // Prepare form data for Cloudinary upload
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('api_key', (signatureData as any).api_key);
-      formData.append('timestamp', (signatureData as any).timestamp.toString());
-      formData.append('signature', (signatureData as any).signature);
-      if ((signatureData as any).public_id) formData.append('public_id', (signatureData as any).public_id);
-      if ((signatureData as any).folder) formData.append('folder', (signatureData as any).folder);
-      if ((signatureData as any).transformation) formData.append('transformation', (signatureData as any).transformation);
+      formData.append('api_key', signatureData.api_key);
+      formData.append('timestamp', signatureData.timestamp.toString());
+      formData.append('signature', signatureData.signature);
+      if (signatureData.public_id) formData.append('public_id', signatureData.public_id);
+      if (signatureData.folder) formData.append('folder', signatureData.folder);
+      if (signatureData.transformation) formData.append('transformation', signatureData.transformation);
 
       // Upload to Cloudinary with progress tracking
       const uploadResponse = await new Promise<any>((resolve, reject) => {
@@ -414,7 +424,7 @@ export default function Dashboard() {
 
         xhr.onerror = () => reject(new Error('Upload failed'));
         
-        xhr.open('POST', `https://api.cloudinary.com/v1_1/${(signatureData as any).cloud_name}/image/upload`);
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/image/upload`);
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.send(formData);
       });
