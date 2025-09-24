@@ -1653,9 +1653,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (process.env.TMDB_API_KEY) {
         try {
           const endpoint = mediaType === 'movie' ? 'movie' : 'tv';
+          
+          // Add timeout and retry logic for TMDB API calls
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          
           const response = await fetch(
-            `https://api.themoviedb.org/3/${endpoint}/${mediaId}/reviews?api_key=${process.env.TMDB_API_KEY}`
+            `https://api.themoviedb.org/3/${endpoint}/${mediaId}/reviews?api_key=${process.env.TMDB_API_KEY}`,
+            {
+              signal: controller.signal,
+              headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'CineHub/1.0'
+              }
+            }
           );
+          
+          clearTimeout(timeoutId);
           
           if (response.ok) {
             const data = await response.json();
@@ -1667,9 +1681,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
               created_at: review.created_at,
               source: 'tmdb'
             })) || [];
+          } else {
+            console.warn(`TMDB API returned ${response.status}: ${response.statusText}`);
           }
-        } catch (tmdbError) {
-          console.error('Error fetching TMDB reviews:', tmdbError);
+        } catch (tmdbError: any) {
+          if (tmdbError.name === 'AbortError') {
+            console.warn('TMDB API request timed out');
+          } else if (tmdbError.cause?.code === 'ECONNRESET') {
+            console.warn('TMDB API connection was reset, continuing without external reviews');
+          } else {
+            console.warn('Error fetching TMDB reviews:', tmdbError.message);
+          }
           // Continue without TMDB reviews if there's an error
         }
       }
