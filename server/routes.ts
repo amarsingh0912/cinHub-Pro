@@ -727,6 +727,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile route (for authenticated users)
+  app.put('/api/auth/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      // Validate the request body
+      const { firstName, lastName, username, email } = req.body;
+      
+      if (!firstName || !lastName || !username || !email) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Check if username/email is already taken by another user
+      const existingUsers = await storage.getAllUsers();
+      const existingUser = existingUsers.find(u => 
+        u.id !== userId && (u.username === username || u.email === email)
+      );
+      
+      if (existingUser) {
+        const field = existingUser.username === username ? 'username' : 'email';
+        return res.status(400).json({ message: `This ${field} is already taken` });
+      }
+
+      // Update user profile in database
+      const updatedUser = await storage.updateUser(userId, {
+        firstName,
+        lastName,
+        username,
+        email
+      });
+
+      // Remove password from response
+      const { password, ...userWithoutPassword } = updatedUser;
+
+      res.json({ 
+        message: "Profile updated successfully",
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // TMDB proxy endpoints (to avoid CORS and secure API key)
   app.get('/api/movies/trending', async (req, res) => {
     try {

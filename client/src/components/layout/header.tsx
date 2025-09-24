@@ -138,7 +138,7 @@ export default function Header() {
                         Settings
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => window.location.href = '/api/logout'} data-testid="link-logout">
+                      <DropdownMenuItem onSelect={() => window.location.href = '/api/auth/logout'} data-testid="link-logout">
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
                       </DropdownMenuItem>
@@ -222,7 +222,7 @@ export default function Header() {
                         Settings
                       </Button>
                       <Button 
-                        onClick={() => window.location.href = '/api/logout'} 
+                        onClick={() => window.location.href = '/api/auth/logout'} 
                         variant="outline" 
                         size="sm" 
                         className="w-full justify-start" 

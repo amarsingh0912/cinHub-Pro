@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
+import { Link } from "wouter";
 
 export default function TVDetail() {
   const { id } = useParams();
@@ -324,24 +325,26 @@ export default function TVDetail() {
                       <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="cast-grid">
                         {tvShow.credits.cast.slice(0, 12).map((actor: any) => (
-                          <div key={actor.id} className="text-center">
-                            <div className="w-full aspect-[2/3] bg-muted rounded-lg mb-2 overflow-hidden flex items-center justify-center">
-                              {actor.profile_path ? (
-                                <img
-                                  src={getImageUrl(actor.profile_path, 'w200')}
-                                  alt={actor.name}
-                                  className="w-full h-full object-cover"
-                                  data-testid={`actor-image-${actor.id}`}
-                                />
-                              ) : (
-                                <Users className="w-8 h-8 text-muted-foreground" />
-                              )}
+                          <Link key={actor.id} href={"/person/" + actor.id}>
+                            <div className="text-center cursor-pointer group hover:scale-105 transition-transform">
+                              <div className="w-full aspect-[2/3] bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                                {actor.profile_path ? (
+                                  <img
+                                    src={getImageUrl(actor.profile_path, 'w500')}
+                                    alt={actor.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    data-testid={`actor-image-${actor.id}`}
+                                  />
+                                ) : (
+                                  <Users className="w-12 h-12 text-muted-foreground" />
+                                )}
+                              </div>
+                              <h4 className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`actor-name-${actor.id}`}>{actor.name}</h4>
+                              <p className="text-xs text-muted-foreground mt-1" data-testid={`actor-character-${actor.id}`}>
+                                {actor.character}
+                              </p>
                             </div>
-                            <h4 className="font-medium text-sm" data-testid={`actor-name-${actor.id}`}>{actor.name}</h4>
-                            <p className="text-xs text-muted-foreground" data-testid={`actor-character-${actor.id}`}>
-                              {actor.character}
-                            </p>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -356,26 +359,28 @@ export default function TVDetail() {
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job))
                           .slice(0, 8)
                           .map((person: any, index: number) => (
-                            <div key={`${person.id}-${index}`} className="flex items-center gap-4">
-                              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center overflow-hidden">
-                                {person.profile_path ? (
-                                  <img
-                                    src={getImageUrl(person.profile_path, 'w200')}
-                                    alt={person.name}
-                                    className="w-full h-full object-cover"
-                                    data-testid={`crew-image-${person.id}`}
-                                  />
-                                ) : (
-                                  <Users className="w-6 h-6 text-muted-foreground" />
-                                )}
+                            <Link key={`${person.id}-${index}`} href={"/person/" + person.id}>
+                              <div className="flex items-center gap-4 cursor-pointer group hover:bg-muted/50 rounded-lg p-2 transition-all">
+                                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                                  {person.profile_path ? (
+                                    <img
+                                      src={getImageUrl(person.profile_path, 'w200')}
+                                      alt={person.name}
+                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                      data-testid={`crew-image-${person.id}`}
+                                    />
+                                  ) : (
+                                    <Users className="w-6 h-6 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div>
+                                  <h4 className="font-medium group-hover:text-primary transition-colors" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
+                                  <p className="text-sm text-muted-foreground" data-testid={`crew-job-${person.id}`}>
+                                    {person.job}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="font-medium" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
-                                <p className="text-sm text-muted-foreground" data-testid={`crew-job-${person.id}`}>
-                                  {person.job}
-                                </p>
-                              </div>
-                            </div>
+                            </Link>
                           ))}
                       </div>
                     </div>

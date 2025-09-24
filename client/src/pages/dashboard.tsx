@@ -15,10 +15,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
 import { ExpandableText } from "@/components/ui/expandable-text";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 // Component to display watchlist item count
 function WatchlistItemCount({ watchlistId }: { watchlistId: string }) {
@@ -53,8 +57,42 @@ export default function Dashboard() {
   const [newWatchlistDescription, setNewWatchlistDescription] = useState("");
   const [newWatchlistIsPublic, setNewWatchlistIsPublic] = useState(false);
   const [editingWatchlist, setEditingWatchlist] = useState<any>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditWatchlistOpen, setIsEditWatchlistOpen] = useState(false);
   const [watchlistToDelete, setWatchlistToDelete] = useState<any>(null);
+  const [viewingWatchlist, setViewingWatchlist] = useState<any>(null);
+  const [isViewWatchlistOpen, setIsViewWatchlistOpen] = useState(false);
+
+  // Profile form schema
+  const profileFormSchema = z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Please enter a valid email address"),
+  });
+
+  // Profile form initialization
+  const profileForm = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      username: user?.username || "",
+      email: user?.email || "",
+    },
+  });
+
+  // Update form when user data changes
+  useEffect(() => {
+    if (user) {
+      profileForm.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        username: user.username || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, profileForm]);
 
   const { data: favorites, isLoading: favoritesLoading } = useQuery<any[]>({
     queryKey: ["/api/favorites"],
@@ -71,6 +109,12 @@ export default function Dashboard() {
   const { data: userReviews, isLoading: reviewsLoading } = useQuery<any[]>({
     queryKey: ["/api/reviews/user"],
     enabled: isAuthenticated,
+    retry: false,
+  });
+
+  const { data: watchlistItems, isLoading: watchlistItemsLoading } = useQuery<any[]>({
+    queryKey: ["/api/watchlists", viewingWatchlist?.id, "items"],
+    enabled: isAuthenticated && !!viewingWatchlist?.id,
     retry: false,
   });
 
@@ -204,6 +248,41 @@ export default function Dashboard() {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof profileFormSchema>) => {
+      const result = await apiRequest("PUT", "/api/auth/profile", data);
+      return result;
+    },
+    onSuccess: (data) => {
+      // Update the auth context/user data - invalidate the correct query key
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setIsEditingProfile(false);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      const errorMessage = error?.message || "Failed to update profile.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -288,6 +367,29 @@ export default function Dashboard() {
       deleteWatchlistMutation.mutate(watchlistToDelete.id);
       setWatchlistToDelete(null);
     }
+  };
+
+  const openViewWatchlist = (watchlist: any) => {
+    setViewingWatchlist(watchlist);
+    setIsViewWatchlistOpen(true);
+  };
+
+  const handleProfileSubmit = (data: z.infer<typeof profileFormSchema>) => {
+    updateProfileMutation.mutate(data);
+  };
+
+  const handleEditProfile = () => {
+    setIsEditingProfile(true);
+  };
+
+  const handleCancelEditProfile = () => {
+    setIsEditingProfile(false);
+    profileForm.reset({
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      username: user?.username || "",
+      email: user?.email || "",
+    });
   };
 
   return (
@@ -655,6 +757,9 @@ export default function Dashboard() {
                               <div className="flex items-center justify-between">
                                 <WatchlistItemCount watchlistId={watchlist.id} />
                                 <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" onClick={() => openViewWatchlist(watchlist)} data-testid={`view-watchlist-${watchlist.id}`}>
+                                    <Eye className="w-4 h-4 text-primary" />
+                                  </Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -717,6 +822,9 @@ export default function Dashboard() {
                               <div className="flex items-center justify-between">
                                 <WatchlistItemCount watchlistId={watchlist.id} />
                                 <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" onClick={() => openViewWatchlist(watchlist)} data-testid={`view-watchlist-${watchlist.id}`}>
+                                    <Eye className="w-4 h-4 text-primary" />
+                                  </Button>
                                   <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -928,54 +1036,118 @@ export default function Dashboard() {
                         </p>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="firstName">First Name</Label>
-                            <Input
-                              id="firstName"
-                              value={user?.firstName || ""}
-                              placeholder="Enter your first name"
-                              data-testid="input-first-name"
-                              disabled
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="lastName">Last Name</Label>
-                            <Input
-                              id="lastName"
-                              value={user?.lastName || ""}
-                              placeholder="Enter your last name"
-                              data-testid="input-last-name"
-                              disabled
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={user?.email || ""}
-                              placeholder="Enter your email"
-                              data-testid="input-email"
-                              disabled
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                              id="username"
-                              value={user?.username || ""}
-                              placeholder="Enter your username"
-                              data-testid="input-username"
-                              disabled
-                            />
-                          </div>
-                        </div>
-                        <div className="pt-4 border-t">
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Profile editing will be available in a future update. Contact support for account changes.
-                          </p>
-                        </div>
+                        <Form {...profileForm}>
+                          <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
+                                control={profileForm.control}
+                                name="firstName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>First Name</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder="Enter your first name"
+                                        data-testid="input-first-name"
+                                        disabled={!isEditingProfile}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={profileForm.control}
+                                name="lastName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Last Name</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder="Enter your last name"
+                                        data-testid="input-last-name"
+                                        disabled={!isEditingProfile}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={profileForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        data-testid="input-email"
+                                        disabled={!isEditingProfile}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={profileForm.control}
+                                name="username"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Username</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        {...field}
+                                        placeholder="Enter your username"
+                                        data-testid="input-username"
+                                        disabled={!isEditingProfile}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="pt-4 border-t flex justify-between items-center">
+                              {!isEditingProfile ? (
+                                <Button 
+                                  type="button" 
+                                  onClick={handleEditProfile}
+                                  data-testid="button-edit-profile"
+                                >
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Edit Profile
+                                </Button>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <Button 
+                                    type="submit" 
+                                    disabled={updateProfileMutation.isPending}
+                                    data-testid="button-save-profile"
+                                  >
+                                    <Save className="w-4 h-4 mr-2" />
+                                    {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                                  </Button>
+                                  <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={handleCancelEditProfile}
+                                    disabled={updateProfileMutation.isPending}
+                                    data-testid="button-cancel-profile"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </form>
+                        </Form>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -1144,6 +1316,69 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Watchlist Dialog */}
+      <Dialog open={isViewWatchlistOpen} onOpenChange={setIsViewWatchlistOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="view-watchlist-dialog">
+          <DialogHeader>
+            <DialogTitle>
+              {viewingWatchlist?.name} ({watchlistItems?.length || 0} items)
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {watchlistItemsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-2 text-muted-foreground">Loading watchlist items...</span>
+              </div>
+            ) : watchlistItems && watchlistItems.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {watchlistItems.map((item) => (
+                  <div key={item.id} className="group" data-testid={`watchlist-item-${item.id}`}>
+                    <Link href={`/${item.mediaType}/${item.mediaId}`}>
+                      <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
+                        <img
+                          src={getImageUrl(item.mediaPosterPath)}
+                          alt={item.mediaTitle}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    </Link>
+                    <div className="mt-2 space-y-1">
+                      <h3 className="font-medium text-sm line-clamp-2" data-testid={`watchlist-item-title-${item.id}`}>
+                        {item.mediaTitle}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {item.mediaReleaseDate ? new Date(item.mediaReleaseDate).getFullYear() : 'TBA'}
+                      </p>
+                      <Badge variant="outline" className="text-xs">
+                        {item.mediaType === 'movie' ? 'Movie' : 'TV Show'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Plus className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <h3 className="text-xl font-semibold mb-2">No items in this watchlist</h3>
+                <p className="text-muted-foreground">
+                  Start adding movies and TV shows to see them here
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsViewWatchlistOpen(false)}
+              data-testid="close-view-watchlist"
+            >
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
