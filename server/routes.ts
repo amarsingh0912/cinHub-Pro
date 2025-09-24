@@ -22,6 +22,8 @@ import {
 } from "@shared/schema";
 import { sendOTP } from "./services/otpService";
 import { generateUploadSignature, validateCloudinaryUrl, isCloudinaryConfigured } from "./services/cloudinaryService";
+import { tmdbCacheService } from "./services/tmdbCache.js";
+import { imageCacheService } from "./services/imageCache.js";
 
 // Robust TMDB API helper function with retry logic
 async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {}): Promise<any> {
@@ -1148,10 +1150,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/:id', async (req, res) => {
     try {
-      const tvId = req.params.id;
+      const tvId = parseInt(req.params.id);
+      if (isNaN(tvId)) {
+        return res.status(400).json({ message: 'Invalid TV show ID' });
+      }
+
+      // Check cache first
+      const cached = await tmdbCacheService.getTVShowFromCache(tvId);
+      if (cached) {
+        console.log(`Returning cached TV show: ${cached.name} (ID: ${tvId})`);
+        const response = tmdbCacheService.buildTVShowResponse(cached);
+        return res.json(response);
+      }
+
+      // Fetch from TMDB if not cached
+      console.log(`Fetching TV show from TMDB: ${tvId}`);
       const data = await fetchFromTMDB(`/tv/${tvId}`, { 
         append_to_response: 'credits,videos,similar,recommendations' 
       });
+
+      // Cache the result
+      await tmdbCacheService.cacheTVShow(data);
+
       res.json(data);
     } catch (error) {
       console.error('Error fetching TV show details:', error);
@@ -1312,14 +1332,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/:id', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
+      const movieId = parseInt(req.params.id);
+      if (isNaN(movieId)) {
+        return res.status(400).json({ message: 'Invalid movie ID' });
       }
-      const movieId = req.params.id;
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar,recommendations`
-      );
-      const data = await response.json();
+
+      // Check cache first
+      const cached = await tmdbCacheService.getMovieFromCache(movieId);
+      if (cached) {
+        console.log(`Returning cached movie: ${cached.title} (ID: ${movieId})`);
+        const response = tmdbCacheService.buildMovieResponse(cached);
+        return res.json(response);
+      }
+
+      // Fetch from TMDB if not cached
+      console.log(`Fetching movie from TMDB: ${movieId}`);
+      const data = await fetchFromTMDB(`/movie/${movieId}`, { 
+        append_to_response: 'credits,videos,similar,recommendations' 
+      });
+
+      // Cache the result
+      await tmdbCacheService.cacheMovie(data);
+
       res.json(data);
     } catch (error) {
       console.error('Error fetching movie details:', error);
