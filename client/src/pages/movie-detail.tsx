@@ -31,7 +31,7 @@ export default function MovieDetail() {
   });
 
   const { data: favoriteStatus } = useQuery<{ isFavorite: boolean }>({
-    queryKey: ["/api/favorites", id, "check"],
+    queryKey: ["/api/favorites", "movie", id, "check"],
     enabled: !!id && isAuthenticated,
     retry: false,
   });
@@ -91,15 +91,16 @@ export default function MovieDetail() {
     mutationFn: async () => {
       if (!movie) return;
       await apiRequest("POST", "/api/favorites", {
-        movieId: movie.id,
-        movieTitle: movie.title,
-        moviePosterPath: movie.poster_path,
-        movieReleaseDate: movie.release_date,
+        mediaType: "movie",
+        mediaId: movie.id,
+        mediaTitle: movie.title,
+        mediaPosterPath: movie.poster_path,
+        mediaReleaseDate: movie.release_date,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites", id, "check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites", "movie", id, "check"] });
       toast({
         title: "Added to Favorites",
         description: `${movie?.title} has been added to your favorites.`,
@@ -127,11 +128,11 @@ export default function MovieDetail() {
 
   const removeFromFavoritesMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", `/api/favorites/${id}`, {});
+      await apiRequest("DELETE", `/api/favorites/movie/${id}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites", id, "check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites", "movie", id, "check"] });
       toast({
         title: "Removed from Favorites",
         description: `${movie?.title} has been removed from your favorites.`,

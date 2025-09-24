@@ -28,7 +28,7 @@ export default function TVDetail() {
   });
 
   const { data: favoriteStatus } = useQuery<{ isFavorite: boolean }>({
-    queryKey: ["/api/favorites", id, "check"],
+    queryKey: ["/api/favorites", "tv", id, "check"],
     enabled: !!id && isAuthenticated,
     retry: false,
   });
@@ -43,16 +43,16 @@ export default function TVDetail() {
     mutationFn: async () => {
       if (!tvShow) return;
       await apiRequest("POST", "/api/favorites", {
-        movieId: tvShow.id,
-        movieTitle: tvShow.name,
-        moviePosterPath: tvShow.poster_path,
-        movieReleaseDate: tvShow.first_air_date,
-        mediaType: 'tv'
+        mediaType: 'tv',
+        mediaId: tvShow.id,
+        mediaTitle: tvShow.name,
+        mediaPosterPath: tvShow.poster_path,
+        mediaReleaseDate: tvShow.first_air_date
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites", id, "check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites", "tv", id, "check"] });
       toast({
         title: "Added to Favorites",
         description: `${tvShow?.name} has been added to your favorites.`,
@@ -80,11 +80,11 @@ export default function TVDetail() {
 
   const removeFromFavoritesMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", `/api/favorites/${id}`, {});
+      await apiRequest("DELETE", `/api/favorites/tv/${id}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/favorites", id, "check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites", "tv", id, "check"] });
       toast({
         title: "Removed from Favorites",
         description: `${tvShow?.name} has been removed from your favorites.`,
