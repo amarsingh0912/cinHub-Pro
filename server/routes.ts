@@ -1917,6 +1917,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
+  // Cache status API endpoints
+  app.get('/api/cache-status/:type/:id', async (req, res) => {
+    try {
+      const { type, id } = req.params;
+      const mediaId = parseInt(id);
+      
+      if (isNaN(mediaId)) {
+        return res.status(400).json({ message: 'Invalid ID parameter' });
+      }
+      
+      if (type !== 'movie' && type !== 'tv') {
+        return res.status(400).json({ message: 'Invalid type parameter. Must be "movie" or "tv"' });
+      }
+      
+      const status = cacheQueueService.getJobStatusByMedia(type as 'movie' | 'tv', mediaId);
+      
+      if (!status) {
+        return res.json({ 
+          jobId: null,
+          status: 'not_found',
+          message: 'No caching job found for this item'
+        });
+      }
+      
+      res.json(status);
+    } catch (error) {
+      console.error('Error getting cache status:', error);
+      res.status(500).json({ message: 'Failed to get cache status' });
+    }
+  });
+
+  app.get('/api/cache-stats', async (req, res) => {
+    try {
+      const queueStats = cacheQueueService.getQueueStats();
+      const wsStats = websocketService.getStats();
+      
+      res.json({
+        queue: queueStats,
+        websocket: wsStats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error getting cache stats:', error);
+      res.status(500).json({ message: 'Failed to get cache stats' });
+    }
+  });
+
   // Initialize WebSocket service for real-time cache status updates
   websocketService.initialize(httpServer);
   
