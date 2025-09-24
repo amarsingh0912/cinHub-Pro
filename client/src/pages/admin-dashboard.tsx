@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { apiRequest } from "@/lib/queryClient";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Activity, Star, List, BarChart3, Settings, Shield } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -24,6 +26,7 @@ interface AdminStats {
 export default function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: adminStats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
@@ -35,6 +38,64 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users"],
     enabled: !!isAuthenticated && !!user?.isAdmin,
     retry: false,
+  });
+
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async ({userId, isAdmin}: {userId: string, isAdmin: boolean}) => {
+      await apiRequest("PATCH", `/api/admin/users/${userId}/role`, { isAdmin });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "User Role Updated",
+        description: "The user's role has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You don't have permission to perform this action.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const errorMessage = error?.message || "Failed to update user role.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserStatusMutation = useMutation({
+    mutationFn: async ({userId, isVerified}: {userId: string, isVerified: boolean}) => {
+      await apiRequest("PATCH", `/api/admin/users/${userId}/status`, { isVerified });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "User Status Updated",
+        description: "The user's status has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You don't have permission to perform this action.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const errorMessage = error?.message || "Failed to update user status.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
   });
 
   // Redirect to home if not authenticated or not admin
@@ -256,14 +317,40 @@ export default function AdminDashboard() {
                                 {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                               </TableCell>
                               <TableCell>
-                                <Badge variant={user.isAdmin ? "destructive" : "secondary"} data-testid={`user-role-${user.id}`}>
-                                  {user.isAdmin ? "Admin" : "User"}
-                                </Badge>
+                                <Select
+                                  value={user.isAdmin ? "admin" : "user"}
+                                  onValueChange={(value) => {
+                                    const isAdmin = value === "admin";
+                                    updateUserRoleMutation.mutate({ userId: user.id, isAdmin });
+                                  }}
+                                  disabled={updateUserRoleMutation.isPending}
+                                >
+                                  <SelectTrigger className="w-24" data-testid={`user-role-${user.id}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="user">User</SelectItem>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </TableCell>
                               <TableCell>
-                                <Badge variant="default" data-testid={`user-status-${user.id}`}>
-                                  Active
-                                </Badge>
+                                <Select
+                                  value={user.isVerified ? "verified" : "unverified"}
+                                  onValueChange={(value) => {
+                                    const isVerified = value === "verified";
+                                    updateUserStatusMutation.mutate({ userId: user.id, isVerified });
+                                  }}
+                                  disabled={updateUserStatusMutation.isPending}
+                                >
+                                  <SelectTrigger className="w-28" data-testid={`user-status-${user.id}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="unverified">Unverified</SelectItem>
+                                    <SelectItem value="verified">Verified</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </TableCell>
                             </TableRow>
                           ))}
