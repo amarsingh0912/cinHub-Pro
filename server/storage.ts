@@ -72,6 +72,9 @@ export interface IStorage {
   // Watchlist operations
   getUserWatchlists(userId: string): Promise<Watchlist[]>;
   createWatchlist(watchlist: InsertWatchlist): Promise<Watchlist>;
+  getWatchlistById(watchlistId: string): Promise<Watchlist | undefined>;
+  updateWatchlist(watchlistId: string, updates: Partial<InsertWatchlist>): Promise<Watchlist>;
+  deleteWatchlist(watchlistId: string): Promise<void>;
   getWatchlistItems(watchlistId: string): Promise<WatchlistItem[]>;
   addWatchlistItem(item: InsertWatchlistItem): Promise<WatchlistItem>;
   removeWatchlistItem(watchlistId: string, mediaType: string, mediaId: number): Promise<void>;
@@ -235,6 +238,36 @@ export class DatabaseStorage implements IStorage {
       .values(watchlist)
       .returning();
     return newWatchlist;
+  }
+
+  async getWatchlistById(watchlistId: string): Promise<Watchlist | undefined> {
+    const [watchlist] = await db
+      .select()
+      .from(watchlists)
+      .where(eq(watchlists.id, watchlistId))
+      .limit(1);
+    return watchlist;
+  }
+
+  async updateWatchlist(watchlistId: string, updates: Partial<InsertWatchlist>): Promise<Watchlist> {
+    const [updatedWatchlist] = await db
+      .update(watchlists)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(watchlists.id, watchlistId))
+      .returning();
+    return updatedWatchlist;
+  }
+
+  async deleteWatchlist(watchlistId: string): Promise<void> {
+    // First delete all watchlist items
+    await db
+      .delete(watchlistItems)
+      .where(eq(watchlistItems.watchlistId, watchlistId));
+    
+    // Then delete the watchlist itself
+    await db
+      .delete(watchlists)
+      .where(eq(watchlists.id, watchlistId));
   }
 
   async getWatchlistItems(watchlistId: string): Promise<WatchlistItem[]> {

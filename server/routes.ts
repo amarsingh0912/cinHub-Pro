@@ -1246,6 +1246,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/watchlists/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const watchlistId = req.params.id;
+      const userId = req.session.userId;
+      
+      // First, get the existing watchlist to verify ownership
+      const existingWatchlist = await storage.getWatchlistById(watchlistId);
+      if (!existingWatchlist) {
+        return res.status(404).json({ message: 'Watchlist not found' });
+      }
+      
+      // Check if the user owns this watchlist
+      if (existingWatchlist.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized: You can only edit your own watchlists' });
+      }
+      
+      // Validate request body, explicitly omitting protected fields
+      const validatedData = insertWatchlistSchema
+        .omit({ id: true, userId: true, createdAt: true, updatedAt: true })
+        .partial()
+        .parse(req.body);
+      const watchlist = await storage.updateWatchlist(watchlistId, validatedData);
+      res.json(watchlist);
+    } catch (error) {
+      console.error('Error updating watchlist:', error);
+      res.status(500).json({ message: 'Failed to update watchlist' });
+    }
+  });
+
+  app.delete('/api/watchlists/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const watchlistId = req.params.id;
+      const userId = req.session.userId;
+      
+      // First, get the existing watchlist to verify ownership
+      const existingWatchlist = await storage.getWatchlistById(watchlistId);
+      if (!existingWatchlist) {
+        return res.status(404).json({ message: 'Watchlist not found' });
+      }
+      
+      // Check if the user owns this watchlist
+      if (existingWatchlist.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized: You can only delete your own watchlists' });
+      }
+      
+      await storage.deleteWatchlist(watchlistId);
+      res.json({ message: 'Watchlist deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting watchlist:', error);
+      res.status(500).json({ message: 'Failed to delete watchlist' });
+    }
+  });
+
   app.get('/api/watchlists/:id/items', isAuthenticated, async (req, res) => {
     try {
       const watchlistId = req.params.id;
@@ -1260,6 +1313,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/watchlists/:id/items', isAuthenticated, async (req, res) => {
     try {
       const watchlistId = req.params.id;
+      const userId = req.session.userId;
+      
+      // Verify user owns the watchlist before adding items
+      const watchlist = await storage.getWatchlistById(watchlistId);
+      if (!watchlist) {
+        return res.status(404).json({ message: 'Watchlist not found' });
+      }
+      
+      if (watchlist.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized: You can only add items to your own watchlists' });
+      }
+      
       const data = insertWatchlistItemSchema.parse({ ...req.body, watchlistId });
       const item = await storage.addWatchlistItem(data);
       res.json(item);
@@ -1272,8 +1337,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/watchlists/:id/items/:mediaType/:mediaId', isAuthenticated, async (req, res) => {
     try {
       const watchlistId = req.params.id;
+      const userId = req.session.userId;
       const mediaType = req.params.mediaType;
       const mediaId = parseInt(req.params.mediaId);
+      
+      // Verify user owns the watchlist before removing items
+      const watchlist = await storage.getWatchlistById(watchlistId);
+      if (!watchlist) {
+        return res.status(404).json({ message: 'Watchlist not found' });
+      }
+      
+      if (watchlist.userId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized: You can only remove items from your own watchlists' });
+      }
+      
       await storage.removeWatchlistItem(watchlistId, mediaType, mediaId);
       res.json({ success: true });
     } catch (error) {

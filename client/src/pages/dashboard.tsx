@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff } from "lucide-react";
+import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
 import { ExpandableText } from "@/components/ui/expandable-text";
@@ -27,6 +28,9 @@ export default function Dashboard() {
   const [newWatchlistName, setNewWatchlistName] = useState("");
   const [newWatchlistDescription, setNewWatchlistDescription] = useState("");
   const [newWatchlistIsPublic, setNewWatchlistIsPublic] = useState(false);
+  const [editingWatchlist, setEditingWatchlist] = useState<any>(null);
+  const [isEditWatchlistOpen, setIsEditWatchlistOpen] = useState(false);
+  const [watchlistToDelete, setWatchlistToDelete] = useState<any>(null);
 
   const { data: favorites, isLoading: favoritesLoading } = useQuery<any[]>({
     queryKey: ["/api/favorites"],
@@ -112,6 +116,70 @@ export default function Dashboard() {
     },
   });
 
+  const editWatchlistMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { name: string; description?: string; isPublic: boolean } }) => {
+      await apiRequest("PUT", `/api/watchlists/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      setIsEditWatchlistOpen(false);
+      setEditingWatchlist(null);
+      toast({
+        title: "Watchlist Updated",
+        description: "Your watchlist has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update watchlist.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteWatchlistMutation = useMutation({
+    mutationFn: async (watchlistId: string) => {
+      await apiRequest("DELETE", `/api/watchlists/${watchlistId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      toast({
+        title: "Watchlist Deleted",
+        description: "Your watchlist has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete watchlist.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -157,6 +225,45 @@ export default function Dashboard() {
       description: newWatchlistDescription.trim() || undefined,
       isPublic: newWatchlistIsPublic,
     });
+  };
+
+  const handleEditWatchlist = () => {
+    if (!newWatchlistName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a watchlist name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    editWatchlistMutation.mutate({
+      id: editingWatchlist.id,
+      data: {
+        name: newWatchlistName.trim(),
+        description: newWatchlistDescription.trim() || undefined,
+        isPublic: newWatchlistIsPublic,
+      }
+    });
+  };
+
+  const openEditWatchlist = (watchlist: any) => {
+    setEditingWatchlist(watchlist);
+    setNewWatchlistName(watchlist.name);
+    setNewWatchlistDescription(watchlist.description || "");
+    setNewWatchlistIsPublic(watchlist.isPublic);
+    setIsEditWatchlistOpen(true);
+  };
+
+  const handleDeleteWatchlist = (watchlist: any) => {
+    setWatchlistToDelete(watchlist);
+  };
+
+  const confirmDeleteWatchlist = () => {
+    if (watchlistToDelete) {
+      deleteWatchlistMutation.mutate(watchlistToDelete.id);
+      setWatchlistToDelete(null);
+    }
   };
 
   return (
@@ -225,10 +332,11 @@ export default function Dashboard() {
         <section className="py-8" data-testid="dashboard-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Tabs defaultValue="favorites" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="favorites" data-testid="tab-favorites">Favorites</TabsTrigger>
                 <TabsTrigger value="watchlists" data-testid="tab-watchlists">Watchlists</TabsTrigger>
                 <TabsTrigger value="reviews" data-testid="tab-reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="profile" data-testid="tab-profile">Profile</TabsTrigger>
               </TabsList>
 
               <TabsContent value="favorites" className="space-y-6">
@@ -250,9 +358,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading favorites...</span>
                       </div>
-                    ) : favorites?.filter(f => f.mediaType === 'movie').length > 0 ? (
+                    ) : favorites?.filter(f => f.mediaType === 'movie')?.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-movies-grid">
-                        {favorites.filter(f => f.mediaType === 'movie').map((favorite) => (
+                        {favorites?.filter(f => f.mediaType === 'movie')?.map((favorite) => (
                           <div key={favorite.id} className="group">
                             <Link href={`/${favorite.mediaType}/${favorite.mediaId}`}>
                               <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
@@ -305,9 +413,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading favorites...</span>
                       </div>
-                    ) : favorites?.filter(f => f.mediaType === 'tv').length > 0 ? (
+                    ) : favorites?.filter(f => f.mediaType === 'tv')?.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="favorites-tv-grid">
-                        {favorites.filter(f => f.mediaType === 'tv').map((favorite) => (
+                        {favorites?.filter(f => f.mediaType === 'tv')?.map((favorite) => (
                           <div key={favorite.id} className="group">
                             <Link href={`/${favorite.mediaType}/${favorite.mediaId}`}>
                               <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent cursor-pointer">
@@ -420,6 +528,66 @@ export default function Dashboard() {
                       </div>
                     </DialogContent>
                   </Dialog>
+                  
+                  {/* Edit Watchlist Dialog */}
+                  <Dialog open={isEditWatchlistOpen} onOpenChange={setIsEditWatchlistOpen}>
+                    <DialogContent data-testid="edit-watchlist-dialog">
+                      <DialogHeader>
+                        <DialogTitle>Edit Watchlist</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="edit-watchlist-name">Name *</Label>
+                          <Input
+                            id="edit-watchlist-name"
+                            value={newWatchlistName}
+                            onChange={(e) => setNewWatchlistName(e.target.value)}
+                            placeholder="Enter watchlist name"
+                            data-testid="input-edit-watchlist-name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="edit-watchlist-description">Description</Label>
+                          <Textarea
+                            id="edit-watchlist-description"
+                            value={newWatchlistDescription}
+                            onChange={(e) => setNewWatchlistDescription(e.target.value)}
+                            placeholder="Enter watchlist description (optional)"
+                            data-testid="input-edit-watchlist-description"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="edit-watchlist-public"
+                            checked={newWatchlistIsPublic}
+                            onChange={(e) => setNewWatchlistIsPublic(e.target.checked)}
+                            data-testid="checkbox-edit-watchlist-public"
+                          />
+                          <Label htmlFor="edit-watchlist-public">Make this watchlist public</Label>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsEditWatchlistOpen(false);
+                              setEditingWatchlist(null);
+                            }}
+                            data-testid="button-cancel-edit-watchlist"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleEditWatchlist}
+                            disabled={editWatchlistMutation.isPending}
+                            data-testid="button-save-edit-watchlist"
+                          >
+                            Update Watchlist
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <Tabs defaultValue="movies" className="w-full">
@@ -434,9 +602,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading watchlists...</span>
                       </div>
-                    ) : watchlists?.length > 0 ? (
+                    ) : (watchlists?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-movies-grid">
-                        {watchlists.map((watchlist) => (
+                        {watchlists?.map((watchlist) => (
                           <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
                             <CardHeader>
                               <div className="flex items-start justify-between">
@@ -465,10 +633,10 @@ export default function Dashboard() {
                                   0 items
                                 </Badge>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" data-testid={`edit-watchlist-${watchlist.id}`}>
+                                  <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" data-testid={`delete-watchlist-${watchlist.id}`}>
+                                  <Button variant="ghost" size="sm" onClick={() => handleDeleteWatchlist(watchlist)} data-testid={`delete-watchlist-${watchlist.id}`}>
                                     <Trash2 className="w-4 h-4 text-destructive" />
                                   </Button>
                                 </div>
@@ -498,9 +666,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading watchlists...</span>
                       </div>
-                    ) : watchlists?.length > 0 ? (
+                    ) : (watchlists?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-tv-grid">
-                        {watchlists.map((watchlist) => (
+                        {watchlists?.map((watchlist) => (
                           <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
                             <CardHeader>
                               <div className="flex items-start justify-between">
@@ -529,10 +697,10 @@ export default function Dashboard() {
                                   0 items
                                 </Badge>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" data-testid={`edit-watchlist-${watchlist.id}`}>
+                                  <Button variant="ghost" size="sm" onClick={() => openEditWatchlist(watchlist)} data-testid={`edit-watchlist-${watchlist.id}`}>
                                     <Edit className="w-4 h-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" data-testid={`delete-watchlist-${watchlist.id}`}>
+                                  <Button variant="ghost" size="sm" onClick={() => handleDeleteWatchlist(watchlist)} data-testid={`delete-watchlist-${watchlist.id}`}>
                                     <Trash2 className="w-4 h-4 text-destructive" />
                                   </Button>
                                 </div>
@@ -577,9 +745,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading reviews...</span>
                       </div>
-                    ) : userReviews?.filter(r => r.mediaType === 'movie').length > 0 ? (
+                    ) : userReviews?.filter(r => r.mediaType === 'movie')?.length > 0 ? (
                       <div className="space-y-4" data-testid="reviews-movies-list">
-                        {userReviews.filter(r => r.mediaType === 'movie').map((review) => (
+                        {userReviews?.filter(r => r.mediaType === 'movie')?.map((review) => (
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
                             <CardContent className="pt-6">
                               <div className="flex items-start gap-4">
@@ -650,9 +818,9 @@ export default function Dashboard() {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         <span className="ml-2 text-muted-foreground">Loading reviews...</span>
                       </div>
-                    ) : userReviews?.filter(r => r.mediaType === 'tv').length > 0 ? (
+                    ) : userReviews?.filter(r => r.mediaType === 'tv')?.length > 0 ? (
                       <div className="space-y-4" data-testid="reviews-tv-list">
-                        {userReviews.filter(r => r.mediaType === 'tv').map((review) => (
+                        {userReviews?.filter(r => r.mediaType === 'tv')?.map((review) => (
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
                             <CardContent className="pt-6">
                               <div className="flex items-start gap-4">
@@ -716,10 +884,246 @@ export default function Dashboard() {
                   </TabsContent>
                 </Tabs>
               </TabsContent>
+
+              <TabsContent value="profile" className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-display font-bold" data-testid="profile-title">
+                    Profile & Settings
+                  </h2>
+                </div>
+
+                <Tabs defaultValue="account" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 max-w-lg">
+                    <TabsTrigger value="account" data-testid="profile-tab-account">Account</TabsTrigger>
+                    <TabsTrigger value="preferences" data-testid="profile-tab-preferences">Preferences</TabsTrigger>
+                    <TabsTrigger value="history" data-testid="profile-tab-history">History</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="account" className="mt-6">
+                    <Card data-testid="profile-account-card">
+                      <CardHeader>
+                        <CardTitle>Account Information</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Manage your account details and security settings
+                        </p>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input
+                              id="firstName"
+                              value={user?.firstName || ""}
+                              placeholder="Enter your first name"
+                              data-testid="input-first-name"
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input
+                              id="lastName"
+                              value={user?.lastName || ""}
+                              placeholder="Enter your last name"
+                              data-testid="input-last-name"
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={user?.email || ""}
+                              placeholder="Enter your email"
+                              data-testid="input-email"
+                              disabled
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="username">Username</Label>
+                            <Input
+                              id="username"
+                              value={user?.username || ""}
+                              placeholder="Enter your username"
+                              data-testid="input-username"
+                              disabled
+                            />
+                          </div>
+                        </div>
+                        <div className="pt-4 border-t">
+                          <p className="text-sm text-muted-foreground mb-4">
+                            Profile editing will be available in a future update. Contact support for account changes.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="preferences" className="mt-6">
+                    <div className="space-y-6">
+                      <Card data-testid="profile-preferences-card">
+                        <CardHeader>
+                          <CardTitle>Recommendation Preferences</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Customize your movie and TV show recommendations
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-3">
+                            <h4 className="font-medium">Preferred Genres</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                              {[
+                                "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime",
+                                "Documentary", "Drama", "Fantasy", "History", "Horror", "Music",
+                                "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western"
+                              ].map((genre) => (
+                                <div key={genre} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`genre-${genre.toLowerCase()}`}
+                                    className="rounded"
+                                    data-testid={`checkbox-genre-${genre.toLowerCase()}`}
+                                    disabled
+                                  />
+                                  <Label htmlFor={`genre-${genre.toLowerCase()}`} className="text-sm">
+                                    {genre}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card data-testid="profile-viewing-preferences-card">
+                        <CardHeader>
+                          <CardTitle>Viewing Preferences</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Set your content preferences and restrictions
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label htmlFor="adult-content">Include Adult Content</Label>
+                              <p className="text-sm text-muted-foreground">Show adult/mature content in recommendations</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              id="adult-content"
+                              className="rounded"
+                              data-testid="checkbox-adult-content"
+                              disabled
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label htmlFor="auto-play">Auto-play Trailers</Label>
+                              <p className="text-sm text-muted-foreground">Automatically play trailers when browsing</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              id="auto-play"
+                              className="rounded"
+                              data-testid="checkbox-auto-play"
+                              disabled
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card data-testid="profile-notification-preferences-card">
+                        <CardHeader>
+                          <CardTitle>Notification Preferences</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Choose what notifications you want to receive
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label htmlFor="new-releases">New Releases</Label>
+                              <p className="text-sm text-muted-foreground">Get notified about new movies and shows</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              id="new-releases"
+                              className="rounded"
+                              data-testid="checkbox-new-releases"
+                              disabled
+                            />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Label htmlFor="watchlist-updates">Watchlist Updates</Label>
+                              <p className="text-sm text-muted-foreground">Notifications when watchlist items become available</p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              id="watchlist-updates"
+                              className="rounded"
+                              data-testid="checkbox-watchlist-updates"
+                              disabled
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="history" className="mt-6">
+                    <Card data-testid="profile-history-card">
+                      <CardHeader>
+                        <CardTitle>Viewing History</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Keep track of what you've watched recently
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <Play className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                          <h3 className="text-xl font-semibold mb-2">No viewing history yet</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Your viewing history will appear here as you watch movies and TV shows
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Viewing history tracking will be available in a future update
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
             </Tabs>
           </div>
         </section>
       </main>
+
+      {/* Delete Watchlist Confirmation Dialog */}
+      <AlertDialog open={!!watchlistToDelete} onOpenChange={() => setWatchlistToDelete(null)}>
+        <AlertDialogContent data-testid="delete-watchlist-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Watchlist</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{watchlistToDelete?.name}"? This will permanently remove the watchlist and all its items. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="cancel-delete-watchlist">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteWatchlist}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="confirm-delete-watchlist"
+            >
+              Delete Watchlist
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <Footer />
     </div>
