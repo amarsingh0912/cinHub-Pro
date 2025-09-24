@@ -131,25 +131,26 @@ export class TMDBCacheService {
   async cacheMovie(tmdbData: TMDBMovieData): Promise<void> {
     try {
       // Process images in parallel
-      const imagePromises: Promise<string | null>[] = [];
       let posterUrl: string | null = null;
       let backdropUrl: string | null = null;
+
+      const imagePromises: Promise<void>[] = [];
 
       if (tmdbData.poster_path) {
         imagePromises.push(
           imageCacheService.getCachedImageUrl(tmdbData.poster_path, 'poster')
-            .then(url => { posterUrl = url; return url; })
+            .then(url => { posterUrl = url; })
         );
       }
 
       if (tmdbData.backdrop_path) {
         imagePromises.push(
           imageCacheService.getCachedImageUrl(tmdbData.backdrop_path, 'backdrop')
-            .then(url => { backdropUrl = url; return url; })
+            .then(url => { backdropUrl = url; })
         );
       }
 
-      // Wait for images to process
+      // Wait for all images to process
       await Promise.all(imagePromises);
 
       // Prepare movie cache entry
@@ -203,25 +204,26 @@ export class TMDBCacheService {
   async cacheTVShow(tmdbData: TMDBTVData): Promise<void> {
     try {
       // Process images in parallel
-      const imagePromises: Promise<string | null>[] = [];
       let posterUrl: string | null = null;
       let backdropUrl: string | null = null;
+
+      const imagePromises: Promise<void>[] = [];
 
       if (tmdbData.poster_path) {
         imagePromises.push(
           imageCacheService.getCachedImageUrl(tmdbData.poster_path, 'poster')
-            .then(url => { posterUrl = url; return url; })
+            .then(url => { posterUrl = url; })
         );
       }
 
       if (tmdbData.backdrop_path) {
         imagePromises.push(
           imageCacheService.getCachedImageUrl(tmdbData.backdrop_path, 'backdrop')
-            .then(url => { backdropUrl = url; return url; })
+            .then(url => { backdropUrl = url; })
         );
       }
 
-      // Wait for images to process
+      // Wait for all images to process
       await Promise.all(imagePromises);
 
       // Prepare TV show cache entry
