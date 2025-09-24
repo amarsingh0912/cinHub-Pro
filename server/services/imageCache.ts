@@ -58,19 +58,11 @@ export class ImageCacheService {
       // Generate unique public ID for Cloudinary
       const publicId = `cinehub/${imageType}s/${tmdbPath.replace('/', '').replace(/\./g, '_')}`;
 
-      // Upload to Cloudinary
+      // Upload to Cloudinary with simplified configuration
       const result = await cloudinary.uploader.upload(tmdbImageUrl, {
         public_id: publicId,
         folder: `cinehub/${imageType}s`,
-        format: 'auto', // Auto-optimize format
         quality: 'auto', // Auto-optimize quality
-        fetch_format: 'auto', // Auto-deliver best format
-        transformation: [
-          {
-            quality: 'auto:good',
-            fetch_format: 'auto'
-          }
-        ],
         overwrite: false // Don't overwrite existing images
       });
 
