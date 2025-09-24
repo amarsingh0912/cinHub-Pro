@@ -1616,6 +1616,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/admin/users/:userId/role', isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { isAdmin: newIsAdmin } = req.body;
+      
+      if (typeof newIsAdmin !== 'boolean') {
+        return res.status(400).json({ message: 'isAdmin must be a boolean' });
+      }
+      
+      // Prevent admin from removing their own admin status
+      if (req.session.userId === userId && !newIsAdmin) {
+        return res.status(400).json({ message: 'Cannot remove your own admin privileges' });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { isAdmin: newIsAdmin });
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      res.status(500).json({ message: 'Failed to update user role' });
+    }
+  });
+
+  app.patch('/api/admin/users/:userId/status', isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { isVerified } = req.body;
+      
+      if (typeof isVerified !== 'boolean') {
+        return res.status(400).json({ message: 'isVerified must be a boolean' });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { isVerified });
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      res.status(500).json({ message: 'Failed to update user status' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
