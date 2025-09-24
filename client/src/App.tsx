@@ -28,6 +28,11 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
+  // Scroll to top when location changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location]);
+
   // OAuth success/failure query param cleanup
   useEffect(() => {
     // Check for OAuth success/failure query params and clean them up

@@ -60,13 +60,13 @@ export default function Genre() {
   const genreName = activeTab === "movies" ? MOVIE_GENRES[genreId || ''] : TV_GENRES[genreId || ''];
 
   const { data: moviesData, isLoading: moviesLoading } = useQuery<MovieResponse>({
-    queryKey: ["/api/movies/genre", genreId, page],
+    queryKey: [`/api/movies/genre/${genreId}`, { page }],
     enabled: !!genreId && activeTab === "movies",
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const { data: tvData, isLoading: tvLoading } = useQuery<MovieResponse>({
-    queryKey: ["/api/tv/genre", genreId, page],
+    queryKey: [`/api/tv/genre/${genreId}`, { page }],
     enabled: !!genreId && activeTab === "tv",
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
