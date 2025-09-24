@@ -1136,6 +1136,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Unified search endpoint for both movies and TV shows
+  app.get('/api/search', async (req, res) => {
+    try {
+      const query = req.query.query;
+      const page = req.query.page || 1;
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+      const data = await fetchFromTMDB(
+        `https://api.themoviedb.org/3/search/multi?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query as string)}&page=${page}`
+      );
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching movies and TV shows:', error);
+      res.status(500).json({ message: 'Failed to search movies and TV shows' });
+    }
+  });
+
   app.get('/api/tv/:id', async (req, res) => {
     try {
       const tvId = req.params.id;
