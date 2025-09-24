@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { TVShowDetails } from "@/types/movie";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
@@ -39,6 +41,16 @@ export default function TVDetail() {
     enabled: !!id,
     retry: false,
   });
+
+  const { data: watchlists } = useQuery<any[]>({
+    queryKey: ["/api/watchlists"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  // Watchlist dialog state
+  const [isWatchlistDialogOpen, setIsWatchlistDialogOpen] = useState(false);
+  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string>("");
 
   const addToFavoritesMutation = useMutation({
     mutationFn: async () => {
@@ -106,6 +118,46 @@ export default function TVDetail() {
       toast({
         title: "Error",
         description: "Failed to remove TV show from favorites.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addToWatchlistMutation = useMutation({
+    mutationFn: async () => {
+      if (!tvShow || !selectedWatchlistId) return;
+      await apiRequest("POST", `/api/watchlists/${selectedWatchlistId}/items`, {
+        mediaType: "tv",
+        mediaId: tvShow.id,
+        mediaTitle: tvShow.name,
+        mediaPosterPath: tvShow.poster_path,
+        mediaReleaseDate: tvShow.first_air_date,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      setIsWatchlistDialogOpen(false);
+      setSelectedWatchlistId("");
+      toast({
+        title: "Added to Watchlist",
+        description: `${tvShow?.name} has been added to your watchlist.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to add TV show to watchlist.",
         variant: "destructive",
       });
     },
@@ -256,31 +308,44 @@ export default function TVDetail() {
                   )}
                   
                   {isAuthenticated ? (
-                    favoriteStatus?.isFavorite ? (
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => removeFromFavoritesMutation.mutate()}
-                        disabled={removeFromFavoritesMutation.isPending}
-                        className="min-w-[140px]"
-                        data-testid="button-remove-favorite"
+                    <>
+                      {favoriteStatus?.isFavorite ? (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() => removeFromFavoritesMutation.mutate()}
+                          disabled={removeFromFavoritesMutation.isPending}
+                          className="min-w-[140px]"
+                          data-testid="button-remove-favorite"
+                        >
+                          <Heart className="w-5 h-5 mr-2 fill-current text-red-500" />
+                          Remove Favorite
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          onClick={() => addToFavoritesMutation.mutate()}
+                          disabled={addToFavoritesMutation.isPending}
+                          className="min-w-[140px]"
+                          data-testid="button-add-favorite"
+                        >
+                          <Heart className="w-5 h-5 mr-2" />
+                          Add to Favorites
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        variant="outline" 
+                        size="lg" 
+                        className="min-w-[140px] flex items-center gap-2" 
+                        onClick={() => setIsWatchlistDialogOpen(true)}
+                        data-testid="button-add-to-watchlist"
                       >
-                        <Heart className="w-5 h-5 mr-2 fill-current text-red-500" />
-                        Remove Favorite
+                        <Plus className="w-5 h-5" />
+                        Add to Watchlist
                       </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        onClick={() => addToFavoritesMutation.mutate()}
-                        disabled={addToFavoritesMutation.isPending}
-                        className="min-w-[140px]"
-                        data-testid="button-add-favorite"
-                      >
-                        <Heart className="w-5 h-5 mr-2" />
-                        Add to Favorites
-                      </Button>
-                    )
+                    </>
                   ) : null}
                 </div>
               </div>
@@ -631,6 +696,71 @@ export default function TVDetail() {
           </Tabs>
         </section>
       </main>
+
+      {/* Add to Watchlist Dialog */}
+      <Dialog open={isWatchlistDialogOpen} onOpenChange={setIsWatchlistDialogOpen}>
+        <DialogContent data-testid="add-to-watchlist-dialog">
+          <DialogHeader>
+            <DialogTitle>Add to Watchlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select a watchlist to add "{tvShow?.name}" to:
+            </p>
+            {watchlists && watchlists.length > 0 ? (
+              <>
+                <Select value={selectedWatchlistId} onValueChange={setSelectedWatchlistId}>
+                  <SelectTrigger data-testid="select-watchlist">
+                    <SelectValue placeholder="Choose a watchlist" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {watchlists.map((watchlist: any) => (
+                      <SelectItem key={watchlist.id} value={watchlist.id} data-testid={`watchlist-option-${watchlist.id}`}>
+                        {watchlist.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsWatchlistDialogOpen(false);
+                      setSelectedWatchlistId("");
+                    }}
+                    data-testid="button-cancel-watchlist"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => addToWatchlistMutation.mutate()}
+                    disabled={!selectedWatchlistId || addToWatchlistMutation.isPending}
+                    data-testid="button-add-to-selected-watchlist"
+                  >
+                    Add to Watchlist
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  You don't have any watchlists yet. Create one first to add TV shows.
+                </p>
+                <Button
+                  onClick={() => {
+                    setIsWatchlistDialogOpen(false);
+                    // Navigate to dashboard or show create watchlist dialog
+                    window.location.href = '/dashboard';
+                  }}
+                  data-testid="button-go-to-dashboard"
+                >
+                  Go to Dashboard
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
