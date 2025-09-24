@@ -5,17 +5,22 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import SearchModal from "@/components/ui/search-modal";
 import AuthModal from "@/components/ui/auth-modal";
 import { Search, Moon, Sun, Film, Menu, X, User, LogOut, Settings, Shield, ChevronDown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Header() {
   const [location, setLocation] = useLocation();
   const { isAuthenticated, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -31,6 +36,30 @@ export default function Header() {
       navItems.push({ href: "/admin", label: "Admin" });
     }
   }
+
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmOpen(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout", {});
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "There was an error logging you out. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLogoutConfirmOpen(false);
+    }
+  };
 
   return (
     <>
@@ -138,7 +167,7 @@ export default function Header() {
                         Settings
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => window.location.href = '/api/auth/logout'} data-testid="link-logout">
+                      <DropdownMenuItem onSelect={handleLogoutClick} data-testid="link-logout">
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
                       </DropdownMenuItem>
@@ -222,7 +251,7 @@ export default function Header() {
                         Settings
                       </Button>
                       <Button 
-                        onClick={() => window.location.href = '/api/auth/logout'} 
+                        onClick={handleLogoutClick}
                         variant="outline" 
                         size="sm" 
                         className="w-full justify-start" 
@@ -255,6 +284,27 @@ export default function Header() {
       
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <AuthModal isOpen={isSignInOpen} onClose={() => setIsSignInOpen(false)} />
+      
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={isLogoutConfirmOpen} onOpenChange={setIsLogoutConfirmOpen}>
+        <AlertDialogContent data-testid="logout-confirmation-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to sign out? You will need to sign in again to access your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="cancel-logout">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLogoutConfirm}
+              data-testid="confirm-logout"
+            >
+              Sign Out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
