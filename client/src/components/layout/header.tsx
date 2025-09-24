@@ -30,12 +30,6 @@ export default function Header() {
     { href: "/contact", label: "Contact Us" },
   ];
 
-  if (isAuthenticated) {
-    navItems.push({ href: "/dashboard", label: "Dashboard" });
-    if (user?.isAdmin) {
-      navItems.push({ href: "/admin", label: "Admin" });
-    }
-  }
 
   const handleLogoutClick = () => {
     setIsLogoutConfirmOpen(true);
