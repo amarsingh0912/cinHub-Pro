@@ -38,6 +38,7 @@ export interface IStorage {
   getUserByIdentifier(identifier: string): Promise<User | undefined>; // For email/username/phone lookup
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>; // For social account linking
   
   // Auth Session operations
@@ -143,6 +144,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async getUserByIdentifier(identifier: string): Promise<User | undefined> {
