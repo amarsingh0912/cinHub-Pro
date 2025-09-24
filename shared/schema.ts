@@ -236,6 +236,7 @@ export const signUpSchema = baseSignUpSchema.refine(
 export const signInSchema = z.object({
   identifier: z.string().min(1, "Email, username, or phone number is required"), // Single field for email/username/phone
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 export const forgotPasswordSchema = z.object({

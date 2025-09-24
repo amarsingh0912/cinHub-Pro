@@ -289,8 +289,9 @@ export async function signInWithTokens(credentials: SignInData) {
   const accessToken = signAccessToken({ id: user.id, isAdmin: user.isAdmin || false });
   const refreshTokenHash = await hashRefreshToken(refreshToken);
   
-  // Store refresh token session in database
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  // Store refresh token session in database with extended expiration if rememberMe is true
+  const expirationDays = credentials.rememberMe ? 30 : 7; // 30 days if remembered, 7 days otherwise
+  const expiresAt = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000);
   await storage.createAuthSession({
     userId: user.id,
     refreshTokenHash,

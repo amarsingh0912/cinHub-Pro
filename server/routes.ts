@@ -270,8 +270,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Set session only for verified users
+      // Set session only for verified users with extended expiration if remember me is checked
       req.session.userId = user.id;
+      
+      // Update session cookie expiration based on remember me setting
+      if (credentials.rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      } else {
+        req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days (default)
+      }
       
       res.json({ user, message: "Signed in successfully" });
     } catch (error) {

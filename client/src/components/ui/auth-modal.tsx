@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -45,6 +46,7 @@ type ModalMode = "signin" | "signup" | "forgot-password" | "otp-verification" | 
 const signinFormSchema = z.object({
   loginValue: z.string().min(1, "Email, username, or phone number is required"),
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().default(false),
 });
 
 const signupFormSchema = baseSignUpSchema.extend({
@@ -95,6 +97,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     defaultValues: {
       loginValue: "",
       password: "",
+      rememberMe: false,
     },
   });
 
@@ -154,7 +157,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     mutationFn: async (data: SignInFormData) => {
       const payload = {
         identifier: data.loginValue,
-        password: data.password
+        password: data.password,
+        rememberMe: data.rememberMe
       };
       
       const response = await apiRequest("POST", "/api/auth/signin", payload);
@@ -504,6 +508,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </div>
                       </FormControl>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={signinForm.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          data-testid="checkbox-remember-me"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal">
+                          Remember me for 30 days
+                        </FormLabel>
+                      </div>
                     </FormItem>
                   )}
                 />
