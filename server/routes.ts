@@ -218,7 +218,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
       if (!otpResult.success) {
         console.error(`Failed to send signup OTP to ${verificationTarget}:`, otpResult.error);
-        // Don't fail the signup, but log the issue
+        // Delete the created OTP since we couldn't send it
+        await storage.deleteOtp(verificationTarget, 'signup');
+        return res.status(500).json({ 
+          message: "Account created but failed to send verification code. Please try signing in to resend the verification code.",
+          error: `OTP delivery failed: ${otpResult.error}`
+        });
       }
       
       // Don't set session - user needs to verify first
@@ -260,6 +265,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
           if (!otpResult.success) {
             console.error(`Failed to send signin verification OTP to ${verificationTarget}:`, otpResult.error);
+            // Delete the created OTP since we couldn't send it
+            await storage.deleteOtp(verificationTarget, 'signup');
+            return res.status(500).json({ 
+              message: "Failed to send verification code. Please try again later.",
+              error: `OTP delivery failed: ${otpResult.error}`
+            });
           }
         }
         
@@ -344,7 +355,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otpResult = await sendOTP(otpTarget, otpCode, 'reset');
       if (!otpResult.success) {
         console.error(`Failed to send password reset OTP to ${otpTarget}:`, otpResult.error);
-        // Still proceed, but user may need to try again or contact support
+        // Delete the created OTP since we couldn't send it
+        await storage.deleteOtp(otpTarget, 'reset');
+        return res.status(500).json({ 
+          message: "Failed to send password reset code. Please try again later.",
+          error: `OTP delivery failed: ${otpResult.error}`
+        });
       }
       
       res.json({ 
@@ -490,6 +506,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const otpResult = await sendOTP(verificationTarget, otpCode, 'signup');
           if (!otpResult.success) {
             console.error(`Failed to send signin verification OTP to ${verificationTarget}:`, otpResult.error);
+            // Delete the created OTP since we couldn't send it
+            await storage.deleteOtp(verificationTarget, 'signup');
+            return res.status(500).json({ 
+              message: "Failed to send verification code. Please try again later.",
+              error: `OTP delivery failed: ${otpResult.error}`
+            });
           }
         }
         
