@@ -5,6 +5,13 @@ export function getImageUrl(path: string | null, size: 'w200' | 'w500' | 'w780' 
   if (!path) {
     return '/placeholder-movie.jpg'; // You would add this placeholder image
   }
+  
+  // If path is already a full URL (cached Cloudinary image), return as is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Otherwise, treat as TMDB path and prepend base URL
   return `${TMDB_IMAGE_BASE_URL}/${size}${path}`;
 }
 

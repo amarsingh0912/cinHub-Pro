@@ -6,6 +6,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
+import { getImageUrl } from "@/lib/tmdb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, Film } from "lucide-react";
@@ -108,7 +109,7 @@ export default function SearchPage() {
                               <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                                 {item.poster_path ? (
                                   <img
-                                    src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                                    src={getImageUrl(item.poster_path)}
                                     alt={title}
                                     className="w-full h-full object-cover"
                                     loading="lazy"

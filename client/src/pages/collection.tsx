@@ -5,6 +5,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { CATEGORIES } from "@/types/movie";
+import { getImageUrl } from "@/lib/tmdb";
 import { Loader2, Film, Star } from "lucide-react";
 
 export default function Collection() {
@@ -73,7 +74,7 @@ export default function Collection() {
                         <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                           {movie.poster_path ? (
                             <img
-                              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                              src={getImageUrl(movie.poster_path)}
                               alt={movie.title}
                               className="w-full h-full object-cover"
                               loading="lazy"

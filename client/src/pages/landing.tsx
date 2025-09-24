@@ -8,6 +8,7 @@ import CategoryGrid from "@/components/movie/category-grid";
 import FeaturedCollections from "@/components/movie/featured-collections";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Link } from "wouter";
+import { getImageUrl } from "@/lib/tmdb";
 import { List, Bot, Bell, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -66,7 +67,7 @@ export default function Landing() {
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {movie.poster_path ? (
                               <img
-                                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                src={getImageUrl(movie.poster_path)}
                                 alt={movie.title}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
@@ -118,7 +119,7 @@ export default function Landing() {
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {show.poster_path ? (
                               <img
-                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                                src={getImageUrl(show.poster_path)}
                                 alt={show.name}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
@@ -195,7 +196,7 @@ export default function Landing() {
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {movie.poster_path ? (
                               <img
-                                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                src={getImageUrl(movie.poster_path)}
                                 alt={movie.title}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
@@ -247,7 +248,7 @@ export default function Landing() {
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {show.poster_path ? (
                               <img
-                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                                src={getImageUrl(show.poster_path)}
                                 alt={show.name}
                                 className="w-full h-full object-cover"
                                 loading="lazy"
