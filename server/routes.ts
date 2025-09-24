@@ -23,6 +23,110 @@ import {
 import { sendOTP } from "./services/otpService";
 import { generateUploadSignature, validateCloudinaryUrl, isCloudinaryConfigured } from "./services/cloudinaryService";
 
+// Robust TMDB API helper function with retry logic
+async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {}): Promise<any> {
+  if (!process.env.TMDB_API_KEY) {
+    throw new Error('TMDB API key not configured');
+  }
+
+  // Build URL with API key and parameters
+  const searchParams = new URLSearchParams({
+    api_key: process.env.TMDB_API_KEY,
+    ...params
+  });
+  const url = `https://api.themoviedb.org/3${endpoint}?${searchParams}`;
+  
+  // Debug URL construction (remove in production) - API key redacted for security
+  if (process.env.NODE_ENV === 'development') {
+    const debugUrl = url.replace(/api_key=[^&]+/, 'api_key=***REDACTED***');
+    console.log(`TMDB API URL: ${debugUrl}`);
+  }
+
+  // Retry configuration
+  const maxRetries = 3;
+  const baseDelay = 250; // 250ms base delay
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'CineHub/1.0'
+        }
+      });
+
+      clearTimeout(timeoutId);
+
+      // Handle rate limiting
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter ? parseInt(retryAfter) * 1000 : baseDelay * Math.pow(2, attempt);
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+      }
+
+      // Handle server errors (5xx) with retry
+      if (response.status >= 500 && attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100; // Add jitter
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`TMDB API returned ${response.status}: ${response.statusText}. Body: ${errorText}`);
+      }
+
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error('TMDB API returned empty response');
+      }
+
+      try {
+        return JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse TMDB response:', responseText.substring(0, 200));
+        throw new Error('TMDB API returned invalid JSON');
+      }
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      
+      // Check for network errors that should be retried
+      const isNetworkError = error.name === 'AbortError' || 
+                           error.code === 'ECONNRESET' ||
+                           error.code === 'ETIMEDOUT' ||
+                           error.code === 'ENOTFOUND' ||
+                           error.code === 'EAI_AGAIN' ||
+                           error.cause?.code === 'ECONNRESET' ||
+                           error.cause?.code === 'ETIMEDOUT' ||
+                           error.message?.includes('UND_ERR_') ||
+                           error.message?.includes('network');
+
+      if (isNetworkError && attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 100; // Add jitter
+        console.warn(`TMDB API network error (attempt ${attempt + 1}/${maxRetries + 1}):`, error.message);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+
+      // Final attempt failed or non-retryable error
+      if (error.name === 'AbortError') {
+        throw new Error('TMDB API request timed out after 15 seconds');
+      } else if (isNetworkError) {
+        throw new Error('TMDB API connection failed after retries');
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 // Ensure uploads directory exists
 const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles');
 if (!fs.existsSync(uploadsDir)) {
@@ -883,13 +987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/movies/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
-      const response = await fetch(
-        `https://api.themoviedb.org/3/trending/movie/${timeWindow}?api_key=${process.env.TMDB_API_KEY}`
-      );
-      const data = await response.json();
+      const data = await fetchFromTMDB(`/trending/movie/${timeWindow}`);
       res.json(data);
     } catch (error) {
       console.error('Error fetching trending movies:', error);
@@ -900,13 +998,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/trending/tv/${timeWindow}?api_key=${process.env.TMDB_API_KEY}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching trending TV shows:', error);
@@ -916,14 +1010,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/popular', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching popular TV shows:', error);
@@ -933,14 +1023,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/top-rated', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/top_rated?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching top rated TV shows:', error);
@@ -950,14 +1036,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/on-the-air', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/on_the_air?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching on-the-air TV shows:', error);
@@ -968,14 +1050,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add alias with underscore for frontend compatibility  
   app.get('/api/tv/airing_today', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching airing today TV shows:', error);
@@ -985,14 +1063,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/airing-today', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching airing today TV shows:', error);
@@ -1003,9 +1077,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Comprehensive TV show discovery endpoint with all TMDB filters
   app.get('/api/tv/discover', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const {
         page = 1,
         sort_by = 'popularity.desc',
@@ -1040,8 +1111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (with_networks) url += `&with_networks=${with_networks}`;
       if (with_companies) url += `&with_companies=${with_companies}`;
 
-      const response = await fetch(url);
-      const data = await response.json();
+      const data = await fetchFromTMDB(url);
       res.json(data);
     } catch (error) {
       console.error('Error discovering TV shows:', error);
@@ -1051,18 +1121,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/search', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const query = req.query.query;
       const page = req.query.page || 1;
       if (!query) {
         return res.status(400).json({ message: 'Search query is required' });
       }
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/search/tv?api_key=${process.env.TMDB_API_KEY}&query=${encodeURIComponent(query as string)}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error searching TV shows:', error);
@@ -1072,14 +1138,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/tv/:id', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const tvId = req.params.id;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/tv/${tvId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar,recommendations`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching TV show details:', error);
@@ -1089,14 +1151,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/movies/popular', async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: 'TMDB API key not configured' });
-      }
       const page = req.query.page || 1;
-      const response = await fetch(
+      const data = await fetchFromTMDB(
         `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.TMDB_API_KEY}&page=${page}`
       );
-      const data = await response.json();
       res.json(data);
     } catch (error) {
       console.error('Error fetching popular movies:', error);
