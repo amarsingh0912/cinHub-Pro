@@ -248,6 +248,38 @@ export default function Dashboard() {
     },
   });
 
+  const removeWatchlistItemMutation = useMutation({
+    mutationFn: async ({watchlistId, mediaType, mediaId}: {watchlistId: string, mediaType: string, mediaId: number}) => {
+      await apiRequest("DELETE", `/api/watchlists/${watchlistId}/items/${mediaType}/${mediaId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists", viewingWatchlist?.id, "items"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      toast({
+        title: "Removed from Watchlist",
+        description: "Item has been removed from your watchlist.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to remove from watchlist.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateProfileMutation = useMutation({
     mutationFn: async (data: z.infer<typeof profileFormSchema>) => {
       const result = await apiRequest("PUT", "/api/auth/profile", data);
@@ -1354,6 +1386,21 @@ export default function Dashboard() {
                       <Badge variant="outline" className="text-xs">
                         {item.mediaType === 'movie' ? 'Movie' : 'TV Show'}
                       </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeWatchlistItemMutation.mutate({
+                          watchlistId: viewingWatchlist.id,
+                          mediaType: item.mediaType,
+                          mediaId: item.mediaId
+                        })}
+                        disabled={removeWatchlistItemMutation.isPending}
+                        className="w-full text-xs"
+                        data-testid={`remove-watchlist-item-${item.id}`}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        Remove
+                      </Button>
                     </div>
                   </div>
                 ))}
