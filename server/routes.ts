@@ -1149,9 +1149,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/:id', async (req, res) => {
     try {
       const tvId = req.params.id;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/${tvId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos,similar,recommendations`
-      );
+      const data = await fetchFromTMDB(`/tv/${tvId}`, { 
+        append_to_response: 'credits,videos,similar,recommendations' 
+      });
       res.json(data);
     } catch (error) {
       console.error('Error fetching TV show details:', error);
