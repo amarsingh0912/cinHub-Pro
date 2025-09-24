@@ -419,6 +419,11 @@ export default function Dashboard() {
         xhr.send(formData);
       });
 
+      // Validate upload response
+      if (!uploadResponse || !uploadResponse.secure_url) {
+        throw new Error('Upload failed: No secure URL returned from Cloudinary');
+      }
+
       // Update profile picture URL in backend
       await updateAvatarMutation.mutateAsync({ secure_url: uploadResponse.secure_url });
 
@@ -1203,7 +1208,7 @@ export default function Dashboard() {
                               <div className="relative">
                                 <Avatar className="w-24 h-24">
                                   <AvatarImage 
-                                    src={user?.profileImageUrl} 
+                                    src={user?.profileImageUrl || undefined} 
                                     alt={user?.displayName || user?.username || "Profile picture"}
                                     data-testid="profile-avatar-image"
                                   />
