@@ -354,14 +354,14 @@ export default function TVDetail() {
                   {tvShow.credits?.crew && (
                     <div>
                       <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
-                      <div className="space-y-4" data-testid="crew-list">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="crew-grid">
                         {tvShow.credits.crew
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job))
-                          .slice(0, 8)
+                          .slice(0, 6)
                           .map((person: any, index: number) => (
                             <Link key={`${person.id}-${index}`} href={"/person/" + person.id}>
-                              <div className="flex items-center gap-4 cursor-pointer group hover:bg-muted/50 rounded-lg p-2 transition-all">
-                                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center overflow-hidden shadow-md group-hover:shadow-lg transition-shadow">
+                              <div className="text-center cursor-pointer group hover:scale-105 transition-transform">
+                                <div className="w-full aspect-[2/3] bg-muted rounded-lg mb-3 overflow-hidden flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
                                   {person.profile_path ? (
                                     <img
                                       src={getImageUrl(person.profile_path, 'w200')}
@@ -370,15 +370,13 @@ export default function TVDetail() {
                                       data-testid={`crew-image-${person.id}`}
                                     />
                                   ) : (
-                                    <Users className="w-6 h-6 text-muted-foreground" />
+                                    <Users className="w-12 h-12 text-muted-foreground" />
                                   )}
                                 </div>
-                                <div>
-                                  <h4 className="font-medium group-hover:text-primary transition-colors" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
-                                  <p className="text-sm text-muted-foreground" data-testid={`crew-job-${person.id}`}>
-                                    {person.job}
-                                  </p>
-                                </div>
+                                <h4 className="font-semibold text-sm group-hover:text-primary transition-colors" data-testid={`crew-name-${person.id}`}>{person.name}</h4>
+                                <p className="text-xs text-muted-foreground mt-1" data-testid={`crew-job-${person.id}`}>
+                                  {person.job}
+                                </p>
                               </div>
                             </Link>
                           ))}
