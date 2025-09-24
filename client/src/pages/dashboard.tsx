@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save } from "lucide-react";
+import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
 import { ExpandableText } from "@/components/ui/expandable-text";
@@ -62,6 +63,8 @@ export default function Dashboard() {
   const [watchlistToDelete, setWatchlistToDelete] = useState<any>(null);
   const [viewingWatchlist, setViewingWatchlist] = useState<any>(null);
   const [isViewWatchlistOpen, setIsViewWatchlistOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Profile form schema
   const profileFormSchema = z.object({
@@ -314,6 +317,131 @@ export default function Dashboard() {
       });
     },
   });
+
+  // Profile picture upload mutations
+  const getCloudinarySignatureMutation = useMutation({
+    mutationFn: async () => {
+      const result = await apiRequest("POST", "/api/profile/avatar/sign", {});
+      return result;
+    },
+  });
+
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (data: { secure_url: string }) => {
+      const result = await apiRequest("PATCH", "/api/profile/avatar", data);
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setIsUploadingAvatar(false);
+      setUploadProgress(0);
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      setIsUploadingAvatar(false);
+      setUploadProgress(0);
+      const errorMessage = error?.message || "Failed to update profile picture.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle profile picture upload
+  const handleAvatarUpload = async (file: File) => {
+    if (!file) return;
+
+    // Validate file type and size
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select a JPEG, PNG, or WebP image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({
+        title: "File Too Large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setUploadProgress(0);
+
+    try {
+      // Get signed upload parameters
+      const signatureData = await getCloudinarySignatureMutation.mutateAsync();
+      
+      // Prepare form data for Cloudinary upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', (signatureData as any).api_key);
+      formData.append('timestamp', (signatureData as any).timestamp.toString());
+      formData.append('signature', (signatureData as any).signature);
+      if ((signatureData as any).public_id) formData.append('public_id', (signatureData as any).public_id);
+      if ((signatureData as any).folder) formData.append('folder', (signatureData as any).folder);
+      if ((signatureData as any).transformation) formData.append('transformation', (signatureData as any).transformation);
+
+      // Upload to Cloudinary with progress tracking
+      const uploadResponse = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${(signatureData as any).cloud_name}/image/upload`);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.send(formData);
+      });
+
+      // Update profile picture URL in backend
+      await updateAvatarMutation.mutateAsync({ secure_url: uploadResponse.secure_url });
+
+    } catch (error: any) {
+      setIsUploadingAvatar(false);
+      setUploadProgress(0);
+      
+      // Check if this is a Cloudinary configuration issue
+      if (error?.message?.includes('not configured')) {
+        toast({
+          title: "Service Unavailable", 
+          description: "Profile picture upload is currently unavailable. Please try again later.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: error?.message || "Failed to upload profile picture. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -1070,6 +1198,69 @@ export default function Dashboard() {
                       <CardContent className="space-y-4">
                         <Form {...profileForm}>
                           <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
+                            {/* Profile Picture Section */}
+                            <div className="flex flex-col items-center space-y-4 pb-6 border-b">
+                              <div className="relative">
+                                <Avatar className="w-24 h-24">
+                                  <AvatarImage 
+                                    src={user?.profileImageUrl} 
+                                    alt={user?.displayName || user?.username || "Profile picture"}
+                                    data-testid="profile-avatar-image"
+                                  />
+                                  <AvatarFallback className="text-lg" data-testid="profile-avatar-fallback">
+                                    <User className="w-8 h-8" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                {isUploadingAvatar && (
+                                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                                    <div className="text-white text-sm font-medium">
+                                      {uploadProgress}%
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="text-center">
+                                <h3 className="font-medium text-sm">Profile Picture</h3>
+                                <p className="text-xs text-muted-foreground">
+                                  Upload a picture to personalize your profile
+                                </p>
+                              </div>
+
+                              {isEditingProfile && (
+                                <div className="flex flex-col items-center space-y-2">
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        handleAvatarUpload(file);
+                                      }
+                                    }}
+                                    disabled={isUploadingAvatar}
+                                    className="hidden"
+                                    id="avatar-upload"
+                                    data-testid="input-avatar-upload"
+                                  />
+                                  <label
+                                    htmlFor="avatar-upload"
+                                    className={`
+                                      inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer
+                                      ${isUploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}
+                                    `}
+                                    data-testid="button-upload-avatar"
+                                  >
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    {isUploadingAvatar ? 'Uploading...' : 'Change Picture'}
+                                  </label>
+                                  <p className="text-xs text-muted-foreground">
+                                    JPEG, PNG, or WebP. Max 5MB.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <FormField
                                 control={profileForm.control}
