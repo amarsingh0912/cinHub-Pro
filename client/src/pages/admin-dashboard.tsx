@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Activity, Star, List, BarChart3, Settings, Shield } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Users, Activity, Star, List, BarChart3, Settings, Shield, Trash2 } from "lucide-react";
 import type { User } from "@shared/schema";
 
 // Type definitions for admin data
@@ -27,6 +28,7 @@ export default function AdminDashboard() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const { data: adminStats, isLoading: statsLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
@@ -90,6 +92,37 @@ export default function AdminDashboard() {
         return;
       }
       const errorMessage = error?.message || "Failed to update user status.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      await apiRequest("DELETE", `/api/admin/users/${userId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/stats"] });
+      setUserToDelete(null);
+      toast({
+        title: "User Deleted",
+        description: "The user has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You don't have permission to perform this action.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const errorMessage = error?.message || "Failed to delete user.";
       toast({
         title: "Error",
         description: errorMessage,
@@ -282,6 +315,7 @@ export default function AdminDashboard() {
                             <TableHead>Joined</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody data-testid="users-table-body">
@@ -351,6 +385,17 @@ export default function AdminDashboard() {
                                     <SelectItem value="verified">Verified</SelectItem>
                                   </SelectContent>
                                 </Select>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setUserToDelete(user)}
+                                  disabled={deleteUserMutation.isPending}
+                                  data-testid={`delete-user-${user.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4 text-destructive" />
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -505,6 +550,31 @@ export default function AdminDashboard() {
           </div>
         </section>
       </main>
+      
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
+        <AlertDialogContent data-testid="delete-user-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{userToDelete?.firstName && userToDelete?.lastName 
+                ? `${userToDelete.firstName} ${userToDelete.lastName}` 
+                : userToDelete?.firstName || userToDelete?.email?.split('@')[0] || 'this user'
+              }"? This action cannot be undone and will permanently remove the user and all their data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="cancel-delete-user">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => userToDelete && deleteUserMutation.mutate(userToDelete.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="confirm-delete-user"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <Footer />
     </div>
