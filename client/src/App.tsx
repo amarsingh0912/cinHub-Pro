@@ -25,14 +25,13 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 
 function Router() {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const [location, setLocation] = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
+  const [location] = useLocation();
 
-  // Role-based redirect logic
+  // OAuth success/failure query param cleanup
   useEffect(() => {
-    // Only redirect if user is authenticated and we're on the root path
-    if (!isLoading && isAuthenticated && user && location === '/') {
-      // Check for OAuth success/failure query params first
+    // Check for OAuth success/failure query params and clean them up
+    if (!isLoading && location === '/') {
       const urlParams = new URLSearchParams(window.location.search);
       const authParam = urlParams.get('auth');
       
@@ -40,15 +39,8 @@ function Router() {
         // Clear the query parameter
         window.history.replaceState({}, document.title, '/');
       }
-      
-      // Redirect based on user role
-      if (user.isAdmin) {
-        setLocation('/admin');
-      } else {
-        setLocation('/dashboard');
-      }
     }
-  }, [isAuthenticated, isLoading, user, location, setLocation]);
+  }, [isLoading, location]);
 
   return (
     <Switch>
