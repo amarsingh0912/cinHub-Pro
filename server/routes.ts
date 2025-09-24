@@ -316,25 +316,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Get the user's email or phone number for OTP delivery
+      const otpTarget = user.email || user.phoneNumber;
+      if (!otpTarget) {
+        return res.status(400).json({ message: "User has no email or phone number for password reset" });
+      }
+
       // Generate 6-digit OTP
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
       
       const otp = await storage.createOtp({
-        target: identifier,
+        target: otpTarget,
         purpose: 'reset',
         code: otpCode,
         expiresAt,
       });
       
       // Send OTP via email or SMS
-      const otpResult = await sendOTP(identifier, otpCode, 'reset');
+      const otpResult = await sendOTP(otpTarget, otpCode, 'reset');
       if (!otpResult.success) {
-        console.error(`Failed to send password reset OTP to ${identifier}:`, otpResult.error);
+        console.error(`Failed to send password reset OTP to ${otpTarget}:`, otpResult.error);
         // Still proceed, but user may need to try again or contact support
       }
       
-      res.json({ message: "Password reset code sent successfully" });
+      res.json({ 
+        message: "Password reset code sent successfully"
+      });
     } catch (error) {
       console.error("Forgot password error:", error);
       res.status(500).json({ message: "Failed to send password reset code" });
@@ -406,16 +414,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Password must be at least 8 characters" });
       }
 
-      // Verify OTP for password reset first
-      const isValidOtp = await storage.verifyOtp(identifier, otpCode, 'reset');
-      if (!isValidOtp) {
-        return res.status(400).json({ message: "Invalid or expired OTP code" });
+      // For password reset, we need to find the user first to get their actual contact info
+      // since the identifier might be a username but OTP was sent to email/phone
+      let user = null;
+      if (identifier.includes('@')) {
+        user = await storage.getUserByEmail(identifier);
+      } else if (identifier.startsWith('+')) {
+        user = await storage.getUserByPhoneNumber(identifier);
+      } else {
+        user = await storage.getUserByUsername(identifier);
       }
 
-      // Find user by identifier
-      const user = await storage.getUserByIdentifier(identifier);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get the actual target that was used for OTP (email or phone)
+      const otpTarget = user.email || user.phoneNumber;
+      if (!otpTarget) {
+        return res.status(400).json({ message: "User has no email or phone number for password reset" });
+      }
+
+      // Verify OTP against the actual target (not the identifier)
+      const isValidOtp = await storage.verifyOtp(otpTarget, otpCode, 'reset');
+      if (!isValidOtp) {
+        return res.status(400).json({ message: "Invalid or expired OTP code" });
       }
 
       // Hash new password and update
@@ -424,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(user.id, { password: hashedPassword });
       
       // Invalidate the OTP after successful password reset
-      await storage.deleteOtp(identifier, 'reset');
+      await storage.deleteOtp(otpTarget, 'reset');
       
       res.json({ message: "Password reset successfully" });
     } catch (error) {
