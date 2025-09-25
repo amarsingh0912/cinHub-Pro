@@ -61,6 +61,9 @@ export default function MovieDetail() {
   // Watchlist dialog state
   const [isWatchlistDialogOpen, setIsWatchlistDialogOpen] = useState(false);
   const [selectedWatchlistId, setSelectedWatchlistId] = useState<string>("");
+  
+  // Trailer modal state
+  const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
   // Submit review mutation
   const submitReviewMutation = useMutation({
@@ -343,7 +346,12 @@ export default function MovieDetail() {
                 
                 <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-4">
                   {trailer && (
-                    <Button size="lg" className="flex items-center gap-2" data-testid="button-watch-trailer">
+                    <Button 
+                      size="lg" 
+                      className="flex items-center gap-2" 
+                      onClick={() => setIsTrailerModalOpen(true)}
+                      data-testid="button-watch-trailer"
+                    >
                       <Play className="w-5 h-5" />
                       Watch Trailer
                     </Button>
@@ -841,6 +849,32 @@ export default function MovieDetail() {
                 >
                   Go to Dashboard
                 </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trailer Modal */}
+      <Dialog open={isTrailerModalOpen} onOpenChange={setIsTrailerModalOpen}>
+        <DialogContent className="max-w-4xl w-full p-0" data-testid="trailer-modal">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle>Watch Trailer</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 pt-4">
+            {trailer && (
+              <div className="aspect-video w-full">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0`}
+                  title="Movie Trailer"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-lg"
+                  data-testid="trailer-iframe"
+                />
               </div>
             )}
           </div>
