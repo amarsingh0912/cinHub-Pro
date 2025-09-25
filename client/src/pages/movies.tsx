@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import type { MovieResponse, TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -120,14 +120,23 @@ interface ContentFilters {
 
 export default function Movies() {
   const [location] = useLocation();
+  const searchString = useSearch(); // This gives us the query string without the ?
   const [currentPage, setCurrentPage] = useState(1);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   
   // Parse URL parameters to set initial filters
   const getInitialFilters = () => {
-    const searchParams = new URLSearchParams(location.split('?')[1] || '');
+    // Use wouter's useSearch hook to get query parameters
+    const searchParams = new URLSearchParams(searchString);
+    
     const categoryParam = searchParams.get('category');
     const contentTypeParam = searchParams.get('contentType');
+    
+    // Debug logging
+    console.log('Current location:', location);
+    console.log('Search string:', searchString);
+    console.log('Category param:', categoryParam);
+    console.log('Content type param:', contentTypeParam);
     
     // Validate category parameter
     const validMovieCategories = ['discover', 'trending', 'popular', 'upcoming', 'now_playing'];
@@ -135,6 +144,9 @@ export default function Movies() {
     const contentType = (contentTypeParam === 'tv') ? 'tv' : 'movies';
     const validCategories = contentType === 'movies' ? validMovieCategories : validTVCategories;
     const category = (categoryParam && validCategories.includes(categoryParam)) ? categoryParam : 'discover';
+    
+    console.log('Final category:', category);
+    console.log('Final content type:', contentType);
     
     return {
       contentType: contentType as ContentType,
@@ -156,7 +168,7 @@ export default function Movies() {
   useEffect(() => {
     const newFilters = getInitialFilters();
     setFilters(newFilters);
-  }, [location]);
+  }, [location, searchString]);
   
   // Get available categories based on content type
   const getAvailableCategories = () => {
