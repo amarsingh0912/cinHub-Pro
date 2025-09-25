@@ -57,49 +57,50 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/30 shadow-lg" data-testid="header">
+      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/30 shadow-lg backdrop-blur-xl" data-testid="header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link href="/" data-testid="link-home">
-                <div className="flex items-center space-x-3 cursor-pointer group">
-                  <div className="w-9 h-9 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110">
+                <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-lg px-2 py-1 -ml-2">
+                  <div className="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-md group-hover:shadow-primary/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-2">
                     <Film className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-xl font-display font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">CineHub Pro</span>
+                  <span className="text-xl font-display font-bold text-gradient group-hover:scale-105 transition-transform duration-300">CineHub Pro</span>
                 </div>
               </Link>
               
-              <nav className="hidden md:flex items-center space-x-1">
+              <nav className="hidden md:flex items-center space-x-2">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`link-${item.label.toLowerCase()}`}>
                     <span
-                      className={`px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer relative group ${
+                      className={`interactive px-4 py-2.5 rounded-xl cursor-pointer relative group backdrop-blur-sm border transition-all duration-300 ${
                         location === item.href
-                          ? "text-primary bg-primary/10 font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                          ? "text-primary bg-primary/10 font-semibold border-primary/30 shadow-sm"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/60 border-transparent hover:border-accent hover:shadow-md"
                       }`}
                     >
                       {item.label}
                       {location === item.href && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-primary rounded-full animate-scale-in" />
                       )}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
                     </span>
                   </Link>
                 ))}
               </nav>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {/* Search Toggle */}
               <Button
                 variant="glass"
                 size="icon"
                 onClick={() => setIsSearchOpen(true)}
                 data-testid="button-search"
-                className="hover:shadow-glow transition-all duration-300"
+                className="hover:scale-105 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:border-primary/30"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-5 h-5 transition-transform duration-200" />
               </Button>
               
               {/* Theme Toggle */}
@@ -109,12 +110,12 @@ export default function Header() {
                 onClick={toggleTheme}
                 data-testid="button-theme"
                 title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                className="hover:shadow-glow transition-all duration-300"
+                className="hover:scale-105 hover:shadow-lg hover:shadow-secondary/20 transition-all duration-300 hover:border-secondary/30"
               >
                 {theme === 'dark' ? (
-                  <Sun className="w-5 h-5" />
+                  <Sun className="w-5 h-5 hover:rotate-12 transition-transform duration-300" />
                 ) : (
-                  <Moon className="w-5 h-5" />
+                  <Moon className="w-5 h-5 hover:-rotate-12 transition-transform duration-300" />
                 )}
               </Button>
               
@@ -122,11 +123,15 @@ export default function Header() {
               <Button
                 variant="glass"
                 size="icon"
-                className="md:hidden hover:shadow-glow transition-all duration-300"
+                className="md:hidden hover:scale-105 hover:shadow-lg hover:shadow-accent/20 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 data-testid="button-mobile-menu"
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5 hover:rotate-90 transition-transform duration-300" />
+                ) : (
+                  <Menu className="w-5 h-5 transition-transform duration-200" />
+                )}
               </Button>
               
               {/* Auth Section */}
@@ -188,19 +193,22 @@ export default function Header() {
           
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-border/30 py-4 animate-fade-in-up" data-testid="mobile-menu">
-              <nav className="flex flex-col space-y-2">
+            <div className="md:hidden border-t border-border/30 py-6 animate-slide-down backdrop-blur-lg" data-testid="mobile-menu">
+              <nav className="flex flex-col space-y-3 animate-stagger-in">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`mobile-link-${item.label.toLowerCase()}`}>
                     <span
-                      className={`block px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
+                      className={`block px-5 py-4 rounded-xl cursor-pointer transition-all duration-300 backdrop-blur-sm border ${
                         location === item.href
-                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/60 hover:translate-x-1"
+                          ? "bg-primary/15 text-primary font-semibold border-primary/30 shadow-sm scale-[1.02]"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/60 hover:translate-x-2 hover:shadow-md border-transparent hover:border-accent/30"
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.label}
+                      {location === item.href && (
+                        <div className="w-2 h-2 bg-primary rounded-full ml-auto animate-pulse" />
+                      )}
                     </span>
                   </Link>
                 ))}
