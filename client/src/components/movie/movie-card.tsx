@@ -5,12 +5,13 @@ import { getImageUrl } from "@/lib/tmdb";
 
 interface MovieCardProps {
   movie: Movie;
+  size?: 'normal' | 'compact';
 }
 
-export default function MovieCard({ movie }: MovieCardProps) {
+export default function MovieCard({ movie, size = 'normal' }: MovieCardProps) {
   return (
     <Link href={`/movie/${movie.id}`} data-testid={`movie-card-${movie.id}`}>
-      <div className="movie-card group cursor-pointer interactive">
+      <div className={`movie-card ${size === 'compact' ? 'movie-card-compact' : ''} group cursor-pointer interactive`}
         <div className="aspect-[2/3] relative overflow-hidden rounded-xl bg-accent/50 border border-border/20 backdrop-blur-sm hover:border-primary/30 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:scale-[1.02]">
           {movie.poster_path ? (
             <img
