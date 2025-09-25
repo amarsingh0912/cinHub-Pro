@@ -11,13 +11,20 @@ interface MovieGridProps {
   skeletonCount?: number;
 }
 
-export default function MovieGrid({ movies, title, showViewAll, viewAllHref, isLoading, skeletonCount = 12 }: MovieGridProps) {
+export default function MovieGrid({
+  movies,
+  title,
+  showViewAll,
+  viewAllHref,
+  isLoading,
+  skeletonCount = 12,
+}: MovieGridProps) {
   if (isLoading) {
     return (
-      <MovieGridSkeleton 
-        title={title} 
-        showViewAll={showViewAll} 
-        count={skeletonCount} 
+      <MovieGridSkeleton
+        title={title}
+        showViewAll={showViewAll}
+        count={skeletonCount}
       />
     );
   }
@@ -35,7 +42,12 @@ export default function MovieGrid({ movies, title, showViewAll, viewAllHref, isL
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {title && (
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-display font-bold" data-testid="section-title">{title}</h2>
+            <h2
+              className="text-3xl font-display font-bold"
+              data-testid="section-title"
+            >
+              {title}
+            </h2>
             {showViewAll && viewAllHref && (
               <a
                 href={viewAllHref}
@@ -47,8 +59,11 @@ export default function MovieGrid({ movies, title, showViewAll, viewAllHref, isL
             )}
           </div>
         )}
-        
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="movie-grid">
+
+        <div
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+          data-testid="movie-grid"
+        >
           {movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}

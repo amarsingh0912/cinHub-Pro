@@ -45,7 +45,7 @@
   --chart-3: hsl(42, 95%, 58%);
   --chart-4: hsl(147, 80%, 44%);
   --chart-5: hsl(341, 78%, 53%);
-  
+
   /* Sidebar Colors */
   --sidebar: hsl(222, 10%, 6%);
   --sidebar-foreground: hsl(210, 40%, 98%);
@@ -55,13 +55,13 @@
   --sidebar-accent-foreground: hsl(210, 40%, 98%);
   --sidebar-border: hsl(222, 10%, 18%);
   --sidebar-ring: hsl(355, 90%, 55%);
-  
+
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-serif: 'Georgia', 'Times New Roman', serif;
   --font-mono: 'SF Mono', 'Monaco', 'Menlo', monospace;
   --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-  
+
   /* Enhanced Radius System */
   --radius-xs: 0.25rem;
   --radius-sm: 0.375rem;
@@ -71,7 +71,7 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
-  
+
   /* Modern Shadow System */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -81,11 +81,11 @@
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-2xl: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  
+
   /* Colored shadows for depth */
   --shadow-primary: 0 10px 25px -5px hsla(355, 90%, 55%, 0.3);
   --shadow-secondary: 0 10px 25px -5px hsla(45, 95%, 60%, 0.2);
-  
+
   /* Enhanced Spacing System with Fluid Scales */
   --space-px: 1px;
   --space-0: 0;
@@ -115,14 +115,14 @@
   --space-48: 12rem;
   --space-56: 14rem;
   --space-64: 16rem;
-  
+
   /* Fluid spacing for responsive design */
   --space-fluid-sm: clamp(1rem, 2vw, 1.5rem);
   --space-fluid-md: clamp(1.5rem, 4vw, 3rem);
   --space-fluid-lg: clamp(2rem, 6vw, 4rem);
   --space-fluid-xl: clamp(3rem, 8vw, 6rem);
   --space-fluid-2xl: clamp(4rem, 12vw, 8rem);
-  
+
   /* Typography Scale */
   --text-xs: clamp(0.75rem, 0.9vw, 0.875rem);
   --text-sm: clamp(0.875rem, 1vw, 1rem);
@@ -137,7 +137,7 @@
   --text-7xl: clamp(4.5rem, 6vw, 6rem);
   --text-8xl: clamp(6rem, 8vw, 8rem);
   --text-9xl: clamp(8rem, 10vw, 10rem);
-  
+
   /* Animation Timing */
   --duration-75: 75ms;
   --duration-100: 100ms;
@@ -147,7 +147,7 @@
   --duration-500: 500ms;
   --duration-700: 700ms;
   --duration-1000: 1000ms;
-  
+
   /* Easing Functions */
   --ease-linear: cubic-bezier(0, 0, 1, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
@@ -161,7 +161,7 @@
   --ease-overshoot: cubic-bezier(0.25, 0.46, 0.45, 1.4);
   --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-dramatic: cubic-bezier(0.25, 0.1, 0.25, 1);
-  
+
   /* Color gradients for UI elements */
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, hsl(42, 95%, 55%) 100%);
@@ -169,7 +169,7 @@
   --gradient-warning: linear-gradient(135deg, var(--warning) 0%, hsl(30, 95%, 50%) 100%);
   --gradient-destructive: linear-gradient(135deg, var(--destructive) 0%, hsl(0, 85%, 50%) 100%);
   --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--muted) 100%);
-  
+
   /* Surface elevation levels */
   --elevation-0: var(--shadow-xs);
   --elevation-1: var(--shadow-sm);
@@ -220,7 +220,7 @@
   --chart-3: hsl(42, 92%, 58%);
   --chart-4: hsl(147, 78%, 44%);
   --chart-5: hsl(341, 78%, 53%);
-  
+
   /* Light Sidebar Colors */
   --sidebar: hsl(0, 0%, 98%);
   --sidebar-foreground: hsl(222, 15%, 8%);
@@ -230,7 +230,7 @@
   --sidebar-accent-foreground: hsl(222, 15%, 8%);
   --sidebar-border: hsl(220, 15%, 92%);
   --sidebar-ring: hsl(355, 88%, 52%);
-  
+
   /* Light Mode Shadow System */
   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -240,7 +240,7 @@
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-2xl: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  
+
   /* Colored shadows for light mode */
   --shadow-primary: 0 10px 25px -5px hsla(355, 88%, 52%, 0.25);
   --shadow-secondary: 0 10px 25px -5px hsla(45, 92%, 58%, 0.2);
@@ -260,7 +260,12 @@
     @apply scroll-smooth;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -272,28 +277,28 @@
 
   /* Enhanced Gradient Utilities */
   .hero-gradient {
-    background: linear-gradient(135deg, 
-      hsla(355, 90%, 55%, 0.15) 0%,
-      hsla(45, 95%, 60%, 0.1) 50%,
-      hsla(220, 30%, 10%, 0.8) 100%);
+    background: linear-gradient(135deg,
+        hsla(355, 90%, 55%, 0.15) 0%,
+        hsla(45, 95%, 60%, 0.1) 50%,
+        hsla(220, 30%, 10%, 0.8) 100%);
   }
 
   .card-gradient {
     background: linear-gradient(135deg,
-      hsla(355, 90%, 55%, 0.05) 0%,
-      hsla(45, 95%, 60%, 0.03) 100%);
+        hsla(355, 90%, 55%, 0.05) 0%,
+        hsla(45, 95%, 60%, 0.03) 100%);
   }
 
   .primary-gradient {
     background: linear-gradient(135deg,
-      hsl(355, 90%, 55%) 0%,
-      hsl(355, 90%, 48%) 100%);
+        hsl(355, 90%, 55%) 0%,
+        hsl(355, 90%, 48%) 100%);
   }
 
   .secondary-gradient {
     background: linear-gradient(135deg,
-      hsl(45, 95%, 60%) 0%,
-      hsl(45, 95%, 55%) 100%);
+        hsl(45, 95%, 60%) 0%,
+        hsl(45, 95%, 55%) 100%);
   }
 
   /* Enhanced Glassmorphism */
@@ -340,9 +345,9 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg,
-      hsla(355, 90%, 55%, 0.08) 0%,
-      hsla(45, 95%, 60%, 0.05) 50%,
-      transparent 100%);
+        hsla(355, 90%, 55%, 0.08) 0%,
+        hsla(45, 95%, 60%, 0.05) 50%,
+        transparent 100%);
     opacity: 0;
     transition: opacity var(--duration-400) var(--ease-smooth);
     z-index: 1;
@@ -356,9 +361,9 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 50% 50%, 
-      hsla(355, 90%, 55%, 0.15) 0%, 
-      transparent 70%);
+    background: radial-gradient(circle at 50% 50%,
+        hsla(355, 90%, 55%, 0.15) 0%,
+        transparent 70%);
     opacity: 0;
     transition: opacity var(--duration-600) var(--ease-spring);
     z-index: 2;
@@ -394,7 +399,6 @@
 
   /* Button-like Interactive Elements */
   .btn-interactive {
-    position: relative;
     overflow: hidden;
     transition: all var(--duration-300) var(--ease-smooth);
   }
@@ -406,10 +410,10 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-      transparent, 
-      rgba(255, 255, 255, 0.2), 
-      transparent);
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent);
     transition: left var(--duration-500) var(--ease-out);
   }
 
@@ -437,20 +441,18 @@
   /* Text Utilities */
   .text-gradient {
     background: linear-gradient(135deg,
-      hsl(355, 90%, 55%),
-      hsl(45, 95%, 60%));
+        hsl(355, 90%, 55%),
+        hsl(45, 95%, 60%));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
   .text-shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
@@ -475,10 +477,10 @@
     position: absolute;
     inset: 0;
     padding: 1px;
-    background: linear-gradient(135deg, 
-      hsla(355, 90%, 55%, 0.5),
-      hsla(45, 95%, 60%, 0.3),
-      transparent);
+    background: linear-gradient(135deg,
+        hsla(355, 90%, 55%, 0.5),
+        hsla(45, 95%, 60%, 0.3),
+        transparent);
     border-radius: inherit;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -488,6 +490,7 @@
 }
 
 @layer components {
+
   /* Enhanced Animation Classes */
   .animate-fade-in {
     animation: fadeIn var(--duration-500) var(--ease-out);
@@ -538,12 +541,10 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(
-      90deg,
-      var(--muted) 25%,
-      var(--muted-foreground) 37.5%,
-      var(--muted) 62.5%
-    );
+    background: linear-gradient(90deg,
+        var(--muted) 25%,
+        var(--muted-foreground) 37.5%,
+        var(--muted) 62.5%);
     background-size: 400% 100%;
     animation: shimmer 2s ease-in-out infinite;
   }
@@ -553,24 +554,49 @@
   }
 
   /* Stagger Animation Classes */
-  .animate-stagger-in > * {
+  .animate-stagger-in>* {
     opacity: 0;
     transform: translateY(20px);
     animation: staggerIn var(--duration-500) var(--ease-out) forwards;
   }
 
-  .animate-stagger-in > *:nth-child(1) { animation-delay: 0ms; }
-  .animate-stagger-in > *:nth-child(2) { animation-delay: 100ms; }
-  .animate-stagger-in > *:nth-child(3) { animation-delay: 200ms; }
-  .animate-stagger-in > *:nth-child(4) { animation-delay: 300ms; }
-  .animate-stagger-in > *:nth-child(5) { animation-delay: 400ms; }
-  .animate-stagger-in > *:nth-child(6) { animation-delay: 500ms; }
-  .animate-stagger-in > *:nth-child(n+7) { animation-delay: 600ms; }
+  .animate-stagger-in>*:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  .animate-stagger-in>*:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .animate-stagger-in>*:nth-child(3) {
+    animation-delay: 200ms;
+  }
+
+  .animate-stagger-in>*:nth-child(4) {
+    animation-delay: 300ms;
+  }
+
+  .animate-stagger-in>*:nth-child(5) {
+    animation-delay: 400ms;
+  }
+
+  .animate-stagger-in>*:nth-child(6) {
+    animation-delay: 500ms;
+  }
+
+  .animate-stagger-in>*:nth-child(n+7) {
+    animation-delay: 600ms;
+  }
 
   /* Enhanced Keyframes */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes fadeInUp {
@@ -578,6 +604,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -589,6 +616,7 @@
       transform: translateY(20px);
       opacity: 0;
     }
+
     to {
       transform: translateY(0);
       opacity: 1;
@@ -600,6 +628,7 @@
       transform: translateY(-20px);
       opacity: 0;
     }
+
     to {
       transform: translateY(0);
       opacity: 1;
@@ -611,6 +640,7 @@
       transform: translateX(-30px);
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
@@ -622,6 +652,7 @@
       transform: translateX(30px);
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
@@ -633,6 +664,7 @@
       transform: scale(0.9);
       opacity: 0;
     }
+
     to {
       transform: scale(1);
       opacity: 1;
@@ -644,10 +676,12 @@
       transform: scale(0.8);
       opacity: 0;
     }
+
     50% {
       transform: scale(1.05);
       opacity: 0.8;
     }
+
     100% {
       transform: scale(1);
       opacity: 1;
@@ -662,33 +696,58 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   @keyframes pulseSlow {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.8;
+    }
   }
 
   @keyframes glow {
     from {
       box-shadow: 0 0 20px hsla(355, 90%, 55%, 0.3);
     }
+
     to {
       box-shadow: 0 0 40px hsla(355, 90%, 55%, 0.6),
-                  0 0 60px hsla(355, 90%, 55%, 0.3);
+        0 0 60px hsla(355, 90%, 55%, 0.3);
     }
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   @keyframes wave {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
   }
 
   @keyframes bounceIn {
@@ -696,14 +755,17 @@
       transform: scale(0.3);
       opacity: 0;
     }
+
     50% {
       transform: scale(1.05);
       opacity: 0.8;
     }
+
     70% {
       transform: scale(0.95);
       opacity: 0.9;
     }
+
     100% {
       transform: scale(1);
       opacity: 1;
@@ -740,7 +802,7 @@
 @media print {
   * {
     -webkit-print-color-adjust: exact !important;
-    color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
@@ -755,6 +817,7 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
