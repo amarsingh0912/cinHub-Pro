@@ -478,7 +478,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                           <Input
                             {...field}
                             placeholder="Enter your email, username, or phone"
-                            className="pl-12 h-12 rounded-xl border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/50 focus:bg-background/80 transition-all duration-200"
+                            className="pl-12 h-12 rounded-xl border-border/30 bg-black backdrop-blur-sm focus:border-primary/50 focus:bg-black transition-all duration-200"
                             data-testid="input-login-credential"
                           />
                         </div>
@@ -500,7 +500,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
-                            className="pr-12 h-12 rounded-xl border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/50 focus:bg-background/80 transition-all duration-200"
+                            className="pr-12 h-12 rounded-xl border-border/30 bg-black backdrop-blur-sm focus:border-primary/50 focus:bg-black transition-all duration-200"
                             data-testid="input-password"
                           />
                           <button

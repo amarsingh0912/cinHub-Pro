@@ -709,7 +709,7 @@ export default function MovieDetail() {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended Movies</h2>
                 {movie?.recommendations?.results && movie.recommendations.results.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {movie.recommendations.results.slice(0, 12).map((rec: any) => (
                       <div key={rec.id} className="space-y-2" data-testid={`recommended-movie-${rec.id}`}>
                         <a href={`/movie/${rec.id}`} className="block group">
@@ -746,7 +746,7 @@ export default function MovieDetail() {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar Movies</h2>
                 {movie?.similar?.results && movie.similar.results.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {movie.similar.results.slice(0, 12).map((sim: any) => (
                       <div key={sim.id} className="space-y-2" data-testid={`similar-movie-${sim.id}`}>
                         <a href={`/movie/${sim.id}`} className="block group">
