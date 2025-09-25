@@ -5,22 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-95 relative overflow-hidden",
+  "btn-interactive inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 relative overflow-hidden active:scale-[0.98] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 rounded-lg",
-        gradient: "primary-gradient text-primary-foreground hover:shadow-lg hover:shadow-primary/30 hover:scale-105 rounded-lg",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] rounded-lg border border-primary/20",
+        gradient: "bg-gradient-to-r from-primary to-primary-600 text-primary-foreground hover:from-primary/90 hover:to-primary-500 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] rounded-lg font-medium",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-lg hover:shadow-destructive/25 rounded-lg",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-lg hover:shadow-destructive/25 hover:scale-[1.02] rounded-lg border border-destructive/20",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-primary/50 rounded-lg",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-primary/50 hover:shadow-md hover:scale-[1.02] rounded-lg backdrop-blur-sm",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-lg hover:shadow-secondary/25 rounded-lg",
-        ghost: "hover:bg-accent hover:text-accent-foreground hover:scale-105 rounded-lg",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
-        glass: "glassmorphism text-foreground hover:bg-white/10 border border-white/10 rounded-xl",
-        premium: "bg-gradient-to-r from-primary to-secondary text-white hover:from-primary/90 hover:to-secondary/90 hover:shadow-xl hover:shadow-primary/30 rounded-xl font-semibold",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-lg hover:shadow-secondary/25 hover:scale-[1.02] rounded-lg border border-secondary/20",
+        ghost: "hover:bg-accent hover:text-accent-foreground hover:scale-[1.02] rounded-lg backdrop-blur-sm",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80 px-0 h-auto rounded-none",
+        glass: "glassmorphism text-foreground hover:bg-white/10 border border-white/10 rounded-xl hover:scale-[1.02] backdrop-blur-lg",
+        premium: "bg-gradient-to-r from-primary via-primary-500 to-secondary text-white hover:from-primary/90 hover:via-primary-400 hover:to-secondary/90 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] rounded-xl font-semibold border border-primary/30",
+        success: "bg-success text-success-foreground hover:bg-success/90 hover:shadow-lg hover:shadow-success/25 hover:scale-[1.02] rounded-lg border border-success/20",
+        warning: "bg-warning text-warning-foreground hover:bg-warning/90 hover:shadow-lg hover:shadow-warning/25 hover:scale-[1.02] rounded-lg border border-warning/20",
       },
       size: {
         default: "h-10 px-4 py-2",
