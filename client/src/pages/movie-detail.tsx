@@ -427,7 +427,7 @@ export default function MovieDetail() {
                   {movie.credits?.cast && (
                     <div>
                       <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="cast-grid">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-grid">
                         {movie.credits.cast.slice(0, 12).map((actor: any) => (
                           <Link key={actor.id} href={"/person/" + actor.id}>
                             <div className="text-center cursor-pointer group hover:scale-105 transition-transform">
@@ -458,7 +458,7 @@ export default function MovieDetail() {
                   {movie.credits?.crew && (
                     <div>
                       <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4" data-testid="crew-grid">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-grid">
                         {movie.credits.crew
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Screenplay'].includes(person.job))
                           .slice(0, 6)
