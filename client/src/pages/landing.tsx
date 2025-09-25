@@ -102,7 +102,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Link href="/movies">
+                  <Link href="/movies?category=trending">
                     <Button variant="outline" data-testid="button-view-all-trending-movies">
                       View All Trending Movies
                     </Button>
@@ -231,7 +231,7 @@ export default function Landing() {
                   </div>
                 )}
                 <div className="text-center mt-8">
-                  <Link href="/movies">
+                  <Link href="/movies?category=popular">
                     <Button variant="outline" data-testid="button-view-all-popular-movies">
                       View All Popular Movies
                     </Button>
