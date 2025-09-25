@@ -52,13 +52,13 @@ export default function SearchPage() {
                   placeholder="Search for movies and TV shows..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="pl-12 pr-24 py-4 text-lg"
+                  className="pl-12 pr-28 py-4 text-lg"
                   data-testid="input-search"
                 />
                 <Search className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Button
                   type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-10"
                   disabled={!query.trim() || isLoading}
                   data-testid="button-search"
                 >
