@@ -23,7 +23,8 @@ import {
   Upload, 
   Camera,
   Key,
-  ArrowLeft
+  ArrowLeft,
+  X
 } from "lucide-react";
 import { FaGoogle, FaFacebook, FaTwitter, FaGithub } from "react-icons/fa";
 import { Link } from "wouter";
@@ -420,29 +421,38 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[min(100vw-2rem,28rem)] sm:w-[32rem] md:w-[36rem] p-0 sm:p-4 md:p-6 sm:rounded-xl overflow-hidden" data-testid="auth-modal">
+      <DialogContent className="w-[min(100vw-2rem,28rem)] sm:w-[32rem] md:w-[38rem] p-0 sm:p-6 md:p-8 sm:rounded-2xl overflow-hidden border border-border/20 backdrop-blur-xl bg-background/95 shadow-2xl shadow-primary/10" data-testid="auth-modal">
         <div className="flex flex-col max-h-[calc(100dvh-0.5rem)] sm:max-h-[calc(100dvh-2rem)] md:max-h-[90dvh]">
-          <DialogHeader className="shrink-0 px-4 pt-4 sm:px-6 sm:pt-6 md:px-6 md:pt-0">
-            <DialogTitle className="text-center text-xl sm:text-2xl font-display font-bold mb-2">
-              {getModalTitle()}
-            </DialogTitle>
-            <DialogDescription className="text-center text-sm sm:text-base text-muted-foreground px-2 sm:px-0">
-              {getModalDescription()}
-            </DialogDescription>
+          <DialogHeader className="shrink-0 px-6 pt-6 sm:px-0 sm:pt-0 text-center">
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-16 h-16 primary-gradient rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                {mode === "signin" && <LogIn className="w-8 h-8 text-white" />}
+                {mode === "signup" && <UserPlus className="w-8 h-8 text-white" />}
+                {mode === "forgot-password" && <Key className="w-8 h-8 text-white" />}
+                {mode === "otp-verification" && <Mail className="w-8 h-8 text-white" />}
+                {mode === "reset-password" && <Key className="w-8 h-8 text-white" />}
+              </div>
+              <DialogTitle className="text-center text-2xl sm:text-3xl font-display font-bold text-gradient mb-3">
+                {getModalTitle()}
+              </DialogTitle>
+              <DialogDescription className="text-center text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
+                {getModalDescription()}
+              </DialogDescription>
+            </div>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6 md:pb-4 pb-[env(safe-area-inset-bottom)] overscroll-contain" role="region" aria-label="Authentication form">
-            <div className="space-y-4 sm:space-y-6 pt-2 sm:pt-4">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 sm:px-0 md:pb-6 pb-[env(safe-area-inset-bottom)] overscroll-contain" role="region" aria-label="Authentication form">
+            <div className="space-y-6">
           {/* Back button for non-signin modes */}
           {mode !== "signin" && (
             <Button
-              variant="ghost"
+              variant="glass"
               size="sm"
               onClick={() => {
                 setMode("signin");
                 setSigninError(""); // Clear errors when switching modes
               }}
-              className="self-start -ml-2"
+              className="self-start interactive hover:scale-105 transition-all duration-200"
               data-testid="button-back"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -453,27 +463,27 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Sign In Form */}
           {mode === "signin" && (
             <Form {...signinForm}>
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <FormField
                   control={signinForm.control}
                   name="loginValue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email, Username, or Phone</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-foreground">Email, Username, or Phone</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <User className="h-5 w-5 text-muted-foreground" />
                           </div>
                           <Input
                             {...field}
                             placeholder="Enter your email, username, or phone"
-                            className="pl-10"
+                            className="pl-12 h-12 rounded-xl border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/50 focus:bg-background/80 transition-all duration-200"
                             data-testid="input-login-credential"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -483,31 +493,31 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-foreground">Password</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
-                            className="pr-10"
+                            className="pr-12 h-12 rounded-xl border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/50 focus:bg-background/80 transition-all duration-200"
                             data-testid="input-password"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-primary transition-colors duration-200"
                             data-testid="button-toggle-password"
                           >
                             {showPassword ? (
-                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              <EyeOff className="h-5 w-5 text-muted-foreground hover:text-primary" />
                             ) : (
-                              <Eye className="h-4 w-4 text-muted-foreground" />
+                              <Eye className="h-5 w-5 text-muted-foreground hover:text-primary" />
                             )}
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
@@ -516,18 +526,20 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   control={signinForm.control}
                   name="rememberMe"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 rounded-xl bg-accent/30 border border-border/20">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                           data-testid="checkbox-remember-me"
+                          className="mt-0.5"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-normal">
+                        <FormLabel className="text-sm font-medium cursor-pointer">
                           Remember me for 30 days
                         </FormLabel>
+                        <p className="text-xs text-muted-foreground">Stay signed in on this device</p>
                       </div>
                     </FormItem>
                   )}
@@ -535,14 +547,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 {/* Sign-in Error Display */}
                 {signinError && (
-                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md" data-testid="signin-error">
-                    <p className="text-sm text-destructive font-medium">{signinError}</p>
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl backdrop-blur-sm animate-fade-in" data-testid="signin-error">
+                    <p className="text-sm text-destructive font-medium flex items-center gap-2">
+                      <X className="h-4 w-4" />
+                      {signinError}
+                    </p>
                   </div>
                 )}
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-base font-semibold interactive hover:scale-[1.02] transition-all duration-300"
                   size="lg"
                   data-testid="button-signin"
                   disabled={isLoading}
@@ -962,67 +977,67 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
 
               {/* Social Authentication */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
+                    <Separator className="w-full border-border/30" />
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
+                  <div className="relative flex justify-center text-xs uppercase font-medium">
+                    <span className="bg-background px-4 py-1 rounded-full text-muted-foreground border border-border/20">
                       Or continue with
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <Button
-                    variant="outline"
+                    variant="glass"
                     onClick={() => handleSocialAuth("Google")}
-                    className="justify-start sm:justify-center"
+                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-red-500/30"
                     data-testid="button-google-auth"
                   >
-                    <FaGoogle className="mr-2 h-4 w-4" />
-                    Google
+                    <FaGoogle className="mr-2 h-5 w-5 text-red-500" />
+                    <span className="hidden sm:inline">Google</span>
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="glass"
                     onClick={() => handleSocialAuth("Facebook")}
-                    className="justify-start sm:justify-center"
+                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-blue-600/30"
                     data-testid="button-facebook-auth"
                   >
-                    <FaFacebook className="mr-2 h-4 w-4" />
-                    Facebook
+                    <FaFacebook className="mr-2 h-5 w-5 text-blue-600" />
+                    <span className="hidden sm:inline">Facebook</span>
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="glass"
                     onClick={() => handleSocialAuth("X")}
-                    className="justify-start sm:justify-center"
+                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-gray-800/30"
                     data-testid="button-x-auth"
                   >
-                    <FaTwitter className="mr-2 h-4 w-4" />
-                    X
+                    <FaTwitter className="mr-2 h-5 w-5 text-gray-800 dark:text-white" />
+                    <span className="hidden sm:inline">X</span>
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="glass"
                     onClick={() => handleSocialAuth("GitHub")}
-                    className="justify-start sm:justify-center"
+                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-gray-800/30"
                     data-testid="button-github-auth"
                   >
-                    <FaGithub className="mr-2 h-4 w-4" />
-                    GitHub
+                    <FaGithub className="mr-2 h-5 w-5 text-gray-800 dark:text-white" />
+                    <span className="hidden sm:inline">GitHub</span>
                   </Button>
                 </div>
               </div>
 
               {/* Terms and Privacy */}
-              <div className="text-center text-xs text-muted-foreground">
+              <div className="text-center text-xs text-muted-foreground p-4 rounded-xl bg-accent/10 border border-border/10">
                 <p>
                   By signing in, you agree to our{" "}
-                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80" data-testid="link-terms">
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80 underline-offset-2 hover:underline transition-all duration-200" data-testid="link-terms">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80" data-testid="link-privacy">
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80 underline-offset-2 hover:underline transition-all duration-200" data-testid="link-privacy">
                     Privacy Policy
                   </Link>
                 </p>
@@ -1034,14 +1049,14 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {mode === "signup" && (
             <div className="space-y-4">
               {/* Terms and Privacy */}
-              <div className="text-center text-xs text-muted-foreground">
+              <div className="text-center text-xs text-muted-foreground p-4 rounded-xl bg-accent/10 border border-border/10">
                 <p>
                   By creating an account, you agree to our{" "}
-                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80" data-testid="link-terms">
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary/80 underline-offset-2 hover:underline transition-all duration-200" data-testid="link-terms">
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80" data-testid="link-privacy">
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary/80 underline-offset-2 hover:underline transition-all duration-200" data-testid="link-privacy">
                     Privacy Policy
                   </Link>
                 </p>
