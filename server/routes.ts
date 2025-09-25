@@ -227,12 +227,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"], // Keep for CSS-in-JS frameworks
         scriptSrc: isProduction ? ["'self'"] : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com", "https://res.cloudinary.com"],
+        imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com", "https://res.cloudinary.com", "https://i.ytimg.com"],
         connectSrc: ["'self'", "wss:", "https://api.cloudinary.com", "https://upload.cloudinary.com", ...(isProduction ? [] : ['https://api.themoviedb.org'])], // Allow TMDB API in dev for debugging
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
+        frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+        frameAncestors: ["'self'"],
       },
     },
     crossOriginEmbedderPolicy: false,
