@@ -20,9 +20,11 @@ export default function MovieGridSkeleton({ title, showViewAll, count = 12 }: Mo
           </div>
         )}
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="movie-grid-skeleton-grid">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in" data-testid="movie-grid-skeleton-grid">
           {Array.from({ length: count }, (_, index) => (
-            <MovieCardSkeleton key={index} />
+            <div key={index} style={{ animationDelay: `${index * 0.1}s` }} className="animate-fade-in-up">
+              <MovieCardSkeleton />
+            </div>
           ))}
         </div>
       </div>

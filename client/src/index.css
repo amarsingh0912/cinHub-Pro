@@ -533,8 +533,23 @@
     animation: glow 2s ease-in-out infinite alternate;
   }
 
+  .animate-wave {
+    animation: wave 1.6s linear infinite;
+  }
+
   .animate-shimmer {
-    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      var(--muted) 25%,
+      var(--muted-foreground) 37.5%,
+      var(--muted) 62.5%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.6s var(--ease-spring) both;
   }
 
   /* Stagger Animation Classes */
@@ -669,6 +684,30 @@
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
+  }
+
+  @keyframes wave {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes bounceIn {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.8;
+    }
+    70% {
+      transform: scale(0.95);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 }
 
