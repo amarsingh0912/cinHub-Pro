@@ -132,21 +132,12 @@ export default function Movies() {
     const categoryParam = searchParams.get('category');
     const contentTypeParam = searchParams.get('contentType');
     
-    // Debug logging
-    console.log('Current location:', location);
-    console.log('Search string:', searchString);
-    console.log('Category param:', categoryParam);
-    console.log('Content type param:', contentTypeParam);
-    
     // Validate category parameter
     const validMovieCategories = ['discover', 'trending', 'popular', 'upcoming', 'now_playing'];
     const validTVCategories = ['discover', 'trending', 'popular', 'airing_today', 'on_the_air'];
     const contentType = (contentTypeParam === 'tv') ? 'tv' : 'movies';
     const validCategories = contentType === 'movies' ? validMovieCategories : validTVCategories;
     const category = (categoryParam && validCategories.includes(categoryParam)) ? categoryParam : 'discover';
-    
-    console.log('Final category:', category);
-    console.log('Final content type:', contentType);
     
     return {
       contentType: contentType as ContentType,
