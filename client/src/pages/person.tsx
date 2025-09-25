@@ -298,7 +298,7 @@ export default function Person() {
 
                     <TabsContent value="movies" data-testid="movies-filmography">
                       {sortedMovieCredits.length > 0 ? (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
                           {sortedMovieCredits.map((movie: any) => (
                             <div key={`${movie.id}-${movie.credit_id}`} className="space-y-2">
                               <MovieCard movie={movie} />
@@ -320,7 +320,7 @@ export default function Person() {
 
                     <TabsContent value="tv" data-testid="tv-filmography">
                       {sortedTVCredits.length > 0 ? (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
                           {sortedTVCredits.map((show: any) => (
                             <div key={`${show.id}-${show.credit_id}`} className="space-y-2">
                               <MovieCard movie={show} isTV={true} />
