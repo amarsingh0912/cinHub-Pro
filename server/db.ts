@@ -1,7 +1,3 @@
-import dotenv from "dotenv";
-import path from "path";
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
