@@ -57,30 +57,33 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-sm" data-testid="header">
+      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/30 shadow-lg" data-testid="header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link href="/" data-testid="link-home">
-                <div className="flex items-center space-x-3 cursor-pointer">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <div className="flex items-center space-x-3 cursor-pointer group">
+                  <div className="w-9 h-9 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/30 transition-all duration-300 group-hover:scale-110">
                     <Film className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-xl font-display font-bold">CineHub Pro</span>
+                  <span className="text-xl font-display font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">CineHub Pro</span>
                 </div>
               </Link>
               
-              <nav className="hidden md:flex items-center space-x-6">
+              <nav className="hidden md:flex items-center space-x-1">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`link-${item.label.toLowerCase()}`}>
                     <span
-                      className={`transition-colors cursor-pointer ${
+                      className={`px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer relative group ${
                         location === item.href
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "text-primary bg-primary/10 font-medium"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                       }`}
                     >
                       {item.label}
+                      {location === item.href && (
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                      )}
                     </span>
                   </Link>
                 ))}
@@ -90,21 +93,23 @@ export default function Header() {
             <div className="flex items-center space-x-4">
               {/* Search Toggle */}
               <Button
-                variant="ghost"
+                variant="glass"
                 size="icon"
                 onClick={() => setIsSearchOpen(true)}
                 data-testid="button-search"
+                className="hover:shadow-glow transition-all duration-300"
               >
                 <Search className="w-5 h-5" />
               </Button>
               
               {/* Theme Toggle */}
               <Button 
-                variant="ghost" 
+                variant="glass" 
                 size="icon" 
                 onClick={toggleTheme}
                 data-testid="button-theme"
                 title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                className="hover:shadow-glow transition-all duration-300"
               >
                 {theme === 'dark' ? (
                   <Sun className="w-5 h-5" />
@@ -115,9 +120,9 @@ export default function Header() {
               
               {/* Mobile Menu Toggle */}
               <Button
-                variant="ghost"
+                variant="glass"
                 size="icon"
-                className="md:hidden"
+                className="md:hidden hover:shadow-glow transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 data-testid="button-mobile-menu"
               >
@@ -129,7 +134,7 @@ export default function Header() {
                 <div className="hidden md:flex items-center space-x-3">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center space-x-2 h-10" data-testid="button-user-menu">
+                      <Button variant="glass" className="flex items-center space-x-2 h-10 hover:shadow-glow" data-testid="button-user-menu">
                         <Avatar className="w-8 h-8">
                           <AvatarImage src={user?.profileImageUrl || ''} alt={user?.displayName || user?.firstName || 'User'} />
                           <AvatarFallback className="bg-primary text-white text-sm">
@@ -172,6 +177,7 @@ export default function Header() {
                 <Button
                   onClick={() => setIsSignInOpen(true)}
                   className="hidden md:inline-flex"
+                  variant="gradient"
                   data-testid="button-signin"
                 >
                   Sign In
@@ -182,15 +188,15 @@ export default function Header() {
           
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-border py-4" data-testid="mobile-menu">
+            <div className="md:hidden border-t border-border/30 py-4 animate-fade-in-up" data-testid="mobile-menu">
               <nav className="flex flex-col space-y-2">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`mobile-link-${item.label.toLowerCase()}`}>
                     <span
-                      className={`block px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                      className={`block px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer ${
                         location === item.href
-                          ? "bg-accent text-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                          ? "bg-primary/10 text-primary font-medium border-l-2 border-primary"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/60 hover:translate-x-1"
                       }`}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -264,6 +270,7 @@ export default function Header() {
                         setIsMobileMenuOpen(false);
                       }}
                       className="w-full"
+                      variant="gradient"
                       data-testid="mobile-button-signin"
                     >
                       Sign In
