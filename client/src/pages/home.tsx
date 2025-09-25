@@ -167,7 +167,7 @@ export default function Home() {
                 ) : trendingMovies?.results && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {trendingMovies.results.slice(0, 12).map((movie) => (
-                      <Link key={movie.id} href={`/movie/${movie.id}`} data-testid={`link-movie-${movie.id}`}>
+                      <Link key={`movie-${movie.id}`} href={`/movie/${movie.id}`} data-testid={`link-movie-${movie.id}`}>
                         <div className="movie-card group cursor-pointer">
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {movie.poster_path ? (
@@ -223,7 +223,7 @@ export default function Home() {
                 ) : trendingTVShows?.results && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {trendingTVShows.results.slice(0, 12).map((show) => (
-                      <Link key={show.id} href={`/tv/${show.id}`} data-testid={`link-tv-${show.id}`}>
+                      <Link key={`tv-${show.id}`} href={`/tv/${show.id}`} data-testid={`link-tv-${show.id}`}>
                         <div className="tv-card group cursor-pointer">
                           <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
                             {show.poster_path ? (

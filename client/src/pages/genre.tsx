@@ -147,7 +147,7 @@ export default function Genre() {
                   <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
                       {data.results.map((movie: any) => (
-                        <MovieCard key={movie.id} movie={movie} />
+                        <MovieCard key={`movie-${movie.id}`} movie={movie} />
                       ))}
                     </div>
                     
@@ -192,7 +192,7 @@ export default function Genre() {
                   <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
                       {data.results.map((show: any) => (
-                        <MovieCard key={show.id} movie={show} isTV={true} />
+                        <MovieCard key={`tv-${show.id}`} movie={show} isTV={true} />
                       ))}
                     </div>
                     
