@@ -1085,7 +1085,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         first_air_date_year,
         'vote_average.gte': minRating,
         'vote_average.lte': maxRating,
-        // Removed runtime and vote count filters per requirements (TV shows don't support certification)
         'first_air_date.gte': airDateFrom,
         'first_air_date.lte': airDateTo,
         with_original_language,
@@ -1095,24 +1094,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         with_companies
       } = req.query;
 
-      let url = `https://api.themoviedb.org/3/discover/tv?api_key=${process.env.TMDB_API_KEY}&page=${page}&sort_by=${sort_by}`;
+      // Build parameters object for fetchFromTMDB
+      const params: Record<string, any> = {
+        page,
+        sort_by
+      };
       
       // Add optional parameters
-      if (with_genres) url += `&with_genres=${with_genres}`;
-      if (first_air_date_year) url += `&first_air_date_year=${first_air_date_year}`;
-      if (minRating) url += `&vote_average.gte=${minRating}`;
-      if (maxRating) url += `&vote_average.lte=${maxRating}`;
-      // Runtime and minimum votes filters removed per user requirements
-      // TV shows do not support certification filters
-      if (airDateFrom) url += `&first_air_date.gte=${airDateFrom}`;
-      if (airDateTo) url += `&first_air_date.lte=${airDateTo}`;
-      if (with_original_language) url += `&with_original_language=${with_original_language}`;
-      if (with_keywords) url += `&with_keywords=${with_keywords}`;
-      if (without_genres) url += `&without_genres=${without_genres}`;
-      if (with_networks) url += `&with_networks=${with_networks}`;
-      if (with_companies) url += `&with_companies=${with_companies}`;
+      if (with_genres) params.with_genres = with_genres;
+      if (first_air_date_year) params.first_air_date_year = first_air_date_year;
+      if (minRating) params['vote_average.gte'] = minRating;
+      if (maxRating) params['vote_average.lte'] = maxRating;
+      if (airDateFrom) params['first_air_date.gte'] = airDateFrom;
+      if (airDateTo) params['first_air_date.lte'] = airDateTo;
+      if (with_original_language) params.with_original_language = with_original_language;
+      if (with_keywords) params.with_keywords = with_keywords;
+      if (without_genres) params.without_genres = without_genres;
+      if (with_networks) params.with_networks = with_networks;
+      if (with_companies) params.with_companies = with_companies;
 
-      const data = await fetchFromTMDB(url);
+      const data = await fetchFromTMDB('/discover/tv', params);
       res.json(data);
     } catch (error) {
       console.error('Error discovering TV shows:', error);
