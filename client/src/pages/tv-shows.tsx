@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import type { TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -10,12 +10,16 @@ import { Loader2, Film } from "lucide-react";
 import { Link } from "wouter";
 
 export default function TVShows() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   
   // Determine which tab to show based on URL query parameters or default
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const category = searchParams.get('category') || 'trending';
-  const defaultTab = category === 'popular' ? 'popular' : 'trending';
+  const currentTab = ['trending', 'popular', 'top-rated'].includes(category) ? category : 'trending';
+  
+  const handleTabChange = (value: string) => {
+    navigate(`/tv-shows?category=${value}`);
+  };
   
   const { data: trendingTVShows, isLoading: trendingLoading } = useQuery<TVResponse>({
     queryKey: ["/api/tv/trending"],
@@ -54,7 +58,7 @@ export default function TVShows() {
         {/* TV Shows Tabs */}
         <section className="py-16" data-testid="tv-shows-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tabs defaultValue={defaultTab} className="w-full" data-testid="tv-shows-tabs">
+            <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full" data-testid="tv-shows-tabs">
               <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-8">
                 <TabsTrigger value="trending" data-testid="tab-trending-tv">Trending</TabsTrigger>
                 <TabsTrigger value="popular" data-testid="tab-popular-tv">Popular</TabsTrigger>
