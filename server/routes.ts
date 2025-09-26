@@ -992,7 +992,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/movies/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
-      const data = await fetchFromTMDB(`/trending/movie/${timeWindow}`);
+      const page = req.query.page || 1;
+      const data = await fetchFromTMDB(`/trending/movie/${timeWindow}`, { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching trending movies:', error);
@@ -1003,7 +1004,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/trending', async (req, res) => {
     try {
       const timeWindow = req.query.time_window || 'week';
-      const data = await fetchFromTMDB(`/trending/tv/${timeWindow}`);
+      const page = req.query.page || 1;
+      const data = await fetchFromTMDB(`/trending/tv/${timeWindow}`, { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching trending TV shows:', error);
