@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X, Film } from "lucide-react";
-import { Movie } from "@/types/movie";
+import { Movie, MovieResponse } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
 
 interface SearchModalProps {
@@ -21,7 +21,7 @@ interface SearchModalProps {
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("");
 
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/search", { query }],
     enabled: query.length > 2,
     staleTime: 1000 * 60 * 5, // 5 minutes
