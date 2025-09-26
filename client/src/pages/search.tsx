@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
 import type { MovieResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import MovieCard from "@/components/movie/movie-card";
-import { getImageUrl } from "@/lib/tmdb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, Film } from "lucide-react";
@@ -16,7 +14,14 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: searchResults, isLoading } = useQuery<any>({
+  const {
+    data: searchResults,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    triggerRef,
+    totalResults
+  } = useInfiniteMovies({
     queryKey: ["/api/search", { query: searchTerm }],
     enabled: searchTerm.length > 0,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -87,68 +92,67 @@ export default function SearchPage() {
               <>
                 <div className="mb-6" data-testid="search-results-header">
                   <h2 className="text-2xl font-bold" data-testid="results-count">
-                    {searchResults.total_results > 0 
-                      ? `Found ${searchResults.total_results.toLocaleString()} results for "${searchTerm}"`
+                    {totalResults > 0 
+                      ? `Found ${totalResults.toLocaleString()} results for "${searchTerm}"`
                       : `No results found for "${searchTerm}"`
                     }
                   </h2>
                 </div>
                 
-                {searchResults.results?.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="search-results-grid">
-                    {searchResults.results
-                      .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
-                      .map((item: any) => {
-                        const isMovie = item.media_type === 'movie';
-                        const title = isMovie ? item.title : item.name;
-                        const releaseDate = isMovie ? item.release_date : item.first_air_date;
-                        const href = isMovie ? `/movie/${item.id}` : `/tv/${item.id}`;
-                        
-                        // Create a movie/TV object with the correct structure for MovieCard
-                        const cardItem = {
-                          id: item.id,
-                          poster_path: item.poster_path,
-                          vote_average: item.vote_average || 0,
-                          overview: item.overview || '',
-                          backdrop_path: item.backdrop_path || null,
-                          vote_count: item.vote_count || 0,
-                          genre_ids: item.genre_ids || [],
-                          adult: item.adult || false,
-                          original_language: item.original_language || 'en',
-                          popularity: item.popularity || 0,
-                          ...(isMovie ? {
-                            title: item.title,
-                            release_date: item.release_date,
-                            original_title: item.original_title || item.title,
-                            video: item.video || false
-                          } : {
-                            name: item.name,
-                            first_air_date: item.first_air_date,
-                            original_name: item.original_name || item.name,
-                            origin_country: item.origin_country || []
-                          })
-                        };
-                        
-                        return (
-                          <MovieCard 
-                            key={`${item.media_type}-${item.id}`} 
-                            movie={cardItem as any} 
-                            mediaType={item.media_type} 
-                          />
-                        );
-                      })}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="no-results">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Search className="w-8 h-8 text-muted-foreground" />
+                {/* Filter and normalize the search results for MovieGrid */}
+                {(() => {
+                  const processedResults = searchResults
+                    .filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv')
+                    .map((item: any) => {
+                      const isMovie = item.media_type === 'movie';
+                      return {
+                        id: item.id,
+                        poster_path: item.poster_path,
+                        vote_average: item.vote_average || 0,
+                        overview: item.overview || '',
+                        backdrop_path: item.backdrop_path || null,
+                        vote_count: item.vote_count || 0,
+                        genre_ids: item.genre_ids || [],
+                        adult: item.adult || false,
+                        original_language: item.original_language || 'en',
+                        popularity: item.popularity || 0,
+                        media_type: item.media_type,
+                        ...(isMovie ? {
+                          title: item.title,
+                          release_date: item.release_date,
+                          original_title: item.original_title || item.title,
+                          video: item.video || false
+                        } : {
+                          name: item.name,
+                          first_air_date: item.first_air_date,
+                          original_name: item.original_name || item.name,
+                          origin_country: item.origin_country || []
+                        })
+                      };
+                    });
+                  
+                  return processedResults.length > 0 ? (
+                    <MovieGrid
+                      movies={processedResults}
+                      isLoading={false}
+                      hasNextPage={hasNextPage}
+                      isFetchingNextPage={isFetchingNextPage}
+                      infiniteScrollTriggerRef={triggerRef}
+                      mediaType="movie" // Mixed results, but MovieCard will handle the media_type
+                      skeletonCount={12}
+                    />
+                  ) : (
+                    <div className="text-center py-12" data-testid="no-results">
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Search className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2">No results found</h3>
+                      <p className="text-muted-foreground">
+                        Try searching with different keywords or check your spelling.
+                      </p>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">No results found</h3>
-                    <p className="text-muted-foreground">
-                      Try searching with different keywords or check your spelling.
-                    </p>
-                  </div>
-                )}
+                  );
+                })()}
               </>
             ) : (
               <div className="text-center py-12" data-testid="search-prompt">
