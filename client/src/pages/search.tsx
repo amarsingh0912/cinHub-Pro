@@ -6,6 +6,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
+import MovieCard from "@/components/movie/movie-card";
 import { getImageUrl } from "@/lib/tmdb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -103,41 +104,37 @@ export default function SearchPage() {
                         const releaseDate = isMovie ? item.release_date : item.first_air_date;
                         const href = isMovie ? `/movie/${item.id}` : `/tv/${item.id}`;
                         
+                        // Create a movie/TV object with the correct structure for MovieCard
+                        const cardItem = {
+                          id: item.id,
+                          poster_path: item.poster_path,
+                          vote_average: item.vote_average || 0,
+                          overview: item.overview || '',
+                          backdrop_path: item.backdrop_path || null,
+                          vote_count: item.vote_count || 0,
+                          genre_ids: item.genre_ids || [],
+                          adult: item.adult || false,
+                          original_language: item.original_language || 'en',
+                          popularity: item.popularity || 0,
+                          ...(isMovie ? {
+                            title: item.title,
+                            release_date: item.release_date,
+                            original_title: item.original_title || item.title,
+                            video: item.video || false
+                          } : {
+                            name: item.name,
+                            first_air_date: item.first_air_date,
+                            original_name: item.original_name || item.name,
+                            origin_country: item.origin_country || []
+                          })
+                        };
+                        
                         return (
-                          <Link key={`${item.media_type}-${item.id}`} href={href} data-testid={`${item.media_type}-card-${item.id}`}>
-                            <div className="movie-card group cursor-pointer">
-                              <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                                {item.poster_path ? (
-                                  <img
-                                    src={getImageUrl(item.poster_path)}
-                                    alt={title}
-                                    className="w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full bg-muted flex items-center justify-center">
-                                    <Film className="w-16 h-16 text-muted-foreground" />
-                                  </div>
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div className="absolute bottom-4 left-4 right-4">
-                                    <div className="flex items-center gap-2 text-white">
-                                      <i className="fas fa-star text-secondary"></i>
-                                      <span data-testid={`result-rating-${item.id}`}>{item.vote_average?.toFixed(1) || 'N/A'}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="mt-3">
-                                <h3 className="font-semibold truncate" data-testid={`result-title-${item.id}`}>
-                                  {title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground" data-testid={`result-year-${item.id}`}>
-                                  {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
+                          <MovieCard 
+                            key={`${item.media_type}-${item.id}`} 
+                            movie={cardItem as any} 
+                            mediaType={item.media_type} 
+                          />
                         );
                       })}
                   </div>

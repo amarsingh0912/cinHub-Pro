@@ -1,22 +1,29 @@
 import { Link } from "wouter";
 import { Star, Film } from "lucide-react";
-import { Movie } from "@/types/movie";
+import { Movie, TVShow } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: Movie | TVShow;
   size?: 'normal' | 'compact';
+  mediaType?: 'movie' | 'tv';
 }
 
-export default function MovieCard({ movie, size = 'normal' }: MovieCardProps) {
+export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCardProps) {
+  // Determine if it's a movie or TV show
+  const isMovie = mediaType === 'movie' || ('title' in movie && !mediaType);
+  const title = isMovie ? (movie as Movie).title : (movie as TVShow).name;
+  const releaseDate = isMovie ? (movie as Movie).release_date : (movie as TVShow).first_air_date;
+  const href = isMovie ? `/movie/${movie.id}` : `/tv/${movie.id}`;
+  
   return (
-    <Link href={`/movie/${movie.id}`} data-testid={`movie-card-${movie.id}`}>
+    <Link href={href} data-testid={`${isMovie ? 'movie' : 'tv'}-card-${movie.id}`}>
       <div className={`movie-card ${size === 'compact' ? 'movie-card-compact' : ''} group cursor-pointer interactive`}>
         <div className="aspect-[2/3] relative overflow-hidden rounded-xl bg-accent/50 border border-border/20 backdrop-blur-sm hover:border-primary/30 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:scale-[1.02]">
           {movie.poster_path ? (
             <img
               src={getImageUrl(movie.poster_path)}
-              alt={movie.title}
+              alt={title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
             />
@@ -39,10 +46,10 @@ export default function MovieCard({ movie, size = 'normal' }: MovieCardProps) {
             <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-150">
               <div className="space-y-2">
                 <h4 className="text-white font-semibold text-sm leading-tight line-clamp-2" data-testid={`hover-title-${movie.id}`}>
-                  {movie.title}
+                  {title}
                 </h4>
                 <p className="text-gray-300 text-xs" data-testid={`hover-year-${movie.id}`}>
-                  {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+                  {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
                 </p>
               </div>
             </div>
@@ -54,10 +61,10 @@ export default function MovieCard({ movie, size = 'normal' }: MovieCardProps) {
         
         <div className="mt-4 space-y-1 group-hover:translate-y-[-2px] transition-transform duration-300">
           <h3 className="font-semibold truncate text-foreground group-hover:text-primary transition-colors duration-200" data-testid={`title-${movie.id}`}>
-            {movie.title}
+            {title}
           </h3>
           <p className="text-sm text-muted-foreground" data-testid={`year-${movie.id}`}>
-            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
+            {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
           </p>
         </div>
       </div>
