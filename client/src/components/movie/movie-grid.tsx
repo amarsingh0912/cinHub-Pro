@@ -1,6 +1,7 @@
 import { Movie } from "@/types/movie";
 import MovieCard from "./movie-card";
 import MovieGridSkeleton from "./movie-grid-skeleton";
+import { Loader2 } from "lucide-react";
 
 interface MovieGridProps {
   movies: Movie[];
@@ -9,6 +10,11 @@ interface MovieGridProps {
   viewAllHref?: string;
   isLoading?: boolean;
   skeletonCount?: number;
+  // Infinite scroll props
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  infiniteScrollTriggerRef?: React.RefObject<HTMLDivElement>;
+  mediaType?: 'movie' | 'tv';
 }
 
 export default function MovieGrid({
@@ -18,6 +24,10 @@ export default function MovieGrid({
   viewAllHref,
   isLoading,
   skeletonCount = 12,
+  hasNextPage,
+  isFetchingNextPage,
+  infiniteScrollTriggerRef,
+  mediaType = 'movie',
 }: MovieGridProps) {
   if (isLoading) {
     return (
@@ -65,9 +75,37 @@ export default function MovieGrid({
           data-testid="movie-grid"
         >
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
           ))}
         </div>
+
+        {/* Infinite scroll trigger and loading state */}
+        {(hasNextPage || isFetchingNextPage) && (
+          <div className="mt-8">
+            {isFetchingNextPage && (
+              <div className="flex items-center justify-center py-8" data-testid="loading-more">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">Loading more...</span>
+              </div>
+            )}
+            
+            {/* Invisible trigger element for infinite scroll */}
+            {infiniteScrollTriggerRef && (
+              <div
+                ref={infiniteScrollTriggerRef}
+                className="h-4"
+                data-testid="infinite-scroll-trigger"
+              />
+            )}
+          </div>
+        )}
+
+        {/* End of content message */}
+        {!hasNextPage && !isFetchingNextPage && movies.length > 0 && (
+          <div className="text-center mt-8 py-4" data-testid="end-of-content">
+            <p className="text-muted-foreground">You've reached the end of the results</p>
+          </div>
+        )}
       </div>
     </section>
   );

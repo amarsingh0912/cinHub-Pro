@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation, useSearch } from "wouter";
+import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
 import type { MovieResponse, TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -121,7 +121,7 @@ interface ContentFilters {
 export default function Movies() {
   const [location] = useLocation();
   const searchString = useSearch(); // This gives us the query string without the ?
-  const [currentPage, setCurrentPage] = useState(1);
+  // Remove currentPage state as it's handled by infinite query
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   
   // Parse URL parameters to set initial filters
@@ -242,9 +242,7 @@ export default function Movies() {
   };
   
   const createQueryParams = () => {
-    const params: Record<string, any> = {
-      page: currentPage
-    };
+    const params: Record<string, any> = {};
     
     // Only add filters for discover endpoint
     if (filters.category === 'discover') {
@@ -294,19 +292,19 @@ export default function Movies() {
     return params;
   };
 
-  const { data: contentData, isLoading } = useQuery<MovieResponse | TVResponse>({
+  const {
+    data: movies,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    triggerRef
+  } = useInfiniteMovies({
     queryKey: [getApiEndpoint(), createQueryParams(), filters.contentType],
+    enabled: true,
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
-
-  const handleLoadMore = () => {
-    setCurrentPage(prev => prev + 1);
-  };
+  // Filters are automatically handled by the infinite query
 
   const handleGenreToggle = (genreId: number) => {
     setFilters(prev => ({
@@ -594,96 +592,16 @@ export default function Movies() {
           </div>
         </section>
 
-        {/* Movies Grid */}
-        <section className="py-8" data-testid="movies-content">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="content-loading">
-                {Array.from({ length: 18 }, (_, index) => (
-                  <MovieCardSkeleton key={index} />
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8" data-testid="content-grid">
-                  {contentData?.results?.map((item: any) => {
-                    const title = filters.contentType === 'movies' ? item.title : item.name;
-                    const releaseDate = filters.contentType === 'movies' ? item.release_date : item.first_air_date;
-                    const linkPath = filters.contentType === 'movies' ? `/movie/${item.id}` : `/tv/${item.id}`;
-                    
-                    return (
-                      <Link key={item.id} href={linkPath}>
-                        <div className="content-card group cursor-pointer">
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                            {item.poster_path ? (
-                              <img
-                                src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                                alt={title}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Film className="w-16 h-16 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="absolute bottom-4 left-4 right-4">
-                                <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
-                                  <span data-testid={`rating-${item.id}`}>{item.vote_average.toFixed(1)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <h3 className="font-semibold truncate" data-testid={`title-${item.id}`}>
-                              {title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground" data-testid={`year-${item.id}`}>
-                              {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-
-                {/* Results Info and Load More */}
-                {contentData && (
-                  <div className="space-y-4">
-                    <div className="text-center text-sm text-muted-foreground" data-testid="results-info">
-                      Showing {contentData.results?.length || 0} of {contentData.total_results?.toLocaleString() || 0} {filters.contentType === 'movies' ? 'movies' : 'TV shows'}
-                      {currentPage > 1 && ` (Page ${currentPage} of ${contentData.total_pages || 1})`}
-                    </div>
-                    
-                    {contentData.results && contentData.results.length > 0 && currentPage < (contentData.total_pages || 1) && (
-                      <div className="text-center" data-testid="load-more-section">
-                        <Button
-                          onClick={handleLoadMore}
-                          variant="outline"
-                          size="lg"
-                          disabled={isLoading}
-                          data-testid="button-load-more"
-                        >
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                              Loading...
-                            </>
-                          ) : (
-                            `Load More ${filters.contentType === 'movies' ? 'Movies' : 'TV Shows'}`
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
+        {/* Movies Grid with Infinite Scroll */}
+        <MovieGrid
+          movies={movies}
+          isLoading={isLoading}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          infiniteScrollTriggerRef={triggerRef}
+          mediaType={filters.contentType === 'movies' ? 'movie' : 'tv'}
+          skeletonCount={18}
+        />
       </main>
       
       <Footer />
