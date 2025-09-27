@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import SearchModal from "@/components/ui/search-modal";
 import AuthModal from "@/components/ui/auth-modal";
 import { Search, Moon, Sun, Film, Menu, X, User, LogOut, Settings, Shield, ChevronDown } from "lucide-react";
+import logoImage from "@assets/generated_images/CineHub_Pro_movie_platform_logo_7e1f88a1.png";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -63,10 +64,12 @@ export default function Header() {
             <div className="flex items-center space-x-8">
               <Link href="/" data-testid="link-home">
                 <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-lg px-2 py-1 -ml-2">
-                  <div className="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-md group-hover:shadow-primary/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-2">
-                    <Film className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xl font-display font-bold text-gradient group-hover:scale-105 transition-transform duration-300">CineHub Pro</span>
+                  <img 
+                    src={logoImage} 
+                    alt="CineHub Pro" 
+                    className="h-10 w-auto object-contain group-hover:scale-105 transition-all duration-300"
+                    data-testid="img-logo"
+                  />
                 </div>
               </Link>
               
