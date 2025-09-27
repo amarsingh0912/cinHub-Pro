@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Filter, X, ChevronDown, ChevronUp, Film } from "lucide-react";
 import { Link } from "wouter";
 
@@ -116,6 +117,7 @@ interface ContentFilters {
   language: string;
   certificate: string;
   status: string;
+  includeAdult: boolean;
 }
 
 export default function Movies() {
@@ -149,7 +151,8 @@ export default function Movies() {
       maxRating: 10,
       language: 'all',
       certificate: 'all',
-      status: 'all'
+      status: 'all',
+      includeAdult: false
     };
   };
   
@@ -287,7 +290,11 @@ export default function Movies() {
           }
         }
       }
+      
     }
+    
+    // Include adult content filter for all categories (not just discover)
+    params.include_adult = filters.includeAdult;
 
     return params;
   };
@@ -326,7 +333,8 @@ export default function Movies() {
       maxRating: 10,
       language: 'all',
       certificate: prev.contentType === 'movies' ? 'all' : 'all',
-      status: 'all'
+      status: 'all',
+      includeAdult: false
     }));
   };
 
@@ -335,7 +343,7 @@ export default function Movies() {
     (filters.language && filters.language !== 'all') || 
     (filters.certificate && filters.certificate !== 'all') ||
     (filters.status && filters.status !== 'all') ||
-    filters.category !== 'discover';
+    filters.category !== 'discover' || filters.includeAdult;
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="movies-page">
@@ -582,6 +590,21 @@ export default function Movies() {
                               <SelectItem value="upcoming" data-testid="status-upcoming">Upcoming</SelectItem>
                             </SelectContent>
                           </Select>
+                        </div>
+                        
+                        {/* Include Adult Content */}
+                        <div className="space-y-3">
+                          <Label className="text-sm font-medium">Adult Content</Label>
+                          <div className="flex items-center space-x-3">
+                            <Switch
+                              checked={filters.includeAdult}
+                              onCheckedChange={(checked) => setFilters(prev => ({ ...prev, includeAdult: checked }))}
+                              data-testid="toggle-include-adult"
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {filters.includeAdult ? 'Including adult content' : 'Excluding adult content'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
