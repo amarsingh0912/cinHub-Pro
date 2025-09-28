@@ -426,7 +426,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(viewingHistory)
       .where(eq(viewingHistory.userId, userId))
-      .orderBy(desc(viewingHistory.viewedAt))
+      .orderBy(desc(viewingHistory.watchedAt))
       .limit(limit);
   }
 
@@ -440,7 +440,7 @@ export class DatabaseStorage implements IStorage {
           eq(viewingHistory.userId, viewingEntry.userId),
           eq(viewingHistory.mediaType, viewingEntry.mediaType),
           eq(viewingHistory.mediaId, viewingEntry.mediaId),
-          sql`DATE(viewed_at) = CURRENT_DATE`
+          sql`DATE(watched_at) = CURRENT_DATE`
         )
       )
       .limit(1);
@@ -449,7 +449,7 @@ export class DatabaseStorage implements IStorage {
       // Update existing entry with new timestamp
       const [updatedEntry] = await db
         .update(viewingHistory)
-        .set({ viewedAt: new Date() })
+        .set({ watchedAt: new Date() })
         .where(eq(viewingHistory.id, existingEntry[0].id))
         .returning();
       return updatedEntry;
@@ -487,7 +487,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(activityHistory)
       .where(eq(activityHistory.userId, userId))
-      .orderBy(desc(activityHistory.timestamp))
+      .orderBy(desc(activityHistory.createdAt))
       .limit(limit);
   }
 
@@ -511,7 +511,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(searchHistory)
       .where(eq(searchHistory.userId, userId))
-      .orderBy(desc(searchHistory.searchedAt))
+      .orderBy(desc(searchHistory.createdAt))
       .limit(limit);
   }
 
@@ -526,14 +526,14 @@ export class DatabaseStorage implements IStorage {
           eq(searchHistory.query, search.query)
         )
       )
-      .orderBy(desc(searchHistory.searchedAt))
+      .orderBy(desc(searchHistory.createdAt))
       .limit(1);
 
     if (existingSearch.length > 0) {
       // Update existing search with new timestamp
       const [updatedSearch] = await db
         .update(searchHistory)
-        .set({ searchedAt: new Date() })
+        .set({ createdAt: new Date() })
         .where(eq(searchHistory.id, existingSearch[0].id))
         .returning();
       return updatedSearch;
