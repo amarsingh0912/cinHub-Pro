@@ -5,14 +5,17 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 5
+const TOAST_REMOVE_DELAY = 5000 // 5 seconds
+const TOAST_AUTO_DISMISS_DELAY = 4000 // 4 seconds
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  duration?: number // Duration in milliseconds, 0 means no auto-dismiss
+  progress?: number // Progress percentage for auto-dismiss (0-100)
 }
 
 const actionTypes = {
@@ -54,6 +57,7 @@ interface State {
 }
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+const toastProgressIntervals = new Map<string, ReturnType<typeof setInterval>>()
 
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
@@ -62,12 +66,54 @@ const addToRemoveQueue = (toastId: string) => {
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
+    toastProgressIntervals.delete(toastId)
     dispatch({
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
   }, TOAST_REMOVE_DELAY)
 
+  toastTimeouts.set(toastId, timeout)
+}
+
+const addToAutoDismissQueue = (toastId: string, duration: number) => {
+  if (duration <= 0) return // Don't auto-dismiss if duration is 0 or negative
+  
+  // Clear any existing timeout/interval
+  if (toastTimeouts.has(toastId)) {
+    clearTimeout(toastTimeouts.get(toastId))
+    toastTimeouts.delete(toastId)
+  }
+  if (toastProgressIntervals.has(toastId)) {
+    clearInterval(toastProgressIntervals.get(toastId))
+    toastProgressIntervals.delete(toastId)
+  }
+
+  const startTime = Date.now()
+  
+  // Update progress every 100ms
+  const progressInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime
+    const progress = Math.min((elapsed / duration) * 100, 100)
+    
+    dispatch({
+      type: "UPDATE_TOAST",
+      toast: { id: toastId, progress }
+    })
+    
+    if (progress >= 100) {
+      clearInterval(progressInterval)
+      toastProgressIntervals.delete(toastId)
+    }
+  }, 100)
+  
+  toastProgressIntervals.set(toastId, progressInterval)
+  
+  // Auto-dismiss after duration
+  const timeout = setTimeout(() => {
+    dispatch({ type: "DISMISS_TOAST", toastId })
+  }, duration)
+  
   toastTimeouts.set(toastId, timeout)
 }
 
@@ -139,7 +185,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+function toast({ duration = TOAST_AUTO_DISMISS_DELAY, ...props }: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -154,12 +200,19 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
+      duration,
+      progress: 0,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
     },
   })
+
+  // Start auto-dismiss if duration is set
+  if (duration > 0) {
+    addToAutoDismissQueue(id, duration)
+  }
 
   return {
     id: id,
