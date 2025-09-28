@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, useRoute } from "wouter";
 import type { TVResponse } from "@/types/movie";
 import { useRevealAnimation, RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import Header from "@/components/layout/header";
@@ -11,15 +10,10 @@ import { Loader2 } from "lucide-react";
 import MovieCard from "@/components/movie/movie-card";
 
 export default function TVShows() {
-  const [location, navigate] = useLocation();
-  
-  // Determine which tab to show based on URL query parameters or default
-  const searchParams = new URLSearchParams(location.split('?')[1] || '');
-  const category = searchParams.get('category') || 'trending';
-  const currentTab = ['trending', 'popular', 'top-rated'].includes(category) ? category : 'trending';
+  const [currentTab, setCurrentTab] = useState<string>('trending');
   
   const handleTabChange = (value: string) => {
-    navigate(`/tv-shows?category=${value}`);
+    setCurrentTab(value);
   };
   
   const { data: trendingTVShows, isLoading: trendingLoading } = useQuery<TVResponse>({
