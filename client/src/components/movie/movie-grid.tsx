@@ -1,4 +1,5 @@
 import { Movie } from "@/types/movie";
+import { RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import MovieCard from "./movie-card";
 import MovieGridSkeleton from "./movie-grid-skeleton";
 import { Loader2 } from "lucide-react";
@@ -15,6 +16,9 @@ interface MovieGridProps {
   isFetchingNextPage?: boolean;
   infiniteScrollTriggerRef?: React.RefObject<HTMLDivElement>;
   mediaType?: 'movie' | 'tv';
+  // Animation props
+  enableAnimations?: boolean;
+  animationType?: 'staggered' | 'fade' | 'none';
 }
 
 export default function MovieGrid({
@@ -28,6 +32,8 @@ export default function MovieGrid({
   isFetchingNextPage,
   infiniteScrollTriggerRef,
   mediaType = 'movie',
+  enableAnimations = true,
+  animationType = 'staggered',
 }: MovieGridProps) {
   if (isLoading) {
     return (
@@ -51,33 +57,59 @@ export default function MovieGrid({
     <section className="py-16" data-testid="movie-grid-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {title && (
-          <div className="flex items-center justify-between mb-8">
-            <h2
-              className="text-3xl font-display font-bold"
-              data-testid="section-title"
-            >
-              {title}
-            </h2>
-            {showViewAll && viewAllHref && (
-              <a
-                href={viewAllHref}
-                className="text-primary hover:text-primary/80 font-medium flex items-center gap-2"
-                data-testid="link-view-all"
+          <RevealOnScroll options={enableAnimations ? REVEAL_PRESETS.sectionHeader : {animation: 'fade-in', once: false}}>
+            <div className="flex items-center justify-between mb-8">
+              <h2
+                className="text-3xl font-display font-bold"
+                data-testid="section-title"
               >
-                View All <i className="fas fa-arrow-right"></i>
-              </a>
-            )}
-          </div>
+                {title}
+              </h2>
+              {showViewAll && viewAllHref && (
+                <a
+                  href={viewAllHref}
+                  className="text-primary hover:text-primary/80 font-medium flex items-center gap-2"
+                  data-testid="link-view-all"
+                >
+                  View All <i className="fas fa-arrow-right"></i>
+                </a>
+              )}
+            </div>
+          </RevealOnScroll>
         )}
 
-        <div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
-          data-testid="movie-grid"
-        >
-          {movies.map((movie) => (
-            <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
-          ))}
-        </div>
+        {enableAnimations && animationType === 'staggered' ? (
+          <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+              data-testid="movie-grid"
+            >
+              {movies.map((movie) => (
+                <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+              ))}
+            </div>
+          </RevealOnScroll>
+        ) : enableAnimations && animationType === 'fade' ? (
+          <RevealOnScroll options={REVEAL_PRESETS.fadeIn}>
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+              data-testid="movie-grid"
+            >
+              {movies.map((movie) => (
+                <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+              ))}
+            </div>
+          </RevealOnScroll>
+        ) : (
+          <div
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
+            data-testid="movie-grid"
+          >
+            {movies.map((movie) => (
+              <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+            ))}
+          </div>
+        )}
 
         {/* Infinite scroll trigger and loading state */}
         {(hasNextPage || isFetchingNextPage) && (

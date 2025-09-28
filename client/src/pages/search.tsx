@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
 import type { MovieResponse } from "@/types/movie";
+import { useRevealAnimation, RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
@@ -42,16 +43,19 @@ export default function SearchPage() {
         {/* Search Header */}
         <section className="py-12 border-b border-border" data-testid="search-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-display font-bold mb-4" data-testid="search-title">
-                Search Movies & TV Shows
-              </h1>
-              <p className="text-xl text-muted-foreground" data-testid="search-description">
-                Find your favorite movies and TV shows from our extensive database
-              </p>
-            </div>
+            <RevealOnScroll options={REVEAL_PRESETS.sectionHeader}>
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-display font-bold mb-4" data-testid="search-title">
+                  Search Movies & TV Shows
+                </h1>
+                <p className="text-xl text-muted-foreground" data-testid="search-description">
+                  Find your favorite movies and TV shows from our extensive database
+                </p>
+              </div>
+            </RevealOnScroll>
             
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+            <RevealOnScroll options={{...REVEAL_PRESETS.fadeIn, delay: 300}}>
+              <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
               <div className="relative" data-testid="search-form">
                 <Input
                   type="text"
@@ -75,7 +79,8 @@ export default function SearchPage() {
                   )}
                 </Button>
               </div>
-            </form>
+              </form>
+            </RevealOnScroll>
           </div>
         </section>
 
@@ -90,14 +95,16 @@ export default function SearchPage() {
               </div>
             ) : searchTerm && searchResults ? (
               <>
-                <div className="mb-6" data-testid="search-results-header">
-                  <h2 className="text-2xl font-bold" data-testid="results-count">
-                    {totalResults > 0 
-                      ? `Found ${totalResults.toLocaleString()} results for "${searchTerm}"`
-                      : `No results found for "${searchTerm}"`
-                    }
-                  </h2>
-                </div>
+                <RevealOnScroll options={REVEAL_PRESETS.fadeIn}>
+                  <div className="mb-6" data-testid="search-results-header">
+                    <h2 className="text-2xl font-bold" data-testid="results-count">
+                      {totalResults > 0 
+                        ? `Found ${totalResults.toLocaleString()} results for "${searchTerm}"`
+                        : `No results found for "${searchTerm}"`
+                      }
+                    </h2>
+                  </div>
+                </RevealOnScroll>
                 
                 {/* Filter and normalize the search results for MovieGrid */}
                 {(() => {

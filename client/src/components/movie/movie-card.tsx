@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Star, Film } from "lucide-react";
 import { Movie, TVShow } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
+import { useRevealAnimation, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 
 interface MovieCardProps {
   movie: Movie | TVShow;
@@ -16,9 +17,19 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
   const releaseDate = isMovie ? (movie as Movie).release_date : (movie as TVShow).first_air_date;
   const href = isMovie ? `/movie/${movie.id}` : `/tv/${movie.id}`;
   
+  // Use reveal animation for each individual card
+  const { ref, className } = useRevealAnimation({
+    animation: 'fade-in-up',
+    threshold: 0.1,
+    delay: 0,
+    duration: 500,
+    once: true
+  });
+  
   return (
-    <Link href={href} data-testid={`${isMovie ? 'movie' : 'tv'}-card-${movie.id}`}>
-      <div className={`movie-card ${size === 'compact' ? 'movie-card-compact' : ''} group cursor-pointer interactive`}>
+    <div ref={ref as React.RefObject<HTMLDivElement>} className={className}>
+      <Link href={href} data-testid={`${isMovie ? 'movie' : 'tv'}-card-${movie.id}`}>
+        <div className={`movie-card ${size === 'compact' ? 'movie-card-compact' : ''} group cursor-pointer interactive`}>
         <div className="aspect-[2/3] relative overflow-hidden rounded-2xl glassmorphism-card bg-card/80 border border-border/30 hover:border-primary/40 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/15 hover:scale-[1.03]">
           {movie.poster_path ? (
             <img
@@ -67,7 +78,8 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
             {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
           </p>
         </div>
-      </div>
-    </Link>
+        </div>
+      </Link>
+    </div>
   );
 }
