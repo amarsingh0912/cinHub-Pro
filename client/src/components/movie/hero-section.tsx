@@ -43,7 +43,7 @@ export default function HeroSection() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16 animate-slide-up-stagger-3">
-            <Link href="/movies">
+            <Link href="/search">
               <Button 
                 size="lg" 
                 className="btn-interactive group relative overflow-hidden bg-gradient-to-r from-primary via-primary-500 to-primary-600 hover:from-primary-400 hover:via-primary-500 hover:to-primary-700 text-white shadow-lg hover:shadow-2xl hover:shadow-primary/30 border-0 px-10 py-5 text-lg font-bold tracking-wide transition-all duration-500 rounded-xl" 
