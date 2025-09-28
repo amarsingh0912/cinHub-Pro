@@ -59,14 +59,24 @@ interface State {
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 const toastProgressIntervals = new Map<string, ReturnType<typeof setInterval>>()
 
+const clearTimers = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    clearTimeout(toastTimeouts.get(toastId))
+    toastTimeouts.delete(toastId)
+  }
+  if (toastProgressIntervals.has(toastId)) {
+    clearInterval(toastProgressIntervals.get(toastId))
+    toastProgressIntervals.delete(toastId)
+  }
+}
+
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
   }
 
   const timeout = setTimeout(() => {
-    toastTimeouts.delete(toastId)
-    toastProgressIntervals.delete(toastId)
+    clearTimers(toastId)
     dispatch({
       type: "REMOVE_TOAST",
       toastId: toastId,
@@ -79,15 +89,8 @@ const addToRemoveQueue = (toastId: string) => {
 const addToAutoDismissQueue = (toastId: string, duration: number) => {
   if (duration <= 0) return // Don't auto-dismiss if duration is 0 or negative
   
-  // Clear any existing timeout/interval
-  if (toastTimeouts.has(toastId)) {
-    clearTimeout(toastTimeouts.get(toastId))
-    toastTimeouts.delete(toastId)
-  }
-  if (toastProgressIntervals.has(toastId)) {
-    clearInterval(toastProgressIntervals.get(toastId))
-    toastProgressIntervals.delete(toastId)
-  }
+  // Clear any existing timers
+  clearTimers(toastId)
 
   const startTime = Date.now()
   
@@ -111,6 +114,7 @@ const addToAutoDismissQueue = (toastId: string, duration: number) => {
   
   // Auto-dismiss after duration
   const timeout = setTimeout(() => {
+    clearTimers(toastId)
     dispatch({ type: "DISMISS_TOAST", toastId })
   }, duration)
   
@@ -139,9 +143,11 @@ export const reducer = (state: State, action: Action): State => {
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
       if (toastId) {
+        clearTimers(toastId) // Clear any existing timers before adding to remove queue
         addToRemoveQueue(toastId)
       } else {
         state.toasts.forEach((toast) => {
+          clearTimers(toast.id) // Clear any existing timers for each toast
           addToRemoveQueue(toast.id)
         })
       }
@@ -160,11 +166,17 @@ export const reducer = (state: State, action: Action): State => {
     }
     case "REMOVE_TOAST":
       if (action.toastId === undefined) {
+        // Clear all timers when removing all toasts
+        state.toasts.forEach((toast) => {
+          clearTimers(toast.id)
+        })
         return {
           ...state,
           toasts: [],
         }
       }
+      // Clear timers for the specific toast being removed
+      clearTimers(action.toastId)
       return {
         ...state,
         toasts: state.toasts.filter((t) => t.id !== action.toastId),
@@ -232,7 +244,7 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,
