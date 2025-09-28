@@ -712,7 +712,7 @@ export default function MovieDetail() {
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold">Movie Stills</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {movie.poster_path && (
                       <div className="space-y-2">
                         <h4 className="font-medium text-muted-foreground">Movie Poster</h4>

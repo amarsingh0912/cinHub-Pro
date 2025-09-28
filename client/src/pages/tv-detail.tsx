@@ -628,7 +628,7 @@ export default function TVDetail() {
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold">TV Show Images</h3>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {tvShow.poster_path && (
                       <div className="space-y-2">
                         <h4 className="text-sm font-medium text-muted-foreground">Poster</h4>
