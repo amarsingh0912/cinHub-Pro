@@ -5,8 +5,8 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { CATEGORIES } from "@/types/movie";
-import { getImageUrl } from "@/lib/tmdb";
-import { Loader2, Film, Star } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import MovieCard from "@/components/movie/movie-card";
 
 export default function Collection() {
   const { category } = useParams();
@@ -70,38 +70,7 @@ export default function Collection() {
                 {moviesData?.results && moviesData.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in" data-testid="collection-movies-grid">
                     {moviesData.results.map((movie: any) => (
-                      <div key={movie.id} className="movie-card group cursor-pointer">
-                        <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                          {movie.poster_path ? (
-                            <img
-                              src={getImageUrl(movie.poster_path)}
-                              alt={movie.title}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-muted flex items-center justify-center">
-                              <Film className="w-16 h-16 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="absolute bottom-4 left-4 right-4">
-                              <div className="flex items-center gap-2 text-white">
-                                <Star className="w-4 h-4 text-secondary fill-current" />
-                                <span data-testid={`movie-rating-${movie.id}`}>{movie.vote_average.toFixed(1)}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-3">
-                          <h3 className="font-semibold truncate" data-testid={`movie-title-${movie.id}`}>
-                            {movie.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground" data-testid={`movie-year-${movie.id}`}>
-                            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
-                          </p>
-                        </div>
-                      </div>
+                      <MovieCard key={movie.id} movie={movie} mediaType="movie" />
                     ))}
                   </div>
                 ) : (

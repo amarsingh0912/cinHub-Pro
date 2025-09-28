@@ -21,6 +21,7 @@ import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSqu
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
 import { CacheStatus } from "@/components/ui/cache-status";
+import MovieCard from "@/components/movie/movie-card";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -719,27 +720,7 @@ export default function MovieDetail() {
                 {movie?.recommendations?.results && movie.recommendations.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {movie.recommendations.results.slice(0, 12).map((rec: any) => (
-                      <div key={rec.id} className="space-y-2" data-testid={`recommended-movie-${rec.id}`}>
-                        <a href={`/movie/${rec.id}`} className="block group">
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
-                            <img
-                              src={rec.poster_path ? getImageUrl(rec.poster_path, 'w500') : '/placeholder-movie.jpg'}
-                              alt={rec.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                              data-testid={`recommended-poster-${rec.id}`}
-                            />
-                          </div>
-                          <h3 className="text-sm font-medium line-clamp-2 group-hover:text-primary transition-colors" data-testid={`recommended-title-${rec.id}`}>
-                            {rec.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span data-testid={`recommended-rating-${rec.id}`}>
-                              {rec.vote_average?.toFixed(1) || 'N/A'}
-                            </span>
-                          </div>
-                        </a>
-                      </div>
+                      <MovieCard key={rec.id} movie={rec} mediaType="movie" />
                     ))}
                   </div>
                 ) : (
@@ -756,27 +737,7 @@ export default function MovieDetail() {
                 {movie?.similar?.results && movie.similar.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {movie.similar.results.slice(0, 12).map((sim: any) => (
-                      <div key={sim.id} className="space-y-2" data-testid={`similar-movie-${sim.id}`}>
-                        <a href={`/movie/${sim.id}`} className="block group">
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg">
-                            <img
-                              src={sim.poster_path ? getImageUrl(sim.poster_path, 'w500') : '/placeholder-movie.jpg'}
-                              alt={sim.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                              data-testid={`similar-poster-${sim.id}`}
-                            />
-                          </div>
-                          <h3 className="text-sm font-medium line-clamp-2 group-hover:text-primary transition-colors" data-testid={`similar-title-${sim.id}`}>
-                            {sim.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span data-testid={`similar-rating-${sim.id}`}>
-                              {sim.vote_average?.toFixed(1) || 'N/A'}
-                            </span>
-                          </div>
-                        </a>
-                      </div>
+                      <MovieCard key={sim.id} movie={sim} mediaType="movie" />
                     ))}
                   </div>
                 ) : (
