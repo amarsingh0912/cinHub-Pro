@@ -7,8 +7,8 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Film } from "lucide-react";
-import { Link } from "wouter";
+import { Loader2 } from "lucide-react";
+import MovieCard from "@/components/movie/movie-card";
 
 export default function TVShows() {
   const [location, navigate] = useLocation();
@@ -79,40 +79,7 @@ export default function TVShows() {
                 ) : trendingTVShows?.results && trendingTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-grid">
                     {trendingTVShows.results.map((show) => (
-                      <Link key={show.id} href={`/tv/${show.id}`}>
-                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                            {show.poster_path ? (
-                              <img
-                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                                alt={show.name}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Film className="w-16 h-16 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="absolute bottom-4 left-4 right-4">
-                                <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
-                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                              {show.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+                      <MovieCard key={show.id} movie={show} mediaType="tv" />
                     ))}
                   </div>
                 ) : (
@@ -132,40 +99,7 @@ export default function TVShows() {
                 ) : popularTVShows?.results && popularTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-grid">
                     {popularTVShows.results.map((show) => (
-                      <Link key={show.id} href={`/tv/${show.id}`}>
-                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                            {show.poster_path ? (
-                              <img
-                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                                alt={show.name}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Film className="w-16 h-16 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="absolute bottom-4 left-4 right-4">
-                                <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
-                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                              {show.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+                      <MovieCard key={show.id} movie={show} mediaType="tv" />
                     ))}
                   </div>
                 ) : (
@@ -185,40 +119,7 @@ export default function TVShows() {
                 ) : topRatedTVShows?.results && topRatedTVShows.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-grid">
                     {topRatedTVShows.results.map((show) => (
-                      <Link key={show.id} href={`/tv/${show.id}`}>
-                        <div className="tv-card group cursor-pointer" data-testid={`tv-card-${show.id}`}>
-                          <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
-                            {show.poster_path ? (
-                              <img
-                                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-                                alt={show.name}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <Film className="w-16 h-16 text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="absolute bottom-4 left-4 right-4">
-                                <div className="flex items-center gap-2 text-white">
-                                  <i className="fas fa-star text-secondary"></i>
-                                  <span data-testid={`tv-rating-${show.id}`}>{show.vote_average.toFixed(1)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <h3 className="font-semibold truncate" data-testid={`tv-title-${show.id}`}>
-                              {show.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground" data-testid={`tv-year-${show.id}`}>
-                              {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
+                      <MovieCard key={show.id} movie={show} mediaType="tv" />
                     ))}
                   </div>
                 ) : (
