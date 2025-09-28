@@ -30,68 +30,68 @@ export default function HeroSection() {
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="space-y-8">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black mb-6 animate-slide-up-stagger-1" data-testid="hero-title">
-            <div className="inline-block">Discover Your Next</div>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-black mb-8 animate-slide-up-stagger-1" data-testid="hero-title">
+            <div className="inline-block mb-2 lg:mb-0">Discover Your Next</div>
             <div className="inline-block">
               <span className="bg-gradient-to-r from-primary via-primary-300 to-secondary bg-clip-text text-transparent animate-gradient-x motion-reduce:animate-none"> Favorite Movie</span>
             </div>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-up-stagger-2" data-testid="hero-description">
+          <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground/90 mb-10 max-w-4xl mx-auto leading-relaxed font-medium animate-slide-up-stagger-2" data-testid="hero-description">
             Explore millions of movies, get personalized recommendations, and 
-            <span className="text-foreground font-medium"> never miss the latest releases</span>
+            <span className="text-foreground/95 font-semibold bg-gradient-to-r from-primary/20 to-secondary/20 px-2 py-1 rounded-md"> never miss the latest releases</span>
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12 animate-slide-up-stagger-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16 animate-slide-up-stagger-3">
             <Link href="/movies">
               <Button 
                 size="lg" 
-                className="btn-interactive group relative overflow-hidden bg-gradient-to-r from-primary to-primary-600 hover:from-primary-400 hover:to-primary-700 text-white shadow-lg hover:shadow-xl hover:shadow-primary/25 border-0 px-8 py-4 text-lg font-semibold transition-all duration-300" 
+                className="btn-interactive group relative overflow-hidden bg-gradient-to-r from-primary via-primary-500 to-primary-600 hover:from-primary-400 hover:via-primary-500 hover:to-primary-700 text-white shadow-lg hover:shadow-2xl hover:shadow-primary/30 border-0 px-10 py-5 text-lg font-bold tracking-wide transition-all duration-500 rounded-xl" 
                 data-testid="button-start-exploring"
               >
-                <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                <Play className="w-5 h-5 mr-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
                 Start Exploring
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
               </Button>
             </Link>
             <Link href="/about">
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="group border-2 border-muted-foreground/30 hover:border-primary/50 bg-background/80 backdrop-blur-sm hover:bg-primary/5 px-8 py-4 text-lg font-semibold transition-all duration-300" 
+                className="group glassmorphism-card border-2 border-white/20 hover:border-primary/60 backdrop-blur-sm hover:bg-primary/8 px-10 py-5 text-lg font-semibold transition-all duration-500 rounded-xl hover:scale-105" 
                 data-testid="button-learn-more"
               >
-                <Info className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
+                <Info className="w-5 h-5 mr-3 group-hover:rotate-12 transition-transform duration-300" />
                 Learn More
               </Button>
             </Link>
           </div>
           
           {/* Enhanced Stats with cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto animate-slide-up-stagger-4" data-testid="stats-grid">
-            <div className="group text-center p-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10">
-              <div className="text-4xl font-display font-black text-primary mb-2 group-hover:scale-110 transition-transform duration-300" data-testid="stat-movies">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-5xl mx-auto animate-slide-up-stagger-4" data-testid="stats-grid">
+            <div className="group text-center p-8 rounded-2xl glassmorphism-card bg-gradient-to-br from-primary/12 to-primary/6 border border-primary/25 hover:border-primary/50 backdrop-blur-sm transition-all duration-500 hover:scale-110 hover:shadow-xl hover:shadow-primary/20">
+              <div className="text-5xl lg:text-6xl font-display font-black text-primary mb-3 group-hover:scale-110 transition-transform duration-500" data-testid="stat-movies">
                 1M+
               </div>
-              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Movies</div>
+              <div className="text-sm font-bold text-foreground/80 uppercase tracking-widest">Movies</div>
             </div>
-            <div className="group text-center p-6 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-secondary/10">
-              <div className="text-4xl font-display font-black text-secondary mb-2 group-hover:scale-110 transition-transform duration-300" data-testid="stat-users">
+            <div className="group text-center p-8 rounded-2xl glassmorphism-card bg-gradient-to-br from-secondary/12 to-secondary/6 border border-secondary/25 hover:border-secondary/50 backdrop-blur-sm transition-all duration-500 hover:scale-110 hover:shadow-xl hover:shadow-secondary/20">
+              <div className="text-5xl lg:text-6xl font-display font-black text-secondary mb-3 group-hover:scale-110 transition-transform duration-500" data-testid="stat-users">
                 50K+
               </div>
-              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Users</div>
+              <div className="text-sm font-bold text-foreground/80 uppercase tracking-widest">Users</div>
             </div>
-            <div className="group text-center p-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/10">
-              <div className="text-4xl font-display font-black text-primary mb-2 group-hover:scale-110 transition-transform duration-300" data-testid="stat-reviews">
+            <div className="group text-center p-8 rounded-2xl glassmorphism-card bg-gradient-to-br from-primary/12 to-primary/6 border border-primary/25 hover:border-primary/50 backdrop-blur-sm transition-all duration-500 hover:scale-110 hover:shadow-xl hover:shadow-primary/20">
+              <div className="text-5xl lg:text-6xl font-display font-black text-primary mb-3 group-hover:scale-110 transition-transform duration-500" data-testid="stat-reviews">
                 100K+
               </div>
-              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Reviews</div>
+              <div className="text-sm font-bold text-foreground/80 uppercase tracking-widest">Reviews</div>
             </div>
-            <div className="group text-center p-6 rounded-xl bg-gradient-to-br from-secondary/10 to-secondary/5 border border-secondary/20 hover:border-secondary/40 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-secondary/10">
-              <div className="text-4xl font-display font-black text-secondary mb-2 group-hover:scale-110 transition-transform duration-300" data-testid="stat-countries">
+            <div className="group text-center p-8 rounded-2xl glassmorphism-card bg-gradient-to-br from-secondary/12 to-secondary/6 border border-secondary/25 hover:border-secondary/50 backdrop-blur-sm transition-all duration-500 hover:scale-110 hover:shadow-xl hover:shadow-secondary/20">
+              <div className="text-5xl lg:text-6xl font-display font-black text-secondary mb-3 group-hover:scale-110 transition-transform duration-500" data-testid="stat-countries">
                 50+
               </div>
-              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Countries</div>
+              <div className="text-sm font-bold text-foreground/80 uppercase tracking-widest">Countries</div>
             </div>
           </div>
         </div>
