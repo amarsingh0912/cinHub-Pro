@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, Router, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,7 +24,7 @@ import Contact from "@/pages/contact";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 
-function Router() {
+function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
@@ -49,16 +49,8 @@ function Router() {
 
   return (
     <Switch>
-      {/* Home route - conditional based on authentication */}
-      <Route path="/" component={!isLoading && isAuthenticated ? Home : Landing} />
-      
-      {/* Authenticated-only routes */}
-      {!isLoading && isAuthenticated && (
-        <>
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/admin" component={AdminDashboard} />
-        </>
-      )}
+      {/* Home route - showing Landing for now */}
+      <Route path="/" component={Landing} />
       
       {/* Routes available to everyone */}
       <Route path="/movies" component={Movies} />
@@ -84,8 +76,25 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <Router>
+            <Switch>
+              <Route path="/" component={Landing} />
+              <Route path="/movies" component={Movies} />
+              <Route path="/tv-shows" component={TVShows} />
+              <Route path="/movie/:id" component={MovieDetail} />
+              <Route path="/tv/:id" component={TVDetail} />
+              <Route path="/search" component={Search} />
+              <Route path="/collection/:category" component={Collection} />
+              <Route path="/genre/:genreId" component={Genre} />
+              <Route path="/person/:personId" component={Person} />
+              <Route path="/about" component={About} />
+              <Route path="/contact" component={Contact} />
+              <Route path="/privacy-policy" component={PrivacyPolicy} />
+              <Route path="/terms-of-service" component={TermsOfService} />
+              <Route component={NotFound} />
+            </Switch>
+            <Toaster />
+          </Router>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
