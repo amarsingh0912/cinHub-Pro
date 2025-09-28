@@ -40,9 +40,9 @@ export default function Collection() {
       
       <main className="pt-16">
         {/* Collection Header */}
-        <section className="py-12 border-b border-border" data-testid="collection-header">
+        <section className="py-12 border-b border-border animate-fade-in-up" data-testid="collection-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
+            <div className="text-center animate-slide-up-stagger-1">
               <div className={`w-20 h-20 bg-gradient-to-br ${categoryInfo.color} rounded-full flex items-center justify-center mx-auto mb-6`}>
                 <categoryInfo.icon className="w-8 h-8 text-white" />
               </div>
@@ -57,10 +57,10 @@ export default function Collection() {
         </section>
 
         {/* Movies Grid */}
-        <section className="py-8" data-testid="collection-movies">
+        <section className="py-8 animate-fade-in-up" data-testid="collection-movies">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="collection-loading">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in" data-testid="collection-loading">
                 {Array.from({ length: 18 }, (_, index) => (
                   <MovieCardSkeleton key={index} />
                 ))}
@@ -68,7 +68,7 @@ export default function Collection() {
             ) : (
               <>
                 {moviesData?.results && moviesData.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="collection-movies-grid">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in" data-testid="collection-movies-grid">
                     {moviesData.results.map((movie: any) => (
                       <div key={movie.id} className="movie-card group cursor-pointer">
                         <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">

@@ -101,9 +101,9 @@ export default function Genre() {
       
       <main className="pt-16">
         {/* Genre Header */}
-        <section className="py-12 border-b border-border" data-testid="genre-header">
+        <section className="py-12 border-b border-border animate-fade-in-up" data-testid="genre-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
+            <div className="text-center animate-slide-up-stagger-1">
               <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/60 rounded-full flex items-center justify-center mx-auto mb-6">
                 {activeTab === "movies" ? (
                   <Film className="w-10 h-10 text-white" />
@@ -122,9 +122,9 @@ export default function Genre() {
         </section>
 
         {/* Content Tabs */}
-        <section className="py-8" data-testid="genre-content">
+        <section className="py-8 animate-fade-in-up" data-testid="genre-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full animate-slide-up-stagger-2">
               <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
                 <TabsTrigger value="movies" data-testid="tab-movies">
                   <Film className="w-4 h-4 mr-2" />

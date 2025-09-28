@@ -60,9 +60,9 @@ export default function Header() {
       <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/25 shadow-2xl backdrop-blur-2xl bg-gradient-to-r from-background/98 via-card/95 to-background/98" data-testid="header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-8 animate-slide-in-left">
               <Link href="/" data-testid="link-home">
-                <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-xl px-3 py-2 -ml-3 hover:bg-primary/5 transition-all duration-300">
+                <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-xl px-3 py-2 -ml-3 hover:bg-primary/5 transition-all duration-300 animate-fade-in">
                   <div className="relative w-12 h-12 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/50 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
                     <Film className="w-6 h-6 text-white drop-shadow-md" />
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
@@ -74,7 +74,7 @@ export default function Header() {
                 </div>
               </Link>
               
-              <nav className="hidden md:flex items-center space-x-2">
+              <nav className="hidden md:flex items-center space-x-2 animate-stagger-in">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`link-${item.label.toLowerCase()}`}>
                     <span
@@ -98,7 +98,7 @@ export default function Header() {
               </nav>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 animate-slide-in-right">
               {/* Search Toggle */}
               <Button
                 variant="glass"

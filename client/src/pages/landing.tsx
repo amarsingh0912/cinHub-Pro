@@ -42,9 +42,9 @@ export default function Landing() {
         <HeroSection />
         
         {/* Trending Section with Tabs */}
-        <section className="py-16" data-testid="trending-section">
+        <section className="py-16 animate-fade-in-up" data-testid="trending-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
+            <div className="mb-8 animate-slide-up-stagger-1">
               <h2 className="text-3xl font-display font-bold text-center mb-2" data-testid="trending-title">
                 Trending Now
               </h2>
@@ -53,7 +53,7 @@ export default function Landing() {
               </p>
             </div>
             
-            <Tabs defaultValue="movies" className="w-full" data-testid="trending-tabs">
+            <Tabs defaultValue="movies" className="w-full animate-slide-up-stagger-2" data-testid="trending-tabs">
               <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
                 <TabsTrigger value="movies" data-testid="tab-trending-movies">Movies</TabsTrigger>
                 <TabsTrigger value="tv" data-testid="tab-trending-tv">TV Shows</TabsTrigger>
@@ -61,7 +61,7 @@ export default function Landing() {
               
               <TabsContent value="movies" data-testid="trending-movies-tab-content">
                 {trendingMovies?.results && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in">
                     {trendingMovies.results.slice(0, 12).map((movie) => (
                       <MovieCard key={movie.id} movie={movie} mediaType="movie" />
                     ))}
@@ -78,7 +78,7 @@ export default function Landing() {
               
               <TabsContent value="tv" data-testid="trending-tv-tab-content">
                 {trendingTVShows?.results && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 animate-stagger-in">
                     {trendingTVShows.results.slice(0, 12).map((show) => (
                       <MovieCard key={show.id} movie={show} mediaType="tv" />
                     ))}
@@ -96,14 +96,18 @@ export default function Landing() {
           </div>
         </section>
         
-        <CategoryGrid />
+        <div className="animate-fade-in-up">
+          <CategoryGrid />
+        </div>
         
-        <FeaturedCollections />
+        <div className="animate-fade-in-up">
+          <FeaturedCollections />
+        </div>
         
         {/* Popular Section with Tabs */}
-        <section className="py-16 bg-card/30" data-testid="popular-section">
+        <section className="py-16 bg-card/30 animate-fade-in-up" data-testid="popular-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
+            <div className="mb-8 animate-slide-up-stagger-1">
               <h2 className="text-3xl font-display font-bold text-center mb-2" data-testid="popular-title">
                 Popular This Week
               </h2>
@@ -112,7 +116,7 @@ export default function Landing() {
               </p>
             </div>
             
-            <Tabs defaultValue="movies" className="w-full" data-testid="popular-tabs">
+            <Tabs defaultValue="movies" className="w-full animate-slide-up-stagger-2" data-testid="popular-tabs">
               <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
                 <TabsTrigger value="movies" data-testid="tab-popular-movies">Movies</TabsTrigger>
                 <TabsTrigger value="tv" data-testid="tab-popular-tv">TV Shows</TabsTrigger>
@@ -156,9 +160,9 @@ export default function Landing() {
         </section>
         
         {/* User Features Preview */}
-        <section className="py-20" data-testid="features-section">
+        <section className="py-20 animate-fade-in-up" data-testid="features-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 animate-slide-up-stagger-1">
               <h2 className="text-4xl font-display font-bold mb-4" data-testid="features-title">
                 Enhance Your Movie Experience
               </h2>
@@ -167,7 +171,7 @@ export default function Landing() {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-testid="features-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-stagger-in" data-testid="features-grid">
               <div className="text-center group">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                   <List className="w-6 h-6 text-primary" />
