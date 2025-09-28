@@ -290,9 +290,9 @@ export default function MovieDetail() {
                   {/* Cache Status Indicator */}
                   <div className="absolute top-3 left-3">
                     <CacheStatus
-                      isOptimizing={cacheStatus.isOptimizing}
-                      isCompleted={cacheStatus.isCompleted}
-                      isFailed={cacheStatus.isFailed}
+                      isOptimizing={cacheStatus.isOptimizing ?? false}
+                      isCompleted={cacheStatus.isCompleted ?? false}
+                      isFailed={cacheStatus.isFailed ?? false}
                       progress={cacheStatus.progress}
                       error={cacheStatus.error}
                       showDetails={false}
@@ -388,9 +388,9 @@ export default function MovieDetail() {
                 
                 {/* Detailed Cache Status */}
                 <CacheStatus
-                  isOptimizing={cacheStatus.isOptimizing}
-                  isCompleted={cacheStatus.isCompleted}
-                  isFailed={cacheStatus.isFailed}
+                  isOptimizing={cacheStatus.isOptimizing ?? false}
+                  isCompleted={cacheStatus.isCompleted ?? false}
+                  isFailed={cacheStatus.isFailed ?? false}
                   progress={cacheStatus.progress}
                   error={cacheStatus.error}
                   showDetails={true}
