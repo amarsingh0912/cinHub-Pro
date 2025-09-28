@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send } from "lucide-react";
+import { Heart, Plus, Star, Clock, Calendar, DollarSign, Play, Users, MessageSquare, Info, Send, Images } from "lucide-react";
 import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
 import { CacheStatus } from "@/components/ui/cache-status";
@@ -414,7 +414,7 @@ export default function MovieDetail() {
 
             {/* Tabs */}
             <Tabs defaultValue="cast" className="w-full" data-testid="movie-tabs">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="cast" className="flex items-center gap-2" data-testid="tab-cast">
                   <Users className="w-4 h-4" />
                   Cast & Crew
@@ -426,6 +426,10 @@ export default function MovieDetail() {
                 <TabsTrigger value="details" className="flex items-center gap-2" data-testid="tab-details">
                   <Info className="w-4 h-4" />
                   Details
+                </TabsTrigger>
+                <TabsTrigger value="stills" className="flex items-center gap-2" data-testid="tab-stills">
+                  <Images className="w-4 h-4" />
+                  Movie Stills
                 </TabsTrigger>
               </TabsList>
 
@@ -700,6 +704,60 @@ export default function MovieDetail() {
                       )}
                     </div>
                   </div>
+                </div>
+              </TabsContent>
+
+              {/* Movie Stills Tab */}
+              <TabsContent value="stills" className="mt-6" data-testid="content-stills">
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold">Movie Stills</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {movie.poster_path && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-muted-foreground">Movie Poster</h4>
+                        <a 
+                          href={getImageUrl(movie.poster_path, 'original')} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block aspect-[2/3] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
+                          data-testid="movie-poster-still"
+                        >
+                          <img
+                            src={getImageUrl(movie.poster_path, 'w780')}
+                            alt={`${movie.title} - Poster`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </a>
+                      </div>
+                    )}
+                    
+                    {movie.backdrop_path && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-muted-foreground">Movie Backdrop</h4>
+                        <a 
+                          href={getImageUrl(movie.backdrop_path, 'original')} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block aspect-video overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
+                          data-testid="movie-backdrop-still"
+                        >
+                          <img
+                            src={getImageUrl(movie.backdrop_path, 'w780')}
+                            alt={`${movie.title} - Backdrop`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {!movie.poster_path && !movie.backdrop_path && (
+                    <div className="text-center py-12" data-testid="no-stills">
+                      <Images className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No movie stills available for this movie.</p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
