@@ -4,6 +4,9 @@ import {
   watchlistItems,
   favorites,
   reviews,
+  viewingHistory,
+  activityHistory,
+  searchHistory,
   otpVerifications,
   authSessions,
   socialAccounts,
@@ -24,6 +27,12 @@ import {
   type InsertFavorite,
   type Review,
   type InsertReview,
+  type ViewingHistory,
+  type InsertViewingHistory,
+  type ActivityHistory,
+  type InsertActivityHistory,
+  type SearchHistory,
+  type InsertSearchHistory,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -92,6 +101,26 @@ export interface IStorage {
   createReview(review: InsertReview): Promise<Review>;
   updateReview(reviewId: string, updates: Partial<InsertReview>): Promise<Review>;
   deleteReview(reviewId: string): Promise<void>;
+  
+  // Viewing History operations
+  getUserViewingHistory(userId: string, limit?: number): Promise<ViewingHistory[]>;
+  addViewingHistory(viewingEntry: InsertViewingHistory): Promise<ViewingHistory>;
+  removeViewingHistory(userId: string, mediaType: string, mediaId: number): Promise<void>;
+  clearUserViewingHistory(userId: string): Promise<void>;
+  
+  // Activity History operations
+  getUserActivityHistory(userId: string, limit?: number): Promise<ActivityHistory[]>;
+  addActivityHistory(activity: InsertActivityHistory): Promise<ActivityHistory>;
+  clearUserActivityHistory(userId: string): Promise<void>;
+  
+  // Search History operations
+  getUserSearchHistory(userId: string, limit?: number): Promise<SearchHistory[]>;
+  addSearchHistory(search: InsertSearchHistory): Promise<SearchHistory>;
+  clearUserSearchHistory(userId: string): Promise<void>;
+  
+  // User Preferences operations
+  getUserPreferences(userId: string): Promise<any>;
+  updateUserPreferences(userId: string, preferences: any): Promise<User>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -389,6 +418,154 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(reviews)
       .where(eq(reviews.id, reviewId));
+  }
+
+  // Viewing History operations
+  async getUserViewingHistory(userId: string, limit: number = 50): Promise<ViewingHistory[]> {
+    return await db
+      .select()
+      .from(viewingHistory)
+      .where(eq(viewingHistory.userId, userId))
+      .orderBy(desc(viewingHistory.viewedAt))
+      .limit(limit);
+  }
+
+  async addViewingHistory(viewingEntry: InsertViewingHistory): Promise<ViewingHistory> {
+    // Check if this media was already viewed today, if so update the existing record
+    const existingEntry = await db
+      .select()
+      .from(viewingHistory)
+      .where(
+        and(
+          eq(viewingHistory.userId, viewingEntry.userId),
+          eq(viewingHistory.mediaType, viewingEntry.mediaType),
+          eq(viewingHistory.mediaId, viewingEntry.mediaId),
+          sql`DATE(viewed_at) = CURRENT_DATE`
+        )
+      )
+      .limit(1);
+
+    if (existingEntry.length > 0) {
+      // Update existing entry with new timestamp
+      const [updatedEntry] = await db
+        .update(viewingHistory)
+        .set({ viewedAt: new Date() })
+        .where(eq(viewingHistory.id, existingEntry[0].id))
+        .returning();
+      return updatedEntry;
+    } else {
+      // Create new entry
+      const [newEntry] = await db
+        .insert(viewingHistory)
+        .values(viewingEntry)
+        .returning();
+      return newEntry;
+    }
+  }
+
+  async removeViewingHistory(userId: string, mediaType: string, mediaId: number): Promise<void> {
+    await db
+      .delete(viewingHistory)
+      .where(
+        and(
+          eq(viewingHistory.userId, userId),
+          eq(viewingHistory.mediaType, mediaType),
+          eq(viewingHistory.mediaId, mediaId)
+        )
+      );
+  }
+
+  async clearUserViewingHistory(userId: string): Promise<void> {
+    await db
+      .delete(viewingHistory)
+      .where(eq(viewingHistory.userId, userId));
+  }
+
+  // Activity History operations
+  async getUserActivityHistory(userId: string, limit: number = 100): Promise<ActivityHistory[]> {
+    return await db
+      .select()
+      .from(activityHistory)
+      .where(eq(activityHistory.userId, userId))
+      .orderBy(desc(activityHistory.timestamp))
+      .limit(limit);
+  }
+
+  async addActivityHistory(activity: InsertActivityHistory): Promise<ActivityHistory> {
+    const [newActivity] = await db
+      .insert(activityHistory)
+      .values(activity)
+      .returning();
+    return newActivity;
+  }
+
+  async clearUserActivityHistory(userId: string): Promise<void> {
+    await db
+      .delete(activityHistory)
+      .where(eq(activityHistory.userId, userId));
+  }
+
+  // Search History operations
+  async getUserSearchHistory(userId: string, limit: number = 20): Promise<SearchHistory[]> {
+    return await db
+      .select()
+      .from(searchHistory)
+      .where(eq(searchHistory.userId, userId))
+      .orderBy(desc(searchHistory.searchedAt))
+      .limit(limit);
+  }
+
+  async addSearchHistory(search: InsertSearchHistory): Promise<SearchHistory> {
+    // Check if this exact search query exists for the user recently
+    const existingSearch = await db
+      .select()
+      .from(searchHistory)
+      .where(
+        and(
+          eq(searchHistory.userId, search.userId),
+          eq(searchHistory.query, search.query)
+        )
+      )
+      .orderBy(desc(searchHistory.searchedAt))
+      .limit(1);
+
+    if (existingSearch.length > 0) {
+      // Update existing search with new timestamp
+      const [updatedSearch] = await db
+        .update(searchHistory)
+        .set({ searchedAt: new Date() })
+        .where(eq(searchHistory.id, existingSearch[0].id))
+        .returning();
+      return updatedSearch;
+    } else {
+      // Create new search entry
+      const [newSearch] = await db
+        .insert(searchHistory)
+        .values(search)
+        .returning();
+      return newSearch;
+    }
+  }
+
+  async clearUserSearchHistory(userId: string): Promise<void> {
+    await db
+      .delete(searchHistory)
+      .where(eq(searchHistory.userId, userId));
+  }
+
+  // User Preferences operations
+  async getUserPreferences(userId: string): Promise<any> {
+    const user = await this.getUser(userId);
+    return user?.preferences || {};
+  }
+
+  async updateUserPreferences(userId: string, preferences: any): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ preferences, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
   }
 
   // Admin operations

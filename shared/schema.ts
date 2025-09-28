@@ -137,11 +137,54 @@ export const reviews = pgTable("reviews", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User viewing history - tracks what users have watched
+export const viewingHistory = pgTable("viewing_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
+  mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
+  mediaTitle: varchar("media_title").notNull(),
+  mediaPosterPath: varchar("media_poster_path"),
+  mediaReleaseDate: varchar("media_release_date"),
+  watchedAt: timestamp("watched_at").defaultNow(),
+  // Optional: track viewing progress for TV shows/long movies
+  watchDuration: integer("watch_duration"), // in seconds
+  totalDuration: integer("total_duration"), // in seconds
+});
+
+// User activity history - tracks general user activities
+export const activityHistory = pgTable("activity_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  activityType: varchar("activity_type").notNull(), // 'favorite_added', 'review_posted', 'watchlist_created', etc.
+  entityType: varchar("entity_type"), // 'movie', 'tv', 'watchlist', 'review'
+  entityId: varchar("entity_id"), // ID of the related entity
+  entityTitle: varchar("entity_title"), // Title/name for display
+  description: text("description"), // Human-readable description
+  metadata: jsonb("metadata"), // Additional data specific to activity type
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User search history - tracks search queries
+export const searchHistory = pgTable("search_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  query: varchar("query").notNull(),
+  searchType: varchar("search_type").notNull(), // 'movie', 'tv', 'person', 'multi'
+  resultsCount: integer("results_count"), // Number of results returned
+  clickedResultId: integer("clicked_result_id"), // TMDB ID of clicked result
+  clickedResultType: varchar("clicked_result_type"), // 'movie', 'tv', 'person'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   watchlists: many(watchlists),
   favorites: many(favorites),
   reviews: many(reviews),
+  viewingHistory: many(viewingHistory),
+  activityHistory: many(activityHistory),
+  searchHistory: many(searchHistory),
   authSessions: many(authSessions),
   socialAccounts: many(socialAccounts),
 }));
@@ -189,6 +232,27 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
 }));
 
+export const viewingHistoryRelations = relations(viewingHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [viewingHistory.userId],
+    references: [users.id],
+  }),
+}));
+
+export const activityHistoryRelations = relations(activityHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [activityHistory.userId],
+    references: [users.id],
+  }),
+}));
+
+export const searchHistoryRelations = relations(searchHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [searchHistory.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas for validation
 export const insertWatchlistSchema = createInsertSchema(watchlists).omit({
   id: true,
@@ -210,6 +274,21 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertViewingHistorySchema = createInsertSchema(viewingHistory).omit({
+  id: true,
+  watchedAt: true,
+});
+
+export const insertActivityHistorySchema = createInsertSchema(activityHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSearchHistorySchema = createInsertSchema(searchHistory).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Authentication schemas
@@ -308,6 +387,12 @@ export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type ViewingHistory = typeof viewingHistory.$inferSelect;
+export type InsertViewingHistory = z.infer<typeof insertViewingHistorySchema>;
+export type ActivityHistory = typeof activityHistory.$inferSelect;
+export type InsertActivityHistory = z.infer<typeof insertActivityHistorySchema>;
+export type SearchHistory = typeof searchHistory.$inferSelect;
+export type InsertSearchHistory = z.infer<typeof insertSearchHistorySchema>;
 
 // TMDB Data Cache Tables
 // Movies cache - stores complete TMDB movie data

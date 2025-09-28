@@ -17,6 +17,9 @@ import {
   insertWatchlistItemSchema,
   insertFavoriteSchema,
   insertReviewSchema,
+  insertViewingHistorySchema,
+  insertActivityHistorySchema,
+  insertSearchHistorySchema,
   signInSchema,
   signUpSchema,
 } from "@shared/schema";
@@ -1833,6 +1836,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error creating review:', error);
       res.status(500).json({ message: 'Failed to create review' });
+    }
+  });
+
+  // User Preferences endpoints
+  app.get('/api/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const preferences = await storage.getUserPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+      res.status(500).json({ message: 'Failed to fetch user preferences' });
+    }
+  });
+
+  app.put('/api/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const preferences = req.body;
+      
+      // Validate preferences object structure
+      const preferencesSchema = z.object({
+        theme: z.enum(['light', 'dark', 'system']).optional(),
+        notifications: z.object({
+          email: z.boolean().optional(),
+          push: z.boolean().optional(),
+          newReleases: z.boolean().optional(),
+          watchlistUpdates: z.boolean().optional(),
+        }).optional(),
+        privacy: z.object({
+          showProfile: z.boolean().optional(),
+          showWatchlists: z.boolean().optional(),
+          showReviews: z.boolean().optional(),
+          showActivity: z.boolean().optional(),
+        }).optional(),
+        display: z.object({
+          language: z.string().optional(),
+          region: z.string().optional(),
+          adultContent: z.boolean().optional(),
+        }).optional(),
+      });
+
+      const validatedPreferences = preferencesSchema.parse(preferences);
+      const updatedUser = await storage.updateUserPreferences(userId, validatedPreferences);
+      res.json(updatedUser.preferences);
+    } catch (error) {
+      console.error('Error updating user preferences:', error);
+      res.status(500).json({ message: 'Failed to update user preferences' });
+    }
+  });
+
+  // Viewing History endpoints
+  app.get('/api/viewing-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const viewingHistory = await storage.getUserViewingHistory(userId, limit);
+      res.json(viewingHistory);
+    } catch (error) {
+      console.error('Error fetching viewing history:', error);
+      res.status(500).json({ message: 'Failed to fetch viewing history' });
+    }
+  });
+
+  app.post('/api/viewing-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const data = insertViewingHistorySchema.parse({ ...req.body, userId });
+      const viewingEntry = await storage.addViewingHistory(data);
+      res.json(viewingEntry);
+    } catch (error) {
+      console.error('Error adding viewing history:', error);
+      res.status(500).json({ message: 'Failed to add viewing history' });
+    }
+  });
+
+  app.delete('/api/viewing-history/:mediaType/:mediaId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const mediaType = req.params.mediaType;
+      const mediaId = parseInt(req.params.mediaId);
+      await storage.removeViewingHistory(userId, mediaType, mediaId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing viewing history:', error);
+      res.status(500).json({ message: 'Failed to remove viewing history' });
+    }
+  });
+
+  app.delete('/api/viewing-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      await storage.clearUserViewingHistory(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing viewing history:', error);
+      res.status(500).json({ message: 'Failed to clear viewing history' });
+    }
+  });
+
+  // Activity History endpoints
+  app.get('/api/activity-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const activityHistory = await storage.getUserActivityHistory(userId, limit);
+      res.json(activityHistory);
+    } catch (error) {
+      console.error('Error fetching activity history:', error);
+      res.status(500).json({ message: 'Failed to fetch activity history' });
+    }
+  });
+
+  app.post('/api/activity-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const data = insertActivityHistorySchema.parse({ ...req.body, userId });
+      const activity = await storage.addActivityHistory(data);
+      res.json(activity);
+    } catch (error) {
+      console.error('Error adding activity history:', error);
+      res.status(500).json({ message: 'Failed to add activity history' });
+    }
+  });
+
+  app.delete('/api/activity-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      await storage.clearUserActivityHistory(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing activity history:', error);
+      res.status(500).json({ message: 'Failed to clear activity history' });
+    }
+  });
+
+  // Search History endpoints
+  app.get('/api/search-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const searchHistory = await storage.getUserSearchHistory(userId, limit);
+      res.json(searchHistory);
+    } catch (error) {
+      console.error('Error fetching search history:', error);
+      res.status(500).json({ message: 'Failed to fetch search history' });
+    }
+  });
+
+  app.post('/api/search-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const data = insertSearchHistorySchema.parse({ ...req.body, userId });
+      const search = await storage.addSearchHistory(data);
+      res.json(search);
+    } catch (error) {
+      console.error('Error adding search history:', error);
+      res.status(500).json({ message: 'Failed to add search history' });
+    }
+  });
+
+  app.delete('/api/search-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      await storage.clearUserSearchHistory(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing search history:', error);
+      res.status(500).json({ message: 'Failed to clear search history' });
     }
   });
 
