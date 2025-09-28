@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import type { TVResponse } from "@/types/movie";
+import { useRevealAnimation, RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
@@ -44,26 +45,29 @@ export default function TVShows() {
         {/* Page Header */}
         <section className="py-12 border-b border-border" data-testid="tv-shows-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-display font-bold mb-4" data-testid="tv-shows-title">
-                TV Shows
-              </h1>
-              <p className="text-xl text-muted-foreground" data-testid="tv-shows-description">
-                Discover amazing TV shows from around the world
-              </p>
-            </div>
+            <RevealOnScroll options={REVEAL_PRESETS.sectionHeader}>
+              <div className="text-center">
+                <h1 className="text-4xl font-display font-bold mb-4" data-testid="tv-shows-title">
+                  TV Shows
+                </h1>
+                <p className="text-xl text-muted-foreground" data-testid="tv-shows-description">
+                  Discover amazing TV shows from around the world
+                </p>
+              </div>
+            </RevealOnScroll>
           </div>
         </section>
 
         {/* TV Shows Tabs */}
         <section className="py-16" data-testid="tv-shows-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full" data-testid="tv-shows-tabs">
-              <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-8">
-                <TabsTrigger value="trending" data-testid="tab-trending-tv">Trending</TabsTrigger>
-                <TabsTrigger value="popular" data-testid="tab-popular-tv">Popular</TabsTrigger>
-                <TabsTrigger value="top-rated" data-testid="tab-top-rated-tv">Top Rated</TabsTrigger>
-              </TabsList>
+            <RevealOnScroll options={REVEAL_PRESETS.sectionContent}>
+              <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full" data-testid="tv-shows-tabs">
+                <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-8">
+                  <TabsTrigger value="trending" data-testid="tab-trending-tv">Trending</TabsTrigger>
+                  <TabsTrigger value="popular" data-testid="tab-popular-tv">Popular</TabsTrigger>
+                  <TabsTrigger value="top-rated" data-testid="tab-top-rated-tv">Top Rated</TabsTrigger>
+                </TabsList>
               
               <TabsContent value="trending" data-testid="trending-tv-content">
                 {trendingLoading ? (
@@ -223,7 +227,8 @@ export default function TVShows() {
                   </div>
                 )}
               </TabsContent>
-            </Tabs>
+              </Tabs>
+            </RevealOnScroll>
           </div>
         </section>
       </main>
