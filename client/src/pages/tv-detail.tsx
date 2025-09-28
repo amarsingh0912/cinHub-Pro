@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info } from "lucide-react";
+import { Heart, Plus, Star, Calendar, Play, Tv, Users, MessageSquare, Info, Film } from "lucide-react";
 import { getImageUrl } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
 import { Link } from "wouter";
@@ -376,7 +376,7 @@ export default function TVDetail() {
 
             {/* Tabs */}
             <Tabs defaultValue="cast" className="w-full" data-testid="tv-tabs">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="cast" className="flex items-center gap-2" data-testid="tab-cast">
                   <Users className="w-4 h-4" />
                   Cast & Crew
@@ -388,6 +388,10 @@ export default function TVDetail() {
                 <TabsTrigger value="details" className="flex items-center gap-2" data-testid="tab-details">
                   <Info className="w-4 h-4" />
                   Details
+                </TabsTrigger>
+                <TabsTrigger value="stills" className="flex items-center gap-2" data-testid="tab-stills">
+                  <Film className="w-4 h-4" />
+                  TV Stills
                 </TabsTrigger>
               </TabsList>
 
@@ -616,6 +620,60 @@ export default function TVDetail() {
                       )}
                     </div>
                   </div>
+                </div>
+              </TabsContent>
+
+              {/* TV Stills Tab */}
+              <TabsContent value="stills" className="mt-6" data-testid="content-stills">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold">TV Show Images</h3>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {tvShow.poster_path && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-muted-foreground">Poster</h4>
+                        <a 
+                          href={getImageUrl(tvShow.poster_path, 'original')} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block aspect-[2/3] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
+                          data-testid="tv-poster-still"
+                        >
+                          <img
+                            src={getImageUrl(tvShow.poster_path, 'w780')}
+                            alt={`${tvShow.name} - Poster`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </a>
+                      </div>
+                    )}
+                    
+                    {tvShow.backdrop_path && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium text-muted-foreground">Backdrop</h4>
+                        <a 
+                          href={getImageUrl(tvShow.backdrop_path, 'original')} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="block aspect-[2/3] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
+                          data-testid="tv-backdrop-still"
+                        >
+                          <img
+                            src={getImageUrl(tvShow.backdrop_path, 'w780')}
+                            alt={`${tvShow.name} - Backdrop`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {!tvShow.poster_path && !tvShow.backdrop_path && (
+                    <div className="text-center py-12">
+                      <Film className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No images available for this TV show</p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>

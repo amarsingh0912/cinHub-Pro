@@ -739,7 +739,7 @@ export default function MovieDetail() {
                           href={getImageUrl(movie.backdrop_path, 'original')} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="block aspect-video overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
+                          className="block aspect-[2/3] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow cursor-pointer" 
                           data-testid="movie-backdrop-still"
                         >
                           <img
