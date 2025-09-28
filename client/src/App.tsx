@@ -49,6 +49,17 @@ function Router() {
 
   return (
     <Switch>
+      {/* Home route - conditional based on authentication */}
+      <Route path="/" component={!isLoading && isAuthenticated ? Home : Landing} />
+      
+      {/* Authenticated-only routes */}
+      {!isLoading && isAuthenticated && (
+        <>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/admin" component={AdminDashboard} />
+        </>
+      )}
+      
       {/* Routes available to everyone */}
       <Route path="/movies" component={Movies} />
       <Route path="/tv-shows" component={TVShows} />
@@ -62,17 +73,6 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
-      
-      {/* Conditional home page based on authentication */}
-      {isLoading || !isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/admin" component={AdminDashboard} />
-        </>
-      )}
       
       <Route component={NotFound} />
     </Switch>
