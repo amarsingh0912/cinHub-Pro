@@ -42,13 +42,13 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
           </div>
           
           {/* Enhanced Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
             <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-150">
               <div className="space-y-2">
-                <h4 className="text-white font-semibold text-sm leading-tight line-clamp-2" data-testid={`hover-title-${movie.id}`}>
+                <h4 className="text-white font-display font-bold text-sm leading-tight line-clamp-2" data-testid={`hover-title-${movie.id}`}>
                   {title}
                 </h4>
-                <p className="text-gray-300 text-xs" data-testid={`hover-year-${movie.id}`}>
+                <p className="text-secondary/90 text-xs font-medium tracking-wide uppercase" data-testid={`hover-year-${movie.id}`}>
                   {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
                 </p>
               </div>
@@ -59,11 +59,11 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         </div>
         
-        <div className="mt-4 space-y-1 group-hover:translate-y-[-2px] transition-transform duration-300">
-          <h3 className="font-semibold truncate text-foreground group-hover:text-primary transition-colors duration-200" data-testid={`title-${movie.id}`}>
+        <div className="mt-4 space-y-2 group-hover:translate-y-[-2px] transition-transform duration-300">
+          <h3 className="font-display font-bold text-[0.95rem] leading-tight truncate text-foreground group-hover:text-primary transition-colors duration-200" data-testid={`title-${movie.id}`}>
             {title}
           </h3>
-          <p className="text-sm text-muted-foreground" data-testid={`year-${movie.id}`}>
+          <p className="text-xs font-medium text-muted-foreground/80 tracking-wide uppercase" data-testid={`year-${movie.id}`}>
             {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
           </p>
         </div>

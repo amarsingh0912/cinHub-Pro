@@ -57,16 +57,20 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/30 shadow-lg backdrop-blur-xl" data-testid="header">
+      <header className="fixed top-0 left-0 right-0 z-50 glassmorphism border-b border-border/30 shadow-lg backdrop-blur-xl bg-gradient-to-r from-background/95 via-background/98 to-background/95" data-testid="header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <Link href="/" data-testid="link-home">
-                <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-lg px-2 py-1 -ml-2">
-                  <div className="w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-md group-hover:shadow-primary/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-2">
-                    <Film className="w-5 h-5 text-white" />
+                <div className="interactive flex items-center space-x-3 cursor-pointer group rounded-xl px-3 py-2 -ml-3 hover:bg-primary/5 transition-all duration-300">
+                  <div className="relative w-12 h-12 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/50 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                    <Film className="w-6 h-6 text-white drop-shadow-md" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
                   </div>
-                  <span className="text-xl font-display font-bold text-gradient group-hover:scale-105 transition-transform duration-300">CineHub Pro</span>
+                  <div className="flex flex-col">
+                    <span className="text-xl font-display font-black bg-gradient-to-r from-primary via-primary-300 to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">CineHub Pro</span>
+                    <span className="text-xs font-medium text-muted-foreground/60 tracking-widest uppercase">Movie Discovery</span>
+                  </div>
                 </div>
               </Link>
               
@@ -74,17 +78,20 @@ export default function Header() {
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href} data-testid={`link-${item.label.toLowerCase()}`}>
                     <span
-                      className={`interactive px-4 py-2.5 rounded-xl cursor-pointer relative group backdrop-blur-sm border transition-all duration-300 ${
+                      className={`interactive px-5 py-3 rounded-xl cursor-pointer relative group backdrop-blur-sm border-2 transition-all duration-300 font-medium text-sm tracking-tight focus:ring-2 focus:ring-primary/30 focus:outline-none ${
                         location === item.href
-                          ? "text-primary bg-primary/10 font-semibold border-primary/30 shadow-sm"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/60 border-transparent hover:border-accent hover:shadow-md"
+                          ? "text-primary bg-gradient-to-br from-primary/15 to-primary/5 border-primary/40 shadow-lg shadow-primary/10 ring-2 ring-primary/20"
+                          : "text-muted-foreground hover:text-foreground hover:bg-gradient-to-br hover:from-accent/50 hover:to-accent/20 border-transparent hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 hover:ring-2 hover:ring-accent/20"
                       }`}
                     >
                       {item.label}
                       {location === item.href && (
-                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-primary rounded-full animate-scale-in" />
+                        <>
+                          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full animate-scale-in" />
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 via-transparent to-secondary/10 opacity-50 -z-10" />
+                        </>
                       )}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/8 via-transparent to-secondary/8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
                     </span>
                   </Link>
                 ))}
