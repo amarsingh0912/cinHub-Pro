@@ -52,18 +52,8 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
             </span>
           </div>
           
-          {/* Enhanced Hover Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out">
-            <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500 delay-200">
-              <div className="space-y-3">
-                <h4 className="text-white font-display font-bold text-base leading-tight line-clamp-2 drop-shadow-lg" data-testid={`hover-title-${movie.id}`}>
-                  {title}
-                </h4>
-                <p className="text-secondary font-semibold text-sm tracking-wide uppercase drop-shadow-md" data-testid={`hover-year-${movie.id}`}>
-                  {releaseDate ? new Date(releaseDate).getFullYear() : 'TBA'}
-                </p>
-              </div>
-            </div>
+          {/* Enhanced Hover Overlay - Removed duplicate title and year */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out">
           </div>
           
           {/* Glassmorphism shine effect */}
