@@ -368,6 +368,30 @@
       animation: none;
       transform: none;
     }
+
+    /* Reduce motion for notification animations */
+    .animate-pulse-in,
+    .animate-ken-burns,
+    .animate-float-slow,
+    .animate-float-medium,
+    .animate-float-fast,
+    .animate-pulse-slow,
+    .animate-gradient-x,
+    .animate-slide-up-stagger-1,
+    .animate-slide-up-stagger-2,
+    .animate-slide-up-stagger-3,
+    .animate-slide-up-stagger-4 {
+      animation: none !important;
+      transform: none !important;
+    }
+
+    /* Simplify toast and alert transitions */
+    [data-radix-toast-viewport],
+    [data-radix-toast-root] {
+      transition: opacity 0.2s ease !important;
+      animation: none !important;
+      transform: none !important;
+    }
   }
 
   @media (max-width: 768px) {
@@ -470,6 +494,21 @@
     100% { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes pulse-in {
+    0% { 
+      opacity: 0; 
+      transform: scale(0.95); 
+    }
+    50% { 
+      opacity: 1; 
+      transform: scale(1.02); 
+    }
+    100% { 
+      opacity: 1; 
+      transform: scale(1); 
+    }
+  }
+
   .animate-ken-burns { animation: ken-burns 20s ease-in-out infinite; }
   .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
   .animate-float-medium { animation: float-medium 6s ease-in-out infinite; }
@@ -499,6 +538,10 @@
     animation: slide-up-stagger 0.8s ease-out forwards;
     animation-delay: 0.7s;
     opacity: 0;
+  }
+
+  .animate-pulse-in { 
+    animation: pulse-in 0.4s ease-out forwards; 
   }
 
   /* Fix missing duration variables */

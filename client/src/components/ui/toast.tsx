@@ -14,24 +14,28 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px] gap-2",
+      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-3 sm:p-4 md:p-6 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px] lg:max-w-[480px] gap-3 focus:outline-none",
       className
     )}
+    aria-label="Notifications"
+    role="region"
+    aria-live="polite"
+    aria-atomic="false"
     {...props}
   />
 ))
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-start space-x-3 overflow-hidden rounded-lg border-l-4 p-4 pr-8 shadow-xl backdrop-blur-sm transition-all duration-500 data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=open]:scale-100 data-[state=closed]:scale-95",
+  "group pointer-events-auto relative flex w-full items-start overflow-hidden rounded-xl border p-6 pr-10 shadow-2xl backdrop-blur-lg transition-all duration-700 ease-out data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=open]:scale-100 data-[state=open]:animate-pulse-in data-[state=closed]:scale-95",
   {
     variants: {
       variant: {
-        default: "border-l-blue-500 bg-background/95 text-foreground shadow-blue-500/20",
-        success: "border-l-green-500 bg-green-50/95 dark:bg-green-950/95 text-green-900 dark:text-green-100 shadow-green-500/20",
-        destructive: "border-l-red-500 bg-red-50/95 dark:bg-red-950/95 text-red-900 dark:text-red-100 shadow-red-500/20",
-        warning: "border-l-amber-500 bg-amber-50/95 dark:bg-amber-950/95 text-amber-900 dark:text-amber-100 shadow-amber-500/20",
-        info: "border-l-blue-500 bg-blue-50/95 dark:bg-blue-950/95 text-blue-900 dark:text-blue-100 shadow-blue-500/20",
+        default: "border-blue-200/40 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/95 via-white/90 to-blue-100/95 dark:from-blue-950/95 dark:via-background/90 dark:to-blue-900/95 text-blue-900 dark:text-blue-100 shadow-blue-500/30 dark:shadow-blue-400/20",
+        success: "border-green-200/40 dark:border-green-800/40 bg-gradient-to-br from-green-50/95 via-white/90 to-green-100/95 dark:from-green-950/95 dark:via-background/90 dark:to-green-900/95 text-green-900 dark:text-green-100 shadow-green-500/30 dark:shadow-green-400/20",
+        destructive: "border-red-200/40 dark:border-red-800/40 bg-gradient-to-br from-red-50/95 via-white/90 to-red-100/95 dark:from-red-950/95 dark:via-background/90 dark:to-red-900/95 text-red-900 dark:text-red-100 shadow-red-500/30 dark:shadow-red-400/20",
+        warning: "border-amber-200/40 dark:border-amber-800/40 bg-gradient-to-br from-amber-50/95 via-white/90 to-amber-100/95 dark:from-amber-950/95 dark:via-background/90 dark:to-amber-900/95 text-amber-900 dark:text-amber-100 shadow-amber-500/30 dark:shadow-amber-400/20",
+        info: "border-blue-200/40 dark:border-blue-800/40 bg-gradient-to-br from-blue-50/95 via-white/90 to-blue-100/95 dark:from-blue-950/95 dark:via-background/90 dark:to-blue-900/95 text-blue-900 dark:text-blue-100 shadow-blue-500/30 dark:shadow-blue-400/20",
       },
     },
     defaultVariants: {
@@ -45,10 +49,28 @@ const Toast = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
+  const ariaLabel = React.useMemo(() => {
+    switch (variant) {
+      case "success": return "Success notification"
+      case "destructive": return "Error notification"
+      case "warning": return "Warning notification"
+      case "info": return "Information notification"
+      default: return "Notification"
+    }
+  }, [variant])
+
+  const ariaLive = React.useMemo(() => {
+    // Use assertive for critical notifications, polite for others
+    return variant === "destructive" || variant === "warning" ? "assertive" : "polite"
+  }, [variant])
+
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
+      aria-label={ariaLabel}
+      role="alert"
+      aria-live={ariaLive}
       {...props}
     />
   )
@@ -70,25 +92,45 @@ const ToastAction = React.forwardRef<
 ))
 ToastAction.displayName = ToastPrimitives.Action.displayName
 
-// Toast Icon Component
+// Toast Icon Component with Enhanced Styling and Accessibility
 const getToastIcon = (variant: "default" | "success" | "destructive" | "warning" | "info") => {
-  const iconProps = { className: "h-5 w-5 shrink-0" }
+  const baseClasses = "h-6 w-6 shrink-0 drop-shadow-sm"
   
   switch (variant) {
     case "success":
-      return <CheckCircle {...iconProps} className={cn(iconProps.className, "text-green-600 dark:text-green-400")} />
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20 ring-4 ring-green-50 dark:ring-green-900/10">
+          <CheckCircle className={cn(baseClasses, "text-green-600 dark:text-green-400")} aria-hidden="true" />
+        </div>
+      )
     case "destructive":
-      return <AlertCircle {...iconProps} className={cn(iconProps.className, "text-red-600 dark:text-red-400")} />
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 ring-4 ring-red-50 dark:ring-red-900/10">
+          <AlertCircle className={cn(baseClasses, "text-red-600 dark:text-red-400")} aria-hidden="true" />
+        </div>
+      )
     case "warning":
-      return <AlertTriangle {...iconProps} className={cn(iconProps.className, "text-amber-600 dark:text-amber-400")} />
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/20 ring-4 ring-amber-50 dark:ring-amber-900/10">
+          <AlertTriangle className={cn(baseClasses, "text-amber-600 dark:text-amber-400")} aria-hidden="true" />
+        </div>
+      )
     case "info":
-      return <Info {...iconProps} className={cn(iconProps.className, "text-blue-600 dark:text-blue-400")} />
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 ring-4 ring-blue-50 dark:ring-blue-900/10">
+          <Info className={cn(baseClasses, "text-blue-600 dark:text-blue-400")} aria-hidden="true" />
+        </div>
+      )
     default:
-      return <Info {...iconProps} className={cn(iconProps.className, "text-blue-600 dark:text-blue-400")} />
+      return (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20 ring-4 ring-blue-50 dark:ring-blue-900/10">
+          <Info className={cn(baseClasses, "text-blue-600 dark:text-blue-400")} aria-hidden="true" />
+        </div>
+      )
   }
 }
 
-// Toast Progress Bar Component
+// Enhanced Toast Progress Bar Component
 const ToastProgress = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
@@ -97,24 +139,30 @@ const ToastProgress = React.forwardRef<
   }
 >(({ className, progress = 0, variant = "default", ...props }, ref) => {
   const progressColors = {
-    default: "bg-blue-500",
-    success: "bg-green-500", 
-    destructive: "bg-red-500",
-    warning: "bg-amber-500",
-    info: "bg-blue-500"
+    default: "from-blue-400 to-blue-600",
+    success: "from-green-400 to-green-600", 
+    destructive: "from-red-400 to-red-600",
+    warning: "from-amber-400 to-amber-600",
+    info: "from-blue-400 to-blue-600"
   }
   
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "absolute bottom-0 left-0 h-1 bg-black/10 dark:bg-white/10 transition-all duration-100",
-        className
-      )}
-      style={{ width: `${100 - progress}%` }}
-      {...props}
-    >
-      <div className={cn("h-full transition-all duration-100", progressColors[variant])} />
+    <div className="absolute bottom-0 left-0 right-0 h-1.5 overflow-hidden">
+      <div
+        ref={ref}
+        className={cn(
+          "h-full bg-gradient-to-r rounded-full transition-all duration-300 ease-out shadow-sm",
+          progressColors[variant],
+          className
+        )}
+        style={{ 
+          width: `${progress}%`,
+          transform: `translateX(${progress - 100}%)`,
+          transformOrigin: 'left'
+        }}
+        {...props}
+      />
+      <div className="absolute inset-0 bg-black/5 dark:bg-white/5" />
     </div>
   )
 })
@@ -127,7 +175,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-full p-1 text-foreground/70 opacity-0 transition-all duration-200 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/50 group-hover:opacity-100",
+      "absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-foreground/60 opacity-0 transition-all duration-300 hover:text-foreground hover:bg-black/10 hover:scale-110 dark:hover:bg-white/10 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 group-hover:opacity-100",
       className
     )}
     toast-close=""
@@ -144,7 +192,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold leading-none tracking-tight", className)}
+    className={cn("text-base font-semibold leading-tight tracking-tight mb-1", className)}
     {...props}
   />
 ))
@@ -156,7 +204,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-sm opacity-90 leading-relaxed", className)}
+    className={cn("text-sm opacity-85 leading-relaxed", className)}
     {...props}
   />
 ))

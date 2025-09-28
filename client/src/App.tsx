@@ -23,6 +23,7 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
+import NotificationsDemo from "@/pages/notifications-demo";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/notifications-demo" component={NotificationsDemo} />
       
       {/* Conditional home page based on authentication */}
       {isLoading || !isAuthenticated ? (
