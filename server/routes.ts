@@ -225,11 +225,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // Keep for CSS-in-JS frameworks
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"], // Keep for CSS-in-JS frameworks and external fonts
         scriptSrc: isProduction ? ["'self'"] : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         imgSrc: ["'self'", "data:", "https://image.tmdb.org", "https://via.placeholder.com", "https://res.cloudinary.com", "https://i.ytimg.com"],
         connectSrc: ["'self'", "wss:", "https://api.cloudinary.com", "https://upload.cloudinary.com", ...(isProduction ? [] : ['https://api.themoviedb.org'])], // Allow TMDB API in dev for debugging
-        fontSrc: ["'self'"],
+        fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
