@@ -15,8 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User } from "lucide-react";
+import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User, History, Activity, Search, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
@@ -65,6 +66,9 @@ export default function Dashboard() {
   const [isViewWatchlistOpen, setIsViewWatchlistOpen] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Preferences and History state
+  const [userPreferences, setUserPreferences] = useState<any>({});
 
   // Profile form schema
   const profileFormSchema = z.object({
@@ -118,6 +122,31 @@ export default function Dashboard() {
   const { data: watchlistItems, isLoading: watchlistItemsLoading } = useQuery<any[]>({
     queryKey: ["/api/watchlists", viewingWatchlist?.id, "items"],
     enabled: isAuthenticated && !!viewingWatchlist?.id,
+    retry: false,
+  });
+
+  // Preferences and History queries
+  const { data: preferences, isLoading: preferencesLoading } = useQuery<any>({
+    queryKey: ["/api/preferences"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  const { data: viewingHistory, isLoading: viewingHistoryLoading } = useQuery<any[]>({
+    queryKey: ["/api/viewing-history"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  const { data: activityHistory, isLoading: activityHistoryLoading } = useQuery<any[]>({
+    queryKey: ["/api/activity-history"],
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  const { data: searchHistory, isLoading: searchHistoryLoading } = useQuery<any[]>({
+    queryKey: ["/api/search-history"],
+    enabled: isAuthenticated,
     retry: false,
   });
 
@@ -318,6 +347,132 @@ export default function Dashboard() {
     },
   });
 
+  // Preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (preferences: any) => {
+      await apiRequest("PUT", "/api/preferences", preferences);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
+      toast({
+        title: "Preferences Updated",
+        description: "Your preferences have been saved successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update preferences.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // History mutations
+  const clearViewingHistoryMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/viewing-history", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/viewing-history"] });
+      toast({
+        title: "History Cleared",
+        description: "Your viewing history has been cleared.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to clear viewing history.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearActivityHistoryMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/activity-history", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/activity-history"] });
+      toast({
+        title: "History Cleared",
+        description: "Your activity history has been cleared.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to clear activity history.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearSearchHistoryMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", "/api/search-history", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/search-history"] });
+      toast({
+        title: "History Cleared",
+        description: "Your search history has been cleared.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to clear search history.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Profile picture upload mutations
   const getCloudinarySignatureMutation = useMutation({
     mutationFn: async () => {
@@ -455,6 +610,57 @@ export default function Dashboard() {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  // Initialize preferences when they load
+  useEffect(() => {
+    if (preferences) {
+      setUserPreferences(preferences);
+    }
+  }, [preferences]);
+
+  // Don't render preferences until they're loaded to prevent data loss
+  const preferencesReady = preferences !== undefined;
+
+  // Utility functions for preferences
+  const handlePreferenceChange = (key: string, value: any) => {
+    const newPreferences = { ...userPreferences, [key]: value };
+    setUserPreferences(newPreferences);
+  };
+
+  const handleGenreToggle = (genre: string) => {
+    const currentGenres = userPreferences.genres || [];
+    const newGenres = currentGenres.includes(genre)
+      ? currentGenres.filter((g: string) => g !== genre)
+      : [...currentGenres, genre];
+    handlePreferenceChange('genres', newGenres);
+  };
+
+  const savePreferences = async () => {
+    if (!preferencesReady) return; // Don't save if preferences haven't loaded yet
+    await updatePreferencesMutation.mutateAsync(userPreferences);
+  };
+
+  // Utility function to format relative time
+  const formatRelativeTime = (date: string) => {
+    const now = new Date();
+    const then = new Date(date);
+    const diffInMs = now.getTime() - then.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else if (diffInDays < 7) {
+      return `${diffInDays} days ago`;
+    } else if (diffInDays < 30) {
+      const weeks = Math.floor(diffInDays / 7);
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else {
+      const months = Math.floor(diffInDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
     }
   };
 
@@ -1391,140 +1597,379 @@ export default function Dashboard() {
                   </TabsContent>
 
                   <TabsContent value="preferences" className="mt-6">
-                    <div className="space-y-6">
-                      <Card data-testid="profile-preferences-card">
-                        <CardHeader>
-                          <CardTitle>Recommendation Preferences</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Customize your movie and TV show recommendations
-                          </p>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-3">
-                            <h4 className="font-medium">Preferred Genres</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                              {[
-                                "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime",
-                                "Documentary", "Drama", "Fantasy", "History", "Horror", "Music",
-                                "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western"
-                              ].map((genre) => (
-                                <div key={genre} className="flex items-center space-x-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`genre-${genre.toLowerCase()}`}
-                                    className="rounded"
-                                    data-testid={`checkbox-genre-${genre.toLowerCase()}`}
-                                    disabled
-                                  />
-                                  <Label htmlFor={`genre-${genre.toLowerCase()}`} className="text-sm">
-                                    {genre}
-                                  </Label>
-                                </div>
-                              ))}
+                    {preferencesLoading || !preferencesReady ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <span className="ml-2 text-muted-foreground">Loading preferences...</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <Card data-testid="profile-preferences-card">
+                          <CardHeader>
+                            <CardTitle>Recommendation Preferences</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Customize your movie and TV show recommendations
+                            </p>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-3">
+                              <h4 className="font-medium">Preferred Genres</h4>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                {[
+                                  "Action", "Adventure", "Animation", "Biography", "Comedy", "Crime",
+                                  "Documentary", "Drama", "Fantasy", "History", "Horror", "Music",
+                                  "Mystery", "Romance", "Sci-Fi", "Sport", "Thriller", "War", "Western"
+                                ].map((genre) => (
+                                  <div key={genre} className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id={`genre-${genre.toLowerCase()}`}
+                                      className="rounded"
+                                      checked={(userPreferences.genres || []).includes(genre)}
+                                      onChange={() => handleGenreToggle(genre)}
+                                      data-testid={`checkbox-genre-${genre.toLowerCase()}`}
+                                    />
+                                    <Label htmlFor={`genre-${genre.toLowerCase()}`} className="text-sm">
+                                      {genre}
+                                    </Label>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
 
-                      <Card data-testid="profile-viewing-preferences-card">
-                        <CardHeader>
-                          <CardTitle>Viewing Preferences</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Set your content preferences and restrictions
-                          </p>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="adult-content">Include Adult Content</Label>
-                              <p className="text-sm text-muted-foreground">Show adult/mature content in recommendations</p>
+                        <Card data-testid="profile-viewing-preferences-card">
+                          <CardHeader>
+                            <CardTitle>Viewing Preferences</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Set your content preferences and restrictions
+                            </p>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label htmlFor="adult-content">Include Adult Content</Label>
+                                <p className="text-sm text-muted-foreground">Show adult/mature content in recommendations</p>
+                              </div>
+                              <Switch
+                                id="adult-content"
+                                checked={userPreferences.includeAdultContent || false}
+                                onCheckedChange={(checked) => handlePreferenceChange('includeAdultContent', checked)}
+                                data-testid="switch-adult-content"
+                              />
                             </div>
-                            <input
-                              type="checkbox"
-                              id="adult-content"
-                              className="rounded"
-                              data-testid="checkbox-adult-content"
-                              disabled
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="auto-play">Auto-play Trailers</Label>
-                              <p className="text-sm text-muted-foreground">Automatically play trailers when browsing</p>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label htmlFor="auto-play">Auto-play Trailers</Label>
+                                <p className="text-sm text-muted-foreground">Automatically play trailers when browsing</p>
+                              </div>
+                              <Switch
+                                id="auto-play"
+                                checked={userPreferences.autoPlayTrailers || false}
+                                onCheckedChange={(checked) => handlePreferenceChange('autoPlayTrailers', checked)}
+                                data-testid="switch-auto-play"
+                              />
                             </div>
-                            <input
-                              type="checkbox"
-                              id="auto-play"
-                              className="rounded"
-                              data-testid="checkbox-auto-play"
-                              disabled
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                          </CardContent>
+                        </Card>
 
-                      <Card data-testid="profile-notification-preferences-card">
-                        <CardHeader>
-                          <CardTitle>Notification Preferences</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Choose what notifications you want to receive
-                          </p>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="new-releases">New Releases</Label>
-                              <p className="text-sm text-muted-foreground">Get notified about new movies and shows</p>
+                        <Card data-testid="profile-notification-preferences-card">
+                          <CardHeader>
+                            <CardTitle>Notification Preferences</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Choose what notifications you want to receive
+                            </p>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label htmlFor="new-releases">New Releases</Label>
+                                <p className="text-sm text-muted-foreground">Get notified about new movies and shows</p>
+                              </div>
+                              <Switch
+                                id="new-releases"
+                                checked={userPreferences.notifyNewReleases || false}
+                                onCheckedChange={(checked) => handlePreferenceChange('notifyNewReleases', checked)}
+                                data-testid="switch-new-releases"
+                              />
                             </div>
-                            <input
-                              type="checkbox"
-                              id="new-releases"
-                              className="rounded"
-                              data-testid="checkbox-new-releases"
-                              disabled
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="watchlist-updates">Watchlist Updates</Label>
-                              <p className="text-sm text-muted-foreground">Notifications when watchlist items become available</p>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label htmlFor="watchlist-updates">Watchlist Updates</Label>
+                                <p className="text-sm text-muted-foreground">Notifications when watchlist items become available</p>
+                              </div>
+                              <Switch
+                                id="watchlist-updates"
+                                checked={userPreferences.notifyWatchlistUpdates || false}
+                                onCheckedChange={(checked) => handlePreferenceChange('notifyWatchlistUpdates', checked)}
+                                data-testid="switch-watchlist-updates"
+                              />
                             </div>
-                            <input
-                              type="checkbox"
-                              id="watchlist-updates"
-                              className="rounded"
-                              data-testid="checkbox-watchlist-updates"
-                              disabled
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
+                          </CardContent>
+                        </Card>
+
+                        <div className="flex justify-end">
+                          <Button 
+                            onClick={savePreferences}
+                            disabled={!preferencesReady || updatePreferencesMutation.isPending}
+                            data-testid="button-save-preferences"
+                          >
+                            <Settings className="w-4 h-4 mr-2" />
+                            {updatePreferencesMutation.isPending ? "Saving..." : "Save Preferences"}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="history" className="mt-6">
-                    <Card data-testid="profile-history-card">
-                      <CardHeader>
-                        <CardTitle>Viewing History</CardTitle>
-                        <p className="text-sm text-muted-foreground">
-                          Keep track of what you've watched recently
-                        </p>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-center py-12">
-                          <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
-                            <Play className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                          <h3 className="text-xl font-semibold mb-2">No viewing history yet</h3>
-                          <p className="text-muted-foreground mb-4">
-                            Your viewing history will appear here as you watch movies and TV shows
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Viewing history tracking will be available in a future update
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-2xl font-display font-bold" data-testid="history-title">
+                          Your Activity History
+                        </h2>
+                      </div>
+
+                      <Tabs defaultValue="viewing" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 max-w-lg">
+                          <TabsTrigger value="viewing" data-testid="history-tab-viewing">
+                            <Play className="w-4 h-4 mr-2" />
+                            Viewing
+                          </TabsTrigger>
+                          <TabsTrigger value="activity" data-testid="history-tab-activity">
+                            <Activity className="w-4 h-4 mr-2" />
+                            Activity
+                          </TabsTrigger>
+                          <TabsTrigger value="search" data-testid="history-tab-search">
+                            <Search className="w-4 h-4 mr-2" />
+                            Search
+                          </TabsTrigger>
+                        </TabsList>
+
+                        {/* Viewing History Tab */}
+                        <TabsContent value="viewing" className="mt-6">
+                          <Card data-testid="viewing-history-card">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                              <div>
+                                <CardTitle>Viewing History</CardTitle>
+                                <p className="text-sm text-muted-foreground">
+                                  Movies and TV shows you've watched recently
+                                </p>
+                              </div>
+                              {viewingHistory && viewingHistory.length > 0 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => clearViewingHistoryMutation.mutate()}
+                                  disabled={clearViewingHistoryMutation.isPending}
+                                  data-testid="button-clear-viewing-history"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Clear History
+                                </Button>
+                              )}
+                            </CardHeader>
+                            <CardContent>
+                              {viewingHistoryLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                  <span className="ml-2 text-muted-foreground">Loading viewing history...</span>
+                                </div>
+                              ) : viewingHistory && viewingHistory.length > 0 ? (
+                                <div className="space-y-4">
+                                  {viewingHistory.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-4 p-3 border rounded-lg" data-testid={`viewing-history-item-${item.id}`}>
+                                      <div className="flex-shrink-0">
+                                        {item.mediaPosterPath ? (
+                                          <img
+                                            src={getImageUrl(item.mediaPosterPath)}
+                                            alt={item.mediaTitle}
+                                            className="w-12 h-16 object-cover rounded"
+                                          />
+                                        ) : (
+                                          <div className="w-12 h-16 bg-muted rounded flex items-center justify-center">
+                                            <Play className="w-4 h-4 text-muted-foreground" />
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <Link href={`/${item.mediaType}/${item.mediaId}`}>
+                                          <h3 className="font-medium hover:text-primary cursor-pointer" data-testid={`viewing-history-title-${item.id}`}>
+                                            {item.mediaTitle}
+                                          </h3>
+                                        </Link>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <Badge variant="outline" className="text-xs">
+                                            {item.mediaType === 'movie' ? 'Movie' : 'TV Show'}
+                                          </Badge>
+                                          <span className="text-sm text-muted-foreground">
+                                            Watched {formatRelativeTime(item.watchedAt)}
+                                          </span>
+                                        </div>
+                                        {item.mediaReleaseDate && (
+                                          <p className="text-sm text-muted-foreground">
+                                            Released {new Date(item.mediaReleaseDate).getFullYear()}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-12">
+                                  <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <Play className="w-8 h-8 text-muted-foreground" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No viewing history yet</h3>
+                                  <p className="text-muted-foreground">
+                                    Your viewing history will appear here as you watch movies and TV shows
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+
+                        {/* Activity History Tab */}
+                        <TabsContent value="activity" className="mt-6">
+                          <Card data-testid="activity-history-card">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                              <div>
+                                <CardTitle>Activity History</CardTitle>
+                                <p className="text-sm text-muted-foreground">
+                                  Your recent actions and interactions
+                                </p>
+                              </div>
+                              {activityHistory && activityHistory.length > 0 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => clearActivityHistoryMutation.mutate()}
+                                  disabled={clearActivityHistoryMutation.isPending}
+                                  data-testid="button-clear-activity-history"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Clear History
+                                </Button>
+                              )}
+                            </CardHeader>
+                            <CardContent>
+                              {activityHistoryLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                  <span className="ml-2 text-muted-foreground">Loading activity history...</span>
+                                </div>
+                              ) : activityHistory && activityHistory.length > 0 ? (
+                                <div className="space-y-3">
+                                  {activityHistory.map((activity) => (
+                                    <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg" data-testid={`activity-history-item-${activity.id}`}>
+                                      <div className="flex-shrink-0 mt-1">
+                                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                                          {activity.activityType === 'favorite_added' && <Heart className="w-4 h-4 text-red-500" />}
+                                          {activity.activityType === 'review_posted' && <Star className="w-4 h-4 text-yellow-500" />}
+                                          {activity.activityType === 'watchlist_created' && <Plus className="w-4 h-4 text-blue-500" />}
+                                          {activity.activityType === 'watchlist_item_added' && <Plus className="w-4 h-4 text-green-500" />}
+                                          {!['favorite_added', 'review_posted', 'watchlist_created', 'watchlist_item_added'].includes(activity.activityType) && <Activity className="w-4 h-4 text-muted-foreground" />}
+                                        </div>
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm" data-testid={`activity-description-${activity.id}`}>
+                                          {activity.description}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          {formatRelativeTime(activity.createdAt)}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-12">
+                                  <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <Activity className="w-8 h-8 text-muted-foreground" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No activity yet</h3>
+                                  <p className="text-muted-foreground">
+                                    Your activity history will appear here as you interact with movies and TV shows
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+
+                        {/* Search History Tab */}
+                        <TabsContent value="search" className="mt-6">
+                          <Card data-testid="search-history-card">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                              <div>
+                                <CardTitle>Search History</CardTitle>
+                                <p className="text-sm text-muted-foreground">
+                                  Your recent searches and queries
+                                </p>
+                              </div>
+                              {searchHistory && searchHistory.length > 0 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => clearSearchHistoryMutation.mutate()}
+                                  disabled={clearSearchHistoryMutation.isPending}
+                                  data-testid="button-clear-search-history"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Clear History
+                                </Button>
+                              )}
+                            </CardHeader>
+                            <CardContent>
+                              {searchHistoryLoading ? (
+                                <div className="flex items-center justify-center py-12">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                  <span className="ml-2 text-muted-foreground">Loading search history...</span>
+                                </div>
+                              ) : searchHistory && searchHistory.length > 0 ? (
+                                <div className="space-y-3">
+                                  {searchHistory.map((search) => (
+                                    <div key={search.id} className="flex items-center gap-3 p-3 border rounded-lg" data-testid={`search-history-item-${search.id}`}>
+                                      <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <Link href={`/search?q=${encodeURIComponent(search.query)}`}>
+                                          <p className="font-medium hover:text-primary cursor-pointer" data-testid={`search-query-${search.id}`}>
+                                            "{search.query}"
+                                          </p>
+                                        </Link>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <Badge variant="outline" className="text-xs">
+                                            {search.searchType === 'multi' ? 'All' : search.searchType}
+                                          </Badge>
+                                          <span className="text-sm text-muted-foreground">
+                                            {search.resultsCount ? `${search.resultsCount} results` : 'No results'}
+                                          </span>
+                                          <span className="text-sm text-muted-foreground">
+                                            • {formatRelativeTime(search.createdAt)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-center py-12">
+                                  <div className="w-16 h-16 bg-muted rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <Search className="w-8 h-8 text-muted-foreground" />
+                                  </div>
+                                  <h3 className="text-xl font-semibold mb-2">No searches yet</h3>
+                                  <p className="text-muted-foreground">
+                                    Your search history will appear here as you search for movies and TV shows
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
                   </TabsContent>
                 </Tabs>
               </TabsContent>

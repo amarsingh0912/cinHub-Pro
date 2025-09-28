@@ -35,7 +35,7 @@ import {
   type InsertSearchHistory,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -227,7 +227,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(authSessions)
       .where(eq(authSessions.userId, userId))
-      .orderBy(desc(authSessions.createdAt));
+      .orderBy(sql`${authSessions.createdAt} DESC`);
   }
 
   async updateAuthSession(id: string, updates: Partial<InsertAuthSession>): Promise<AuthSession> {
@@ -263,7 +263,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(watchlists)
       .where(eq(watchlists.userId, userId))
-      .orderBy(desc(watchlists.createdAt));
+      .orderBy(sql`${watchlists.createdAt} DESC`);
   }
 
   async createWatchlist(watchlist: InsertWatchlist): Promise<Watchlist> {
@@ -309,7 +309,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(watchlistItems)
       .where(eq(watchlistItems.watchlistId, watchlistId))
-      .orderBy(desc(watchlistItems.addedAt));
+      .orderBy(sql`${watchlistItems.addedAt} DESC`);
   }
 
   async addWatchlistItem(item: InsertWatchlistItem): Promise<WatchlistItem> {
@@ -338,7 +338,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(favorites)
       .where(eq(favorites.userId, userId))
-      .orderBy(desc(favorites.addedAt));
+      .orderBy(sql`${favorites.addedAt} DESC`);
   }
 
   async addFavorite(favorite: InsertFavorite): Promise<Favorite> {
@@ -381,7 +381,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(reviews)
       .where(eq(reviews.userId, userId))
-      .orderBy(desc(reviews.createdAt));
+      .orderBy(sql`${reviews.createdAt} DESC`);
   }
 
   async getMediaReviews(mediaType: string, mediaId: number): Promise<Review[]> {
@@ -394,7 +394,7 @@ export class DatabaseStorage implements IStorage {
           eq(reviews.mediaId, mediaId)
         )
       )
-      .orderBy(desc(reviews.createdAt));
+      .orderBy(sql`${reviews.createdAt} DESC`);
   }
 
   async createReview(review: InsertReview): Promise<Review> {
@@ -426,7 +426,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(viewingHistory)
       .where(eq(viewingHistory.userId, userId))
-      .orderBy(desc(viewingHistory.watchedAt))
+      .orderBy(sql`${viewingHistory.watchedAt} DESC`)
       .limit(limit);
   }
 
@@ -487,7 +487,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(activityHistory)
       .where(eq(activityHistory.userId, userId))
-      .orderBy(desc(activityHistory.createdAt))
+      .orderBy(sql`${activityHistory.createdAt} DESC`)
       .limit(limit);
   }
 
@@ -511,7 +511,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(searchHistory)
       .where(eq(searchHistory.userId, userId))
-      .orderBy(desc(searchHistory.createdAt))
+      .orderBy(sql`${searchHistory.createdAt} DESC`)
       .limit(limit);
   }
 
@@ -526,7 +526,7 @@ export class DatabaseStorage implements IStorage {
           eq(searchHistory.query, search.query)
         )
       )
-      .orderBy(desc(searchHistory.createdAt))
+      .orderBy(sql`${searchHistory.createdAt} DESC`)
       .limit(1);
 
     if (existingSearch.length > 0) {
@@ -573,7 +573,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(users)
-      .orderBy(desc(users.createdAt));
+      .orderBy(sql`${users.createdAt} DESC`);
   }
 
   async getUserStats(): Promise<{
@@ -746,7 +746,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(socialAccounts)
       .where(eq(socialAccounts.userId, userId))
-      .orderBy(desc(socialAccounts.createdAt));
+      .orderBy(sql`${socialAccounts.createdAt} DESC`);
   }
 
   async getUserSocialAccount(userId: string, provider: string): Promise<SocialAccount | undefined> {
