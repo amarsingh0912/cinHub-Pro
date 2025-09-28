@@ -411,6 +411,84 @@
     transform: translateY(-12px) scale(0.92);
   }
 
+  /* Enhanced Animations for Hero Section */
+  @keyframes ken-burns {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.08) rotate(0.5deg); }
+    100% { transform: scale(1.05) rotate(0deg); }
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) translateX(0px); }
+    25% { transform: translateY(-20px) translateX(5px); }
+    50% { transform: translateY(-10px) translateX(10px); }
+    75% { transform: translateY(-15px) translateX(-5px); }
+  }
+
+  @keyframes float-medium {
+    0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+    33% { transform: translateY(-15px) translateX(8px) rotate(2deg); }
+    66% { transform: translateY(-8px) translateX(-8px) rotate(-1deg); }
+  }
+
+  @keyframes float-fast {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-25px) scale(1.1); }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes slide-up-stagger {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-ken-burns { animation: ken-burns 20s ease-in-out infinite; }
+  .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
+  .animate-float-medium { animation: float-medium 6s ease-in-out infinite; }
+  .animate-float-fast { animation: float-fast 4s ease-in-out infinite; }
+  .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+  .animate-gradient-x { 
+    background-size: 200% 200%; 
+    animation: gradient-x 3s ease infinite; 
+  }
+  
+  .animate-slide-up-stagger-1 { 
+    animation: slide-up-stagger 0.8s ease-out forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+  }
+  .animate-slide-up-stagger-2 { 
+    animation: slide-up-stagger 0.8s ease-out forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
+  }
+  .animate-slide-up-stagger-3 { 
+    animation: slide-up-stagger 0.8s ease-out forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+  }
+  .animate-slide-up-stagger-4 { 
+    animation: slide-up-stagger 0.8s ease-out forwards;
+    animation-delay: 0.7s;
+    opacity: 0;
+  }
+
+  /* Fix missing duration variables */
+  :root {
+    --duration-250: 250ms;
+    --duration-400: 400ms;
+    --duration-600: 600ms;
+  }
+
   /* Enhanced Interactive Elements */
   .interactive {
     transition: all var(--duration-250) var(--ease-smooth);
