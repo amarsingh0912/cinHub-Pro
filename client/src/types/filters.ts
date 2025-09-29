@@ -480,10 +480,10 @@ export interface UseAdvancedFiltersReturn {
 }
 
 export interface UseFilterURLSyncReturn {
-  syncToURL: (filters: AdvancedFilterState) => void;
+  syncToURL: (filters: AdvancedFilterState, options?: { pushState?: boolean }) => void;
   syncFromURL: () => AdvancedFilterState;
   urlParams: FilterQueryParams;
-  updateURL: (params: Partial<FilterQueryParams>) => void;
+  updateURL: (params: Partial<FilterQueryParams>, options?: { pushState?: boolean }) => void;
 }
 
 export interface UseDebouncedFiltersReturn {
@@ -491,4 +491,12 @@ export interface UseDebouncedFiltersReturn {
   isDebouncing: boolean;
   cancelDebounce: () => void;
   flushDebounce: () => void;
+}
+
+// Enhanced hook for complete filter management with URL sync
+export interface UseAdvancedFiltersWithURLReturn extends UseAdvancedFiltersReturn {
+  // URL sync methods
+  syncToURL: (options?: { pushState?: boolean }) => void;
+  urlParams: FilterQueryParams;
+  hasURLFilters: boolean;
 }
