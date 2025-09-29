@@ -1150,13 +1150,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Unified search endpoint for both movies and TV shows
   app.get('/api/search', async (req, res) => {
     try {
-      const query = req.query.query;
-      const page = req.query.page || 1;
+      const { 
+        query,
+        page = 1,
+        genre,
+        year,
+        rating,
+        sort = 'popularity.desc'
+      } = req.query;
+
       if (!query) {
         return res.status(400).json({ message: 'Search query is required' });
       }
-      const data = await fetchFromTMDB('/search/multi', { query: query as string, page });
-      res.json(data);
+
+      // Check if any filters are applied (only treat sort as a filter if it's not the default)
+      const hasFilters = genre || year || rating || (sort && sort !== 'relevance' && sort !== 'popularity.desc');
+
+      if (!hasFilters) {
+        // No filters, use simple search endpoint
+        const data = await fetchFromTMDB('/search/multi', { 
+          query: query as string, 
+          page 
+        });
+        res.json(data);
+        return;
+      }
+
+      // When filters are applied, we need to use discover endpoints
+      // and merge results from movies and TV shows
+      // Proper pagination: alternate between movie-heavy and TV-heavy pages
+      const currentPage = Number(page);
+      const isEvenPage = currentPage % 2 === 0;
+      
+      // For odd pages (1,3,5...), prioritize movies; for even pages (2,4,6...), prioritize TV
+      const moviePage = isEvenPage ? Math.floor(currentPage / 2) : Math.ceil(currentPage / 2);
+      const tvPage = isEvenPage ? Math.ceil(currentPage / 2) : Math.floor(currentPage / 2);
+      
+      // Ensure we don't request page 0
+      const movieParams: Record<string, any> = {
+        page: Math.max(1, moviePage),
+        sort_by: sort === 'relevance' ? 'popularity.desc' : sort
+      };
+
+      const tvParams: Record<string, any> = {
+        page: Math.max(1, tvPage),
+        sort_by: sort === 'relevance' ? 'popularity.desc' : sort
+      };
+
+      // Add search query as keyword if provided
+      if (query && query.toString().trim()) {
+        const keywordResponse = await fetchFromTMDB('/search/keyword', { 
+          query: query as string 
+        });
+        if (keywordResponse.results && keywordResponse.results.length > 0) {
+          const keywordIds = keywordResponse.results.slice(0, 5).map((k: any) => k.id).join(',');
+          movieParams.with_keywords = keywordIds;
+          tvParams.with_keywords = keywordIds;
+        }
+      }
+
+      // Apply filters
+      if (genre && genre !== 'all') {
+        movieParams.with_genres = genre;
+        tvParams.with_genres = genre;
+      }
+      
+      if (year && year !== 'all') {
+        movieParams.primary_release_year = year;
+        tvParams.first_air_date_year = year;
+      }
+      
+      if (rating && rating !== '0') {
+        movieParams['vote_average.gte'] = rating;
+        tvParams['vote_average.gte'] = rating;
+      }
+
+      // Fetch from both endpoints in parallel
+      const [movieData, tvData] = await Promise.all([
+        fetchFromTMDB('/discover/movie', movieParams).catch(() => ({ results: [], total_results: 0, total_pages: 0 })),
+        fetchFromTMDB('/discover/tv', tvParams).catch(() => ({ results: [], total_results: 0, total_pages: 0 }))
+      ]);
+
+      // Merge results
+      const combinedResults = [
+        ...movieData.results.map((item: any) => ({ ...item, media_type: 'movie' })),
+        ...tvData.results.map((item: any) => ({ ...item, media_type: 'tv' }))
+      ];
+
+      // Sort combined results if needed
+      if (sort === 'vote_average.desc') {
+        combinedResults.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+      } else if (sort === 'primary_release_date.desc' || sort === 'first_air_date.desc') {
+        combinedResults.sort((a, b) => {
+          const dateA = new Date(a.release_date || a.first_air_date || '1900-01-01');
+          const dateB = new Date(b.release_date || b.first_air_date || '1900-01-01');
+          return dateB.getTime() - dateA.getTime();
+        });
+      }
+
+      // Return merged response
+      res.json({
+        page: Number(page),
+        results: combinedResults,
+        total_results: movieData.total_results + tvData.total_results,
+        total_pages: Math.max(movieData.total_pages, tvData.total_pages)
+      });
+
     } catch (error) {
       console.error('Error searching movies and TV shows:', error);
       res.status(500).json({ message: 'Failed to search movies and TV shows' });

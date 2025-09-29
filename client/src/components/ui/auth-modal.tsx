@@ -24,7 +24,10 @@ import {
   Camera,
   Key,
   ArrowLeft,
-  X
+  X,
+  Loader2,
+  Check,
+  AlertCircle
 } from "lucide-react";
 import { FaGoogle, FaFacebook, FaTwitter, FaGithub } from "react-icons/fa";
 import { Link } from "wouter";
@@ -80,6 +83,27 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 type OtpVerificationFormData = z.infer<typeof otpVerificationSchema>;
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
+// Password strength calculation
+const calculatePasswordStrength = (password: string) => {
+  if (!password) return { score: 0, label: "Weak", color: "text-red-500" };
+  
+  let score = 0;
+  const checks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password)
+  };
+  
+  score = Object.values(checks).filter(Boolean).length;
+  
+  if (score < 2) return { score: 1, label: "Weak", color: "text-red-500" };
+  if (score < 4) return { score: 2, label: "Fair", color: "text-yellow-500" };
+  if (score < 5) return { score: 3, label: "Good", color: "text-blue-500" };
+  return { score: 4, label: "Strong", color: "text-green-500" };
+};
+
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -88,6 +112,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [otpSentTo, setOtpSentTo] = useState<string>("");
   const [otpPurpose, setOtpPurpose] = useState<'signup' | 'reset'>('signup');
   const [signinError, setSigninError] = useState<string>("");
+  const [otpDigits, setOtpDigits] = useState<string[]>(new Array(6).fill(""));
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>(new Array(6).fill(null));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -152,6 +178,44 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return; // Only allow single digit
+    
+    const newOtpDigits = [...otpDigits];
+    newOtpDigits[index] = value;
+    setOtpDigits(newOtpDigits);
+    
+    // Update form value
+    const otpValue = newOtpDigits.join('');
+    otpForm.setValue('otp', otpValue);
+    
+    // Auto-focus next input
+    if (value && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      // Focus previous input on backspace
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text').slice(0, 6);
+    if (!/^\d+$/.test(pastedText)) return;
+    
+    const newDigits = pastedText.split('').concat(new Array(6 - pastedText.length).fill(''));
+    setOtpDigits(newDigits);
+    otpForm.setValue('otp', pastedText);
+    
+    // Focus last filled input or next empty one
+    const nextIndex = Math.min(pastedText.length, 5);
+    otpInputRefs.current[nextIndex]?.focus();
   };
 
   const signinMutation = useMutation({
@@ -738,6 +802,55 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         </div>
                       </FormControl>
                       <FormMessage />
+                      {/* Password Strength Indicator */}
+                      {signupForm.watch('password') && (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">Password Strength:</span>
+                            <span className={`font-medium ${calculatePasswordStrength(signupForm.watch('password')).color}`}>
+                              {calculatePasswordStrength(signupForm.watch('password')).label}
+                            </span>
+                          </div>
+                          <div className="flex space-x-1">
+                            {[1, 2, 3, 4].map((level) => (
+                              <div
+                                key={level}
+                                className={`h-2 w-full rounded-full ${
+                                  level <= calculatePasswordStrength(signupForm.watch('password')).score
+                                    ? level === 1
+                                      ? 'bg-red-500'
+                                      : level === 2
+                                      ? 'bg-yellow-500'
+                                      : level === 3
+                                      ? 'bg-blue-500'
+                                      : 'bg-green-500'
+                                    : 'bg-muted'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className={`flex items-center ${signupForm.watch('password')?.length >= 8 ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                {signupForm.watch('password')?.length >= 8 ? <Check className="w-3 h-3 mr-1" /> : <AlertCircle className="w-3 h-3 mr-1" />}
+                                8+ characters
+                              </div>
+                              <div className={`flex items-center ${/[A-Z]/.test(signupForm.watch('password') || '') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                {/[A-Z]/.test(signupForm.watch('password') || '') ? <Check className="w-3 h-3 mr-1" /> : <AlertCircle className="w-3 h-3 mr-1" />}
+                                Uppercase
+                              </div>
+                              <div className={`flex items-center ${/[a-z]/.test(signupForm.watch('password') || '') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                {/[a-z]/.test(signupForm.watch('password') || '') ? <Check className="w-3 h-3 mr-1" /> : <AlertCircle className="w-3 h-3 mr-1" />}
+                                Lowercase
+                              </div>
+                              <div className={`flex items-center ${/[0-9]/.test(signupForm.watch('password') || '') ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                {/[0-9]/.test(signupForm.watch('password') || '') ? <Check className="w-3 h-3 mr-1" /> : <AlertCircle className="w-3 h-3 mr-1" />}
+                                Number
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -835,35 +948,61 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* OTP Verification Form */}
           {mode === "otp-verification" && (
             <Form {...otpForm}>
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-                <FormField
-                  control={otpForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Verification Code</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter 6-digit code"
-                          maxLength={6}
-                          className="text-center text-lg tracking-widest"
-                          data-testid="input-otp"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                <div className="space-y-4">
+                  <FormLabel className="text-center block text-lg font-medium">Verification Code</FormLabel>
+                  <p className="text-center text-sm text-muted-foreground mb-6">
+                    Enter the 6-digit code we sent to your device
+                  </p>
+                  
+                  {/* Individual OTP Digits */}
+                  <div className="flex justify-center space-x-2 sm:space-x-3" onPaste={handleOtpPaste}>
+                    {otpDigits.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => (otpInputRefs.current[index] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="w-12 h-12 sm:w-14 sm:h-14 text-center text-lg font-bold border-2 border-border rounded-xl bg-background/50 backdrop-blur-sm focus:border-primary focus:bg-background focus:shadow-lg focus:shadow-primary/10 transition-all duration-300 hover:border-border/60"
+                        data-testid={`input-otp-digit-${index}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Resend Code Button */}
+                  <div className="text-center pt-4">
+                    <p className="text-sm text-muted-foreground mb-2">Didn't receive the code?</p>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-primary hover:text-primary/80 font-medium"
+                      data-testid="button-resend-otp"
+                    >
+                      Resend Code
+                    </Button>
+                  </div>
+                </div>
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary text-white rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:shadow-xl transition-all duration-300"
                   size="lg"
                   data-testid="button-verify-otp"
-                  disabled={isLoading}
+                  disabled={isLoading || otpDigits.some(digit => !digit)}
                 >
-                  {isLoading ? "Verifying..." : "Verify Code"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify Code"
+                  )}
                 </Button>
               </form>
             </Form>
