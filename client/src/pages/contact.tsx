@@ -2,51 +2,61 @@ import { useState } from "react";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, MessageCircle, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { contactFormSchema, type ContactFormData } from "@shared/schema";
+import { Mail, MessageCircle, Phone, MapPin, Clock, Send, CheckCircle, Users, Globe, Zap } from "lucide-react";
 
 export default function Contact() {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
+  
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactFormSchema),
+    mode: "onSubmit",
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.message) {
+  // Contact form submission mutation
+  const contactMutation = useMutation({
+    mutationFn: (data: ContactFormData) => {
+      // For now, simulate API call - in a real app, this would send to backend
+      return new Promise<{ success: boolean }>((resolve) => {
+        setTimeout(() => {
+          resolve({ success: true });
+        }, 1500);
+      });
+    },
+    onSuccess: () => {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Message Sent Successfully!",
+        description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+      });
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Failed to Send Message",
+        description: "There was an error sending your message. Please try again.",
         variant: "destructive",
       });
-      return;
-    }
+    },
+  });
 
-    setIsSubmitting(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for your message. We'll get back to you within 24 hours.",
-      });
-      setFormData({ name: "", email: "", subject: "", message: "" });
-      setIsSubmitting(false);
-    }, 1500);
+  const onSubmit = (data: ContactFormData) => {
+    contactMutation.mutate(data);
   };
 
   const contactInfo = [
@@ -101,15 +111,40 @@ export default function Contact() {
       
       <main className="pt-16">
         {/* Contact Hero */}
-        <section className="py-16 bg-gradient-to-r from-primary/10 to-secondary/10" data-testid="contact-hero">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl sm:text-5xl font-display font-bold mb-6" data-testid="contact-title">
+        <section className="py-20 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 relative overflow-hidden" data-testid="contact-hero">
+          <div className="absolute inset-0 bg-grid-white/10 bg-[size:20px_20px] opacity-20"></div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full mb-8 animate-pulse">
+              <MessageCircle className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-4xl sm:text-6xl font-display font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent" data-testid="contact-title">
               Get in Touch
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto" data-testid="contact-description">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed" data-testid="contact-description">
               Have questions about CineHub Pro? Need help with your account? 
-              We're here to help! Reach out to us through any of the methods below.
+              We're here to help! Reach out to us through any of the methods below and we'll respond promptly.
             </p>
+            <div className="flex flex-col items-center mt-8 space-y-4">
+              <div className="flex justify-center space-x-4">
+                <Badge variant="secondary" className="animate-bounce">
+                  <Clock className="w-4 h-4 mr-2" />
+                  24/7 Support
+                </Badge>
+                <Badge variant="outline" className="animate-bounce delay-100">
+                  <Zap className="w-4 h-4 mr-2" />
+                  Quick Response
+                </Badge>
+              </div>
+              <Button 
+                size="lg"
+                className="group bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                data-testid="hero-contact-cta"
+              >
+                <Send className="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                Start a Conversation
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -145,7 +180,7 @@ export default function Contact() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Contact Form */}
               <div>
-                <Card data-testid="contact-form-card">
+                <Card data-testid="contact-form-card" id="contact-form">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Send className="w-5 h-5" />
@@ -153,82 +188,103 @@ export default function Contact() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-6" data-testid="contact-form">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="name">Full Name *</Label>
-                          <Input
-                            id="name"
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-testid="contact-form">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
                             name="name"
-                            type="text"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            placeholder="Your full name"
-                            required
-                            data-testid="input-name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Full Name *</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Your full name"
+                                    {...field}
+                                    data-testid="input-name"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </div>
-                        <div>
-                          <Label htmlFor="email">Email Address *</Label>
-                          <Input
-                            id="email"
+                          <FormField
+                            control={form.control}
                             name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            placeholder="your@email.com"
-                            required
-                            data-testid="input-email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email Address *</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    {...field}
+                                    data-testid="input-email"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
                         </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="subject">Subject</Label>
-                        <Input
-                          id="subject"
+                        
+                        <FormField
+                          control={form.control}
                           name="subject"
-                          type="text"
-                          value={formData.subject}
-                          onChange={handleInputChange}
-                          placeholder="What's this about?"
-                          data-testid="input-subject"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subject *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="What's this about?"
+                                  {...field}
+                                  data-testid="input-subject"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="message">Message *</Label>
-                        <Textarea
-                          id="message"
+                        
+                        <FormField
+                          control={form.control}
                           name="message"
-                          value={formData.message}
-                          onChange={handleInputChange}
-                          placeholder="Tell us how we can help you..."
-                          rows={6}
-                          required
-                          data-testid="textarea-message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Message *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Tell us how we can help you..."
+                                  rows={6}
+                                  {...field}
+                                  data-testid="textarea-message"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        disabled={isSubmitting} 
-                        className="w-full"
-                        data-testid="button-submit"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4 mr-2" />
-                            Send Message
-                          </>
-                        )}
-                      </Button>
-                    </form>
+                        
+                        <Button 
+                          type="submit" 
+                          disabled={contactMutation.isPending} 
+                          className="w-full group hover:shadow-lg transition-all duration-300"
+                          data-testid="button-submit"
+                        >
+                          {contactMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform duration-300" />
+                              Send Message
+                            </>
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
                   </CardContent>
                 </Card>
               </div>
@@ -267,8 +323,13 @@ export default function Contact() {
                     <p className="text-muted-foreground mb-4" data-testid="faq-help-description">
                       Can't find what you're looking for? Our support team is here to help.
                     </p>
-                    <Button variant="outline" data-testid="button-more-help">
-                      <Mail className="w-4 h-4 mr-2" />
+                    <Button 
+                      variant="outline" 
+                      className="group hover:scale-105 transition-all duration-300" 
+                      onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                      data-testid="button-more-help"
+                    >
+                      <Mail className="w-4 h-4 mr-2 group-hover:bounce" />
                       Contact Support
                     </Button>
                   </CardContent>
