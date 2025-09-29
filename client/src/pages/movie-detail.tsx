@@ -381,8 +381,8 @@ export default function MovieDetail() {
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
                   <div className="flex items-center gap-2" data-testid="movie-rating">
                     <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="font-semibold">{movie.vote_average.toFixed(1)}</span>
-                    <span className="text-muted-foreground">({movie.vote_count.toLocaleString()} votes)</span>
+                    <span className="font-semibold">{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
+                    <span className="text-muted-foreground">({movie.vote_count ? movie.vote_count.toLocaleString() : '0'} votes)</span>
                   </div>
                   
                   {movie.runtime && (
