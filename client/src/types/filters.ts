@@ -471,12 +471,17 @@ export interface UseAdvancedFiltersReturn {
   filters: AdvancedFilterState;
   setFilters: (filters: AdvancedFilterState | ((prev: AdvancedFilterState) => AdvancedFilterState)) => void;
   updateFilter: <K extends keyof AdvancedFilterState>(key: K, value: AdvancedFilterState[K]) => void;
-  resetFilters: () => void;
-  clearFilter: (key: keyof AdvancedFilterState) => void;
+  toggleGenre: (genreId: number) => void;
+  setGenres: (genres: number[]) => void;
+  clearGenres: () => void;
+  setRatingRange: (min: number, max: number) => void;
+  setYearRange: (startYear?: number, endYear?: number) => void;
+  toggleWatchProvider: (providerId: number) => void;
+  addKeyword: (keywordId: number) => void;
+  removeKeyword: (keywordId: number) => void;
+  clearAllFilters: () => void;
+  resetToDefaults: (newDefaults?: Partial<AdvancedFilterState>) => void;
   hasActiveFilters: boolean;
-  activeFilterCount: number;
-  validationErrors: FilterValidationError[];
-  isValid: boolean;
 }
 
 export interface UseFilterURLSyncReturn {
@@ -491,12 +496,82 @@ export interface UseDebouncedFiltersReturn {
   isDebouncing: boolean;
   cancelDebounce: () => void;
   flushDebounce: () => void;
+  getAbortSignal: () => AbortSignal;
 }
 
 // Enhanced hook for complete filter management with URL sync
 export interface UseAdvancedFiltersWithURLReturn extends UseAdvancedFiltersReturn {
+  // Debouncing properties
+  debouncedFilters: AdvancedFilterState;
+  isDebouncing: boolean;
+  cancelDebounce: () => void;
+  flushDebounce: () => void;
+  getAbortSignal: () => AbortSignal;
   // URL sync methods
   syncToURL: (options?: { pushState?: boolean }) => void;
   urlParams: FilterQueryParams;
   hasURLFilters: boolean;
+}
+
+// Memoized default filter state to avoid reference comparison issues
+const DEFAULT_FILTERS: AdvancedFilterState = {
+  contentType: 'movie',
+  category: 'discover',
+  sort_by: 'popularity.desc',
+  with_genres: [],
+  without_genres: [],
+  without_keywords: [],
+  primary_release_date: { start: undefined, end: undefined },
+  first_air_date: { start: undefined, end: undefined },
+  with_runtime: { min: undefined, max: undefined },
+  vote_average: { min: undefined, max: undefined },
+  vote_count: { min: undefined, max: undefined },
+  with_original_language: undefined,
+  region: undefined,
+  watch_region: 'US',
+  with_watch_providers: [],
+  with_watch_monetization_types: [],
+  with_keywords: [],
+  with_companies: [],
+  with_people: [],
+  with_networks: [],
+  include_adult: false,
+  certification_country: 'US',
+  certification: undefined,
+  search_query: undefined,
+  search_type: 'movie',
+  page: 1,
+  ui: {
+    showAdvancedFilters: false,
+    collapsedSections: [],
+    recentFilters: [],
+  },
+};
+
+/**
+ * Create default filter state (returns a deep clone to avoid mutation)
+ */
+export function createDefaultFilters(): AdvancedFilterState {
+  return JSON.parse(JSON.stringify(DEFAULT_FILTERS));
+}
+
+/**
+ * Deep equality check for filter state comparison
+ */
+export function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== 'object' || typeof b !== 'object') return a === b;
+  
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    return a.every((item, index) => deepEqual(item, b[index]));
+  }
+  
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  
+  return keysA.every(key => deepEqual(a[key], b[key]));
 }
