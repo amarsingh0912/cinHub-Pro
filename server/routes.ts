@@ -1558,6 +1558,305 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Filter API Endpoints for TMDB
+  
+  // Search people (cast/crew) - for People autocomplete filter
+  app.get('/api/search/person', async (req, res) => {
+    try {
+      const { query, page = 1 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const data = await fetchFromTMDB('/search/person', { 
+        query: query as string, 
+        page 
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching people:', error);
+      res.status(500).json({ message: 'Failed to search people' });
+    }
+  });
+
+  // Search keywords - for Keywords/Moods filter
+  app.get('/api/search/keyword', async (req, res) => {
+    try {
+      const { query, page = 1 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const data = await fetchFromTMDB('/search/keyword', { 
+        query: query as string, 
+        page 
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching keywords:', error);
+      res.status(500).json({ message: 'Failed to search keywords' });
+    }
+  });
+
+  // Search production companies - for Companies filter
+  app.get('/api/search/company', async (req, res) => {
+    try {
+      const { query, page = 1 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const data = await fetchFromTMDB('/search/company', { 
+        query: query as string, 
+        page 
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Error searching companies:', error);
+      res.status(500).json({ message: 'Failed to search companies' });
+    }
+  });
+
+  // Get watch providers by region - for Streaming Providers filter
+  app.get('/api/watch/providers/:region', async (req, res) => {
+    try {
+      const { region } = req.params;
+      const { type = 'movie' } = req.query; // movie or tv
+      
+      if (type !== 'movie' && type !== 'tv') {
+        return res.status(400).json({ message: 'Type must be movie or tv' });
+      }
+
+      const data = await fetchFromTMDB(`/watch/providers/${type}`, { 
+        watch_region: region 
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching watch providers:', error);
+      res.status(500).json({ message: 'Failed to fetch watch providers' });
+    }
+  });
+
+  // Get certifications by country - for Certification filter
+  app.get('/api/certification/:type/:country', async (req, res) => {
+    try {
+      const { type, country } = req.params;
+      
+      if (type !== 'movie' && type !== 'tv') {
+        return res.status(400).json({ message: 'Type must be movie or tv' });
+      }
+
+      const endpoint = type === 'movie' ? '/certification/movie/list' : '/certification/tv/list';
+      const data = await fetchFromTMDB(endpoint);
+      
+      // Filter certifications for the specific country
+      const certifications = data.certifications?.[country.toUpperCase()] || [];
+      
+      res.json({ 
+        certifications,
+        country: country.toUpperCase() 
+      });
+    } catch (error) {
+      console.error('Error fetching certifications:', error);
+      res.status(500).json({ message: 'Failed to fetch certifications' });
+    }
+  });
+
+  // Enhanced discover movies endpoint - for complete filter support
+  app.get('/api/movies/discover', async (req, res) => {
+    try {
+      // Extract and validate all possible TMDB discover parameters
+      const {
+        page = 1,
+        sort_by = 'popularity.desc',
+        with_genres,
+        without_genres,
+        with_keywords,
+        without_keywords,
+        'primary_release_date.gte': primaryReleaseDateGte,
+        'primary_release_date.lte': primaryReleaseDateLte,
+        'release_date.gte': releaseDateGte,
+        'release_date.lte': releaseDateLte,
+        'with_runtime.gte': withRuntimeGte,
+        'with_runtime.lte': withRuntimeLte,
+        'vote_average.gte': voteAverageGte,
+        'vote_average.lte': voteAverageLte,
+        'vote_count.gte': voteCountGte,
+        'vote_count.lte': voteCountLte,
+        with_original_language,
+        region,
+        watch_region,
+        with_watch_providers,
+        with_watch_monetization_types,
+        with_people,
+        with_companies,
+        include_adult,
+        certification_country,
+        certification
+      } = req.query;
+
+      const params: Record<string, any> = {
+        page,
+        sort_by
+      };
+
+      // Add all filter parameters if they exist
+      if (with_genres) params.with_genres = with_genres;
+      if (without_genres) params.without_genres = without_genres;
+      if (with_keywords) params.with_keywords = with_keywords;
+      if (without_keywords) params.without_keywords = without_keywords;
+      if (primaryReleaseDateGte) params['primary_release_date.gte'] = primaryReleaseDateGte;
+      if (primaryReleaseDateLte) params['primary_release_date.lte'] = primaryReleaseDateLte;
+      if (releaseDateGte) params['release_date.gte'] = releaseDateGte;
+      if (releaseDateLte) params['release_date.lte'] = releaseDateLte;
+      if (withRuntimeGte) params['with_runtime.gte'] = withRuntimeGte;
+      if (withRuntimeLte) params['with_runtime.lte'] = withRuntimeLte;
+      if (voteAverageGte) params['vote_average.gte'] = voteAverageGte;
+      if (voteAverageLte) params['vote_average.lte'] = voteAverageLte;
+      if (voteCountGte) params['vote_count.gte'] = voteCountGte;
+      if (voteCountLte) params['vote_count.lte'] = voteCountLte;
+      if (with_original_language) params.with_original_language = with_original_language;
+      if (region) params.region = region;
+      if (watch_region) params.watch_region = watch_region;
+      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
+      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
+      if (with_people) params.with_people = with_people;
+      if (with_companies) params.with_companies = with_companies;
+      if (include_adult !== undefined) params.include_adult = include_adult;
+      if (certification_country) params.certification_country = certification_country;
+      if (certification) params.certification = certification;
+
+      const data = await fetchFromTMDB('/discover/movie', params);
+      res.json(data);
+    } catch (error) {
+      console.error('Error discovering movies:', error);
+      res.status(500).json({ message: 'Failed to discover movies' });
+    }
+  });
+
+  // Get movie genres from TMDB
+  app.get('/api/movies/genres', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/genre/movie/list');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching movie genres:', error);
+      res.status(500).json({ message: 'Failed to fetch movie genres' });
+    }
+  });
+
+  // Get TV genres from TMDB
+  app.get('/api/tv/genres', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/genre/tv/list');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching TV genres:', error);
+      res.status(500).json({ message: 'Failed to fetch TV genres' });
+    }
+  });
+
+  // Get languages from TMDB
+  app.get('/api/languages', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/configuration/languages');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching languages:', error);
+      res.status(500).json({ message: 'Failed to fetch languages' });
+    }
+  });
+
+  // Get countries from TMDB
+  app.get('/api/countries', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/configuration/countries');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+      res.status(500).json({ message: 'Failed to fetch countries' });
+    }
+  });
+
+  // Enhanced discover TV shows endpoint - for complete filter support
+  app.get('/api/tv/discover', async (req, res) => {
+    try {
+      // Extract and validate all possible TMDB discover parameters for TV
+      const {
+        page = 1,
+        sort_by = 'popularity.desc',
+        with_genres,
+        without_genres,
+        with_keywords,
+        without_keywords,
+        'first_air_date.gte': firstAirDateGte,
+        'first_air_date.lte': firstAirDateLte,
+        'air_date.gte': airDateGte,
+        'air_date.lte': airDateLte,
+        'with_runtime.gte': withRuntimeGte,
+        'with_runtime.lte': withRuntimeLte,
+        'vote_average.gte': voteAverageGte,
+        'vote_average.lte': voteAverageLte,
+        'vote_count.gte': voteCountGte,
+        'vote_count.lte': voteCountLte,
+        with_original_language,
+        watch_region,
+        with_watch_providers,
+        with_watch_monetization_types,
+        with_people,
+        with_companies,
+        with_networks,
+        include_adult,
+        certification_country,
+        certification
+      } = req.query;
+
+      const params: Record<string, any> = {
+        page,
+        sort_by
+      };
+
+      // Add all filter parameters if they exist
+      if (with_genres) params.with_genres = with_genres;
+      if (without_genres) params.without_genres = without_genres;
+      if (with_keywords) params.with_keywords = with_keywords;
+      if (without_keywords) params.without_keywords = without_keywords;
+      if (firstAirDateGte) params['first_air_date.gte'] = firstAirDateGte;
+      if (firstAirDateLte) params['first_air_date.lte'] = firstAirDateLte;
+      if (airDateGte) params['air_date.gte'] = airDateGte;
+      if (airDateLte) params['air_date.lte'] = airDateLte;
+      if (withRuntimeGte) params['with_runtime.gte'] = withRuntimeGte;
+      if (withRuntimeLte) params['with_runtime.lte'] = withRuntimeLte;
+      if (voteAverageGte) params['vote_average.gte'] = voteAverageGte;
+      if (voteAverageLte) params['vote_average.lte'] = voteAverageLte;
+      if (voteCountGte) params['vote_count.gte'] = voteCountGte;
+      if (voteCountLte) params['vote_count.lte'] = voteCountLte;
+      if (with_original_language) params.with_original_language = with_original_language;
+      if (watch_region) params.watch_region = watch_region;
+      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
+      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
+      if (with_people) params.with_people = with_people;
+      if (with_companies) params.with_companies = with_companies;
+      if (with_networks) params.with_networks = with_networks;
+      if (include_adult !== undefined) params.include_adult = include_adult;
+      if (certification_country) params.certification_country = certification_country;
+      if (certification) params.certification = certification;
+
+      const data = await fetchFromTMDB('/discover/tv', params);
+      res.json(data);
+    } catch (error) {
+      console.error('Error discovering TV shows:', error);
+      res.status(500).json({ message: 'Failed to discover TV shows' });
+    }
+  });
+
   // TV shows by genre ID endpoint
   app.get('/api/tv/genre/:genreId', async (req, res) => {
     try {

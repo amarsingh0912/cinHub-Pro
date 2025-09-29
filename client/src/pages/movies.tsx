@@ -1,168 +1,32 @@
 import { useState, useEffect } from "react";
 import { useLocation, useSearch } from "wouter";
-import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
+import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import type { MovieResponse, TVResponse } from "@/types/movie";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, Filter, X, ChevronDown, ChevronUp, Film, Settings, Palette, Star, Globe, Calendar, Shield, Eye } from "lucide-react";
+import { AdvancedFilterSheet, FloatingFiltersButton } from "@/components/filters";
+import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
 
-// Movie genres
-const MOVIE_GENRES = [
-  { id: 28, name: "Action" },
-  { id: 12, name: "Adventure" },
-  { id: 16, name: "Animation" },
-  { id: 35, name: "Comedy" },
-  { id: 80, name: "Crime" },
-  { id: 99, name: "Documentary" },
-  { id: 18, name: "Drama" },
-  { id: 10751, name: "Family" },
-  { id: 14, name: "Fantasy" },
-  { id: 36, name: "History" },
-  { id: 27, name: "Horror" },
-  { id: 10402, name: "Music" },
-  { id: 9648, name: "Mystery" },
-  { id: 10749, name: "Romance" },
-  { id: 878, name: "Science Fiction" },
-  { id: 53, name: "Thriller" },
-  { id: 10752, name: "War" },
-  { id: 37, name: "Western" }
-];
-
-// TV show genres
-const TV_GENRES = [
-  { id: 10759, name: "Action & Adventure" },
-  { id: 16, name: "Animation" },
-  { id: 35, name: "Comedy" },
-  { id: 80, name: "Crime" },
-  { id: 99, name: "Documentary" },
-  { id: 18, name: "Drama" },
-  { id: 10751, name: "Family" },
-  { id: 10762, name: "Kids" },
-  { id: 9648, name: "Mystery" },
-  { id: 10763, name: "News" },
-  { id: 10764, name: "Reality" },
-  { id: 10765, name: "Sci-Fi & Fantasy" },
-  { id: 10766, name: "Soap" },
-  { id: 10767, name: "Talk" },
-  { id: 10768, name: "War & Politics" },
-  { id: 37, name: "Western" }
-];
-
-const LANGUAGES = [
-  { code: "en", name: "English" },
-  { code: "es", name: "Spanish" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "it", name: "Italian" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
-  { code: "zh", name: "Chinese" },
-  { code: "pt", name: "Portuguese" },
-  { code: "ru", name: "Russian" },
-  { code: "hi", name: "Hindi" },
-  { code: "ar", name: "Arabic" }
-];
-
-// Content categories for movies
-const MOVIE_CATEGORIES = [
-  { value: "discover", name: "Discover" },
-  { value: "trending", name: "Trending" },
-  { value: "popular", name: "Popular" },
-  { value: "upcoming", name: "Upcoming" },
-  { value: "now_playing", name: "Now in Theaters" }
-];
-
-// Content categories for TV shows
-const TV_CATEGORIES = [
-  { value: "discover", name: "Discover" },
-  { value: "trending", name: "Trending" },
-  { value: "popular", name: "Popular" },
-  { value: "airing_today", name: "Airing Today" },
-  { value: "on_the_air", name: "On The Air" }
-];
-
-// Certificate/Rating options
-const CERTIFICATES = [
-  { value: "G", name: "G - General Audiences" },
-  { value: "PG", name: "PG - Parental Guidance" },
-  { value: "PG-13", name: "PG-13 - Parents Strongly Cautioned" },
-  { value: "R", name: "R - Restricted" },
-  { value: "NC-17", name: "NC-17 - Adults Only" }
-];
-
-type ContentType = 'movies' | 'tv';
-type MovieCategory = 'discover' | 'trending' | 'popular' | 'upcoming' | 'now_playing';
-type TVCategory = 'discover' | 'trending' | 'popular' | 'airing_today' | 'on_the_air';
-
-interface ContentFilters {
-  contentType: ContentType;
-  category: MovieCategory | TVCategory;
-  sortBy: string;
-  genres: number[];
-  releaseYear: string;
-  minRating: number;
-  maxRating: number;
-  language: string;
-  certificate: string;
-  status: string;
-  includeAdult: boolean;
-}
 
 export default function Movies() {
   const [location] = useLocation();
-  const searchString = useSearch(); // This gives us the query string without the ?
-  // Remove currentPage state as it's handled by infinite query
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const searchString = useSearch();
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   
-  // Parse URL parameters to set initial filters
+  // Parse URL parameters for initial filter state
   const getInitialFilters = () => {
-    // Use wouter's useSearch hook to get query parameters
     const searchParams = new URLSearchParams(searchString);
-    
-    const categoryParam = searchParams.get('category');
     const contentTypeParam = searchParams.get('contentType');
-    
-    // Validate category parameter
-    const validMovieCategories = ['discover', 'trending', 'popular', 'upcoming', 'now_playing'];
-    const validTVCategories = ['discover', 'trending', 'popular', 'airing_today', 'on_the_air'];
-    const contentType = (contentTypeParam === 'tv') ? 'tv' : 'movies';
-    const validCategories = contentType === 'movies' ? validMovieCategories : validTVCategories;
-    const category = (categoryParam && validCategories.includes(categoryParam)) ? categoryParam : 'discover';
+    const categoryParam = searchParams.get('category');
     
     return {
-      contentType: contentType as ContentType,
-      category: category as MovieCategory | TVCategory,
-      sortBy: 'popularity.desc',
-      genres: [],
-      releaseYear: '',
-      minRating: 0,
-      maxRating: 10,
-      language: 'all',
-      certificate: 'all',
-      status: 'all',
-      includeAdult: false
+      contentType: (contentTypeParam === 'tv') ? 'tv' : 'movie',
+      category: categoryParam || 'discover',
     };
   };
-  
-  const [filters, setFilters] = useState<ContentFilters>(getInitialFilters);
-  
-  // Update filters when URL changes
-  useEffect(() => {
-    const newFilters = getInitialFilters();
-    setFilters(newFilters);
-  }, [location, searchString]);
   
   // Get available categories based on content type
   const getAvailableCategories = () => {
