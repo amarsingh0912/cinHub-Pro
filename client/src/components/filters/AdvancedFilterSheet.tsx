@@ -45,6 +45,7 @@ import { CompaniesAutocomplete } from "./CompaniesAutocomplete";
 import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
 import { NaturalLanguageSearch } from "./NaturalLanguageSearch";
 import { ContentTypeToggle } from "./SegmentedToggle";
+import { GenreChipGroup } from "./ChipGroup";
 import type { 
   AdvancedFilterState, 
   FilterCategory, 
@@ -332,26 +333,23 @@ export function AdvancedFilterSheet({
   );
 
   const renderGenreFilter = () => (
-    <div className="space-y-3">
-      <Label className="text-sm font-medium">Genres</Label>
-      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-        {currentGenres.map((genre: any) => (
-          <div key={genre.id} className="flex items-center space-x-2">
-            <Checkbox
-              id={`genre-${genre.id}`}
-              checked={filters.with_genres?.includes(genre.id) || false}
-              onCheckedChange={() => toggleGenre(genre.id)}
-              data-testid={`genre-${genre.id}`}
-            />
-            <Label 
-              htmlFor={`genre-${genre.id}`} 
-              className="text-sm font-normal cursor-pointer"
-            >
-              {genre.name}
-            </Label>
-          </div>
-        ))}
-      </div>
+    <div className="space-y-4">
+      <Label className="text-sm font-medium flex items-center gap-2">
+        <Filter className="h-4 w-4" />
+        Genres
+      </Label>
+      <GenreChipGroup
+        selectedGenres={{
+          with_genres: filters.with_genres || [],
+          without_genres: filters.without_genres || []
+        }}
+        onGenresChange={(genres) => {
+          updateFilter('with_genres', genres.with_genres);
+          updateFilter('without_genres', genres.without_genres);
+        }}
+        genres={currentGenres}
+        data-testid="genre-filter"
+      />
     </div>
   );
 
