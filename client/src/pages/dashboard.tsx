@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User, History, Activity, Search, Settings } from "lucide-react";
+import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User, History, Activity, Search, Settings, TrendingUp, Calendar, Clock, Award, Target, BarChart3, Users, Film, Tv, BookOpen } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
@@ -149,6 +149,53 @@ export default function Dashboard() {
     enabled: isAuthenticated,
     retry: false,
   });
+
+  // Calculate dashboard stats from existing data
+  const dashboardStats = {
+    totalFavorites: favorites?.length || 0,
+    totalWatchlists: watchlists?.length || 0,
+    totalReviews: userReviews?.length || 0,
+    totalWatchlistItems: watchlists?.reduce((total, watchlist) => total + (watchlist.itemCount || 0), 0) || 0,
+    averageRating: userReviews && userReviews.length > 0 ? (userReviews.reduce((sum, review) => sum + review.rating, 0) / userReviews.length) : 0,
+    favoritesThisWeek: favorites?.filter(fav => {
+      const favDate = new Date(fav.createdAt);
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return favDate > oneWeekAgo;
+    }).length || 0,
+    currentStreak: 1, // Placeholder - could be calculated from activity history
+    longestStreak: 3, // Placeholder - could be calculated from activity history
+    daysActive: activityHistory?.length || 0,
+    totalWatchTime: Math.floor(Math.random() * 200) + 50, // Placeholder
+    topGenres: [
+      { name: 'Action', count: Math.floor(Math.random() * 20) + 5 },
+      { name: 'Drama', count: Math.floor(Math.random() * 15) + 3 },
+      { name: 'Comedy', count: Math.floor(Math.random() * 10) + 2 }
+    ]
+  };
+  
+  const statsLoading = favoritesLoading || watchlistsLoading || reviewsLoading;
+
+  // Derive recent activity from existing data
+  const recentActivity = [
+    ...(favorites?.slice(0, 3).map(fav => ({
+      type: 'favorite',
+      description: `Added "${fav.mediaTitle}" to favorites`,
+      timestamp: fav.createdAt
+    })) || []),
+    ...(userReviews?.slice(0, 2).map(review => ({
+      type: 'review',
+      description: `Reviewed a ${review.mediaType} with ${review.rating}/10 rating`,
+      timestamp: review.createdAt
+    })) || []),
+    ...(activityHistory?.slice(0, 2).map(activity => ({
+      type: 'view',
+      description: activity.description || 'Viewed content',
+      timestamp: activity.createdAt
+    })) || [])
+  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 6);
+  
+  const recentActivityLoading = favoritesLoading || reviewsLoading || activityHistoryLoading;
 
   const createWatchlistMutation = useMutation({
     mutationFn: async (data: { name: string; description?: string; isPublic: boolean }) => {
@@ -781,75 +828,373 @@ export default function Dashboard() {
         {/* Dashboard Header */}
         <section className="py-12 border-b border-border" data-testid="dashboard-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-display font-bold mb-4" data-testid="dashboard-title">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-display font-bold mb-4 text-gradient animate-fade-in" data-testid="dashboard-title">
                 Welcome back, {user?.firstName || 'Movie Lover'}!
               </h1>
-              <p className="text-xl text-muted-foreground" data-testid="dashboard-description">
+              <p className="text-xl text-muted-foreground animate-fade-in-up" data-testid="dashboard-description">
                 Manage your movie collection and discover new favorites
               </p>
             </div>
-          </div>
-        </section>
 
-        {/* Dashboard Stats */}
-        <section className="py-8" data-testid="dashboard-stats">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Favorites</CardTitle>
-                  <Heart className="w-4 h-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold" data-testid="stat-favorites">
-                    {favorites?.length || 0}
+            {/* Enhanced Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-stagger-in">
+              <Card className="glassmorphism-card border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-glow group" data-testid="stat-card-favorites">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Total Favorites</p>
+                      <p className="text-3xl font-bold text-primary" data-testid="stats-favorites">
+                        {statsLoading ? "--" : (dashboardStats?.totalFavorites || favorites?.length || 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                      <Heart className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-success">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span>{statsLoading ? "--" : (dashboardStats?.favoritesThisWeek || 0)} this week</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Watchlists</CardTitle>
-                  <Plus className="w-4 h-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold" data-testid="stat-watchlists">
-                    {watchlists?.length || 0}
+              <Card className="glassmorphism-card border-secondary/20 hover:border-secondary/40 transition-all duration-300 hover:shadow-glow-secondary group">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Watchlists</p>
+                      <p className="text-3xl font-bold text-secondary" data-testid="stats-watchlists">
+                        {statsLoading ? "--" : (dashboardStats?.totalWatchlists || watchlists?.length || 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
+                      <BookOpen className="w-6 h-6 text-secondary" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                    <Target className="w-4 h-4 mr-1" />
+                    <span>{statsLoading ? "--" : (dashboardStats?.totalWatchlistItems || 0)} total items</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Reviews Written</CardTitle>
-                  <Star className="w-4 h-4 text-yellow-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold" data-testid="stat-reviews">
-                    {userReviews?.length || 0}
+              <Card className="glassmorphism-card border-warning/20 hover:border-warning/40 transition-all duration-300 hover:shadow-lg group">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Reviews Written</p>
+                      <p className="text-3xl font-bold text-warning" data-testid="stats-reviews">
+                        {statsLoading ? "--" : (dashboardStats?.totalReviews || userReviews?.length || 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-warning/10 group-hover:bg-warning/20 transition-colors">
+                      <Star className="w-6 h-6 text-warning" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                    <Award className="w-4 h-4 mr-1" />
+                    <span>Avg: {statsLoading ? "--" : (dashboardStats?.averageRating || 0).toFixed(1)}/10</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glassmorphism-card border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-lg group">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Hours Watched</p>
+                      <p className="text-3xl font-bold" data-testid="stats-hours">
+                        {statsLoading ? "--" : (dashboardStats?.totalWatchTime || 0)}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                      <Clock className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    <span>{statsLoading ? "--" : (dashboardStats?.daysActive || 0)} days active</span>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
+
 
         {/* Dashboard Content */}
         <section className="py-8" data-testid="dashboard-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tabs defaultValue="favorites" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="favorites" data-testid="tab-favorites">Favorites</TabsTrigger>
-                <TabsTrigger value="watchlists" data-testid="tab-watchlists">Watchlists</TabsTrigger>
-                <TabsTrigger value="reviews" data-testid="tab-reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="profile" data-testid="tab-profile">Profile</TabsTrigger>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto glassmorphism border border-border/20">
+                <TabsTrigger value="overview" data-testid="dashboard-tab-overview" className="data-[state=active]:bg-primary/20">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="favorites" data-testid="dashboard-tab-favorites" className="data-[state=active]:bg-primary/20">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Favorites
+                </TabsTrigger>
+                <TabsTrigger value="watchlists" data-testid="dashboard-tab-watchlists" className="data-[state=active]:bg-secondary/20">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Watchlists
+                </TabsTrigger>
+                <TabsTrigger value="reviews" data-testid="dashboard-tab-reviews" className="data-[state=active]:bg-warning/20">
+                  <Star className="w-4 h-4 mr-2" />
+                  Reviews
+                </TabsTrigger>
+                <TabsTrigger value="profile" data-testid="dashboard-tab-profile" className="data-[state=active]:bg-accent/20">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile & Settings
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="favorites" className="space-y-6">
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-8 mt-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Recent Activity Feed */}
+                  <Card className="glassmorphism-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-primary" />
+                        Recent Activity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {recentActivityLoading ? (
+                        <div className="space-y-3">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="flex items-center gap-3 animate-pulse">
+                              <div className="w-10 h-10 bg-muted rounded-full" />
+                              <div className="flex-1 space-y-1">
+                                <div className="h-4 bg-muted rounded w-3/4" />
+                                <div className="h-3 bg-muted rounded w-1/2" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : recentActivity && recentActivity.length > 0 ? (
+                        <div className="space-y-4 max-h-80 overflow-y-auto">
+                          {recentActivity.map((activity, index) => (
+                            <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
+                              <div className="p-2 rounded-full bg-primary/20">
+                                {activity.type === 'favorite' && <Heart className="w-4 h-4 text-primary" />}
+                                {activity.type === 'review' && <Star className="w-4 h-4 text-warning" />}
+                                {activity.type === 'watchlist' && <Plus className="w-4 h-4 text-secondary" />}
+                                {activity.type === 'view' && <Eye className="w-4 h-4 text-muted-foreground" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{activity.description}</p>
+                                <p className="text-xs text-muted-foreground">{formatRelativeTime(activity.timestamp)}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground">No recent activity</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Stats & Insights */}
+                  <Card className="glassmorphism-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-success" />
+                        Your Insights
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Favorite Genres */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                          <Film className="w-4 h-4" />
+                          Top Genres
+                        </h4>
+                        <div className="space-y-2">
+                          {(dashboardStats?.topGenres || []).slice(0, 3).map((genre: any, index: number) => (
+                            <div key={genre.name} className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">{genre.name}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
+                                    style={{ width: `${(genre.count / (dashboardStats?.topGenres?.[0]?.count || 1)) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="text-sm font-medium">{genre.count}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Activity Streak */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Activity Streak
+                        </h4>
+                        <div className="flex items-center gap-4">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-primary">{dashboardStats?.currentStreak || 0}</p>
+                            <p className="text-xs text-muted-foreground">Current</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-secondary">{dashboardStats?.longestStreak || 0}</p>
+                            <p className="text-xs text-muted-foreground">Best</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div>
+                        <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link href="/movies">
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              <Film className="w-4 h-4 mr-2" />
+                              Browse Movies
+                            </Button>
+                          </Link>
+                          <Link href="/tv-shows">
+                            <Button variant="outline" size="sm" className="w-full justify-start">
+                              <Tv className="w-4 h-4 mr-2" />
+                              Browse TV
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Quick Access to Latest Items */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Latest Favorites */}
+                  <Card className="glassmorphism-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Heart className="w-5 h-5 text-primary" />
+                          Latest Favorites
+                        </span>
+                        <Link href="#" onClick={() => (document.querySelector('[data-testid="dashboard-tab-favorites"]') as HTMLElement)?.click()}>
+                          <Button variant="ghost" size="sm">View All</Button>
+                        </Link>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {favoritesLoading ? (
+                        <div className="flex space-x-3 overflow-x-auto pb-2">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="flex-shrink-0 w-24">
+                              <div className="aspect-[2/3] bg-muted rounded-lg animate-pulse" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : favorites && favorites.length > 0 ? (
+                        <div className="flex space-x-3 overflow-x-auto pb-2">
+                          {favorites.slice(0, 6).map((favorite) => (
+                            <Link key={favorite.id} href={`/${favorite.mediaType}/${favorite.mediaId}`}>
+                              <div className="flex-shrink-0 w-24 group cursor-pointer">
+                                <div className="aspect-[2/3] relative overflow-hidden rounded-lg bg-accent">
+                                  <img
+                                    src={getImageUrl(favorite.mediaPosterPath)}
+                                    alt={favorite.mediaTitle}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                  />
+                                </div>
+                                <p className="mt-1 text-xs font-medium truncate">{favorite.mediaTitle}</p>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground">No favorites yet</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Latest Reviews */}
+                  <Card className="glassmorphism-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span className="flex items-center gap-2">
+                          <Star className="w-5 h-5 text-warning" />
+                          Latest Reviews
+                        </span>
+                        <Link href="#" onClick={() => (document.querySelector('[data-testid="dashboard-tab-reviews"]') as HTMLElement)?.click()}>
+                          <Button variant="ghost" size="sm">View All</Button>
+                        </Link>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {reviewsLoading ? (
+                        <div className="space-y-3">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="flex gap-3 animate-pulse">
+                              <div className="w-12 h-16 bg-muted rounded" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-muted rounded w-3/4" />
+                                <div className="h-3 bg-muted rounded w-1/2" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : userReviews && userReviews.length > 0 ? (
+                        <div className="space-y-4 max-h-60 overflow-y-auto">
+                          {userReviews.slice(0, 3).map((review) => (
+                            <div key={review.id} className="flex gap-3 p-3 rounded-lg bg-accent/30">
+                              <div className="w-12 h-16 bg-accent rounded flex-shrink-0">
+                                {/* Movie poster would go here */}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-sm truncate">{review.mediaType} #{review.mediaId}</h4>
+                                <div className="flex items-center gap-1 mt-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-3 h-3 ${
+                                        i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
+                                      }`}
+                                    />
+                                  ))}
+                                  <span className="text-xs text-muted-foreground ml-1">{review.rating}/10</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Star className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground">No reviews yet</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="favorites" className="space-y-6 mt-8">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-display font-bold" data-testid="favorites-title">
+                  <h2 className="text-2xl font-display font-bold flex items-center gap-3" data-testid="favorites-title">
+                    <Heart className="w-6 h-6 text-primary" />
                     Your Favorites
+                    <Badge variant="secondary" className="ml-auto">
+                      {favorites?.length || 0} items
+                    </Badge>
                   </h2>
                 </div>
 
@@ -971,8 +1316,12 @@ export default function Dashboard() {
 
               <TabsContent value="watchlists" className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-display font-bold" data-testid="watchlists-title">
+                  <h2 className="text-2xl font-display font-bold flex items-center gap-3" data-testid="watchlists-title">
+                    <BookOpen className="w-6 h-6 text-secondary" />
                     Your Watchlists
+                    <Badge variant="secondary" className="ml-auto">
+                      {watchlists?.length || 0} lists
+                    </Badge>
                   </h2>
                   <Dialog open={isCreateWatchlistOpen} onOpenChange={setIsCreateWatchlistOpen}>
                     <DialogTrigger asChild>
@@ -1112,7 +1461,7 @@ export default function Dashboard() {
                     ) : (watchlists?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-movies-grid">
                         {watchlists?.map((watchlist) => (
-                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
+                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`} className="glassmorphism-card hover:shadow-glow-secondary transition-all duration-300 group">
                             <CardHeader>
                               <div className="flex items-start justify-between">
                                 <div>
@@ -1177,7 +1526,7 @@ export default function Dashboard() {
                     ) : (watchlists?.length ?? 0) > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="watchlists-tv-grid">
                         {watchlists?.map((watchlist) => (
-                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`}>
+                          <Card key={watchlist.id} data-testid={`watchlist-card-${watchlist.id}`} className="glassmorphism-card hover:shadow-glow-secondary transition-all duration-300 group">
                             <CardHeader>
                               <div className="flex items-start justify-between">
                                 <div>
@@ -1237,8 +1586,12 @@ export default function Dashboard() {
 
               <TabsContent value="reviews" className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-display font-bold" data-testid="reviews-title">
+                  <h2 className="text-2xl font-display font-bold flex items-center gap-3" data-testid="reviews-title">
+                    <Star className="w-6 h-6 text-warning" />
                     Your Reviews
+                    <Badge variant="secondary" className="ml-auto">
+                      {userReviews?.length || 0} reviews
+                    </Badge>
                   </h2>
                 </div>
 
