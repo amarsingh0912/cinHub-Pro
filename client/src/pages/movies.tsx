@@ -443,17 +443,17 @@ export default function Movies() {
               <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <CollapsibleContent>
                   <Card className="w-full bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-md border-2 border-border/50 shadow-2xl overflow-hidden" data-testid="filters-panel">
-                    <CardHeader className="pb-3 bg-gradient-to-r from-accent/20 to-accent/10 border-b border-border/30">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-accent/20 to-accent/10 border-b border-border/30">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-primary/10 rounded-lg">
-                            <Film className="w-4 h-4 text-primary" />
+                        <div className="flex items-center gap-1.5">
+                          <div className="p-1 bg-primary/10 rounded-lg">
+                            <Film className="w-3.5 h-3.5 text-primary" />
                           </div>
                           <div>
-                            <CardTitle className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                            <CardTitle className="text-base font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                               {filters.contentType === 'movies' ? 'Movie' : 'TV Show'} Filters
                             </CardTitle>
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               Refine your search with advanced options
                             </p>
                           </div>
@@ -472,26 +472,26 @@ export default function Movies() {
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4">
+                    <CardContent className="p-3">
                       {/* Filter Sections with Visual Grouping */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {/* Content & Category Section */}
-                        <div className="group relative bg-gradient-to-br from-accent/8 via-accent/5 to-accent/3 rounded-xl p-4 border border-accent/30 hover:border-accent/60 transition-all duration-500 hover:shadow-lg hover:shadow-accent/10 overflow-hidden">
+                        <div className="group relative bg-gradient-to-br from-accent/8 via-accent/5 to-accent/3 rounded-lg p-3 border border-accent/30 hover:border-accent/60 transition-all duration-500 hover:shadow-md hover:shadow-accent/10 overflow-hidden">
                           {/* Animated background effect */}
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 transform translate-x-[-100%] group-hover:translate-x-[100%] animate-pulse"></div>
                           
                           <div className="relative z-10">
-                            <h3 className="text-base font-semibold mb-3 text-foreground flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                            <h3 className="text-sm font-semibold mb-2 text-foreground flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                               <div className="relative">
-                                <div className="w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse shadow-lg shadow-primary/30"></div>
-                                <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-primary to-secondary rounded-full animate-ping opacity-75"></div>
+                                <div className="w-1.5 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full animate-pulse shadow-lg shadow-primary/30"></div>
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full animate-ping opacity-75"></div>
                               </div>
-                              <Film className="w-4 h-4 text-primary animate-pulse" />
+                              <Film className="w-3.5 h-3.5 text-primary animate-pulse" />
                               <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                                 Content & Category
                               </span>
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                               {/* Content Type Toggle */}
                               <div className="space-y-2 group/item">
                                 <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5 tracking-wide">
@@ -504,9 +504,9 @@ export default function Movies() {
                                     value={filters.contentType} 
                                     onValueChange={(value) => handleContentTypeChange(value as ContentType)}
                                   >
-                                    <SelectTrigger className="relative h-9 border hover:border-primary/60 focus:border-primary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/item:scale-[1.01]" data-testid="select-content-type">
-                                      <div className="flex items-center gap-2">
-                                        <Film className="w-4 h-4 text-muted-foreground" />
+                                    <SelectTrigger className="relative h-8 border hover:border-primary/60 focus:border-primary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/item:scale-[1.01]" data-testid="select-content-type">
+                                      <div className="flex items-center gap-1.5">
+                                        <Film className="w-3.5 h-3.5 text-muted-foreground" />
                                         <SelectValue placeholder="Select content type" />
                                       </div>
                                     </SelectTrigger>
@@ -540,9 +540,9 @@ export default function Movies() {
                                     value={filters.category} 
                                     onValueChange={(value) => setFilters(prev => ({ ...prev, category: value as MovieCategory | TVCategory }))}
                                   >
-                                    <SelectTrigger className="relative h-9 border hover:border-secondary/60 focus:border-secondary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/item:scale-[1.01]" data-testid="select-category">
-                                      <div className="flex items-center gap-2">
-                                        <Palette className="w-4 h-4 text-muted-foreground" />
+                                    <SelectTrigger className="relative h-8 border hover:border-secondary/60 focus:border-secondary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/item:scale-[1.01]" data-testid="select-category">
+                                      <div className="flex items-center gap-1.5">
+                                        <Palette className="w-3.5 h-3.5 text-muted-foreground" />
                                         <SelectValue placeholder="Select category" />
                                       </div>
                                     </SelectTrigger>
@@ -564,7 +564,7 @@ export default function Movies() {
                         </div>
 
                         {/* Genres & Discovery Section */}
-                        <div className="group relative bg-gradient-to-br from-primary/8 via-primary/5 to-primary/3 rounded-xl p-4 border border-primary/30 hover:border-primary/60 transition-all duration-500 hover:shadow-lg hover:shadow-primary/15 overflow-hidden">
+                        <div className="group relative bg-gradient-to-br from-primary/8 via-primary/5 to-primary/3 rounded-lg p-3 border border-primary/30 hover:border-primary/60 transition-all duration-500 hover:shadow-md hover:shadow-primary/15 overflow-hidden">
                           {/* Animated sparkle effect */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
                             <div className="absolute top-4 right-4 w-1 h-1 bg-primary rounded-full animate-ping"></div>
@@ -573,34 +573,34 @@ export default function Movies() {
                           </div>
                           
                           <div className="relative z-10">
-                            <h3 className="text-base font-semibold mb-3 text-foreground flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                            <h3 className="text-sm font-semibold mb-2 text-foreground flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                               <div className="relative">
-                                <div className="w-2 h-2 bg-gradient-to-r from-secondary to-accent rounded-full animate-pulse shadow-lg shadow-secondary/30"></div>
-                                <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-secondary to-accent rounded-full animate-ping opacity-75"></div>
+                                <div className="w-1.5 h-1.5 bg-gradient-to-r from-secondary to-accent rounded-full animate-pulse shadow-lg shadow-secondary/30"></div>
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-gradient-to-r from-secondary to-accent rounded-full animate-ping opacity-75"></div>
                               </div>
-                              <Palette className="w-4 h-4 text-secondary animate-pulse" />
+                              <Palette className="w-3.5 h-3.5 text-secondary animate-pulse" />
                               <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                                 Genres & Discovery
                               </span>
                             </h3>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {/* Genres */}
-                              <div className="space-y-2 group/genres">
-                                <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5 tracking-wide">
-                                  <Star className="w-3 h-3 text-primary/70" />
+                              <div className="space-y-1.5 group/genres">
+                                <Label className="text-xs font-semibold text-foreground flex items-center gap-1 tracking-wide">
+                                  <Star className="w-2.5 h-2.5 text-primary/70" />
                                   Movie Genres
-                                  <span className="text-xs text-muted-foreground ml-1 px-1.5 py-0.5 bg-muted/30 rounded-full">
+                                  <span className="text-xs text-muted-foreground ml-1 px-1 py-0.5 bg-muted/30 rounded-full">
                                     {filters.genres.length} selected
                                   </span>
                                 </Label>
                                 <div className="relative">
                                   <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl blur opacity-0 group-hover/genres:opacity-100 transition-opacity duration-500"></div>
-                                  <div className="relative flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-sm rounded-lg border border-border/30 hover:border-primary/40 transition-all duration-300 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
+                                  <div className="relative flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-gradient-to-br from-background/40 to-background/20 backdrop-blur-sm rounded-lg border border-border/30 hover:border-primary/40 transition-all duration-300 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent">
                                     {getAvailableGenres().map((genre, index) => (
                                       <Badge
                                         key={genre.id}
                                         variant={filters.genres.includes(genre.id) ? "default" : "outline"}
-                                        className={`cursor-pointer transition-all duration-300 transform hover:scale-105 hover:rotate-1 font-medium px-2 py-1 text-xs ${
+                                        className={`cursor-pointer transition-all duration-300 transform hover:scale-105 hover:rotate-1 font-medium px-1.5 py-0.5 text-xs ${
                                           filters.genres.includes(genre.id) 
                                             ? 'bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 border-primary/20' 
                                             : 'hover:bg-gradient-to-r hover:from-primary/15 hover:to-secondary/10 hover:border-primary/60 hover:shadow-lg border-2'
@@ -624,9 +624,9 @@ export default function Movies() {
                                   
                                   {/* Genre selection summary */}
                                   {filters.genres.length > 0 && (
-                                    <div className="mt-2 p-2 bg-primary/10 rounded-lg border border-primary/20 animate-in slide-in-from-top-2 duration-300">
-                                      <div className="flex items-center gap-2 text-xs text-primary font-medium">
-                                        <Star className="w-4 h-4" />
+                                    <div className="mt-1.5 p-1.5 bg-primary/10 rounded-lg border border-primary/20 animate-in slide-in-from-top-2 duration-300">
+                                      <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+                                        <Star className="w-3 h-3" />
                                         <span>
                                           {filters.genres.length === 1 ? '1 genre selected' : `${filters.genres.length} genres selected`}
                                         </span>
@@ -648,7 +648,7 @@ export default function Movies() {
                         </div>
 
                         {/* Details & Ratings Section */}
-                        <div className="group relative bg-gradient-to-br from-secondary/8 via-secondary/5 to-secondary/3 rounded-xl p-4 border border-secondary/30 hover:border-secondary/60 transition-all duration-500 hover:shadow-lg hover:shadow-secondary/15 overflow-hidden">
+                        <div className="group relative bg-gradient-to-br from-secondary/8 via-secondary/5 to-secondary/3 rounded-lg p-3 border border-secondary/30 hover:border-secondary/60 transition-all duration-500 hover:shadow-md hover:shadow-secondary/15 overflow-hidden">
                           {/* Floating elements effect */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
                             <div className="absolute top-6 right-6 w-2 h-2 bg-secondary rounded-full animate-bounce animation-delay-100"></div>
@@ -657,17 +657,17 @@ export default function Movies() {
                           </div>
                           
                           <div className="relative z-10">
-                            <h3 className="text-base font-semibold mb-3 text-foreground flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                            <h3 className="text-sm font-semibold mb-2 text-foreground flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                               <div className="relative">
-                                <div className="w-2 h-2 bg-gradient-to-r from-accent to-primary rounded-full animate-pulse shadow-lg shadow-accent/30"></div>
-                                <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-accent to-primary rounded-full animate-ping opacity-75"></div>
+                                <div className="w-1.5 h-1.5 bg-gradient-to-r from-accent to-primary rounded-full animate-pulse shadow-lg shadow-accent/30"></div>
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-gradient-to-r from-accent to-primary rounded-full animate-ping opacity-75"></div>
                               </div>
-                              <Star className="w-4 h-4 text-accent animate-pulse" />
+                              <Star className="w-3.5 h-3.5 text-accent animate-pulse" />
                               <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                                 Details & Ratings
                               </span>
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                               {/* Release Year */}
                               <div className="space-y-2 group/year">
                                 <Label htmlFor="release-year" className="text-xs font-semibold text-foreground flex items-center gap-1.5 tracking-wide">
@@ -684,7 +684,7 @@ export default function Movies() {
                                     max={new Date().getFullYear() + 5}
                                     value={filters.releaseYear}
                                     onChange={(e) => setFilters(prev => ({ ...prev, releaseYear: e.target.value }))}
-                                    className="relative h-9 border hover:border-secondary/60 focus:border-secondary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/year:scale-[1.01] text-center font-semibold"
+                                    className="relative h-8 border hover:border-secondary/60 focus:border-secondary/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/year:scale-[1.01] text-center font-semibold"
                                     data-testid="input-release-year"
                                   />
                                   {filters.releaseYear && (
@@ -706,7 +706,7 @@ export default function Movies() {
                                 </Label>
                                 <div className="relative">
                                   <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-primary/10 rounded-xl blur opacity-0 group-hover/rating:opacity-100 transition-opacity duration-500"></div>
-                                  <div className="relative space-y-3 p-3 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-sm rounded-lg border border-border/30 hover:border-accent/40 transition-all duration-300 group-hover/rating:scale-[1.01]">
+                                  <div className="relative space-y-2 p-2 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-sm rounded-lg border border-border/30 hover:border-accent/40 transition-all duration-300 group-hover/rating:scale-[1.01]">
                                     {/* Minimum Rating */}
                                     <div className="space-y-2">
                                       <div className="flex items-center justify-between">
@@ -756,12 +756,12 @@ export default function Movies() {
                                     </div>
                                     
                                     {/* Rating Range Display */}
-                                    <div className="flex items-center justify-center gap-2 pt-1 border-t border-border/20">
-                                      <div className="px-2 py-0.5 bg-accent/10 rounded-full text-xs font-medium text-accent">
+                                    <div className="flex items-center justify-center gap-1.5 pt-1 border-t border-border/20">
+                                      <div className="px-1.5 py-0.5 bg-accent/10 rounded-full text-xs font-medium text-accent">
                                         {filters.minRating} ★
                                       </div>
                                       <span className="text-muted-foreground text-xs">to</span>
-                                      <div className="px-2 py-0.5 bg-accent/10 rounded-full text-xs font-medium text-accent">
+                                      <div className="px-1.5 py-0.5 bg-accent/10 rounded-full text-xs font-medium text-accent">
                                         {filters.maxRating} ★
                                       </div>
                                     </div>
@@ -773,7 +773,7 @@ export default function Movies() {
                         </div>
 
                         {/* Advanced Options Section */}
-                        <div className="group relative bg-gradient-to-br from-muted/8 via-muted/5 to-muted/3 rounded-xl p-4 border border-muted/30 hover:border-muted/60 transition-all duration-500 hover:shadow-lg hover:shadow-muted/15 overflow-hidden">
+                        <div className="group relative bg-gradient-to-br from-muted/8 via-muted/5 to-muted/3 rounded-lg p-3 border border-muted/30 hover:border-muted/60 transition-all duration-500 hover:shadow-md hover:shadow-muted/15 overflow-hidden">
                           {/* Orbital animation effect */}
                           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
                             <div className="absolute top-8 right-8 w-1 h-1 bg-muted-foreground rounded-full animate-spin animation-delay-200"></div>
@@ -782,17 +782,17 @@ export default function Movies() {
                           </div>
                           
                           <div className="relative z-10">
-                            <h3 className="text-base font-semibold mb-3 text-foreground flex items-center gap-2 group-hover:scale-105 transition-transform duration-300">
+                            <h3 className="text-sm font-semibold mb-2 text-foreground flex items-center gap-1.5 group-hover:scale-105 transition-transform duration-300">
                               <div className="relative">
-                                <div className="w-2 h-2 bg-gradient-to-r from-muted-foreground to-secondary rounded-full animate-pulse shadow-lg shadow-muted-foreground/30"></div>
-                                <div className="absolute inset-0 w-2 h-2 bg-gradient-to-r from-muted-foreground to-secondary rounded-full animate-ping opacity-75"></div>
+                                <div className="w-1.5 h-1.5 bg-gradient-to-r from-muted-foreground to-secondary rounded-full animate-pulse shadow-lg shadow-muted-foreground/30"></div>
+                                <div className="absolute inset-0 w-1.5 h-1.5 bg-gradient-to-r from-muted-foreground to-secondary rounded-full animate-ping opacity-75"></div>
                               </div>
-                              <Settings className="w-4 h-4 text-muted-foreground animate-pulse" />
+                              <Settings className="w-3.5 h-3.5 text-muted-foreground animate-pulse" />
                               <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                                 Advanced Options
                               </span>
                             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
                               {/* Language */}
                               <div className="space-y-2 group/lang">
                                 <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5 tracking-wide">
@@ -805,7 +805,7 @@ export default function Movies() {
                                     value={filters.language} 
                                     onValueChange={(value) => setFilters(prev => ({ ...prev, language: value }))}
                                   >
-                                    <SelectTrigger className="relative h-9 border hover:border-muted-foreground/60 focus:border-muted-foreground/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/lang:scale-[1.01]" data-testid="select-language">
+                                    <SelectTrigger className="relative h-8 border hover:border-muted-foreground/60 focus:border-muted-foreground/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/lang:scale-[1.01]" data-testid="select-language">
                                       <div className="flex items-center gap-2">
                                         <Globe className="w-4 h-4 text-muted-foreground" />
                                         <SelectValue placeholder="Any language" />
@@ -844,7 +844,7 @@ export default function Movies() {
                                       value={filters.certificate} 
                                       onValueChange={(value) => setFilters(prev => ({ ...prev, certificate: value }))}
                                     >
-                                      <SelectTrigger className="relative h-9 border hover:border-orange-500/60 focus:border-orange-500/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/cert:scale-[1.01]" data-testid="select-certificate">
+                                      <SelectTrigger className="relative h-8 border hover:border-orange-500/60 focus:border-orange-500/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/cert:scale-[1.01]" data-testid="select-certificate">
                                         <div className="flex items-center gap-2">
                                           <Shield className="w-4 h-4 text-muted-foreground" />
                                           <SelectValue placeholder="Any certificate" />
@@ -883,7 +883,7 @@ export default function Movies() {
                                     value={filters.status} 
                                     onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
                                   >
-                                    <SelectTrigger className="relative h-9 border hover:border-green-500/60 focus:border-green-500/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/status:scale-[1.01]" data-testid="select-status">
+                                    <SelectTrigger className="relative h-8 border hover:border-green-500/60 focus:border-green-500/80 transition-all duration-300 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md group-hover/status:scale-[1.01]" data-testid="select-status">
                                       <div className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4 text-muted-foreground" />
                                         <SelectValue placeholder="Any status" />
@@ -921,7 +921,7 @@ export default function Movies() {
                                 </Label>
                                 <div className="relative">
                                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg blur opacity-0 group-hover/adult:opacity-100 transition-opacity duration-300"></div>
-                                  <div className="relative flex items-center justify-between p-2 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-sm rounded-lg border border-border/30 hover:border-purple-500/40 transition-all duration-300 group-hover/adult:scale-[1.01]">
+                                  <div className="relative flex items-center justify-between p-1.5 bg-gradient-to-br from-background/50 to-background/30 backdrop-blur-sm rounded-lg border border-border/30 hover:border-purple-500/40 transition-all duration-300 group-hover/adult:scale-[1.01]">
                                     <div className="flex items-center gap-2">
                                       <Switch
                                         checked={filters.includeAdult}
