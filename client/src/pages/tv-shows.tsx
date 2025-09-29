@@ -31,6 +31,16 @@ export default function TVShows() {
     staleTime: 1000 * 60 * 15, // 15 minutes
   });
 
+  const { data: airingTodayTVShows, isLoading: airingTodayLoading } = useQuery<TVResponse>({
+    queryKey: ["/api/tv/airing_today"],
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+
+  const { data: onTheAirTVShows, isLoading: onTheAirLoading } = useQuery<TVResponse>({
+    queryKey: ["/api/tv/on-the-air"],
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="tv-shows-page">
       <Header />
@@ -57,10 +67,12 @@ export default function TVShows() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RevealOnScroll options={REVEAL_PRESETS.sectionContent}>
               <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full" data-testid="tv-shows-tabs">
-                <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-8">
+                <TabsList className="grid w-full grid-cols-5 max-w-4xl mx-auto mb-8">
                   <TabsTrigger value="trending" data-testid="tab-trending-tv">Trending</TabsTrigger>
                   <TabsTrigger value="popular" data-testid="tab-popular-tv">Popular</TabsTrigger>
                   <TabsTrigger value="top-rated" data-testid="tab-top-rated-tv">Top Rated</TabsTrigger>
+                  <TabsTrigger value="airing-today" data-testid="tab-airing-today-tv">Airing Today</TabsTrigger>
+                  <TabsTrigger value="on-the-air" data-testid="tab-on-the-air-tv">On The Air</TabsTrigger>
                 </TabsList>
               
               <TabsContent value="trending" data-testid="trending-tv-content">
@@ -119,6 +131,46 @@ export default function TVShows() {
                 ) : (
                   <div className="text-center py-12" data-testid="top-rated-tv-empty">
                     <p className="text-muted-foreground">No top rated TV shows found.</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="airing-today" data-testid="airing-today-tv-content">
+                {airingTodayLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="airing-today-tv-loading">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : airingTodayTVShows?.results && airingTodayTVShows.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="airing-today-tv-grid">
+                    {airingTodayTVShows.results.map((show) => (
+                      <MovieCard key={show.id} movie={show} mediaType="tv" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12" data-testid="airing-today-tv-empty">
+                    <p className="text-muted-foreground">No TV shows airing today found.</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="on-the-air" data-testid="on-the-air-tv-content">
+                {onTheAirLoading ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="on-the-air-tv-loading">
+                    {Array.from({ length: 18 }, (_, index) => (
+                      <MovieCardSkeleton key={index} />
+                    ))}
+                  </div>
+                ) : onTheAirTVShows?.results && onTheAirTVShows.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="on-the-air-tv-grid">
+                    {onTheAirTVShows.results.map((show) => (
+                      <MovieCard key={show.id} movie={show} mediaType="tv" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12" data-testid="on-the-air-tv-empty">
+                    <p className="text-muted-foreground">No TV shows on the air found.</p>
                   </div>
                 )}
               </TabsContent>

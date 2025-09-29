@@ -237,7 +237,7 @@ export default function Movies() {
       return '/api/tv/airing_today';
     }
     if (category === 'on_the_air') {
-      return '/api/tv/on_the_air';
+      return '/api/tv/on-the-air';
     }
     
     // For discover, use discover endpoint

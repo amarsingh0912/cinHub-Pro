@@ -1041,9 +1041,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/on-the-air', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/on_the_air?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/tv/on_the_air', { page });
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching on-the-air TV shows:', error);
+      res.status(500).json({ message: 'Failed to fetch on-the-air TV shows' });
+    }
+  });
+
+  // Add alias with underscore for frontend compatibility  
+  app.get('/api/tv/on_the_air', async (req, res) => {
+    try {
+      const page = req.query.page || 1;
+      const data = await fetchFromTMDB('/tv/on_the_air', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching on-the-air TV shows:', error);
@@ -1055,9 +1065,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/airing_today', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/tv/airing_today', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching airing today TV shows:', error);
@@ -1068,9 +1076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tv/airing-today', async (req, res) => {
     try {
       const page = req.query.page || 1;
-      const data = await fetchFromTMDB(
-        `https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.TMDB_API_KEY}&page=${page}`
-      );
+      const data = await fetchFromTMDB('/tv/airing_today', { page });
       res.json(data);
     } catch (error) {
       console.error('Error fetching airing today TV shows:', error);
