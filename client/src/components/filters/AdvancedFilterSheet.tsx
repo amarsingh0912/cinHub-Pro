@@ -212,7 +212,20 @@ export function AdvancedFilterSheet({
   appliedFiltersCount = 0 
 }: AdvancedFilterSheetProps) {
   const isMobile = useIsMobile();
-  const [collapsedSections, setCollapsedSections] = useState<string[]>(['release', 'ratings', 'streaming', 'advanced']);
+  const [collapsedSections, setCollapsedSections] = useState<string[]>(['advanced']);
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Initialize collapsed sections based on mobile state (only once)
+  useEffect(() => {
+    if (!hasInitialized) {
+      setHasInitialized(true);
+      if (isMobile) {
+        setCollapsedSections(['release', 'ratings', 'streaming', 'advanced']); // More collapsed on mobile
+      } else {
+        setCollapsedSections(['advanced']); // Only advanced collapsed on desktop
+      }
+    }
+  }, [isMobile, hasInitialized]);
 
   // Fetch real data from TMDB APIs
   const { data: movieGenresData } = useQuery({
@@ -625,14 +638,20 @@ export function AdvancedFilterSheet({
       <SheetContent 
         side={isMobile ? "bottom" : "right"} 
         className={cn(
-          "w-full focus:outline-none border-border/50",
-          isMobile ? "h-[85vh]" : "sm:max-w-lg",
+          "w-full focus:outline-none border-border/50 flex flex-col",
+          isMobile ? "h-[90dvh]" : "sm:max-w-lg h-full",
           // Glassmorphism effect
           "backdrop-blur-xl bg-background/95 border-border/20"
         )}
         data-testid="filter-sheet"
       >
-        <SheetHeader className="space-y-3">
+        {/* Mobile drag handle */}
+        {isMobile && (
+          <div className="flex justify-center py-2 -mt-2">
+            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+          </div>
+        )}
+        <SheetHeader className={cn("space-y-3 flex-shrink-0", isMobile ? "px-4" : "px-6")}>
           <SheetTitle className="flex items-center gap-3 text-lg font-semibold">
             <Filter className="h-5 w-5" />
             Advanced Filters
@@ -647,7 +666,7 @@ export function AdvancedFilterSheet({
           </SheetDescription>
           
           {/* Quick filter chips */}
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2" role="group" aria-label="Quick filter presets">
             {QUICK_FILTER_PRESETS.map((preset) => (
               <Button
                 key={preset.id}
@@ -656,6 +675,8 @@ export function AdvancedFilterSheet({
                 onClick={() => applyQuickFilter(preset)}
                 data-testid={`quick-filter-${preset.id}`}
                 className="h-7 text-xs hover:bg-primary/10"
+                aria-label={`Apply ${preset.label} filter: ${preset.description}`}
+                title={preset.description}
               >
                 {preset.label}
               </Button>
@@ -663,27 +684,26 @@ export function AdvancedFilterSheet({
           </div>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-6 py-4">
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className={cn("py-4", isMobile ? "space-y-4 px-4" : "space-y-6 px-6")}>
             {/* Natural Language Search */}
-            <div className="space-y-3">
+            <div className={cn(isMobile ? "space-y-2" : "space-y-3")}>
               <NaturalLanguageSearch
                 onFiltersApply={(newFilters) => {
                   onFiltersChange({ ...filters, ...newFilters });
                 }}
-                placeholder="Try: 'action movies from 2020 on Netflix rated above 7'"
+                placeholder={isMobile ? "Try: action movies on Netflix" : "Try: 'action movies from 2020 on Netflix rated above 7'"}
               />
             </div>
 
             <Separator />
 
-            {/* Content Type */}
-            {renderContentTypeFilter()}
-
-            <Separator />
-
-            {/* Sort */}
-            {renderSortFilter()}
+            {/* Essential filters first - Content Type and Sort */}
+            <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2")}>
+              <div>{renderContentTypeFilter()}</div>
+              <div>{renderSortFilter()}</div>
+            </div>
 
             <Separator />
 
@@ -697,11 +717,19 @@ export function AdvancedFilterSheet({
                 <CollapsibleTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex w-full items-center justify-between p-0 hover:bg-transparent"
+                    className="flex w-full items-center justify-between p-0 hover:bg-transparent focus:bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-md"
                     data-testid={`toggle-${category.id}`}
+                    aria-expanded={!collapsedSections.includes(category.id)}
+                    aria-controls={`filter-category-${category.id}`}
+                    aria-label={`Toggle ${category.label} filter section`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{category.label}</span>
+                      {category.description && (
+                        <span className="text-xs text-muted-foreground hidden lg:inline">
+                          ({category.description})
+                        </span>
+                      )}
                     </div>
                     {collapsedSections.includes(category.id) ? (
                       <ChevronDown className="h-4 w-4" />
@@ -710,7 +738,12 @@ export function AdvancedFilterSheet({
                     )}
                   </Button>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 pt-3">
+                <CollapsibleContent 
+                  className={cn("pt-3", isMobile ? "space-y-3" : "space-y-4")}
+                  id={`filter-category-${category.id}`}
+                  role="region"
+                  aria-labelledby={`toggle-${category.id}`}
+                >
                   {category.id === 'genres' && renderGenreFilter()}
                   {category.id === 'release' && (
                     <div className="space-y-4">
@@ -747,26 +780,208 @@ export function AdvancedFilterSheet({
                 {!collapsedSections.includes(category.id) && <Separator />}
               </Collapsible>
             ))}
-          </div>
-        </ScrollArea>
+            </div>
+          </ScrollArea>
+        </div>
 
-        <SheetFooter className="flex-col space-y-2 pt-4 border-t border-border/50">
+        <SheetFooter className={cn("flex-col space-y-3 pt-4 border-t border-border/50 flex-shrink-0 bg-background/95 backdrop-blur-sm", isMobile ? "px-4" : "px-6")}>
+          {/* Applied filters summary */}
+          {appliedFiltersCount > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {appliedFiltersCount} {appliedFiltersCount === 1 ? 'Filter' : 'Filters'} Applied
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  data-testid="clear-all-quick"
+                  aria-label="Clear all applied filters"
+                >
+                  Clear All
+                </Button>
+              </div>
+              
+              {/* Quick applied filters preview */}
+              <div 
+                className="flex flex-wrap gap-1 max-h-16 overflow-y-auto" 
+                role="list" 
+                aria-label="Applied filters summary"
+              >
+                {filters.with_genres.length > 0 && (
+                  <button
+                    onClick={(e) => {
+                      updateFilter('with_genres', []);
+                      // Focus management: move to next focusable element or Clear All button
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                      nextElement?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateFilter('with_genres', []);
+                        // Focus management: move to next focusable element or Clear All button
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        nextElement?.focus();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs h-6 px-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    aria-label={`Remove ${filters.with_genres.length} genre ${filters.with_genres.length === 1 ? 'filter' : 'filters'}`}
+                    role="listitem"
+                  >
+                    {filters.with_genres.length} {filters.with_genres.length === 1 ? 'Genre' : 'Genres'}
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+                {(filters.primary_release_date?.start || filters.first_air_date?.start) && (
+                  <button
+                    onClick={(e) => {
+                      updateFilter('primary_release_date', {});
+                      updateFilter('first_air_date', {});
+                      // Focus management: move to next focusable element or Clear All button
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                      nextElement?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateFilter('primary_release_date', {});
+                        updateFilter('first_air_date', {});
+                        // Focus management: move to next focusable element or Clear All button
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        nextElement?.focus();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs h-6 px-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    aria-label="Remove date range filter"
+                    role="listitem"
+                  >
+                    Date Range
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+                {(filters.vote_average?.min || filters.vote_average?.max) && (
+                  <button
+                    onClick={(e) => {
+                      updateFilter('vote_average', {});
+                      // Focus management: move to next focusable element or Clear All button
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                      nextElement?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateFilter('vote_average', {});
+                        // Focus management: move to next focusable element or Clear All button
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        nextElement?.focus();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs h-6 px-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    aria-label="Remove rating filter"
+                    role="listitem"
+                  >
+                    Rating Filter
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+                {filters.with_watch_providers.length > 0 && (
+                  <button
+                    onClick={(e) => {
+                      updateFilter('with_watch_providers', []);
+                      // Focus management: move to next focusable element or Clear All button
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                      nextElement?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateFilter('with_watch_providers', []);
+                        // Focus management: move to next focusable element or Clear All button
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        nextElement?.focus();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs h-6 px-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    aria-label={`Remove ${filters.with_watch_providers.length} streaming provider ${filters.with_watch_providers.length === 1 ? 'filter' : 'filters'}`}
+                    role="listitem"
+                  >
+                    {filters.with_watch_providers.length} {filters.with_watch_providers.length === 1 ? 'Provider' : 'Providers'}
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+                {filters.sort_by !== 'popularity.desc' && (
+                  <button
+                    onClick={(e) => {
+                      updateFilter('sort_by', 'popularity.desc');
+                      // Focus management: move to next focusable element or Clear All button
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                      nextElement?.focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        updateFilter('sort_by', 'popularity.desc');
+                        // Focus management: move to next focusable element or Clear All button
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
+                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        nextElement?.focus();
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-xs h-6 px-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                    aria-label="Reset sorting to default (most popular)"
+                    role="listitem"
+                  >
+                    Custom Sort
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="flex gap-2 w-full">
-            <Button 
-              variant="outline" 
-              onClick={clearAllFilters}
-              className="flex-1"
-              data-testid="clear-filters"
-            >
-              Clear All
-            </Button>
-            <Button 
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-              data-testid="apply-filters"
-            >
-              Apply Filters
-            </Button>
+            {appliedFiltersCount === 0 ? (
+              <Button 
+                onClick={() => onOpenChange(false)}
+                className="w-full"
+                data-testid="close-filters"
+                aria-label="Close filters panel"
+              >
+                Close
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={clearAllFilters}
+                  className="flex-1"
+                  data-testid="clear-filters"
+                  aria-label="Clear all applied filters"
+                >
+                  Reset
+                </Button>
+                <Button 
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1"
+                  data-testid="apply-filters"
+                  aria-label="Apply current filter settings"
+                >
+                  Apply {appliedFiltersCount > 0 ? `(${appliedFiltersCount})` : ''}
+                </Button>
+              </>
+            )}
           </div>
         </SheetFooter>
       </SheetContent>
