@@ -46,6 +46,8 @@ import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
 import { NaturalLanguageSearch } from "./NaturalLanguageSearch";
 import { ContentTypeToggle } from "./SegmentedToggle";
 import { GenreChipGroup } from "./ChipGroup";
+import { RuntimeSlider } from "./DualRangeSlider";
+import { RatingSlider } from "./StarSlider";
 import type { 
   AdvancedFilterState, 
   FilterCategory, 
@@ -461,30 +463,24 @@ export function AdvancedFilterSheet({
   );
 
   const renderRuntimeFilter = () => (
-    <div className="space-y-3">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <Clock className="h-4 w-4" />
-        Runtime (minutes)
-      </Label>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">
-          {filters.with_runtime?.min || 0} - {filters.with_runtime?.max || 300} minutes
-        </Label>
-        <Slider
-          value={[filters.with_runtime?.min || 0, filters.with_runtime?.max || 300]}
-          min={0}
-          max={300}
-          step={5}
-          onValueChange={([min, max]) => {
-            updateFilter('with_runtime', { 
-              min: min > 0 ? min : undefined, 
-              max: max < 300 ? max : undefined 
-            });
-          }}
-          className="w-full"
-          data-testid="runtime-slider"
-        />
-      </div>
+    <div className="space-y-4">
+      <RuntimeSlider
+        value={[
+          filters.with_runtime?.min || (filters.contentType === 'movie' ? 60 : 15),
+          filters.with_runtime?.max || (filters.contentType === 'movie' ? 240 : 120)
+        ]}
+        onValueChange={([min, max]) => {
+          const minValue = filters.contentType === 'movie' ? (min > 60 ? min : undefined) : (min > 15 ? min : undefined);
+          const maxValue = filters.contentType === 'movie' ? (max < 240 ? max : undefined) : (max < 120 ? max : undefined);
+          
+          updateFilter('with_runtime', {
+            min: minValue,
+            max: maxValue
+          });
+        }}
+        contentType={filters.contentType}
+        data-testid="runtime-filter"
+      />
     </div>
   );
 

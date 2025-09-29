@@ -6,3 +6,5 @@ export { KeywordsAutocomplete } from './KeywordsAutocomplete';
 export { NaturalLanguageSearch } from './NaturalLanguageSearch';
 export { SegmentedToggle, ContentTypeToggle, SegmentedTogglePresets } from './SegmentedToggle';
 export { ChipGroup, GenreChipGroup } from './ChipGroup';
+export { DualRangeSlider, RuntimeSlider } from './DualRangeSlider';
+export { StarSlider, RatingSlider } from './StarSlider';
