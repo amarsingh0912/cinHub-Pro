@@ -1,45 +1,85 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { TVResponse } from "@/types/movie";
-import { useRevealAnimation, RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
+import { useMemo } from "react";
+import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { FloatingFiltersButton } from "@/components/filters";
 import { Loader2 } from "lucide-react";
-import MovieCard from "@/components/movie/movie-card";
+import { DEFAULT_TV_FILTERS } from "@/types/filters";
 
 export default function TVShows() {
-  const [currentTab, setCurrentTab] = useState<string>('trending');
-  
-  const handleTabChange = (value: string) => {
-    setCurrentTab(value);
+  // Use the complete filter system with URL sync and debouncing
+  const {
+    filters,
+    setFilters,
+    updateFilter,
+    debouncedFilters,
+    isDebouncing,
+    data: shows,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    triggerRef,
+    hasActiveFilters,
+  } = useInfiniteMoviesWithFilters({
+    initialFilters: DEFAULT_TV_FILTERS,
+    debounceDelay: 250,
+    syncToURL: true,
+    pushState: false,
+    enabled: true,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
+
+  // Get the display title based on category
+  const getTitle = () => {
+    const { category } = filters;
+    
+    switch (category) {
+      case 'trending': return 'Trending TV Shows';
+      case 'popular': return 'Popular TV Shows';
+      case 'airing_today': return 'Airing Today';
+      case 'on_the_air': return 'On The Air';
+      case 'top_rated': return 'Top Rated TV Shows';
+      default: return 'Discover TV Shows';
+    }
   };
-  
-  const { data: trendingTVShows, isLoading: trendingLoading } = useQuery<TVResponse>({
-    queryKey: ["/api/tv/trending"],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
 
-  const { data: popularTVShows, isLoading: popularLoading } = useQuery<TVResponse>({
-    queryKey: ["/api/tv/popular"],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
+  const getDescription = () => {
+    const { category } = filters;
+    
+    if (category === 'discover') {
+      return 'Browse and filter thousands of TV shows with advanced options';
+    }
+    
+    return `Explore TV shows in the ${category} category`;
+  };
 
-  const { data: topRatedTVShows, isLoading: topRatedLoading } = useQuery<TVResponse>({
-    queryKey: ["/api/tv/top-rated"],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
-
-  const { data: airingTodayTVShows, isLoading: airingTodayLoading } = useQuery<TVResponse>({
-    queryKey: ["/api/tv/airing_today"],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
-
-  const { data: onTheAirTVShows, isLoading: onTheAirLoading } = useQuery<TVResponse>({
-    queryKey: ["/api/tv/on-the-air"],
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
+  // Count applied filters for the badge
+  const appliedFiltersCount = useMemo(() => {
+    return [
+      filters.with_genres?.length || 0,
+      filters.without_genres?.length || 0,
+      filters.with_keywords?.length || 0,
+      filters.without_keywords?.length || 0,
+      filters.with_watch_providers?.length || 0,
+      filters.with_watch_monetization_types?.length || 0,
+      filters.with_people?.length || 0,
+      filters.with_companies?.length || 0,
+      filters.with_networks?.length || 0,
+      (filters.primary_release_date?.start || filters.primary_release_date?.end) ? 1 : 0,
+      (filters.first_air_date?.start || filters.first_air_date?.end) ? 1 : 0,
+      (filters.with_runtime?.min || filters.with_runtime?.max) ? 1 : 0,
+      (filters.vote_average?.min || filters.vote_average?.max) ? 1 : 0,
+      (filters.vote_count?.min || filters.vote_count?.max) ? 1 : 0,
+      filters.with_original_language ? 1 : 0,
+      filters.region ? 1 : 0,
+      filters.watch_region && filters.watch_region !== 'US' ? 1 : 0,
+      filters.certification ? 1 : 0,
+      filters.include_adult ? 1 : 0,
+      filters.sort_by && filters.sort_by !== 'popularity.desc' ? 1 : 0,
+    ].reduce((sum, count) => sum + count, 0);
+  }, [filters]);
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="tv-shows-page">
@@ -47,140 +87,127 @@ export default function TVShows() {
       
       <main className="pt-16">
         {/* Page Header */}
-        <section className="py-12 border-b border-border" data-testid="tv-shows-header">
+        <section className="py-8 md:py-12 border-b border-border/50" data-testid="tv-shows-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <RevealOnScroll options={REVEAL_PRESETS.sectionHeader}>
-              <div className="text-center">
-                <h1 className="text-4xl font-display font-bold mb-4" data-testid="tv-shows-title">
-                  TV Shows
-                </h1>
-                <p className="text-xl text-muted-foreground" data-testid="tv-shows-description">
-                  Discover amazing TV shows from around the world
-                </p>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-display font-bold mb-2" data-testid="content-title">
+                    {getTitle()}
+                  </h1>
+                  <p className="text-lg md:text-xl text-muted-foreground" data-testid="content-description">
+                    {getDescription()}
+                  </p>
+                </div>
+                
+                {/* Show filter badge on desktop */}
+                <div className="hidden md:flex items-center gap-2">
+                  {appliedFiltersCount > 0 && (
+                    <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary" data-testid="filter-count-badge">
+                      {appliedFiltersCount} {appliedFiltersCount === 1 ? 'filter' : 'filters'} applied
+                    </div>
+                  )}
+                  {isDebouncing && (
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border text-sm text-muted-foreground" data-testid="debouncing-indicator">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Updating...
+                    </div>
+                  )}
+                </div>
               </div>
-            </RevealOnScroll>
+              
+              {/* Mobile filter info */}
+              <div className="md:hidden flex items-center gap-2">
+                {appliedFiltersCount > 0 && (
+                  <div className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+                    {appliedFiltersCount} {appliedFiltersCount === 1 ? 'filter' : 'filters'}
+                  </div>
+                )}
+                {isDebouncing && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/50 border border-border text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Updating...
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* TV Shows Tabs */}
-        <section className="py-16" data-testid="tv-shows-content">
+        {/* TV Shows Grid */}
+        <section className="py-8 md:py-12" data-testid="tv-shows-grid-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <RevealOnScroll options={REVEAL_PRESETS.sectionContent}>
-              <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full" data-testid="tv-shows-tabs">
-                <TabsList className="grid w-full grid-cols-5 max-w-4xl mx-auto mb-8">
-                  <TabsTrigger value="trending" data-testid="tab-trending-tv">Trending</TabsTrigger>
-                  <TabsTrigger value="popular" data-testid="tab-popular-tv">Popular</TabsTrigger>
-                  <TabsTrigger value="top-rated" data-testid="tab-top-rated-tv">Top Rated</TabsTrigger>
-                  <TabsTrigger value="airing-today" data-testid="tab-airing-today-tv">Airing Today</TabsTrigger>
-                  <TabsTrigger value="on-the-air" data-testid="tab-on-the-air-tv">On The Air</TabsTrigger>
-                </TabsList>
-              
-              <TabsContent value="trending" data-testid="trending-tv-content">
-                {trendingLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-loading">
-                    {Array.from({ length: 18 }, (_, index) => (
-                      <MovieCardSkeleton key={index} />
-                    ))}
-                  </div>
-                ) : trendingTVShows?.results && trendingTVShows.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="trending-tv-grid">
-                    {trendingTVShows.results.map((show) => (
-                      <MovieCard key={show.id} movie={show} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="trending-tv-empty">
-                    <p className="text-muted-foreground">No trending TV shows found.</p>
+            {isLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <MovieCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : shows && shows.length > 0 ? (
+              <>
+                <MovieGrid movies={shows} mediaType={filters.contentType} />
+                
+                {/* Infinite scroll trigger */}
+                {hasNextPage && (
+                  <div ref={triggerRef} className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 )}
-              </TabsContent>
-              
-              <TabsContent value="popular" data-testid="popular-tv-content">
-                {popularLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-loading">
-                    {Array.from({ length: 18 }, (_, index) => (
-                      <MovieCardSkeleton key={index} />
+                
+                {isFetchingNextPage && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <MovieCardSkeleton key={i} />
                     ))}
-                  </div>
-                ) : popularTVShows?.results && popularTVShows.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="popular-tv-grid">
-                    {popularTVShows.results.map((show) => (
-                      <MovieCard key={show.id} movie={show} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="popular-tv-empty">
-                    <p className="text-muted-foreground">No popular TV shows found.</p>
                   </div>
                 )}
-              </TabsContent>
-              
-              <TabsContent value="top-rated" data-testid="top-rated-tv-content">
-                {topRatedLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-loading">
-                    {Array.from({ length: 18 }, (_, index) => (
-                      <MovieCardSkeleton key={index} />
-                    ))}
-                  </div>
-                ) : topRatedTVShows?.results && topRatedTVShows.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="top-rated-tv-grid">
-                    {topRatedTVShows.results.map((show) => (
-                      <MovieCard key={show.id} movie={show} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="top-rated-tv-empty">
-                    <p className="text-muted-foreground">No top rated TV shows found.</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="airing-today" data-testid="airing-today-tv-content">
-                {airingTodayLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="airing-today-tv-loading">
-                    {Array.from({ length: 18 }, (_, index) => (
-                      <MovieCardSkeleton key={index} />
-                    ))}
-                  </div>
-                ) : airingTodayTVShows?.results && airingTodayTVShows.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="airing-today-tv-grid">
-                    {airingTodayTVShows.results.map((show) => (
-                      <MovieCard key={show.id} movie={show} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="airing-today-tv-empty">
-                    <p className="text-muted-foreground">No TV shows airing today found.</p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="on-the-air" data-testid="on-the-air-tv-content">
-                {onTheAirLoading ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="on-the-air-tv-loading">
-                    {Array.from({ length: 18 }, (_, index) => (
-                      <MovieCardSkeleton key={index} />
-                    ))}
-                  </div>
-                ) : onTheAirTVShows?.results && onTheAirTVShows.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="on-the-air-tv-grid">
-                    {onTheAirTVShows.results.map((show) => (
-                      <MovieCard key={show.id} movie={show} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="on-the-air-tv-empty">
-                    <p className="text-muted-foreground">No TV shows on the air found.</p>
-                  </div>
-                )}
-              </TabsContent>
-              </Tabs>
-            </RevealOnScroll>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 md:py-24" data-testid="no-results">
+                <div className="w-full max-w-md text-center">
+                  <svg
+                    className="mx-auto h-16 w-16 md:h-20 md:w-20 text-muted-foreground/50 mb-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <h3 className="text-lg md:text-xl font-semibold text-foreground mb-2">
+                    No results found
+                  </h3>
+                  <p className="text-sm md:text-base text-muted-foreground mb-6">
+                    Try adjusting your filters or search criteria to find what you're looking for.
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      onClick={() => setFilters(DEFAULT_TV_FILTERS)}
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                      data-testid="reset-filters-button"
+                    >
+                      Reset Filters
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </main>
-      
+
       <Footer />
+
+      {/* Floating Filters Button - Desktop: fixed bottom-right, Mobile: bottom sheet */}
+      <FloatingFiltersButton
+        filters={filters}
+        onFiltersChange={setFilters}
+      />
     </div>
   );
 }

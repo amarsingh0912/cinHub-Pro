@@ -1602,6 +1602,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multi-search - for global search bar (searches movies, TV, people)
+  app.get('/api/search/multi', async (req, res) => {
+    try {
+      const { query, page = 1 } = req.query;
+      
+      if (!query) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const data = await fetchFromTMDB('/search/multi', { 
+        query: query as string, 
+        page 
+      });
+      
+      res.json(data);
+    } catch (error) {
+      console.error('Error performing multi-search:', error);
+      res.status(500).json({ message: 'Failed to perform multi-search' });
+    }
+  });
+
   // Search production companies - for Companies filter
   app.get('/api/search/company', async (req, res) => {
     try {
