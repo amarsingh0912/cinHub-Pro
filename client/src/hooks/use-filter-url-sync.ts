@@ -457,14 +457,11 @@ export function useAutoFilterURLSync(
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
       
-      const urlFilters = syncFromURL();
-      const hasURLFilters = Object.values(urlFilters).some(value => 
-        value !== undefined && 
-        value !== '' && 
-        (Array.isArray(value) ? value.length > 0 : true)
-      );
+      // Check if URL actually has query parameters
+      const hasRealURLParams = window.location.search.length > 1;
       
-      if (hasURLFilters && onFiltersChange) {
+      if (hasRealURLParams && onFiltersChange) {
+        const urlFilters = syncFromURL();
         // Store the URL filters we're trying to hydrate
         pendingUrlFiltersRef.current = urlFilters;
         onFiltersChange(urlFilters);
@@ -478,18 +475,31 @@ export function useAutoFilterURLSync(
   // Check if filters have been successfully hydrated from URL
   useEffect(() => {
     if (pendingUrlFiltersRef.current && !hydratedFiltersRef.current) {
-      // Check if current filters now match what we tried to hydrate
+      // CRITICAL FIX: Full state comparison instead of partial field check
       const expectedParams = filtersToQueryParams(pendingUrlFiltersRef.current);
       const currentParams = filtersToQueryParams(filters);
       
-      // Compare key filter properties to see if hydration succeeded
-      const keysMatch = ['contentType', 'with_genres', 'vote_average', 'primary_release_date', 'first_air_date'].every(key => {
-        const expected = expectedParams[key as keyof FilterQueryParams];
-        const current = currentParams[key as keyof FilterQueryParams];
-        return expected === current;
+      // Convert to normalized query strings for robust comparison
+      const expectedParamsObj = new URLSearchParams();
+      const currentParamsObj = new URLSearchParams();
+      
+      Object.entries(expectedParams).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          expectedParamsObj.set(key, String(value));
+        }
       });
       
-      if (keysMatch) {
+      Object.entries(currentParams).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          currentParamsObj.set(key, String(value));
+        }
+      });
+      
+      const expectedString = expectedParamsObj.toString();
+      const currentString = currentParamsObj.toString();
+      
+      // Compare the full serialized query strings
+      if (expectedString === currentString) {
         // Filters have been successfully hydrated, now allow normal sync behavior
         hydratedFiltersRef.current = true;
         pendingUrlFiltersRef.current = null;
