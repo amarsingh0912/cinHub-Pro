@@ -36,8 +36,12 @@ import {
   Shield,
   Search,
   Film,
-  Tv
+  Tv,
+  Sparkles,
+  TrendingUp,
+  Zap
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PeopleAutocomplete } from "./PeopleAutocomplete";
@@ -316,6 +320,11 @@ export function AdvancedFilterSheet({
       with_people: [],
       with_companies: [],
       with_networks: [],
+      with_original_language: undefined,
+      watch_region: 'US',
+      region: undefined,
+      certification: undefined,
+      include_adult: false,
       sort_by: 'popularity.desc'
     } as AdvancedFilterState);
   };
@@ -330,8 +339,10 @@ export function AdvancedFilterSheet({
 
   const renderContentTypeFilter = () => (
     <div className="space-y-4">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <Film className="h-4 w-4" />
+      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+        <div className="p-1 rounded-md bg-primary/10 text-primary">
+          <Film className="h-4 w-4" />
+        </div>
         Content Type
       </Label>
       <div className="flex justify-center">
@@ -349,9 +360,16 @@ export function AdvancedFilterSheet({
 
   const renderGenreFilter = () => (
     <div className="space-y-4">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <Filter className="h-4 w-4" />
+      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+        <div className="p-1 rounded-md bg-primary/10 text-primary">
+          <Filter className="h-4 w-4" />
+        </div>
         Genres
+        {(filters.with_genres?.length > 0 || filters.without_genres?.length > 0) && (
+          <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+            {(filters.with_genres?.length || 0) + (filters.without_genres?.length || 0)}
+          </Badge>
+        )}
       </Label>
       <GenreChipGroup
         selectedGenres={{
@@ -377,11 +395,20 @@ export function AdvancedFilterSheet({
       ? parseInt(filters.primary_release_date?.end?.substring(0, 4) || `${currentYear}`)
       : parseInt(filters.first_air_date?.end?.substring(0, 4) || `${currentYear}`);
 
+    const hasYearFilter = (filters.primary_release_date?.start || filters.first_air_date?.start);
+
     return (
       <div className="space-y-4">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <Calendar className="h-4 w-4" />
+          </div>
           Release Year Range
+          {hasYearFilter && (
+            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+              {startYear}-{endYear}
+            </Badge>
+          )}
         </Label>
         
         {/* Quick filter chips */}
@@ -430,12 +457,22 @@ export function AdvancedFilterSheet({
     );
   };
 
-  const renderRatingFilter = () => (
-    <div className="space-y-4">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <Star className="h-4 w-4" />
-        User Rating
-      </Label>
+  const renderRatingFilter = () => {
+    const hasRatingFilter = filters.vote_average?.min || filters.vote_average?.max || filters.vote_count?.min;
+    
+    return (
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <Star className="h-4 w-4" />
+          </div>
+          User Rating
+          {hasRatingFilter && (
+            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+              {filters.vote_average?.min || 0}-{filters.vote_average?.max || 10}
+            </Badge>
+          )}
+        </Label>
       
       <div className="space-y-3">
         <div className="space-y-2">
@@ -474,6 +511,7 @@ export function AdvancedFilterSheet({
       </div>
     </div>
   );
+  };
 
   const renderRuntimeFilter = () => (
     <div className="space-y-4">
@@ -497,12 +535,22 @@ export function AdvancedFilterSheet({
     </div>
   );
 
-  const renderStreamingFilter = () => (
-    <div className="space-y-4">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <MonitorPlay className="h-4 w-4" />
-        Streaming Providers
-      </Label>
+  const renderStreamingFilter = () => {
+    const hasStreamingFilter = filters.with_watch_providers?.length > 0 || filters.with_watch_monetization_types?.length > 0;
+    
+    return (
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <MonitorPlay className="h-4 w-4" />
+          </div>
+          Streaming Providers
+          {hasStreamingFilter && (
+            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+              {filters.with_watch_providers?.length || 0}
+            </Badge>
+          )}
+        </Label>
 
       {/* Region selection */}
       <div className="space-y-2">
@@ -570,12 +618,20 @@ export function AdvancedFilterSheet({
       </div>
     </div>
   );
+  };
 
   const renderLanguageFilter = () => (
     <div className="space-y-3">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <Globe className="h-4 w-4" />
+      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+        <div className="p-1 rounded-md bg-primary/10 text-primary">
+          <Globe className="h-4 w-4" />
+        </div>
         Original Language
+        {filters.with_original_language && (
+          <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs uppercase">
+            {filters.with_original_language}
+          </Badge>
+        )}
       </Label>
       <Select 
         value={filters.with_original_language} 
@@ -596,9 +652,22 @@ export function AdvancedFilterSheet({
     </div>
   );
 
-  const renderSortFilter = () => (
-    <div className="space-y-3">
-      <Label className="text-sm font-medium">Sort By</Label>
+  const renderSortFilter = () => {
+    const isSortActive = filters.sort_by && filters.sort_by !== 'popularity.desc';
+    
+    return (
+      <div className="space-y-3">
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <TrendingUp className="h-4 w-4" />
+          </div>
+          Sort By
+          {isSortActive && (
+            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+              Custom
+            </Badge>
+          )}
+        </Label>
       <Select 
         value={filters.sort_by} 
         onValueChange={(value) => updateFilter('sort_by', value as any)}
@@ -616,12 +685,15 @@ export function AdvancedFilterSheet({
       </Select>
     </div>
   );
+  };
 
   const renderAdultContentFilter = () => (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium flex items-center gap-2">
-          <Shield className="h-4 w-4" />
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <Shield className="h-4 w-4" />
+          </div>
           Include Adult Content
         </Label>
         <Switch
@@ -648,38 +720,70 @@ export function AdvancedFilterSheet({
         {/* Mobile drag handle */}
         {isMobile && (
           <div className="flex justify-center py-2 -mt-2">
-            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full" />
+            <motion.div 
+              className="w-12 h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full"
+              animate={{ scaleX: [1, 0.8, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            />
           </div>
         )}
-        <SheetHeader className={cn("space-y-3 flex-shrink-0", isMobile ? "px-4" : "px-6")}>
-          <SheetTitle className="flex items-center gap-3 text-lg font-semibold">
-            <Filter className="h-5 w-5" />
-            Advanced Filters
+        <SheetHeader className={cn(
+          "space-y-3 flex-shrink-0 relative",
+          isMobile ? "px-4 pb-4" : "px-6 pb-5"
+        )}>
+          {/* Decorative gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          
+          <SheetTitle className="flex items-center gap-3 text-xl font-bold relative">
+            <div className="relative">
+              <Filter className="h-6 w-6 text-primary" />
+              <Sparkles className="h-3 w-3 text-primary absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Advanced Filters
+            </span>
             {appliedFiltersCount > 0 && (
-              <Badge variant="secondary" className="ml-auto" data-testid="applied-filters-count">
+              <Badge 
+                variant="default" 
+                className="ml-auto bg-gradient-to-r from-primary to-primary/80 text-white border-0 shadow-lg animate-pulse"
+                data-testid="applied-filters-count"
+              >
                 {appliedFiltersCount}
               </Badge>
             )}
           </SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground">
+          <SheetDescription className="text-sm text-muted-foreground flex items-center gap-2 relative">
+            <TrendingUp className="h-4 w-4" />
             Discover content with precise filtering across all TMDB categories
           </SheetDescription>
           
           {/* Quick filter chips */}
-          <div className="flex flex-wrap gap-2 pt-2" role="group" aria-label="Quick filter presets">
-            {QUICK_FILTER_PRESETS.map((preset) => (
-              <Button
+          <div className="flex flex-wrap gap-2 pt-2 relative" role="group" aria-label="Quick filter presets">
+            {QUICK_FILTER_PRESETS.map((preset, index) => (
+              <motion.div
                 key={preset.id}
-                variant="outline"
-                size="sm"
-                onClick={() => applyQuickFilter(preset)}
-                data-testid={`quick-filter-${preset.id}`}
-                className="h-7 text-xs hover:bg-primary/10"
-                aria-label={`Apply ${preset.label} filter: ${preset.description}`}
-                title={preset.description}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                {preset.label}
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyQuickFilter(preset)}
+                  data-testid={`quick-filter-${preset.id}`}
+                  className={cn(
+                    "h-7 text-xs relative overflow-hidden group",
+                    "hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10",
+                    "hover:border-primary/50 hover:shadow-md",
+                    "transition-all duration-300 hover:scale-105"
+                  )}
+                  aria-label={`Apply ${preset.label} filter: ${preset.description}`}
+                  title={preset.description}
+                >
+                  <Zap className="h-3 w-3 mr-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {preset.label}
+                </Button>
+              </motion.div>
             ))}
           </div>
         </SheetHeader>
@@ -708,98 +812,154 @@ export function AdvancedFilterSheet({
             <Separator />
 
             {/* Filter Categories */}
-            {FILTER_CATEGORIES.map((category) => (
-              <Collapsible
+            {FILTER_CATEGORIES.map((category, index) => (
+              <motion.div
                 key={category.id}
-                open={!collapsedSections.includes(category.id)}
-                onOpenChange={() => toggleSection(category.id)}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.08 }}
               >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex w-full items-center justify-between p-0 hover:bg-transparent focus:bg-muted/20 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-md"
-                    data-testid={`toggle-${category.id}`}
-                    aria-expanded={!collapsedSections.includes(category.id)}
-                    aria-controls={`filter-category-${category.id}`}
-                    aria-label={`Toggle ${category.label} filter section`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{category.label}</span>
-                      {category.description && (
-                        <span className="text-xs text-muted-foreground hidden lg:inline">
-                          ({category.description})
-                        </span>
-                      )}
-                    </div>
-                    {collapsedSections.includes(category.id) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronUp className="h-4 w-4" />
-                    )}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent 
-                  className={cn("pt-3", isMobile ? "space-y-3" : "space-y-4")}
-                  id={`filter-category-${category.id}`}
-                  role="region"
-                  aria-labelledby={`toggle-${category.id}`}
+                <Collapsible
+                  open={!collapsedSections.includes(category.id)}
+                  onOpenChange={() => toggleSection(category.id)}
                 >
-                  {category.id === 'genres' && renderGenreFilter()}
-                  {category.id === 'release' && (
-                    <div className="space-y-4">
-                      {renderYearFilter()}
-                      <Separator />
-                      {renderRuntimeFilter()}
-                    </div>
-                  )}
-                  {category.id === 'ratings' && renderRatingFilter()}
-                  {category.id === 'streaming' && renderStreamingFilter()}
-                  {category.id === 'advanced' && (
-                    <div className="space-y-4">
-                      <KeywordsAutocomplete
-                        value={filters.with_keywords || []}
-                        onChange={(keywords) => updateFilter('with_keywords', keywords)}
-                      />
-                      <Separator />
-                      <PeopleAutocomplete
-                        value={filters.with_people || []}
-                        onChange={(people) => updateFilter('with_people', people)}
-                      />
-                      <Separator />
-                      <CompaniesAutocomplete
-                        value={filters.with_companies || []}
-                        onChange={(companies) => updateFilter('with_companies', companies)}
-                      />
-                      <Separator />
-                      {renderLanguageFilter()}
-                      <Separator />
-                      {renderAdultContentFilter()}
-                    </div>
-                  )}
-                </CollapsibleContent>
-                {!collapsedSections.includes(category.id) && <Separator />}
-              </Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "flex w-full items-center justify-between p-3 mb-2",
+                        "hover:bg-gradient-to-r hover:from-primary/10 hover:to-transparent",
+                        "focus:bg-gradient-to-r focus:from-primary/15 focus:to-transparent",
+                        "focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-lg",
+                        "transition-all duration-300 group",
+                        !collapsedSections.includes(category.id) && "bg-primary/5"
+                      )}
+                      data-testid={`toggle-${category.id}`}
+                      aria-expanded={!collapsedSections.includes(category.id)}
+                      aria-controls={`filter-category-${category.id}`}
+                      aria-label={`Toggle ${category.label} filter section`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "p-1.5 rounded-md transition-colors duration-300",
+                          !collapsedSections.includes(category.id) 
+                            ? "bg-primary/20 text-primary" 
+                            : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                        )}>
+                          {category.id === 'genres' && <Filter className="h-4 w-4" />}
+                          {category.id === 'release' && <Calendar className="h-4 w-4" />}
+                          {category.id === 'ratings' && <Star className="h-4 w-4" />}
+                          {category.id === 'streaming' && <MonitorPlay className="h-4 w-4" />}
+                          {category.id === 'advanced' && <Sparkles className="h-4 w-4" />}
+                        </div>
+                        <div className="text-left">
+                          <span className="text-sm font-semibold block">{category.label}</span>
+                          {category.description && (
+                            <span className="text-xs text-muted-foreground hidden lg:block">
+                              {category.description}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: collapsedSections.includes(category.id) ? 0 : 180 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </motion.div>
+                    </Button>
+                  </CollapsibleTrigger>
+                  <AnimatePresence>
+                    {!collapsedSections.includes(category.id) && (
+                      <CollapsibleContent 
+                        forceMount
+                        className={cn("overflow-hidden")}
+                        id={`filter-category-${category.id}`}
+                        role="region"
+                        aria-labelledby={`toggle-${category.id}`}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className={cn(
+                            "pt-3 pb-4 px-3 rounded-lg",
+                            "bg-gradient-to-br from-muted/30 to-transparent",
+                            "border border-border/50",
+                            isMobile ? "space-y-3" : "space-y-4"
+                          )}
+                        >
+                          {category.id === 'genres' && renderGenreFilter()}
+                          {category.id === 'release' && (
+                            <div className="space-y-4">
+                              {renderYearFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderRuntimeFilter()}
+                            </div>
+                          )}
+                          {category.id === 'ratings' && renderRatingFilter()}
+                          {category.id === 'streaming' && renderStreamingFilter()}
+                          {category.id === 'advanced' && (
+                            <div className="space-y-4">
+                              <KeywordsAutocomplete
+                                value={filters.with_keywords || []}
+                                onChange={(keywords) => updateFilter('with_keywords', keywords)}
+                              />
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              <PeopleAutocomplete
+                                value={filters.with_people || []}
+                                onChange={(people) => updateFilter('with_people', people)}
+                              />
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              <CompaniesAutocomplete
+                                value={filters.with_companies || []}
+                                onChange={(companies) => updateFilter('with_companies', companies)}
+                              />
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderLanguageFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderAdultContentFilter()}
+                            </div>
+                          )}
+                        </motion.div>
+                      </CollapsibleContent>
+                    )}
+                  </AnimatePresence>
+                </Collapsible>
+              </motion.div>
             ))}
             </div>
           </ScrollArea>
         </div>
 
-        <SheetFooter className={cn("flex-col space-y-3 pt-4 border-t border-border/50 flex-shrink-0 bg-background/95 backdrop-blur-sm", isMobile ? "px-4" : "px-6")}>
+        <SheetFooter className={cn(
+          "flex-col space-y-3 pt-5 border-t flex-shrink-0",
+          "bg-gradient-to-t from-background via-background/95 to-background/90 backdrop-blur-xl",
+          "border-gradient-to-r border-t-border/50",
+          isMobile ? "px-4 pb-4" : "px-6 pb-6"
+        )}>
           {/* Applied filters summary */}
           {appliedFiltersCount > 0 && (
-            <div className="space-y-2">
+            <motion.div 
+              className="space-y-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-sm font-semibold flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                   {appliedFiltersCount} {appliedFiltersCount === 1 ? 'Filter' : 'Filters'} Applied
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearAllFilters}
-                  className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  className="h-7 px-3 text-xs hover:bg-destructive/10 hover:text-destructive transition-colors"
                   data-testid="clear-all-quick"
                   aria-label="Clear all applied filters"
                 >
+                  <X className="h-3 w-3 mr-1" />
                   Clear All
                 </Button>
               </div>
@@ -948,14 +1108,19 @@ export function AdvancedFilterSheet({
                   </button>
                 )}
               </div>
-            </div>
+            </motion.div>
           )}
           
-          <div className="flex gap-2 w-full">
+          <div className="flex gap-3 w-full">
             {appliedFiltersCount === 0 ? (
               <Button 
                 onClick={() => onOpenChange(false)}
-                className="w-full"
+                className={cn(
+                  "w-full h-11 font-semibold",
+                  "bg-gradient-to-r from-primary to-primary/80",
+                  "hover:from-primary/90 hover:to-primary/70",
+                  "shadow-lg hover:shadow-xl transition-all duration-300"
+                )}
                 data-testid="close-filters"
                 aria-label="Close filters panel"
               >
@@ -966,19 +1131,31 @@ export function AdvancedFilterSheet({
                 <Button 
                   variant="outline" 
                   onClick={clearAllFilters}
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 h-11 font-semibold",
+                    "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50",
+                    "transition-all duration-300"
+                  )}
                   data-testid="clear-filters"
                   aria-label="Clear all applied filters"
                 >
+                  <X className="h-4 w-4 mr-2" />
                   Reset
                 </Button>
                 <Button 
                   onClick={() => onOpenChange(false)}
-                  className="flex-1"
+                  className={cn(
+                    "flex-1 h-11 font-semibold relative overflow-hidden group",
+                    "bg-gradient-to-r from-primary to-primary/80",
+                    "hover:from-primary/90 hover:to-primary/70",
+                    "shadow-lg hover:shadow-xl transition-all duration-300"
+                  )}
                   data-testid="apply-filters"
                   aria-label="Apply current filter settings"
                 >
+                  <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
                   Apply {appliedFiltersCount > 0 ? `(${appliedFiltersCount})` : ''}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 </Button>
               </>
             )}
