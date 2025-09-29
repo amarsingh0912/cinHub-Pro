@@ -102,28 +102,79 @@ export function FloatingFiltersButton({
             isMobile ? "h-14 px-6" : "h-12 px-8",
             // Premium animations and transitions
             "transition-all duration-500 ease-out",
-            // Glow effects
-            hasFilters && "shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] animate-pulse-slow"
+            // Enhanced glow effects
+            hasFilters && "shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
           )}
           size={isMobile ? "lg" : "default"}
           data-testid="floating-filters-button"
         >
-        {/* Animated background gradient */}
+          {/* Animated border glow */}
+          {hasFilters && (
+            <motion.div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(var(--primary-rgb), 0.3), transparent)',
+                backgroundSize: '200% 100%'
+              }}
+              animate={{
+                backgroundPosition: ['0% 0%', '200% 0%']
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'linear'
+              }}
+            />
+          )}
+        {/* Animated background gradient with particles */}
         <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20 animate-gradient-x"
+          className="absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.5 }}
-        />
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20"
+            animate={{
+              backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            style={{ backgroundSize: '200% 100%' }}
+          />
+          {/* Floating micro particles */}
+          {isHovered && [...Array(5)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-0.5 h-0.5 rounded-full bg-primary/60"
+              initial={{ 
+                x: `${i * 20}%`,
+                y: '100%',
+                opacity: 0
+              }}
+              animate={{ 
+                y: '-20%',
+                opacity: [0, 1, 0]
+              }}
+              transition={{ 
+                duration: 1.5,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+        </motion.div>
 
-        {/* Sparkle effects */}
+        {/* Enhanced sparkle effects with trails */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.3 }}
           className="absolute inset-0"
         >
+          {/* Primary sparkles */}
           <motion.div
+            className="absolute top-1 left-2"
             animate={{ 
               scale: [1, 1.2, 1],
               rotate: [0, 180, 360]
@@ -134,9 +185,16 @@ export function FloatingFiltersButton({
               ease: "linear"
             }}
           >
-            <Sparkles className="absolute top-1 left-2 h-3 w-3 text-secondary" />
+            <Sparkles className="h-3 w-3 text-secondary drop-shadow-[0_0_4px_rgba(var(--secondary-rgb),0.8)]" />
+            {/* Sparkle glow */}
+            <motion.div
+              className="absolute inset-0 bg-secondary/50 blur-sm rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
           </motion.div>
           <motion.div
+            className="absolute bottom-1 right-2"
             animate={{ 
               scale: [1, 1.3, 1],
               rotate: [360, 180, 0]
@@ -148,8 +206,28 @@ export function FloatingFiltersButton({
               delay: 0.5
             }}
           >
-            <Sparkles className="absolute bottom-1 right-2 h-2 w-2 text-primary" />
+            <Sparkles className="h-2 w-2 text-primary drop-shadow-[0_0_4px_rgba(var(--primary-rgb),0.8)]" />
+            <motion.div
+              className="absolute inset-0 bg-primary/50 blur-sm rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0.3 }}
+            />
           </motion.div>
+          {/* Random sparkle bursts */}
+          {isHovered && (
+            <motion.div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ 
+                scale: [0, 1.5, 0],
+                opacity: [0, 1, 0],
+                rotate: [0, 180]
+              }}
+              transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2 }}
+            >
+              <Sparkles className="h-4 w-4 text-primary/60" />
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Main content */}
@@ -200,48 +278,79 @@ export function FloatingFiltersButton({
 
           {appliedFiltersCount > 0 && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
               transition={{ 
                 type: "spring",
                 stiffness: 500,
                 damping: 15
               }}
+              className="relative"
             >
+              {/* Badge glow ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full bg-primary/30 blur-md"
+                animate={{
+                  scale: [1, 1.3, 1],
+                  opacity: [0.5, 0.8, 0.5]
+                }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
               <Badge 
                 variant="destructive" 
                 className={cn(
-                  "ml-1 h-6 w-6 p-0 flex items-center justify-center",
+                  "ml-1 h-6 w-6 p-0 flex items-center justify-center relative",
                   "text-xs font-bold rounded-full",
                   "bg-gradient-to-br from-primary via-primary to-primary/80",
-                  "shadow-[0_0_15px_rgba(var(--primary-rgb),0.6)] text-white border-0",
-                  "animate-pulse"
+                  "shadow-[0_0_15px_rgba(var(--primary-rgb),0.6)] text-white border-0"
                 )}
                 data-testid="filters-badge"
               >
-                {appliedFiltersCount > 99 ? "99+" : appliedFiltersCount}
+                <motion.span
+                  animate={{ 
+                    scale: [1, 1.1, 1]
+                  }}
+                  transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 1 }}
+                >
+                  {appliedFiltersCount > 99 ? "99+" : appliedFiltersCount}
+                </motion.span>
               </Badge>
             </motion.div>
           )}
         </div>
 
-        {/* Orbital glow effect */}
+        {/* Enhanced orbital glow with pulse */}
         {hasFilters && (
-          <motion.div
-            className="absolute inset-0 rounded-lg"
-            animate={{
-              boxShadow: [
-                "0 0 20px rgba(var(--primary-rgb), 0.3)",
-                "0 0 30px rgba(var(--primary-rgb), 0.5)",
-                "0 0 20px rgba(var(--primary-rgb), 0.3)"
-              ]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
+          <>
+            <motion.div
+              className="absolute inset-0 rounded-lg"
+              animate={{
+                boxShadow: [
+                  "0 0 20px rgba(var(--primary-rgb), 0.3)",
+                  "0 0 40px rgba(var(--primary-rgb), 0.6)",
+                  "0 0 20px rgba(var(--primary-rgb), 0.3)"
+                ]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            {/* Pulsing ring effect */}
+            <motion.div
+              className="absolute inset-0 rounded-lg border-2 border-primary/40"
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.3, 0.6, 0.3]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          </>
         )}
       </Button>
       </motion.div>

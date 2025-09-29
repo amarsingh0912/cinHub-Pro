@@ -253,7 +253,7 @@ export function AdvancedFilterSheet({
   });
 
   const { data: watchProvidersData } = useQuery({
-    queryKey: ['/api/watch/providers', filters.watch_region || 'US', { type: filters.contentType }],
+    queryKey: [`/api/watch/providers/${filters.watch_region || 'US'}`, { type: filters.contentType }],
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
@@ -717,29 +717,88 @@ export function AdvancedFilterSheet({
         )}
         data-testid="filter-sheet"
       >
-        {/* Mobile drag handle */}
+        {/* Mobile drag handle with particle effect */}
         {isMobile && (
-          <div className="flex justify-center py-2 -mt-2">
+          <div className="flex justify-center py-2 -mt-2 relative">
             <motion.div 
-              className="w-12 h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full"
+              className="w-12 h-1.5 bg-gradient-to-r from-primary/40 via-primary to-primary/40 rounded-full relative overflow-visible"
               animate={{ scaleX: [1, 0.8, 1] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
+            >
+              {/* Glow particles */}
+              <motion.div
+                className="absolute inset-0 blur-md bg-primary/50 rounded-full"
+                animate={{ 
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 0.8, 0.5]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </motion.div>
           </div>
         )}
         <SheetHeader className={cn(
-          "space-y-3 flex-shrink-0 relative",
+          "space-y-3 flex-shrink-0 relative overflow-hidden",
           isMobile ? "px-4 pb-4" : "px-6 pb-5"
         )}>
-          {/* Decorative gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+          {/* Animated gradient background with particles */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div 
+              className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent"
+            />
+            {/* Floating particles */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 rounded-full bg-primary/30"
+                initial={{ 
+                  x: `${20 + i * 30}%`,
+                  y: '100%',
+                  opacity: 0
+                }}
+                animate={{ 
+                  y: '-100%',
+                  opacity: [0, 1, 1, 0]
+                }}
+                transition={{ 
+                  duration: 4 + i,
+                  repeat: Infinity,
+                  delay: i * 0.7,
+                  ease: "linear"
+                }}
+              />
+            ))}
+          </div>
           
           <SheetTitle className="flex items-center gap-3 text-xl font-bold relative">
-            <div className="relative">
-              <Filter className="h-6 w-6 text-primary" />
-              <Sparkles className="h-3 w-3 text-primary absolute -top-1 -right-1 animate-pulse" />
-            </div>
-            <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <motion.div 
+              className="relative"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-primary/20 blur-xl rounded-full"
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  opacity: [0.3, 0.6, 0.3]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <Filter className="h-6 w-6 text-primary relative z-10" />
+              <motion.div
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+              >
+                <Sparkles className="h-3 w-3 text-primary absolute -top-1 -right-1" />
+              </motion.div>
+            </motion.div>
+            <span 
+              className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent"
+              style={{ backgroundSize: '200% auto' }}
+            >
               Advanced Filters
             </span>
             {appliedFiltersCount > 0 && (
@@ -765,6 +824,8 @@ export function AdvancedFilterSheet({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Button
                   variant="outline"
@@ -774,14 +835,28 @@ export function AdvancedFilterSheet({
                   className={cn(
                     "h-7 text-xs relative overflow-hidden group",
                     "hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10",
-                    "hover:border-primary/50 hover:shadow-md",
-                    "transition-all duration-300 hover:scale-105"
+                    "hover:border-primary/50",
+                    "transition-all duration-300"
                   )}
                   aria-label={`Apply ${preset.label} filter: ${preset.description}`}
                   title={preset.description}
                 >
-                  <Zap className="h-3 w-3 mr-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  {preset.label}
+                  {/* Shimmer effect on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
+                    transition={{ duration: 0.6 }}
+                  />
+                  {/* Ripple effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-primary/20 rounded-md"
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1.5, opacity: [0.5, 0] }}
+                    transition={{ duration: 0.5 }}
+                  />
+                  <Zap className="h-3 w-3 mr-1 opacity-0 group-hover:opacity-100 transition-opacity relative z-10" />
+                  <span className="relative z-10">{preset.label}</span>
                 </Button>
               </motion.div>
             ))}
@@ -824,34 +899,60 @@ export function AdvancedFilterSheet({
                   onOpenChange={() => toggleSection(category.id)}
                 >
                   <CollapsibleTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "flex w-full items-center justify-between p-3 mb-2",
-                        "hover:bg-gradient-to-r hover:from-primary/10 hover:to-transparent",
-                        "focus:bg-gradient-to-r focus:from-primary/15 focus:to-transparent",
-                        "focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-lg",
-                        "transition-all duration-300 group",
-                        !collapsedSections.includes(category.id) && "bg-primary/5"
-                      )}
-                      data-testid={`toggle-${category.id}`}
-                      aria-expanded={!collapsedSections.includes(category.id)}
-                      aria-controls={`filter-category-${category.id}`}
-                      aria-label={`Toggle ${category.label} filter section`}
+                    <motion.div
+                      whileHover={{ x: 4 }}
+                      transition={{ type: "spring", stiffness: 300 }}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "p-1.5 rounded-md transition-colors duration-300",
-                          !collapsedSections.includes(category.id) 
-                            ? "bg-primary/20 text-primary" 
-                            : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                        )}>
-                          {category.id === 'genres' && <Filter className="h-4 w-4" />}
-                          {category.id === 'release' && <Calendar className="h-4 w-4" />}
-                          {category.id === 'ratings' && <Star className="h-4 w-4" />}
-                          {category.id === 'streaming' && <MonitorPlay className="h-4 w-4" />}
-                          {category.id === 'advanced' && <Sparkles className="h-4 w-4" />}
-                        </div>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "flex w-full items-center justify-between p-3 mb-2 relative overflow-hidden",
+                          "hover:bg-gradient-to-r hover:from-primary/10 hover:to-transparent",
+                          "focus:bg-gradient-to-r focus:from-primary/15 focus:to-transparent",
+                          "focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-lg",
+                          "transition-all duration-300 group",
+                          !collapsedSections.includes(category.id) && "bg-primary/5"
+                        )}
+                        data-testid={`toggle-${category.id}`}
+                        aria-expanded={!collapsedSections.includes(category.id)}
+                        aria-controls={`filter-category-${category.id}`}
+                        aria-label={`Toggle ${category.label} filter section`}
+                      >
+                        {/* Hover glow effect */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0"
+                          initial={{ x: '-100%', opacity: 0 }}
+                          whileHover={{ x: '100%', opacity: 1 }}
+                          transition={{ duration: 0.8, ease: "easeInOut" }}
+                        />
+                      <div className="flex items-center gap-3 relative z-10">
+                        <motion.div 
+                          className={cn(
+                            "p-1.5 rounded-md transition-colors duration-300 relative",
+                            !collapsedSections.includes(category.id) 
+                              ? "bg-primary/20 text-primary" 
+                              : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                          )}
+                          whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          {/* Icon glow on hover */}
+                          {!collapsedSections.includes(category.id) && (
+                            <motion.div
+                              className="absolute inset-0 bg-primary/40 blur-md rounded-md"
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                opacity: [0.3, 0.6, 0.3]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            />
+                          )}
+                          {category.id === 'genres' && <Filter className="h-4 w-4 relative z-10" />}
+                          {category.id === 'release' && <Calendar className="h-4 w-4 relative z-10" />}
+                          {category.id === 'ratings' && <Star className="h-4 w-4 relative z-10" />}
+                          {category.id === 'streaming' && <MonitorPlay className="h-4 w-4 relative z-10" />}
+                          {category.id === 'advanced' && <Sparkles className="h-4 w-4 relative z-10" />}
+                        </motion.div>
                         <div className="text-left">
                           <span className="text-sm font-semibold block">{category.label}</span>
                           {category.description && (
@@ -862,12 +963,15 @@ export function AdvancedFilterSheet({
                         </div>
                       </div>
                       <motion.div
+                        className="relative z-10"
                         animate={{ rotate: collapsedSections.includes(category.id) ? 0 : 180 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.3, type: "spring" }}
+                        whileHover={{ scale: 1.2 }}
                       >
                         <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                       </motion.div>
                     </Button>
+                    </motion.div>
                   </CollapsibleTrigger>
                   <AnimatePresence>
                     {!collapsedSections.includes(category.id) && (
@@ -879,17 +983,31 @@ export function AdvancedFilterSheet({
                         aria-labelledby={`toggle-${category.id}`}
                       >
                         <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3 }}
+                          initial={{ opacity: 0, height: 0, y: -20 }}
+                          animate={{ opacity: 1, height: "auto", y: 0 }}
+                          exit={{ opacity: 0, height: 0, y: -20 }}
+                          transition={{ 
+                            duration: 0.4,
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30
+                          }}
                           className={cn(
-                            "pt-3 pb-4 px-3 rounded-lg",
+                            "pt-3 pb-4 px-3 rounded-lg relative overflow-hidden",
                             "bg-gradient-to-br from-muted/30 to-transparent",
                             "border border-border/50",
                             isMobile ? "space-y-3" : "space-y-4"
                           )}
                         >
+                          {/* Subtle animated background */}
+                          <motion.div
+                            className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"
+                            animate={{ 
+                              opacity: [0.3, 0.5, 0.3],
+                              scale: [1, 1.02, 1]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity }}
+                          />
                           {category.id === 'genres' && renderGenreFilter()}
                           {category.id === 'release' && (
                             <div className="space-y-4">
@@ -1113,50 +1231,95 @@ export function AdvancedFilterSheet({
           
           <div className="flex gap-3 w-full">
             {appliedFiltersCount === 0 ? (
-              <Button 
-                onClick={() => onOpenChange(false)}
-                className={cn(
-                  "w-full h-11 font-semibold",
-                  "bg-gradient-to-r from-primary to-primary/80",
-                  "hover:from-primary/90 hover:to-primary/70",
-                  "shadow-lg hover:shadow-xl transition-all duration-300"
-                )}
-                data-testid="close-filters"
-                aria-label="Close filters panel"
-              >
-                Close
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={clearAllFilters}
-                  className={cn(
-                    "flex-1 h-11 font-semibold",
-                    "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50",
-                    "transition-all duration-300"
-                  )}
-                  data-testid="clear-filters"
-                  aria-label="Clear all applied filters"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
+              <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   onClick={() => onOpenChange(false)}
                   className={cn(
-                    "flex-1 h-11 font-semibold relative overflow-hidden group",
+                    "w-full h-11 font-semibold relative overflow-hidden group",
                     "bg-gradient-to-r from-primary to-primary/80",
                     "hover:from-primary/90 hover:to-primary/70",
                     "shadow-lg hover:shadow-xl transition-all duration-300"
                   )}
-                  data-testid="apply-filters"
-                  aria-label="Apply current filter settings"
+                  data-testid="close-filters"
+                  aria-label="Close filters panel"
                 >
-                  <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
-                  Apply {appliedFiltersCount > 0 ? `(${appliedFiltersCount})` : ''}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{ x: ['-100%', '100%'] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  />
+                  <span className="relative z-10">Close</span>
                 </Button>
+              </motion.div>
+            ) : (
+              <>
+                <motion.div className="flex-1" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    variant="outline" 
+                    onClick={clearAllFilters}
+                    className={cn(
+                      "w-full h-11 font-semibold relative overflow-hidden group",
+                      "hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50",
+                      "transition-all duration-300"
+                    )}
+                    data-testid="clear-filters"
+                    aria-label="Clear all applied filters"
+                  >
+                    <motion.div
+                      className="absolute inset-0 bg-destructive/5"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                    <motion.div
+                      whileHover={{ rotate: 90 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <X className="h-4 w-4 mr-2 relative z-10" />
+                    </motion.div>
+                    <span className="relative z-10">Reset</span>
+                  </Button>
+                </motion.div>
+                <motion.div 
+                  className="flex-1" 
+                  whileHover={{ scale: 1.02 }} 
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button 
+                    onClick={() => onOpenChange(false)}
+                    className={cn(
+                      "w-full h-11 font-semibold relative overflow-hidden group",
+                      "bg-gradient-to-r from-primary to-primary/80",
+                      "hover:from-primary/90 hover:to-primary/70",
+                      "shadow-lg hover:shadow-xl transition-all duration-300"
+                    )}
+                    data-testid="apply-filters"
+                    aria-label="Apply current filter settings"
+                  >
+                    {/* Success pulse effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-white/20"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileTap={{ scale: 2, opacity: [0, 0.5, 0] }}
+                      transition={{ duration: 0.5 }}
+                    />
+                    {/* Shimmer effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      animate={{ x: ['-100%', '100%'] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    />
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Sparkles className="h-4 w-4 mr-2 relative z-10" />
+                    </motion.div>
+                    <span className="relative z-10">
+                      Apply {appliedFiltersCount > 0 ? `(${appliedFiltersCount})` : ''}
+                    </span>
+                  </Button>
+                </motion.div>
               </>
             )}
           </div>
