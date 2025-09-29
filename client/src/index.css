@@ -123,6 +123,12 @@
   --space-fluid-xl: clamp(3rem, 8vw, 6rem);
   --space-fluid-2xl: clamp(4rem, 12vw, 8rem);
 
+  /* Enhanced Glassmorphism Variables */
+  --glass-bg: hsla(222, 12%, 8%, 0.8);
+  --glass-border: hsla(210, 40%, 98%, 0.1);
+  --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.37);
+  --glass-backdrop-blur: 12px;
+
   /* Typography Scale */
   --text-xs: clamp(0.75rem, 0.9vw, 0.875rem);
   --text-sm: clamp(0.875rem, 1vw, 1rem);
