@@ -1171,8 +1171,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Search query is required' });
       }
 
-      // Check if any filters are applied (only treat sort as a filter if it's not the default)
-      const hasFilters = genre || year || rating || (sort && sort !== 'relevance' && sort !== 'popularity.desc');
+      // Check if any filters are applied - be explicit about what constitutes a real filter
+      // Also check for literal string 'undefined' which can come from frontend
+      const hasGenreFilter = genre && genre !== 'all' && genre !== '' && genre !== 'undefined';
+      const hasYearFilter = year && year !== 'all' && year !== '' && year !== 'undefined';
+      const hasRatingFilter = rating && rating !== '0' && rating !== '' && rating !== 'undefined';
+      // Only count sort as a filter if it's explicitly set to something other than default values
+      const hasSortFilter = sort && sort !== 'relevance' && sort !== 'popularity.desc' && sort !== '' && sort !== 'undefined';
+      
+      const hasFilters = hasGenreFilter || hasYearFilter || hasRatingFilter || hasSortFilter;
 
       if (!hasFilters) {
         // No filters, use simple search endpoint
