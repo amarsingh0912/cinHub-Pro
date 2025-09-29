@@ -1856,9 +1856,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId;
       const preferences = req.body;
       
-      // Validate preferences object structure
+      // Validate preferences object structure - updated to match frontend expectations
       const preferencesSchema = z.object({
+        // Genre preferences
+        genres: z.array(z.string()).optional(),
+        
+        // Viewing preferences
+        includeAdultContent: z.boolean().optional(),
+        autoPlayTrailers: z.boolean().optional(),
+        
+        // Notification preferences
+        notifyNewReleases: z.boolean().optional(),
+        notifyWatchlistUpdates: z.boolean().optional(),
+        emailNotifications: z.boolean().optional(),
+        
+        // Display preferences
         theme: z.enum(['light', 'dark', 'system']).optional(),
+        language: z.string().optional(),
+        region: z.string().optional(),
+        
+        // Legacy support for nested structure (backward compatibility)
         notifications: z.object({
           email: z.boolean().optional(),
           push: z.boolean().optional(),
