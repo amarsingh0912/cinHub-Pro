@@ -421,21 +421,24 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[min(100vw-2rem,28rem)] sm:w-[32rem] md:w-[38rem] p-0 sm:p-6 md:p-8 sm:rounded-2xl overflow-hidden border border-border/20 backdrop-blur-xl bg-background/95 shadow-2xl shadow-primary/10" data-testid="auth-modal">
+      <DialogContent className="w-[min(100vw-2rem,28rem)] sm:w-[32rem] md:w-[40rem] p-0 sm:p-8 md:p-10 sm:rounded-3xl overflow-hidden border-2 border-border/30 backdrop-blur-xl bg-gradient-to-b from-background/98 via-background/95 to-background/98 shadow-2xl shadow-primary/20" data-testid="auth-modal">
         <div className="flex flex-col max-h-[calc(100dvh-0.5rem)] sm:max-h-[calc(100dvh-2rem)] md:max-h-[90dvh]">
-          <DialogHeader className="shrink-0 px-6 pt-6 sm:px-0 sm:pt-0 text-center">
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-16 h-16 primary-gradient rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-                {mode === "signin" && <LogIn className="w-8 h-8 text-white" />}
-                {mode === "signup" && <UserPlus className="w-8 h-8 text-white" />}
-                {mode === "forgot-password" && <Key className="w-8 h-8 text-white" />}
-                {mode === "otp-verification" && <Mail className="w-8 h-8 text-white" />}
-                {mode === "reset-password" && <Key className="w-8 h-8 text-white" />}
+          <DialogHeader className="shrink-0 px-6 pt-8 sm:px-0 sm:pt-0 text-center">
+            <div className="flex flex-col items-center mb-8">
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-primary rounded-3xl blur-lg opacity-50 animate-pulse"></div>
+                <div className="relative w-full h-full bg-gradient-to-r from-primary to-primary/80 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-500">
+                  {mode === "signin" && <LogIn className="w-10 h-10 text-white drop-shadow-lg" />}
+                  {mode === "signup" && <UserPlus className="w-10 h-10 text-white drop-shadow-lg" />}
+                  {mode === "forgot-password" && <Key className="w-10 h-10 text-white drop-shadow-lg" />}
+                  {mode === "otp-verification" && <Mail className="w-10 h-10 text-white drop-shadow-lg" />}
+                  {mode === "reset-password" && <Key className="w-10 h-10 text-white drop-shadow-lg" />}
+                </div>
               </div>
-              <DialogTitle className="text-center text-2xl sm:text-3xl font-display font-bold text-gradient mb-3">
+              <DialogTitle className="text-center text-3xl sm:text-4xl font-display font-bold bg-gradient-to-r from-foreground via-foreground to-primary/80 bg-clip-text text-transparent mb-4 mt-6">
                 {getModalTitle()}
               </DialogTitle>
-              <DialogDescription className="text-center text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
+              <DialogDescription className="text-center text-base sm:text-lg text-muted-foreground/90 max-w-md leading-relaxed">
                 {getModalDescription()}
               </DialogDescription>
             </div>
@@ -446,13 +449,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           {/* Back button for non-signin modes */}
           {mode !== "signin" && (
             <Button
-              variant="glass"
+              variant="ghost"
               size="sm"
               onClick={() => {
                 setMode("signin");
                 setSigninError(""); // Clear errors when switching modes
               }}
-              className="self-start interactive hover:scale-105 transition-all duration-200"
+              className="self-start mb-4 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-xl px-4 py-2 transition-all duration-300"
               data-testid="button-back"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -469,21 +472,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="loginValue"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-semibold text-foreground">Email, Username, or Phone</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                        <User className="w-4 h-4 mr-2 text-primary" />
+                        Email, Username, or Phone
+                      </FormLabel>
                       <FormControl>
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <User className="h-5 w-5 text-muted-foreground" />
-                          </div>
+                        <div className="relative group">
                           <Input
                             {...field}
                             placeholder="Enter your email, username, or phone"
-                            className="pl-12 h-12 rounded-xl border-border/30 bg-black backdrop-blur-sm focus:border-primary/50 focus:bg-black transition-all duration-200"
+                            className="h-14 px-6 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/60 focus:bg-background/80 group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
                             data-testid="input-login-credential"
                           />
                         </div>
                       </FormControl>
-                      <FormMessage className="text-xs" />
+                      <FormMessage className="text-xs text-destructive font-medium" />
                     </FormItem>
                   )}
                 />
@@ -493,31 +496,34 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-semibold text-foreground">Password</FormLabel>
+                      <FormLabel className="text-sm font-semibold text-foreground mb-3 flex items-center">
+                        <Key className="w-4 h-4 mr-2 text-primary" />
+                        Password
+                      </FormLabel>
                       <FormControl>
-                        <div className="relative">
+                        <div className="relative group">
                           <Input
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
-                            className="pr-12 h-12 rounded-xl border-border/30 bg-black backdrop-blur-sm focus:border-primary/50 focus:bg-black transition-all duration-200"
+                            className="pr-14 h-14 px-6 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/60 focus:bg-background/80 group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
                             data-testid="input-password"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-primary transition-colors duration-200"
+                            className="absolute inset-y-0 right-0 pr-5 flex items-center text-muted-foreground hover:text-primary transition-colors duration-200 group-focus-within:text-primary"
                             data-testid="button-toggle-password"
                           >
                             {showPassword ? (
-                              <EyeOff className="h-5 w-5 text-muted-foreground hover:text-primary" />
+                              <EyeOff className="h-5 w-5" />
                             ) : (
-                              <Eye className="h-5 w-5 text-muted-foreground hover:text-primary" />
+                              <Eye className="h-5 w-5" />
                             )}
                           </button>
                         </div>
                       </FormControl>
-                      <FormMessage className="text-xs" />
+                      <FormMessage className="text-xs text-destructive font-medium" />
                     </FormItem>
                   )}
                 />
@@ -526,17 +532,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   control={signinForm.control}
                   name="rememberMe"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 rounded-xl bg-accent/30 border border-border/20">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-5 rounded-2xl bg-gradient-to-r from-accent/20 via-accent/30 to-accent/20 border border-border/20 hover:border-border/40 transition-all duration-300 hover:shadow-md">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
                           data-testid="checkbox-remember-me"
-                          className="mt-0.5"
+                          className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-medium cursor-pointer">
+                        <FormLabel className="text-sm font-medium cursor-pointer hover:text-primary transition-colors">
                           Remember me for 30 days
                         </FormLabel>
                         <p className="text-xs text-muted-foreground">Stay signed in on this device</p>
@@ -547,9 +553,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 {/* Sign-in Error Display */}
                 {signinError && (
-                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl backdrop-blur-sm animate-fade-in" data-testid="signin-error">
+                  <div className="p-5 bg-gradient-to-r from-destructive/10 via-destructive/15 to-destructive/10 border-2 border-destructive/30 rounded-2xl backdrop-blur-sm animate-fade-in shadow-lg shadow-destructive/5" data-testid="signin-error">
                     <p className="text-sm text-destructive font-medium flex items-center gap-2">
-                      <X className="h-4 w-4" />
+                      <X className="h-4 w-4 flex-shrink-0" />
                       {signinError}
                     </p>
                   </div>
@@ -557,13 +563,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold interactive hover:scale-[1.02] transition-all duration-300"
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary text-white border-0 rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:hover:translate-y-0 disabled:opacity-60"
                   size="lg"
                   data-testid="button-signin"
                   disabled={isLoading}
                 >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Sign In
+                    </>
+                  )}
                 </Button>
               </form>
             </Form>
@@ -980,51 +995,51 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <div className="space-y-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full border-border/30" />
+                    <Separator className="w-full border-border/40" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase font-medium">
-                    <span className="bg-background px-4 py-1 rounded-full text-muted-foreground border border-border/20">
+                    <span className="bg-gradient-to-r from-background via-background to-background px-6 py-2 rounded-full text-muted-foreground/80 border border-border/30 shadow-sm">
                       Or continue with
                     </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <Button
-                    variant="glass"
+                    variant="outline"
                     onClick={() => handleSocialAuth("Google")}
-                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-red-500/30"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 group"
                     data-testid="button-google-auth"
                   >
-                    <FaGoogle className="mr-2 h-5 w-5 text-red-500" />
-                    <span className="hidden sm:inline">Google</span>
+                    <FaGoogle className="mr-3 h-5 w-5 text-red-500 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="font-medium text-foreground">Google</span>
                   </Button>
                   <Button
-                    variant="glass"
+                    variant="outline"
                     onClick={() => handleSocialAuth("Facebook")}
-                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-blue-600/30"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-blue-600/40 hover:shadow-lg hover:shadow-blue-600/10 transition-all duration-300 group"
                     data-testid="button-facebook-auth"
                   >
-                    <FaFacebook className="mr-2 h-5 w-5 text-blue-600" />
-                    <span className="hidden sm:inline">Facebook</span>
+                    <FaFacebook className="mr-3 h-5 w-5 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="font-medium text-foreground">Facebook</span>
                   </Button>
                   <Button
-                    variant="glass"
+                    variant="outline"
                     onClick={() => handleSocialAuth("X")}
-                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-gray-800/30"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-gray-500/40 hover:shadow-lg hover:shadow-gray-500/10 transition-all duration-300 group"
                     data-testid="button-x-auth"
                   >
-                    <FaTwitter className="mr-2 h-5 w-5 text-gray-800 dark:text-white" />
-                    <span className="hidden sm:inline">X</span>
+                    <FaTwitter className="mr-3 h-5 w-5 text-gray-800 dark:text-gray-200 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="font-medium text-foreground">X</span>
                   </Button>
                   <Button
-                    variant="glass"
+                    variant="outline"
                     onClick={() => handleSocialAuth("GitHub")}
-                    className="justify-center h-12 interactive hover:scale-105 transition-all duration-300 hover:border-gray-800/30"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-gray-700/40 hover:shadow-lg hover:shadow-gray-700/10 transition-all duration-300 group"
                     data-testid="button-github-auth"
                   >
-                    <FaGithub className="mr-2 h-5 w-5 text-gray-800 dark:text-white" />
-                    <span className="hidden sm:inline">GitHub</span>
+                    <FaGithub className="mr-3 h-5 w-5 text-gray-800 dark:text-gray-200 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="font-medium text-foreground">GitHub</span>
                   </Button>
                 </div>
               </div>
