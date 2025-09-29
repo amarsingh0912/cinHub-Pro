@@ -545,7 +545,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                           <Input
                             {...field}
                             placeholder="Enter your email, username, or phone"
-                            className="h-14 px-6 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/60 focus:bg-background/80 group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
+                            className="h-14 px-6 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm focus:border-primary/60 focus:bg-black group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
                             data-testid="input-login-credential"
                           />
                         </div>
@@ -570,7 +570,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             {...field}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter your password"
-                            className="pr-14 h-14 px-6 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm focus:border-primary/60 focus:bg-background/80 group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
+                            className="pr-14 h-14 px-6 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm focus:border-primary/60 focus:bg-black group-hover:border-border/60 text-base placeholder:text-muted-foreground/60 transition-all duration-300 focus:shadow-lg focus:shadow-primary/10"
                             data-testid="input-password"
                           />
                           <button
@@ -968,7 +968,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         value={digit}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                        className="w-12 h-12 sm:w-14 sm:h-14 text-center text-lg font-bold border-2 border-border rounded-xl bg-background/50 backdrop-blur-sm focus:border-primary focus:bg-background focus:shadow-lg focus:shadow-primary/10 transition-all duration-300 hover:border-border/60"
+                        className="w-12 h-12 sm:w-14 sm:h-14 text-center text-lg font-bold border-2 border-border rounded-xl bg-black backdrop-blur-sm focus:border-primary focus:bg-black focus:shadow-lg focus:shadow-primary/10 transition-all duration-300 hover:border-border/60"
                         data-testid={`input-otp-digit-${index}`}
                       />
                     ))}
@@ -1147,7 +1147,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Button
                     variant="outline"
                     onClick={() => handleSocialAuth("Google")}
-                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 group"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm hover:bg-black hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 group"
                     data-testid="button-google-auth"
                   >
                     <FaGoogle className="mr-3 h-5 w-5 text-red-500 group-hover:scale-110 transition-transform duration-300" />
@@ -1156,7 +1156,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Button
                     variant="outline"
                     onClick={() => handleSocialAuth("Facebook")}
-                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-blue-600/40 hover:shadow-lg hover:shadow-blue-600/10 transition-all duration-300 group"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm hover:bg-black hover:border-blue-600/40 hover:shadow-lg hover:shadow-blue-600/10 transition-all duration-300 group"
                     data-testid="button-facebook-auth"
                   >
                     <FaFacebook className="mr-3 h-5 w-5 text-blue-600 group-hover:scale-110 transition-transform duration-300" />
@@ -1165,7 +1165,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Button
                     variant="outline"
                     onClick={() => handleSocialAuth("X")}
-                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-gray-500/40 hover:shadow-lg hover:shadow-gray-500/10 transition-all duration-300 group"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm hover:bg-black hover:border-gray-500/40 hover:shadow-lg hover:shadow-gray-500/10 transition-all duration-300 group"
                     data-testid="button-x-auth"
                   >
                     <FaTwitter className="mr-3 h-5 w-5 text-gray-800 dark:text-gray-200 group-hover:scale-110 transition-transform duration-300" />
@@ -1174,7 +1174,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <Button
                     variant="outline"
                     onClick={() => handleSocialAuth("GitHub")}
-                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-background hover:border-gray-700/40 hover:shadow-lg hover:shadow-gray-700/10 transition-all duration-300 group"
+                    className="justify-center h-14 rounded-2xl border-2 border-border/30 bg-black backdrop-blur-sm hover:bg-black hover:border-gray-700/40 hover:shadow-lg hover:shadow-gray-700/10 transition-all duration-300 group"
                     data-testid="button-github-auth"
                   >
                     <FaGithub className="mr-3 h-5 w-5 text-gray-800 dark:text-gray-200 group-hover:scale-110 transition-transform duration-300" />
