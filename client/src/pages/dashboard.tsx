@@ -26,6 +26,7 @@ import { ExpandableText } from "@/components/ui/expandable-text";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import type { MovieResponse, TVResponse } from "@/types/movie";
 
 // Component to display watchlist item count
 function WatchlistItemCount({ watchlistId }: { watchlistId: string }) {
@@ -62,6 +63,7 @@ export default function Dashboard() {
   const [editingWatchlist, setEditingWatchlist] = useState<any>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditWatchlistOpen, setIsEditWatchlistOpen] = useState(false);
+  const [trendingActiveTab, setTrendingActiveTab] = useState('movies');
   const [watchlistToDelete, setWatchlistToDelete] = useState<any>(null);
   const [viewingWatchlist, setViewingWatchlist] = useState<any>(null);
   const [isViewWatchlistOpen, setIsViewWatchlistOpen] = useState(false);
@@ -149,6 +151,17 @@ export default function Dashboard() {
     queryKey: ["/api/search-history"],
     enabled: isAuthenticated,
     retry: false,
+  });
+
+  // Trending content queries
+  const { data: trendingMovies, isLoading: trendingMoviesLoading } = useQuery<MovieResponse>({
+    queryKey: ["/api/movies/trending"],
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
+
+  const { data: trendingTV, isLoading: trendingTVLoading } = useQuery<TVResponse>({
+    queryKey: ["/api/tv/trending"],
+    staleTime: 1000 * 60 * 15, // 15 minutes
   });
 
   // Memoized calculations based on real user data
@@ -1306,18 +1319,29 @@ export default function Dashboard() {
                           ))}
                         </div>
                       ) : recentActivity && recentActivity.length > 0 ? (
-                        <div className="space-y-4 max-h-80 overflow-y-auto">
+                        <div className="space-y-3 max-h-80 overflow-y-auto">
                           {recentActivity.map((activity, index) => (
-                            <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors">
-                              <div className="p-2 rounded-full bg-primary/20">
-                                {activity.type === 'favorite' && <Heart className="w-4 h-4 text-primary" />}
-                                {activity.type === 'review' && <Star className="w-4 h-4 text-warning" />}
-                                {activity.type === 'watchlist' && <Plus className="w-4 h-4 text-secondary" />}
-                                {activity.type === 'view' && <Eye className="w-4 h-4 text-muted-foreground" />}
+                            <div key={index} className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-accent/20 to-accent/10 hover:from-accent/30 hover:to-accent/20 transition-all duration-300 border border-accent/20 hover:border-accent/40 group">
+                              <div className={`p-2.5 rounded-xl group-hover:scale-110 transition-transform duration-300 ${
+                                activity.type === 'favorite' ? 'bg-gradient-to-br from-red-500/20 to-pink-500/20' :
+                                activity.type === 'review' ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20' :
+                                activity.type === 'watchlist' ? 'bg-gradient-to-br from-blue-500/20 to-indigo-500/20' :
+                                'bg-gradient-to-br from-gray-500/20 to-slate-500/20'
+                              }`}>
+                                {activity.type === 'favorite' && <Heart className="w-4 h-4 text-red-500" />}
+                                {activity.type === 'review' && <Star className="w-4 h-4 text-yellow-500" />}
+                                {activity.type === 'watchlist' && <Plus className="w-4 h-4 text-blue-500" />}
+                                {activity.type === 'view' && <Eye className="w-4 h-4 text-gray-500" />}
+                                {activity.type === 'search' && <Search className="w-4 h-4 text-purple-500" />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{activity.description}</p>
-                                <p className="text-xs text-muted-foreground">{formatRelativeTime(activity.timestamp)}</p>
+                                <p className="text-sm font-medium truncate text-foreground group-hover:text-accent-foreground transition-colors">{activity.description}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs text-muted-foreground">{formatRelativeTime(activity.timestamp)}</p>
+                                  <Badge variant="secondary" className="text-xs px-2 py-0.5 capitalize">
+                                    {activity.type}
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1382,27 +1406,186 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      {/* Quick Actions */}
+                      {/* Enhanced Quick Actions */}
                       <div>
                         <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Link href="/movies">
-                            <Button variant="outline" size="sm" className="w-full justify-start">
-                              <Film className="w-4 h-4 mr-2" />
-                              Browse Movies
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <Link href="/movies">
+                              <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50">
+                                <Film className="w-4 h-4 mr-2" />
+                                Browse Movies
+                              </Button>
+                            </Link>
+                            <Link href="/tv-shows">
+                              <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50">
+                                <Tv className="w-4 h-4 mr-2" />
+                                Browse TV
+                              </Button>
+                            </Link>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start hover:bg-accent/50"
+                              onClick={() => setIsCreateWatchlistOpen(true)}
+                              data-testid="quick-action-create-watchlist"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              New Watchlist
                             </Button>
-                          </Link>
-                          <Link href="/tv-shows">
-                            <Button variant="outline" size="sm" className="w-full justify-start">
-                              <Tv className="w-4 h-4 mr-2" />
-                              Browse TV
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start hover:bg-accent/50"
+                              onClick={() => (document.querySelector('[data-testid="dashboard-tab-reviews"]') as HTMLElement)?.click()}
+                              data-testid="quick-action-write-review"
+                            >
+                              <Star className="w-4 h-4 mr-2" />
+                              Write Review
                             </Button>
-                          </Link>
+                          </div>
+                          <div className="grid grid-cols-1 gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start hover:bg-accent/50"
+                              onClick={() => (document.querySelector('[data-testid="dashboard-tab-profile"]') as HTMLElement)?.click()}
+                              data-testid="quick-action-settings"
+                            >
+                              <Settings className="w-4 h-4 mr-2" />
+                              Account Settings
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Trending Recommendations Widget */}
+                <Card className="glassmorphism-card">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-success" />
+                        Trending This Week
+                      </span>
+                      <div className="flex gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setTrendingActiveTab('movies')} 
+                                className={trendingActiveTab === 'movies' ? 'bg-accent/50' : ''}>
+                          Movies
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setTrendingActiveTab('tv')}
+                                className={trendingActiveTab === 'tv' ? 'bg-accent/50' : ''}>
+                          TV Shows
+                        </Button>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {trendingActiveTab === 'movies' ? (
+                      trendingMoviesLoading ? (
+                        <div className="flex space-x-4 overflow-x-auto pb-2">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="min-w-[150px] animate-pulse">
+                              <div className="w-full h-48 bg-muted rounded-lg mb-2" />
+                              <div className="h-4 bg-muted rounded w-3/4 mb-1" />
+                              <div className="h-3 bg-muted rounded w-1/2" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : trendingMovies?.results ? (
+                        <div className="flex space-x-4 overflow-x-auto pb-2">
+                          {trendingMovies.results.slice(0, 6).map((movie) => (
+                            <div key={movie.id} className="min-w-[150px] group cursor-pointer">
+                              <div className="relative overflow-hidden rounded-lg mb-2 group-hover:scale-105 transition-transform duration-300">
+                                <img
+                                  src={movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '/placeholder-movie.jpg'}
+                                  alt={movie.title}
+                                  className="w-full h-48 object-cover"
+                                  data-testid={`trending-movie-${movie.id}`}
+                                />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <div className="flex gap-2">
+                                    <Button size="sm" variant="secondary" className="text-xs">
+                                      <Heart className="w-3 h-3 mr-1" />
+                                      Add
+                                    </Button>
+                                    <Button size="sm" variant="secondary" className="text-xs">
+                                      <Plus className="w-3 h-3 mr-1" />
+                                      Watch
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                              <h3 className="text-sm font-medium truncate" title={movie.title}>{movie.title}</h3>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Star className="w-3 h-3 fill-current text-yellow-500" />
+                                <span>{movie.vote_average.toFixed(1)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Film className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground">Unable to load trending movies</p>
+                        </div>
+                      )
+                    ) : (
+                      trendingTVLoading ? (
+                        <div className="flex space-x-4 overflow-x-auto pb-2">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="min-w-[150px] animate-pulse">
+                              <div className="w-full h-48 bg-muted rounded-lg mb-2" />
+                              <div className="h-4 bg-muted rounded w-3/4 mb-1" />
+                              <div className="h-3 bg-muted rounded w-1/2" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : trendingTV?.results ? (
+                        <div className="flex space-x-4 overflow-x-auto pb-2">
+                          {trendingTV.results.slice(0, 6).map((show) => (
+                            <div key={show.id} className="min-w-[150px] group cursor-pointer">
+                              <div className="relative overflow-hidden rounded-lg mb-2 group-hover:scale-105 transition-transform duration-300">
+                                <img
+                                  src={show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : '/placeholder-movie.jpg'}
+                                  alt={show.name}
+                                  className="w-full h-48 object-cover"
+                                  data-testid={`trending-tv-${show.id}`}
+                                />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <div className="flex gap-2">
+                                    <Button size="sm" variant="secondary" className="text-xs">
+                                      <Heart className="w-3 h-3 mr-1" />
+                                      Add
+                                    </Button>
+                                    <Button size="sm" variant="secondary" className="text-xs">
+                                      <Plus className="w-3 h-3 mr-1" />
+                                      Watch
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                              <h3 className="text-sm font-medium truncate" title={show.name}>{show.name}</h3>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Star className="w-3 h-3 fill-current text-yellow-500" />
+                                <span>{show.vote_average.toFixed(1)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Tv className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                          <p className="text-sm text-muted-foreground">Unable to load trending TV shows</p>
+                        </div>
+                      )
+                    )}
+                  </CardContent>
+                </Card>
 
                 {/* Quick Access to Latest Items */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
