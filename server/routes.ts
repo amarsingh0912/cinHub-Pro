@@ -1271,6 +1271,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get TV genres from TMDB - MUST be before /api/tv/:id route
+  app.get('/api/tv/genres', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/genre/tv/list');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching TV genres:', error);
+      res.status(500).json({ message: 'Failed to fetch TV genres' });
+    }
+  });
+
   app.get('/api/tv/:id', async (req, res) => {
     try {
       const tvId = parseInt(req.params.id);
@@ -1455,6 +1466,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error searching movies:', error);
       res.status(500).json({ message: 'Failed to search movies' });
+    }
+  });
+
+  // Get movie genres from TMDB - MUST be before /api/movies/:id route
+  app.get('/api/movies/genres', async (req, res) => {
+    try {
+      const data = await fetchFromTMDB('/genre/movie/list');
+      res.json(data);
+    } catch (error) {
+      console.error('Error fetching movie genres:', error);
+      res.status(500).json({ message: 'Failed to fetch movie genres' });
     }
   });
 
@@ -1759,28 +1781,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error discovering movies:', error);
       res.status(500).json({ message: 'Failed to discover movies' });
-    }
-  });
-
-  // Get movie genres from TMDB
-  app.get('/api/movies/genres', async (req, res) => {
-    try {
-      const data = await fetchFromTMDB('/genre/movie/list');
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching movie genres:', error);
-      res.status(500).json({ message: 'Failed to fetch movie genres' });
-    }
-  });
-
-  // Get TV genres from TMDB
-  app.get('/api/tv/genres', async (req, res) => {
-    try {
-      const data = await fetchFromTMDB('/genre/tv/list');
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching TV genres:', error);
-      res.status(500).json({ message: 'Failed to fetch TV genres' });
     }
   });
 
