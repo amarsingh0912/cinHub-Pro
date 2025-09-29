@@ -41,9 +41,9 @@ async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {})
     api_key: process.env.TMDB_API_KEY
   };
   
-  // Only add parameters that are not undefined
+  // Only add parameters that are not undefined, null, empty, or the string "undefined"
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== '' && value !== 'undefined') {
       filteredParams[key] = String(value);
     }
   });
