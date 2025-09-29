@@ -1178,22 +1178,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // When filters are applied, we need to use discover endpoints
       // and merge results from movies and TV shows
-      // Proper pagination: alternate between movie-heavy and TV-heavy pages
+      // Use the same page number for both endpoints to ensure proper pagination
       const currentPage = Number(page);
-      const isEvenPage = currentPage % 2 === 0;
       
-      // For odd pages (1,3,5...), prioritize movies; for even pages (2,4,6...), prioritize TV
-      const moviePage = isEvenPage ? Math.floor(currentPage / 2) : Math.ceil(currentPage / 2);
-      const tvPage = isEvenPage ? Math.ceil(currentPage / 2) : Math.floor(currentPage / 2);
-      
-      // Ensure we don't request page 0
       const movieParams: Record<string, any> = {
-        page: Math.max(1, moviePage),
+        page: currentPage,
         sort_by: sort === 'relevance' ? 'popularity.desc' : sort
       };
 
       const tvParams: Record<string, any> = {
-        page: Math.max(1, tvPage),
+        page: currentPage,
         sort_by: sort === 'relevance' ? 'popularity.desc' : sort
       };
 
