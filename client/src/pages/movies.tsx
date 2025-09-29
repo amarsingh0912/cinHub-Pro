@@ -375,235 +375,312 @@ export default function Movies() {
                 
                 <div className="flex items-center gap-4">
                   <Button
-                    variant="outline"
+                    variant={hasActiveFilters ? "default" : "outline"}
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className="flex items-center gap-2"
+                    className={`relative flex items-center gap-2 min-w-[120px] transition-all duration-300 hover:scale-105 ${
+                      hasActiveFilters 
+                        ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg' 
+                        : 'hover:bg-accent hover:text-accent-foreground border-2 hover:border-primary/50'
+                    }`}
                     data-testid="toggle-filters"
                   >
-                    <Filter className="w-4 h-4" />
+                    <div className="relative">
+                      <Filter className={`w-4 h-4 transition-transform duration-300 ${isFiltersOpen ? 'rotate-180' : ''}`} />
+                      {hasActiveFilters && (
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      )}
+                    </div>
                     Filters
                     {hasActiveFilters && (
-                      <Badge variant="secondary" className="ml-2">Active</Badge>
+                      <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs px-2 py-0.5 animate-pulse">
+                        Active
+                      </Badge>
                     )}
-                    {isFiltersOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    <div className={`transition-transform duration-300 ${isFiltersOpen ? 'rotate-180' : ''}`}>
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </Button>
                   
-                  <Select 
-                    value={filters.sortBy} 
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, sortBy: value }))}
-                  >
-                    <SelectTrigger className="w-56" data-testid="sort-select">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getSortOptions().map((option) => (
-                        <SelectItem key={option.value} value={option.value} data-testid={`sort-${option.value}`}>
-                          {option.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <Select 
+                      value={filters.sortBy} 
+                      onValueChange={(value) => setFilters(prev => ({ ...prev, sortBy: value }))}
+                    >
+                      <SelectTrigger className="w-56 h-10 border-2 transition-all duration-200 hover:border-primary/50 focus:border-primary bg-card/50 backdrop-blur-sm" data-testid="sort-select">
+                        <SelectValue placeholder="Sort by" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card/95 backdrop-blur-md border-2">
+                        {getSortOptions().map((option) => (
+                          <SelectItem 
+                            key={option.value} 
+                            value={option.value} 
+                            data-testid={`sort-${option.value}`}
+                            className="transition-colors duration-200 hover:bg-primary/10"
+                          >
+                            {option.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               
               {/* Comprehensive Filters Panel */}
               <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <CollapsibleContent>
-                  <Card className="w-full" data-testid="filters-panel">
-                    <CardHeader className="pb-4">
+                  <Card className="w-full bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-md border-2 border-border/50 shadow-2xl overflow-hidden" data-testid="filters-panel">
+                    <CardHeader className="pb-6 bg-gradient-to-r from-accent/20 to-accent/10 border-b border-border/30">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{filters.contentType === 'movies' ? 'Movie' : 'TV Show'} Filters</CardTitle>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <Film className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                              {filters.contentType === 'movies' ? 'Movie' : 'TV Show'} Filters
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Refine your search with advanced options
+                            </p>
+                          </div>
+                        </div>
                         {hasActiveFilters && (
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={clearAllFilters}
+                            className="transition-all duration-200 hover:bg-destructive hover:text-destructive-foreground hover:scale-105 border-destructive/50"
                             data-testid="clear-filters"
                           >
+                            <X className="w-4 h-4 mr-2" />
                             Clear All
                           </Button>
                         )}
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Genres */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Genres</Label>
-                          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                            {getAvailableGenres().map((genre) => (
-                              <Badge
-                                key={genre.id}
-                                variant={filters.genres.includes(genre.id) ? "default" : "outline"}
-                                className="cursor-pointer hover:bg-primary/80"
-                                onClick={() => handleGenreToggle(genre.id)}
-                                data-testid={`genre-${genre.name.toLowerCase().replace(/ /g, '-')}`}
+                    <CardContent className="p-8">
+                      {/* Filter Sections with Visual Grouping */}
+                      <div className="space-y-8">
+                        {/* Content & Category Section */}
+                        <div className="bg-accent/5 rounded-xl p-6 border border-accent/20 hover:border-accent/40 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold mb-6 text-foreground/90 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                            Content & Category
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Content Type Toggle */}
+                            <div className="space-y-3">
+                              <Label className="text-sm font-medium text-foreground/80">Content Type</Label>
+                              <Select 
+                                value={filters.contentType} 
+                                onValueChange={(value) => handleContentTypeChange(value as ContentType)}
                               >
-                                {genre.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        {/* Release Year */}
-                        <div className="space-y-3">
-                          <Label htmlFor="release-year" className="text-sm font-medium">Release Year</Label>
-                          <Input
-                            id="release-year"
-                            type="number"
-                            placeholder="e.g., 2023"
-                            min="1900"
-                            max={new Date().getFullYear() + 5}
-                            value={filters.releaseYear}
-                            onChange={(e) => setFilters(prev => ({ ...prev, releaseYear: e.target.value }))}
-                            data-testid="input-release-year"
-                          />
-                        </div>
-                        
-                        {/* Rating Range */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Rating Range</Label>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs w-8">{filters.minRating}</span>
-                              <Slider
-                                value={[filters.minRating]}
-                                onValueChange={([value]) => setFilters(prev => ({ ...prev, minRating: value }))}
-                                max={10}
-                                min={0}
-                                step={0.1}
-                                className="flex-1"
-                                data-testid="slider-min-rating"
-                              />
-                              <span className="text-xs">Min</span>
+                                <SelectTrigger className="h-11 border-2 hover:border-primary/50 transition-colors bg-card/50" data-testid="select-content-type">
+                                  <SelectValue placeholder="Select content type" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-card/95 backdrop-blur-md">
+                                  <SelectItem value="movies" data-testid="content-type-movies" className="hover:bg-primary/10">Movies</SelectItem>
+                                  <SelectItem value="tv" data-testid="content-type-tv" className="hover:bg-primary/10">TV Shows</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs w-8">{filters.maxRating}</span>
-                              <Slider
-                                value={[filters.maxRating]}
-                                onValueChange={([value]) => setFilters(prev => ({ ...prev, maxRating: value }))}
-                                max={10}
-                                min={0}
-                                step={0.1}
-                                className="flex-1"
-                                data-testid="slider-max-rating"
-                              />
-                              <span className="text-xs">Max</span>
+                            
+                            {/* Category Filter */}
+                            <div className="space-y-3">
+                              <Label className="text-sm font-medium text-foreground/80">Category</Label>
+                              <Select 
+                                value={filters.category} 
+                                onValueChange={(value) => setFilters(prev => ({ ...prev, category: value as MovieCategory | TVCategory }))}
+                              >
+                                <SelectTrigger className="h-11 border-2 hover:border-primary/50 transition-colors bg-card/50" data-testid="select-category">
+                                  <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-card/95 backdrop-blur-md">
+                                  {getAvailableCategories().map((category) => (
+                                    <SelectItem key={category.value} value={category.value} data-testid={`category-${category.value}`} className="hover:bg-primary/10">
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Content Type Toggle */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Content Type</Label>
-                          <Select 
-                            value={filters.contentType} 
-                            onValueChange={(value) => handleContentTypeChange(value as ContentType)}
-                          >
-                            <SelectTrigger data-testid="select-content-type">
-                              <SelectValue placeholder="Select content type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="movies" data-testid="content-type-movies">Movies</SelectItem>
-                              <SelectItem value="tv" data-testid="content-type-tv">TV Shows</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        {/* Category Filter */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Category</Label>
-                          <Select 
-                            value={filters.category} 
-                            onValueChange={(value) => setFilters(prev => ({ ...prev, category: value as MovieCategory | TVCategory }))}
-                          >
-                            <SelectTrigger data-testid="select-category">
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getAvailableCategories().map((category) => (
-                                <SelectItem key={category.value} value={category.value} data-testid={`category-${category.value}`}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        {/* Language */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Original Language</Label>
-                          <Select 
-                            value={filters.language} 
-                            onValueChange={(value) => setFilters(prev => ({ ...prev, language: value }))}
-                          >
-                            <SelectTrigger data-testid="select-language">
-                              <SelectValue placeholder="Any language" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all" data-testid="language-any">Any Language</SelectItem>
-                              {LANGUAGES.map((lang) => (
-                                <SelectItem key={lang.code} value={lang.code} data-testid={`language-${lang.code}`}>
-                                  {lang.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        {/* Certificate/Rating Filter - Movies Only */}
-                        {filters.contentType === 'movies' && (
-                          <div className="space-y-3">
-                            <Label className="text-sm font-medium">Certificate/Rating</Label>
-                            <Select 
-                              value={filters.certificate} 
-                              onValueChange={(value) => setFilters(prev => ({ ...prev, certificate: value }))}
-                            >
-                              <SelectTrigger data-testid="select-certificate">
-                                <SelectValue placeholder="Any certificate" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all" data-testid="certificate-all">All Ratings</SelectItem>
-                                {CERTIFICATES.map((cert) => (
-                                  <SelectItem key={cert.value} value={cert.value} data-testid={`certificate-${cert.value}`}>
-                                    {cert.name}
-                                  </SelectItem>
+
+                        {/* Genres & Filters Section */}
+                        <div className="bg-primary/5 rounded-xl p-6 border border-primary/20 hover:border-primary/40 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold mb-6 text-foreground/90 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
+                            Genres & Discovery
+                          </h3>
+                          <div className="space-y-6">
+                            {/* Genres */}
+                            <div className="space-y-4">
+                              <Label className="text-sm font-medium text-foreground/80">Genres</Label>
+                              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-3 bg-background/30 rounded-lg border border-border/30">
+                                {getAvailableGenres().map((genre) => (
+                                  <Badge
+                                    key={genre.id}
+                                    variant={filters.genres.includes(genre.id) ? "default" : "outline"}
+                                    className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
+                                      filters.genres.includes(genre.id) 
+                                        ? 'bg-gradient-to-r from-primary to-primary/80 shadow-md hover:shadow-lg' 
+                                        : 'hover:bg-primary/10 hover:border-primary/50'
+                                    }`}
+                                    onClick={() => handleGenreToggle(genre.id)}
+                                    data-testid={`genre-${genre.name.toLowerCase().replace(/ /g, '-')}`}
+                                  >
+                                    {genre.name}
+                                  </Badge>
                                 ))}
-                              </SelectContent>
-                            </Select>
+                              </div>
+                            </div>
                           </div>
-                        )}
-                        
-                        {/* Release Status */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Release Status</Label>
-                          <Select 
-                            value={filters.status} 
-                            onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
-                          >
-                            <SelectTrigger data-testid="select-status">
-                              <SelectValue placeholder="Any status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all" data-testid="status-all">All {filters.contentType === 'movies' ? 'Movies' : 'TV Shows'}</SelectItem>
-                              <SelectItem value="released" data-testid="status-released">Released</SelectItem>
-                              <SelectItem value="upcoming" data-testid="status-upcoming">Upcoming</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
-                        
-                        {/* Include Adult Content */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-medium">Adult Content</Label>
-                          <div className="flex items-center space-x-3">
-                            <Switch
-                              checked={filters.includeAdult}
-                              onCheckedChange={(checked) => setFilters(prev => ({ ...prev, includeAdult: checked }))}
-                              data-testid="toggle-include-adult"
-                            />
-                            <span className="text-sm text-muted-foreground">
-                              {filters.includeAdult ? 'Including adult content' : 'Excluding adult content'}
-                            </span>
+
+                        {/* Details & Ratings Section */}
+                        <div className="bg-secondary/5 rounded-xl p-6 border border-secondary/20 hover:border-secondary/40 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold mb-6 text-foreground/90 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                            Details & Ratings
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Release Year */}
+                            <div className="space-y-3">
+                              <Label htmlFor="release-year" className="text-sm font-medium text-foreground/80">Release Year</Label>
+                              <Input
+                                id="release-year"
+                                type="number"
+                                placeholder="e.g., 2023"
+                                min="1900"
+                                max={new Date().getFullYear() + 5}
+                                value={filters.releaseYear}
+                                onChange={(e) => setFilters(prev => ({ ...prev, releaseYear: e.target.value }))}
+                                className="h-11 border-2 hover:border-primary/50 focus:border-primary bg-card/50 transition-colors"
+                                data-testid="input-release-year"
+                              />
+                            </div>
+                            
+                            {/* Rating Range */}
+                            <div className="space-y-3 md:col-span-2">
+                              <Label className="text-sm font-medium text-foreground/80">Rating Range</Label>
+                              <div className="space-y-4 p-4 bg-background/30 rounded-lg border border-border/30">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-sm font-medium w-12 text-center bg-primary/10 rounded px-2 py-1">{filters.minRating}</span>
+                                  <Slider
+                                    value={[filters.minRating]}
+                                    onValueChange={([value]) => setFilters(prev => ({ ...prev, minRating: value }))}
+                                    max={10}
+                                    min={0}
+                                    step={0.1}
+                                    className="flex-1"
+                                    data-testid="slider-min-rating"
+                                  />
+                                  <span className="text-xs text-muted-foreground font-medium">Min</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-sm font-medium w-12 text-center bg-primary/10 rounded px-2 py-1">{filters.maxRating}</span>
+                                  <Slider
+                                    value={[filters.maxRating]}
+                                    onValueChange={([value]) => setFilters(prev => ({ ...prev, maxRating: value }))}
+                                    max={10}
+                                    min={0}
+                                    step={0.1}
+                                    className="flex-1"
+                                    data-testid="slider-max-rating"
+                                  />
+                                  <span className="text-xs text-muted-foreground font-medium">Max</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Advanced Options Section */}
+                        <div className="bg-muted/5 rounded-xl p-6 border border-muted/20 hover:border-muted/40 transition-colors duration-300">
+                          <h3 className="text-lg font-semibold mb-6 text-foreground/90 flex items-center gap-2">
+                            <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
+                            Advanced Options
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Language */}
+                            <div className="space-y-3">
+                              <Label className="text-sm font-medium text-foreground/80">Original Language</Label>
+                              <Select 
+                                value={filters.language} 
+                                onValueChange={(value) => setFilters(prev => ({ ...prev, language: value }))}
+                              >
+                                <SelectTrigger className="h-11 border-2 hover:border-primary/50 transition-colors bg-card/50" data-testid="select-language">
+                                  <SelectValue placeholder="Any language" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-card/95 backdrop-blur-md">
+                                  <SelectItem value="all" data-testid="language-any" className="hover:bg-primary/10">Any Language</SelectItem>
+                                  {LANGUAGES.map((lang) => (
+                                    <SelectItem key={lang.code} value={lang.code} data-testid={`language-${lang.code}`} className="hover:bg-primary/10">
+                                      {lang.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            {/* Certificate/Rating Filter - Movies Only */}
+                            {filters.contentType === 'movies' && (
+                              <div className="space-y-3">
+                                <Label className="text-sm font-medium text-foreground/80">Certificate/Rating</Label>
+                                <Select 
+                                  value={filters.certificate} 
+                                  onValueChange={(value) => setFilters(prev => ({ ...prev, certificate: value }))}
+                                >
+                                  <SelectTrigger className="h-11 border-2 hover:border-primary/50 transition-colors bg-card/50" data-testid="select-certificate">
+                                    <SelectValue placeholder="Any certificate" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-card/95 backdrop-blur-md">
+                                    <SelectItem value="all" data-testid="certificate-all" className="hover:bg-primary/10">All Ratings</SelectItem>
+                                    {CERTIFICATES.map((cert) => (
+                                      <SelectItem key={cert.value} value={cert.value} data-testid={`certificate-${cert.value}`} className="hover:bg-primary/10">
+                                        {cert.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                            
+                            {/* Release Status */}
+                            <div className="space-y-3">
+                              <Label className="text-sm font-medium text-foreground/80">Release Status</Label>
+                              <Select 
+                                value={filters.status} 
+                                onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                              >
+                                <SelectTrigger className="h-11 border-2 hover:border-primary/50 transition-colors bg-card/50" data-testid="select-status">
+                                  <SelectValue placeholder="Any status" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-card/95 backdrop-blur-md">
+                                  <SelectItem value="all" data-testid="status-all" className="hover:bg-primary/10">All {filters.contentType === 'movies' ? 'Movies' : 'TV Shows'}</SelectItem>
+                                  <SelectItem value="released" data-testid="status-released" className="hover:bg-primary/10">Released</SelectItem>
+                                  <SelectItem value="upcoming" data-testid="status-upcoming" className="hover:bg-primary/10">Upcoming</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            {/* Include Adult Content */}
+                            <div className="space-y-3">
+                              <Label className="text-sm font-medium text-foreground/80">Adult Content</Label>
+                              <div className="flex items-center space-x-3 p-3 bg-background/30 rounded-lg border border-border/30">
+                                <Switch
+                                  checked={filters.includeAdult}
+                                  onCheckedChange={(checked) => setFilters(prev => ({ ...prev, includeAdult: checked }))}
+                                  data-testid="toggle-include-adult"
+                                  className="data-[state=checked]:bg-primary"
+                                />
+                                <span className={`text-sm transition-colors ${filters.includeAdult ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                                  {filters.includeAdult ? 'Including adult content' : 'Excluding adult content'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
