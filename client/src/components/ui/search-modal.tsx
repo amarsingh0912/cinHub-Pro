@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +22,38 @@ interface SearchModalProps {
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("");
+  const { isAuthenticated } = useAuth();
 
   const { data: searchResults, isLoading } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/search", { query }],
     enabled: query.length > 2,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Search history tracking mutation
+  const trackSearchHistoryMutation = useMutation({
+    mutationFn: async ({ query, resultsCount }: { query: string; resultsCount: number }) => {
+      await apiRequest("POST", "/api/search-history", {
+        query,
+        searchType: 'movie',
+        resultsCount
+      });
+    },
+    onError: (error) => {
+      // Silent fail for search history - don't show error to user
+      console.log('Failed to track search history:', error);
+    },
+  });
+
+  // Track search history when results load
+  useEffect(() => {
+    if (searchResults && query.length > 2 && isAuthenticated) {
+      trackSearchHistoryMutation.mutate({
+        query,
+        resultsCount: searchResults.results?.length || 0
+      });
+    }
+  }, [searchResults, query, isAuthenticated]);
 
   const handleClose = () => {
     setQuery("");

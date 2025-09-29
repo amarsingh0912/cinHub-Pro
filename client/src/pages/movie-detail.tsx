@@ -66,6 +66,31 @@ export default function MovieDetail() {
   // Trailer modal state
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
+  // Viewing history tracking mutation
+  const trackViewingHistoryMutation = useMutation({
+    mutationFn: async () => {
+      if (!movie) return;
+      await apiRequest("POST", "/api/viewing-history", {
+        mediaType: 'movie',
+        mediaId: movie.id,
+        mediaTitle: movie.title,
+        mediaPosterPath: movie.poster_path,
+        mediaReleaseDate: movie.release_date
+      });
+    },
+    onError: (error) => {
+      // Silent fail for viewing history - don't show error to user
+      console.log('Failed to track viewing history:', error);
+    },
+  });
+
+  // Track viewing history when movie loads and user is authenticated
+  useEffect(() => {
+    if (movie && isAuthenticated && !authLoading) {
+      trackViewingHistoryMutation.mutate();
+    }
+  }, [movie, isAuthenticated, authLoading]);
+
   // Submit review mutation
   const submitReviewMutation = useMutation({
     mutationFn: async () => {
@@ -78,8 +103,22 @@ export default function MovieDetail() {
         isPublic: true
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", "movie", id] });
+      
+      // Track activity history
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "review_posted",
+          entityType: "movie",
+          entityId: movie?.id?.toString(),
+          entityTitle: movie?.title,
+          description: `Posted a review for "${movie?.title}"`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
       setReviewText("");
       setReviewRating("");
       toast({
@@ -118,9 +157,23 @@ export default function MovieDetail() {
         mediaReleaseDate: movie.release_date,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       queryClient.invalidateQueries({ queryKey: ["/api/favorites", "movie", id, "check"] });
+      
+      // Track activity history
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "favorite_added",
+          entityType: "movie",
+          entityId: movie?.id?.toString(),
+          entityTitle: movie?.title,
+          description: `Added "${movie?.title}" to favorites`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
       toast({
         title: "Added to Favorites",
         description: `${movie?.title} has been added to your favorites.`,
@@ -189,8 +242,22 @@ export default function MovieDetail() {
         mediaReleaseDate: movie.release_date,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      
+      // Track activity history
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "watchlist_item_added",
+          entityType: "movie",
+          entityId: movie?.id?.toString(),
+          entityTitle: movie?.title,
+          description: `Added "${movie?.title}" to watchlist`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
       setIsWatchlistDialogOpen(false);
       setSelectedWatchlistId("");
       toast({

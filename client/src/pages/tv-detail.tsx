@@ -56,6 +56,31 @@ export default function TVDetail() {
   // Trailer modal state
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
+  // Viewing history tracking mutation
+  const trackViewingHistoryMutation = useMutation({
+    mutationFn: async () => {
+      if (!tvShow) return;
+      await apiRequest("POST", "/api/viewing-history", {
+        mediaType: 'tv',
+        mediaId: tvShow.id,
+        mediaTitle: tvShow.name,
+        mediaPosterPath: tvShow.poster_path,
+        mediaReleaseDate: tvShow.first_air_date
+      });
+    },
+    onError: (error) => {
+      // Silent fail for viewing history - don't show error to user
+      console.log('Failed to track viewing history:', error);
+    },
+  });
+
+  // Track viewing history when TV show loads and user is authenticated
+  useEffect(() => {
+    if (tvShow && isAuthenticated && !authLoading) {
+      trackViewingHistoryMutation.mutate();
+    }
+  }, [tvShow, isAuthenticated, authLoading]);
+
   const addToFavoritesMutation = useMutation({
     mutationFn: async () => {
       if (!tvShow) return;
@@ -67,9 +92,23 @@ export default function TVDetail() {
         mediaReleaseDate: tvShow.first_air_date
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       queryClient.invalidateQueries({ queryKey: ["/api/favorites", "tv", id, "check"] });
+      
+      // Track activity history
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: 'favorite_added',
+          entityType: 'tv',
+          entityId: tvShow?.id?.toString(),
+          entityTitle: tvShow?.name,
+          description: `Added "${tvShow?.name}" to favorites`
+        });
+      } catch (error) {
+        console.log('Failed to track activity history:', error);
+      }
+      
       toast({
         title: "Added to Favorites",
         description: `${tvShow?.name} has been added to your favorites.`,
@@ -138,8 +177,22 @@ export default function TVDetail() {
         mediaReleaseDate: tvShow.first_air_date,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      
+      // Track activity history
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "watchlist_item_added",
+          entityType: "tv",
+          entityId: tvShow?.id?.toString(),
+          entityTitle: tvShow?.name,
+          description: `Added "${tvShow?.name}" to watchlist`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
       setIsWatchlistDialogOpen(false);
       setSelectedWatchlistId("");
       toast({

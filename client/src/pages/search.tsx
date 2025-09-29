@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
+import { useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 import type { MovieResponse } from "@/types/movie";
 import { useRevealAnimation, RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import Header from "@/components/layout/header";
@@ -14,6 +17,7 @@ import { Search, Loader2, Film } from "lucide-react";
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const { isAuthenticated } = useAuth();
 
   const {
     data: searchResults,
@@ -27,6 +31,31 @@ export default function SearchPage() {
     enabled: searchTerm.length > 0,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Search history tracking mutation
+  const trackSearchHistoryMutation = useMutation({
+    mutationFn: async ({ query, resultsCount }: { query: string; resultsCount: number }) => {
+      await apiRequest("POST", "/api/search-history", {
+        query,
+        searchType: 'multi',
+        resultsCount
+      });
+    },
+    onError: (error) => {
+      // Silent fail for search history - don't show error to user
+      console.log('Failed to track search history:', error);
+    },
+  });
+
+  // Track search history when results load
+  useEffect(() => {
+    if (searchResults && searchTerm && isAuthenticated && totalResults !== undefined) {
+      trackSearchHistoryMutation.mutate({
+        query: searchTerm,
+        resultsCount: totalResults
+      });
+    }
+  }, [searchResults, searchTerm, isAuthenticated, totalResults]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
