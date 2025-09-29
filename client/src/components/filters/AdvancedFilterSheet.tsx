@@ -43,6 +43,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PeopleAutocomplete } from "./PeopleAutocomplete";
 import { CompaniesAutocomplete } from "./CompaniesAutocomplete";
 import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
+import { NaturalLanguageSearch } from "./NaturalLanguageSearch";
 import type { 
   AdvancedFilterState, 
   FilterCategory, 
@@ -669,6 +670,18 @@ export function AdvancedFilterSheet({
 
         <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-6 py-4">
+            {/* Natural Language Search */}
+            <div className="space-y-3">
+              <NaturalLanguageSearch
+                onFiltersApply={(newFilters) => {
+                  onFiltersChange({ ...filters, ...newFilters });
+                }}
+                placeholder="Try: 'action movies from 2020 on Netflix rated above 7'"
+              />
+            </div>
+
+            <Separator />
+
             {/* Content Type */}
             {renderContentTypeFilter()}
 
