@@ -36,11 +36,19 @@ async function fetchFromTMDB(endpoint: string, params: Record<string, any> = {})
     throw new Error('TMDB API key not configured');
   }
 
-  // Build URL with API key and parameters
-  const searchParams = new URLSearchParams({
-    api_key: process.env.TMDB_API_KEY,
-    ...params
+  // Build URL with API key and parameters (filter out undefined values)
+  const filteredParams: Record<string, string> = {
+    api_key: process.env.TMDB_API_KEY
+  };
+  
+  // Only add parameters that are not undefined
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      filteredParams[key] = String(value);
+    }
   });
+  
+  const searchParams = new URLSearchParams(filteredParams);
   const url = `https://api.themoviedb.org/3${endpoint}?${searchParams}`;
   
   // Debug URL construction (remove in production) - API key redacted for security
@@ -1183,12 +1191,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const movieParams: Record<string, any> = {
         page: currentPage,
-        sort_by: sort === 'relevance' ? 'popularity.desc' : sort
+        sort_by: sort === 'relevance' ? 'popularity.desc' : (sort || 'popularity.desc')
       };
 
       const tvParams: Record<string, any> = {
         page: currentPage,
-        sort_by: sort === 'relevance' ? 'popularity.desc' : sort
+        sort_by: sort === 'relevance' ? 'popularity.desc' : (sort || 'popularity.desc')
       };
 
       // Add search query as keyword if provided
