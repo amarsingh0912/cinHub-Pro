@@ -44,6 +44,7 @@ import { PeopleAutocomplete } from "./PeopleAutocomplete";
 import { CompaniesAutocomplete } from "./CompaniesAutocomplete";
 import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
 import { NaturalLanguageSearch } from "./NaturalLanguageSearch";
+import { ContentTypeToggle } from "./SegmentedToggle";
 import type { 
   AdvancedFilterState, 
   FilterCategory, 
@@ -312,21 +313,21 @@ export function AdvancedFilterSheet({
   };
 
   const renderContentTypeFilter = () => (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <Label className="text-sm font-medium flex items-center gap-2">
         <Film className="h-4 w-4" />
         Content Type
       </Label>
-      <Tabs 
-        value={filters.contentType} 
-        onValueChange={(value) => updateFilter('contentType', value as 'movie' | 'tv')}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="movie" data-testid="filter-type-movie">Movies</TabsTrigger>
-          <TabsTrigger value="tv" data-testid="filter-type-tv">TV Shows</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex justify-center">
+        <ContentTypeToggle
+          value={filters.contentType}
+          onValueChange={(value) => updateFilter('contentType', value as 'movie' | 'tv')}
+          size="md"
+          variant="premium"
+          showCounts={false}
+          data-testid="content-type-toggle"
+        />
+      </div>
     </div>
   );
 
