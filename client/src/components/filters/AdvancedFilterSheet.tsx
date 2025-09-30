@@ -47,7 +47,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { PeopleAutocomplete } from "./PeopleAutocomplete";
 import { CompaniesAutocomplete } from "./CompaniesAutocomplete";
 import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
-import { NaturalLanguageSearch } from "./NaturalLanguageSearch";
 import { ContentTypeToggle } from "./SegmentedToggle";
 import { GenreChipGroup } from "./ChipGroup";
 import { RuntimeSlider } from "./DualRangeSlider";
@@ -1304,18 +1303,6 @@ export function AdvancedFilterSheet({
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             <div className={cn("py-4", isMobile ? "space-y-4 px-4" : "space-y-6 px-6")}>
-            {/* Natural Language Search */}
-            <div className={cn(isMobile ? "space-y-2" : "space-y-3")}>
-              <NaturalLanguageSearch
-                onFiltersApply={(newFilters) => {
-                  onFiltersChange({ ...filters, ...newFilters });
-                }}
-                placeholder={isMobile ? "Try: action movies on Netflix" : "Try: 'action movies from 2020 on Netflix rated above 7'"}
-              />
-            </div>
-
-            <Separator />
-
             {/* Sort Filter */}
             <div className="space-y-4">
               {renderSortFilter()}
