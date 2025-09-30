@@ -112,9 +112,9 @@ export const ChipGroup = ({
   const getChipVariant = (mode: 'include' | 'exclude') => {
     switch (mode) {
       case 'include':
-        return 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/15';
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20';
       case 'exclude':
-        return 'bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/15';
+        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20';
     }
   };
 
@@ -175,17 +175,17 @@ export const ChipGroup = ({
                     {/* Mode indicator */}
                     <div
                       className={cn(
-                        "flex items-center justify-center w-4 h-4 rounded-full",
-                        "transition-all duration-200",
+                        "flex items-center justify-center w-5 h-5 rounded-full",
+                        "transition-all duration-200 shadow-sm",
                         selection.mode === 'include' 
-                          ? "bg-primary/20 text-primary" 
-                          : "bg-destructive/20 text-destructive"
+                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30" 
+                          : "bg-rose-500/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30"
                       )}
                     >
                       {selection.mode === 'include' ? (
-                        <Check className="w-2.5 h-2.5" />
+                        <Check className="w-3 h-3 font-bold" />
                       ) : (
-                        <X className="w-2.5 h-2.5" />
+                        <X className="w-3 h-3 font-bold" />
                       )}
                     </div>
 
@@ -346,22 +346,22 @@ export const ChipGroup = ({
                             size="sm"
                             variant="ghost"
                             onClick={() => addSelection(item, 'include')}
-                            className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
-                            title="Include"
+                            className="h-7 w-7 p-0 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-full"
+                            title="Include this item"
                             data-testid={`include-chip-${item.id}`}
                           >
-                            <Check className="w-3 h-3" />
+                            <Check className="w-3.5 h-3.5" />
                           </Button>
                           {allowExclude && (
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => addSelection(item, 'exclude')}
-                              className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
-                              title="Exclude"
+                              className="h-7 w-7 p-0 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 rounded-full"
+                              title="Exclude this item"
                               data-testid={`exclude-chip-${item.id}`}
                             >
-                              <X className="w-3 h-3" />
+                              <X className="w-3.5 h-3.5" />
                             </Button>
                           )}
                         </div>

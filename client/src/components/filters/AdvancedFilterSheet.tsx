@@ -399,17 +399,19 @@ export function AdvancedFilterSheet({
 
     return (
       <div className="space-y-4">
-        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-          <div className="p-1 rounded-md bg-primary/10 text-primary">
-            <Calendar className="h-4 w-4" />
-          </div>
-          Release Year Range
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+            <div className="p-1 rounded-md bg-primary/10 text-primary">
+              <Calendar className="h-4 w-4" />
+            </div>
+            Release Year
+          </Label>
           {hasYearFilter && (
-            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+            <Badge variant="secondary" className="h-5 px-2 text-xs font-medium">
               {startYear}-{endYear}
             </Badge>
           )}
-        </Label>
+        </div>
         
         {/* Quick filter chips */}
         <div className="flex flex-wrap gap-2">
@@ -420,7 +422,7 @@ export function AdvancedFilterSheet({
               size="sm"
               onClick={() => applyQuickFilter(preset)}
               data-testid={`quick-filter-${preset.id}`}
-              className="h-7 text-xs"
+              className="h-7 text-xs hover:bg-primary/10 hover:border-primary/30 transition-all"
             >
               {preset.label}
             </Button>
@@ -428,30 +430,46 @@ export function AdvancedFilterSheet({
         </div>
 
         <div className="space-y-3">
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">
-              {startYear} - {endYear}
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Range: {startYear} - {endYear}
             </Label>
-            <Slider
-              value={[startYear, endYear]}
-              min={1900}
-              max={currentYear + 2}
-              step={1}
-              onValueChange={([start, end]) => {
-                const dateRange = {
-                  start: `${start}-01-01`,
-                  end: `${end}-12-31`
-                };
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
                 if (filters.contentType === 'movie') {
-                  updateFilter('primary_release_date', dateRange);
+                  updateFilter('primary_release_date', {});
                 } else {
-                  updateFilter('first_air_date', dateRange);
+                  updateFilter('first_air_date', {});
                 }
               }}
-              className="w-full"
-              data-testid="year-range-slider"
-            />
+              className="h-6 px-2 text-xs hover:text-destructive"
+              disabled={!hasYearFilter}
+              data-testid="reset-year"
+            >
+              Reset
+            </Button>
           </div>
+          <Slider
+            value={[startYear, endYear]}
+            min={1900}
+            max={currentYear + 2}
+            step={1}
+            onValueChange={([start, end]) => {
+              const dateRange = {
+                start: `${start}-01-01`,
+                end: `${end}-12-31`
+              };
+              if (filters.contentType === 'movie') {
+                updateFilter('primary_release_date', dateRange);
+              } else {
+                updateFilter('first_air_date', dateRange);
+              }
+            }}
+            className="w-full"
+            data-testid="year-range-slider"
+          />
         </div>
       </div>
     );
@@ -462,23 +480,37 @@ export function AdvancedFilterSheet({
     
     return (
       <div className="space-y-4">
-        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-          <div className="p-1 rounded-md bg-primary/10 text-primary">
-            <Star className="h-4 w-4" />
-          </div>
-          User Rating
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+            <div className="p-1 rounded-md bg-primary/10 text-primary">
+              <Star className="h-4 w-4" />
+            </div>
+            User Rating
+          </Label>
           {hasRatingFilter && (
-            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-              {filters.vote_average?.min || 0}-{filters.vote_average?.max || 10}
+            <Badge variant="secondary" className="h-5 px-2 text-xs font-medium">
+              {filters.vote_average?.min || 0}-{filters.vote_average?.max || 10} ⭐
             </Badge>
           )}
-        </Label>
+        </div>
       
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">
-            Rating: {filters.vote_average?.min || 0} - {filters.vote_average?.max || 10}
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Rating: {(filters.vote_average?.min || 0).toFixed(1)} - {(filters.vote_average?.max || 10).toFixed(1)} ⭐
+            </Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => updateFilter('vote_average', {})}
+              className="h-6 px-2 text-xs hover:text-destructive"
+              disabled={!filters.vote_average?.min && !filters.vote_average?.max}
+              data-testid="reset-rating"
+            >
+              Reset
+            </Button>
+          </div>
           <Slider
             value={[filters.vote_average?.min || 0, filters.vote_average?.max || 10]}
             min={0}
@@ -490,12 +522,31 @@ export function AdvancedFilterSheet({
             className="w-full"
             data-testid="rating-slider"
           />
+          <div className="flex justify-between text-xs text-muted-foreground px-1">
+            <span>0</span>
+            <span>2.5</span>
+            <span>5.0</span>
+            <span>7.5</span>
+            <span>10</span>
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">
-            Minimum Vote Count: {filters.vote_count?.min || 0}
-          </Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Min Votes: {filters.vote_count?.min || 0}+
+            </Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => updateFilter('vote_count', {})}
+              className="h-6 px-2 text-xs hover:text-destructive"
+              disabled={!filters.vote_count?.min}
+              data-testid="reset-vote-count"
+            >
+              Reset
+            </Button>
+          </div>
           <Slider
             value={[filters.vote_count?.min || 0]}
             min={0}
@@ -507,6 +558,9 @@ export function AdvancedFilterSheet({
             className="w-full"
             data-testid="vote-count-slider"
           />
+          <div className="text-xs text-muted-foreground">
+            Higher vote counts ensure more reliable ratings
+          </div>
         </div>
       </div>
     </div>
@@ -540,26 +594,28 @@ export function AdvancedFilterSheet({
     
     return (
       <div className="space-y-4">
-        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-          <div className="p-1 rounded-md bg-primary/10 text-primary">
-            <MonitorPlay className="h-4 w-4" />
-          </div>
-          Streaming Providers
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+            <div className="p-1 rounded-md bg-primary/10 text-primary">
+              <MonitorPlay className="h-4 w-4" />
+            </div>
+            Streaming Providers
+          </Label>
           {hasStreamingFilter && (
-            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-              {filters.with_watch_providers?.length || 0}
+            <Badge variant="secondary" className="h-5 px-2 text-xs font-medium">
+              {filters.with_watch_providers?.length || 0} selected
             </Badge>
           )}
-        </Label>
+        </div>
 
       {/* Region selection */}
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Region</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Region</Label>
         <Select 
           value={filters.watch_region} 
           onValueChange={(value) => updateFilter('watch_region', value)}
         >
-          <SelectTrigger data-testid="region-select">
+          <SelectTrigger data-testid="region-select" className="h-9">
             <SelectValue placeholder="Select region" />
           </SelectTrigger>
           <SelectContent>
@@ -570,31 +626,59 @@ export function AdvancedFilterSheet({
             ))}
           </SelectContent>
         </Select>
+        <div className="text-xs text-muted-foreground">
+          Availability varies by region
+        </div>
       </div>
 
       {/* Streaming providers */}
-      <div className="grid grid-cols-2 gap-2">
-        {watchProviders.map((provider: any) => (
-          <div key={provider.provider_id} className="flex items-center space-x-2">
-            <Checkbox
-              id={`provider-${provider.provider_id}`}
-              checked={filters.with_watch_providers?.includes(provider.provider_id) || false}
-              onCheckedChange={() => toggleWatchProvider(provider.provider_id)}
-              data-testid={`provider-${provider.provider_id}`}
-            />
-            <Label 
-              htmlFor={`provider-${provider.provider_id}`} 
-              className="text-sm font-normal cursor-pointer"
-            >
-              {provider.provider_name}
-            </Label>
+      {watchProviders.length > 0 ? (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">Providers</Label>
+            {filters.with_watch_providers?.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter('with_watch_providers', [])}
+                className="h-6 px-2 text-xs hover:text-destructive"
+                data-testid="clear-providers"
+              >
+                Clear
+              </Button>
+            )}
           </div>
-        ))}
-      </div>
+          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+            {watchProviders.map((provider: any) => (
+              <div 
+                key={provider.provider_id} 
+                className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
+              >
+                <Checkbox
+                  id={`provider-${provider.provider_id}`}
+                  checked={filters.with_watch_providers?.includes(provider.provider_id) || false}
+                  onCheckedChange={() => toggleWatchProvider(provider.provider_id)}
+                  data-testid={`provider-${provider.provider_id}`}
+                />
+                <Label 
+                  htmlFor={`provider-${provider.provider_id}`} 
+                  className="text-sm font-normal cursor-pointer flex-1 leading-tight"
+                >
+                  {provider.provider_name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-sm text-muted-foreground text-center py-4 bg-muted/20 rounded-lg">
+          No providers available for this region
+        </div>
+      )}
 
       {/* Monetization types */}
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Availability Type</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Availability Type</Label>
         <div className="flex flex-wrap gap-2">
           {MONETIZATION_TYPES.map((type) => (
             <Button
@@ -609,7 +693,7 @@ export function AdvancedFilterSheet({
                 updateFilter('with_watch_monetization_types', updated);
               }}
               data-testid={`monetization-${type.value}`}
-              className="h-7 text-xs"
+              className="h-7 text-xs hover:scale-105 transition-all"
             >
               {type.label}
             </Button>

@@ -1102,14 +1102,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         first_air_date_year,
         'vote_average.gte': minRating,
         'vote_average.lte': maxRating,
+        'vote_count.gte': minVoteCount,
+        'with_runtime.gte': minRuntime,
+        'with_runtime.lte': maxRuntime,
         'first_air_date.gte': airDateFrom,
         'first_air_date.lte': airDateTo,
         with_original_language,
         with_keywords,
         without_genres,
         with_networks,
-        with_companies
+        with_companies,
+        include_adult,
+        with_watch_providers,
+        watch_region,
+        with_watch_monetization_types
+        // Note: certification filters are not supported for TV shows in TMDB API
       } = req.query;
+
+      // Helper to normalize array parameters with correct delimiters
+      // TMDB uses '|' for OR semantics and ',' for AND semantics
+      const normalizeArrayParam = (param: any, useOrSemantic: boolean = false): string => {
+        if (!param) return param;
+        const delimiter = useOrSemantic ? '|' : ',';
+        return Array.isArray(param) ? param.join(delimiter) : param;
+      };
 
       // Build parameters object for fetchFromTMDB
       const params: Record<string, any> = {
@@ -1117,18 +1133,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sort_by
       };
       
-      // Add optional parameters
-      if (with_genres) params.with_genres = with_genres;
+      // Add optional parameters with proper array encoding
+      if (with_genres) params.with_genres = normalizeArrayParam(with_genres, false); // AND semantic
       if (first_air_date_year) params.first_air_date_year = first_air_date_year;
       if (minRating) params['vote_average.gte'] = minRating;
       if (maxRating) params['vote_average.lte'] = maxRating;
+      if (minVoteCount) params['vote_count.gte'] = minVoteCount;
+      if (minRuntime) params['with_runtime.gte'] = minRuntime;
+      if (maxRuntime) params['with_runtime.lte'] = maxRuntime;
       if (airDateFrom) params['first_air_date.gte'] = airDateFrom;
       if (airDateTo) params['first_air_date.lte'] = airDateTo;
       if (with_original_language) params.with_original_language = with_original_language;
-      if (with_keywords) params.with_keywords = with_keywords;
-      if (without_genres) params.without_genres = without_genres;
-      if (with_networks) params.with_networks = with_networks;
-      if (with_companies) params.with_companies = with_companies;
+      if (with_keywords) params.with_keywords = normalizeArrayParam(with_keywords, false); // AND semantic
+      if (without_genres) params.without_genres = normalizeArrayParam(without_genres, false);
+      if (with_networks) params.with_networks = normalizeArrayParam(with_networks, true); // OR semantic for networks
+      if (with_companies) params.with_companies = normalizeArrayParam(with_companies, true); // OR semantic for companies
+      if (include_adult !== undefined) params.include_adult = include_adult;
+      if (with_watch_providers) params.with_watch_providers = normalizeArrayParam(with_watch_providers, true); // OR semantic
+      if (watch_region) params.watch_region = watch_region;
+      if (with_watch_monetization_types) params.with_watch_monetization_types = normalizeArrayParam(with_watch_monetization_types, true);
 
       const data = await fetchFromTMDB('/discover/tv', params);
       res.json(data);
@@ -1411,7 +1434,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         primary_release_year,
         'vote_average.gte': minRating,
         'vote_average.lte': maxRating,
-        // Removed runtime and vote count filters per requirements
+        'vote_count.gte': minVoteCount,
+        'with_runtime.gte': minRuntime,
+        'with_runtime.lte': maxRuntime,
         'primary_release_date.gte': releaseDateFrom,
         'primary_release_date.lte': releaseDateTo,
         with_original_language,
@@ -1419,25 +1444,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         with_keywords,
         without_genres,
         certification_country,
-        'certification.lte': certification
+        'certification.lte': certification,
+        include_adult,
+        with_watch_providers,
+        watch_region,
+        with_watch_monetization_types,
+        with_people,
+        with_companies
       } = req.query;
 
       let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}&page=${page}&sort_by=${sort_by}`;
       
+      // Helper to normalize array parameters with correct delimiters
+      // TMDB uses '|' for OR semantics and ',' for AND semantics
+      const normalizeArrayParam = (param: any, useOrSemantic: boolean = false): string => {
+        if (!param) return param;
+        const delimiter = useOrSemantic ? '|' : ',';
+        return Array.isArray(param) ? param.join(delimiter) : param;
+      };
+      
       // Add optional parameters
-      if (with_genres) url += `&with_genres=${with_genres}`;
+      if (with_genres) url += `&with_genres=${normalizeArrayParam(with_genres, false)}`; // AND semantic for genres
       if (primary_release_year) url += `&primary_release_year=${primary_release_year}`;
       if (minRating) url += `&vote_average.gte=${minRating}`;
       if (maxRating) url += `&vote_average.lte=${maxRating}`;
-      // Runtime and minimum votes filters removed per user requirements
+      if (minVoteCount) url += `&vote_count.gte=${minVoteCount}`;
+      if (minRuntime) url += `&with_runtime.gte=${minRuntime}`;
+      if (maxRuntime) url += `&with_runtime.lte=${maxRuntime}`;
       if (releaseDateFrom) url += `&primary_release_date.gte=${releaseDateFrom}`;
       if (releaseDateTo) url += `&primary_release_date.lte=${releaseDateTo}`;
       if (with_original_language) url += `&with_original_language=${with_original_language}`;
       if (region) url += `&region=${region}`;
-      if (with_keywords) url += `&with_keywords=${with_keywords}`;
-      if (without_genres) url += `&without_genres=${without_genres}`;
+      if (with_keywords) url += `&with_keywords=${normalizeArrayParam(with_keywords, false)}`; // AND semantic for keywords
+      if (without_genres) url += `&without_genres=${normalizeArrayParam(without_genres, false)}`;
       if (certification_country) url += `&certification_country=${certification_country}`;
       if (certification) url += `&certification.lte=${certification}`;
+      if (include_adult !== undefined) url += `&include_adult=${include_adult}`;
+      if (with_watch_providers) url += `&with_watch_providers=${normalizeArrayParam(with_watch_providers, true)}`; // OR semantic for providers
+      if (watch_region) url += `&watch_region=${watch_region}`;
+      if (with_watch_monetization_types) url += `&with_watch_monetization_types=${normalizeArrayParam(with_watch_monetization_types, true)}`;
+      if (with_people) url += `&with_people=${normalizeArrayParam(with_people, true)}`; // OR semantic for people
+      if (with_companies) url += `&with_companies=${normalizeArrayParam(with_companies, true)}`; // OR semantic for companies
 
       const response = await fetch(url);
       const data = await response.json();
