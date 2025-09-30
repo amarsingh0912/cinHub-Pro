@@ -441,28 +441,20 @@ export const GenreChipGroup = ({
 
     if (mode === "include") {
       if (isInInclude) {
-        onGenresChange({
-          with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-          without_genres: selectedGenres.without_genres,
-        });
-      } else {
-        onGenresChange({
-          with_genres: [...selectedGenres.with_genres, genreId],
-          without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
-        });
+        return;
       }
+      onGenresChange({
+        with_genres: [...selectedGenres.with_genres, genreId],
+        without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
+      });
     } else {
       if (isInExclude) {
-        onGenresChange({
-          with_genres: selectedGenres.with_genres,
-          without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
-        });
-      } else {
-        onGenresChange({
-          with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-          without_genres: [...selectedGenres.without_genres, genreId],
-        });
+        return;
       }
+      onGenresChange({
+        with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
+        without_genres: [...selectedGenres.without_genres, genreId],
+      });
     }
     setOpen(false);
   };
@@ -518,8 +510,8 @@ export const GenreChipGroup = ({
                 Clear All
               </Button>
             </div>
-            <div className="max-h-32 w-full pr-2 overflow-y-auto">
-              <div className="flex flex-wrap gap-2">
+            <div className="max-h-32 w-full overflow-y-auto overflow-x-hidden">
+              <div className="flex flex-wrap gap-2 pr-2">
                 <AnimatePresence mode="popLayout">
                   {selectedGenres.with_genres.map((genreId) => {
                     const genre = genres.find((g) => g.id === genreId);
