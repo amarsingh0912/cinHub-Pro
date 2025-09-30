@@ -66,11 +66,10 @@ export const ChipGroup = ({
     );
   }, [items, searchQuery]);
 
-  // Get items that aren't already selected
+  // Show all filtered items (including selected ones for mode switching)
   const availableItems = useMemo(() => {
-    const selectedIds = selected.map(s => s.item.id);
-    return filteredItems.filter(item => !selectedIds.includes(item.id));
-  }, [filteredItems, selected]);
+    return filteredItems;
+  }, [filteredItems]);
 
   const sizeClasses = {
     sm: 'text-xs',
@@ -85,10 +84,25 @@ export const ChipGroup = ({
   };
 
   const addSelection = (item: ChipItem, mode: 'include' | 'exclude' = 'include') => {
+    const existingIndex = selected.findIndex(s => s.item.id === item.id);
+    
+    if (existingIndex !== -1) {
+      const existing = selected[existingIndex];
+      if (existing.mode === mode) {
+        return;
+      }
+      const updated = [...selected];
+      updated[existingIndex] = { ...existing, mode };
+      onSelectionChange(updated);
+      setIsOpen(false);
+      return;
+    }
+    
     if (maxSelections && selected.length >= maxSelections) return;
     
     const newSelection: ChipSelection = { item, mode };
     onSelectionChange([...selected, newSelection]);
+    setIsOpen(false);
   };
 
   const removeSelection = (itemId: string | number) => {
@@ -306,7 +320,12 @@ export const ChipGroup = ({
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">
-                  {availableItems.map((item, index) => (
+                  {availableItems.map((item, index) => {
+                    const selection = selected.find(s => s.item.id === item.id);
+                    const isIncluded = selection?.mode === 'include';
+                    const isExcluded = selection?.mode === 'exclude';
+                    
+                    return (
                     <motion.div
                       key={item.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -319,13 +338,28 @@ export const ChipGroup = ({
                         className={cn(
                           "flex items-center justify-between p-2 rounded-lg",
                           "hover:bg-primary/5 cursor-pointer transition-all duration-200",
-                          "border border-transparent hover:border-primary/10"
+                          "border border-transparent hover:border-primary/10",
+                          (isIncluded || isExcluded) && "bg-muted/30"
                         )}
                         data-testid={`available-chip-${item.id}`}
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium truncate">
+                            {isIncluded && (
+                              <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                <Check className="w-2.5 h-2.5" />
+                              </div>
+                            )}
+                            {isExcluded && (
+                              <div className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
+                                <X className="w-2.5 h-2.5" />
+                              </div>
+                            )}
+                            <span className={cn(
+                              "font-medium truncate",
+                              isIncluded && "text-emerald-600 dark:text-emerald-400",
+                              isExcluded && "text-rose-600 dark:text-rose-400"
+                            )}>
                               {item.label}
                             </span>
                             {item.count && (
@@ -367,7 +401,8 @@ export const ChipGroup = ({
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </AnimatePresence>
               )}
             </div>
