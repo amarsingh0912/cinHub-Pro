@@ -48,8 +48,8 @@ export function FloatingFiltersButton({
   // Count applied filters with more comprehensive logic
   // Only count the date filter relevant to the current content type
   const hasDateFilter = filters.contentType === 'movie'
-    ? (filters.primary_release_date?.start || filters.primary_release_date?.end) ? 1 : 0
-    : (filters.first_air_date?.start || filters.first_air_date?.end) ? 1 : 0;
+    ? (filters.primary_release_date?.start || filters.primary_release_date?.end || filters.release_date?.start || filters.release_date?.end || filters.primary_release_year) ? 1 : 0
+    : (filters.first_air_date?.start || filters.first_air_date?.end || filters.air_date?.start || filters.air_date?.end || filters.first_air_date_year) ? 1 : 0;
 
   const appliedFiltersCount = [
     filters.with_genres?.length || 0,
@@ -58,6 +58,8 @@ export function FloatingFiltersButton({
     filters.without_keywords?.length || 0,
     filters.with_watch_providers?.length || 0,
     filters.with_watch_monetization_types?.length || 0,
+    filters.with_cast?.length || 0,
+    filters.with_crew?.length || 0,
     filters.with_people?.length || 0,
     filters.with_companies?.length || 0,
     filters.with_networks?.length || 0,
@@ -68,7 +70,13 @@ export function FloatingFiltersButton({
     filters.with_original_language ? 1 : 0,
     filters.region ? 1 : 0,
     filters.watch_region && filters.watch_region !== 'US' ? 1 : 0,
+    filters.timezone ? 1 : 0,
+    filters.certification_country ? 1 : 0,
     filters.certification ? 1 : 0,
+    filters.certification_lte ? 1 : 0,
+    filters.with_release_type?.length || 0,
+    filters.include_video ? 1 : 0,
+    filters.screened_theatrically ? 1 : 0,
     filters.include_adult ? 1 : 0,
     filters.sort_by && filters.sort_by !== 'popularity.desc' ? 1 : 0,
   ].reduce((sum, count) => sum + count, 0);

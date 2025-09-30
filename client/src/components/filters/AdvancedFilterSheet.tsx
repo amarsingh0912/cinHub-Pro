@@ -113,7 +113,7 @@ const FILTER_CATEGORIES: FilterCategory[] = [
     label: 'Release & Runtime',
     icon: 'Calendar',
     description: 'Release dates and runtime duration',
-    fields: ['primary_release_date', 'first_air_date', 'with_runtime'],
+    fields: ['primary_release_date', 'first_air_date', 'release_date', 'air_date', 'primary_release_year', 'first_air_date_year', 'timezone', 'with_runtime'],
     collapsible: true,
     defaultOpen: false
   },
@@ -140,7 +140,7 @@ const FILTER_CATEGORIES: FilterCategory[] = [
     label: 'Advanced Filters',
     icon: 'Settings',
     description: 'Language, people, companies, and more',
-    fields: ['with_original_language', 'region', 'certification', 'include_adult'],
+    fields: ['with_keywords', 'without_keywords', 'with_cast', 'with_crew', 'with_people', 'with_companies', 'with_networks', 'with_original_language', 'region', 'certification_country', 'certification', 'certification_lte', 'with_release_type', 'include_video', 'screened_theatrically', 'include_adult'],
     collapsible: true,
     defaultOpen: false
   }
@@ -336,9 +336,12 @@ export function AdvancedFilterSheet({
       // Movie dates
       primary_release_date: {},
       release_date: {},
+      primary_release_year: undefined,
       // TV dates
       first_air_date: {},
       air_date: {},
+      first_air_date_year: undefined,
+      timezone: undefined,
       with_runtime: {},
       vote_average: {},
       vote_count: {},
@@ -353,8 +356,13 @@ export function AdvancedFilterSheet({
       with_original_language: undefined,
       watch_region: 'US',
       region: undefined,
+      certification_country: undefined,
       certification: undefined,
+      certification_lte: undefined,
+      with_release_type: undefined,
       include_adult: false,
+      include_video: undefined,
+      screened_theatrically: undefined,
       sort_by: 'popularity.desc'
     } as AdvancedFilterState);
   };
@@ -505,7 +513,7 @@ export function AdvancedFilterSheet({
   };
 
   const renderRatingFilter = () => {
-    const hasRatingFilter = filters.vote_average?.min || filters.vote_average?.max || filters.vote_count?.min;
+    const hasRatingFilter = filters.vote_average?.min || filters.vote_average?.max || filters.vote_count?.min || filters.vote_count?.max;
     
     return (
       <div className="space-y-4">
@@ -563,36 +571,45 @@ export function AdvancedFilterSheet({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">
-              Min Votes: {filters.vote_count?.min || 0}+
+              Vote Count: {filters.vote_count?.min || 0}{filters.vote_count?.max ? ` - ${filters.vote_count.max}` : '+'}
             </Label>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => updateFilter('vote_count', {})}
               className="h-6 px-2 text-xs hover:text-destructive"
-              disabled={!filters.vote_count?.min}
+              disabled={!filters.vote_count?.min && !filters.vote_count?.max}
               data-testid="reset-vote-count"
             >
               Reset
             </Button>
           </div>
           <Slider
-            value={[filters.vote_count?.min || 0]}
+            value={[filters.vote_count?.min || 0, filters.vote_count?.max || 5000]}
             min={0}
-            max={1000}
-            step={10}
-            onValueChange={([min]) => {
-              updateFilter('vote_count', { min: min > 0 ? min : undefined });
+            max={5000}
+            step={50}
+            onValueChange={([min, max]) => {
+              updateFilter('vote_count', { 
+                min: min > 0 ? min : undefined, 
+                max: max < 5000 ? max : undefined 
+              });
             }}
             className="w-full"
             data-testid="vote-count-slider"
           />
+          <div className="flex justify-between text-xs text-muted-foreground px-1">
+            <span>0</span>
+            <span>1k</span>
+            <span>2.5k</span>
+            <span>5k</span>
+          </div>
           <div className="text-xs text-muted-foreground flex items-center gap-1">
             <span>💡</span>
             {filters.vote_count?.min && filters.vote_count.min > 500 ? (
-              <span className="text-amber-600 dark:text-amber-400">Setting too high may limit results</span>
+              <span className="text-amber-600 dark:text-amber-400">High minimum may limit results</span>
             ) : (
-              <span>Higher vote counts ensure more reliable ratings</span>
+              <span>Set vote count range for better quality control</span>
             )}
           </div>
         </div>
@@ -835,6 +852,264 @@ export function AdvancedFilterSheet({
           checked={filters.include_adult || false}
           onCheckedChange={(checked) => updateFilter('include_adult', checked)}
           data-testid="adult-content-switch"
+        />
+      </div>
+    </div>
+  );
+
+  const renderCastFilter = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium flex items-center gap-2">
+        <Users className="h-4 w-4" />
+        Cast Members (Movies Only)
+      </Label>
+      <PeopleAutocomplete
+        value={filters.with_cast || []}
+        onChange={(cast) => updateFilter('with_cast', cast)}
+        placeholder="Search for actors..."
+      />
+    </div>
+  );
+
+  const renderCrewFilter = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium flex items-center gap-2">
+        <Users className="h-4 w-4" />
+        Crew Members (Movies Only)
+      </Label>
+      <PeopleAutocomplete
+        value={filters.with_crew || []}
+        onChange={(crew) => updateFilter('with_crew', crew)}
+        placeholder="Search for directors, writers..."
+      />
+    </div>
+  );
+
+  const renderNetworksFilter = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium flex items-center gap-2">
+        <Tv className="h-4 w-4" />
+        TV Networks
+      </Label>
+      <CompaniesAutocomplete
+        value={filters.with_networks || []}
+        onChange={(networks) => updateFilter('with_networks', networks)}
+        placeholder="Search for networks..."
+      />
+    </div>
+  );
+
+  const renderKeywordExclusionFilter = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium flex items-center gap-2">
+        <X className="h-4 w-4" />
+        Exclude Keywords
+      </Label>
+      <KeywordsAutocomplete
+        value={filters.without_keywords || []}
+        onChange={(keywords) => updateFilter('without_keywords', keywords)}
+        placeholder="Search keywords to exclude..."
+      />
+    </div>
+  );
+
+  const renderSpecificYearFilter = () => {
+    const currentYear = new Date().getFullYear();
+    
+    return (
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-muted-foreground">
+          {filters.contentType === 'movie' ? 'Specific Release Year' : 'Specific First Air Year'}
+        </Label>
+        <Input
+          type="number"
+          min={1900}
+          max={currentYear + 2}
+          value={filters.contentType === 'movie' ? (filters.primary_release_year || '') : (filters.first_air_date_year || '')}
+          onChange={(e) => {
+            const year = e.target.value ? Number(e.target.value) : undefined;
+            if (filters.contentType === 'movie') {
+              updateFilter('primary_release_year', year);
+            } else {
+              updateFilter('first_air_date_year', year);
+            }
+          }}
+          placeholder={`e.g., ${currentYear}`}
+          data-testid="specific-year-input"
+        />
+      </div>
+    );
+  };
+
+  const renderTimezoneFilter = () => {
+    const timezones = [
+      { value: 'America/New_York', label: 'Eastern Time (ET)' },
+      { value: 'America/Chicago', label: 'Central Time (CT)' },
+      { value: 'America/Denver', label: 'Mountain Time (MT)' },
+      { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+      { value: 'Europe/London', label: 'London (GMT)' },
+      { value: 'Europe/Paris', label: 'Paris (CET)' },
+      { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
+      { value: 'Australia/Sydney', label: 'Sydney (AEDT)' },
+    ];
+
+    return (
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Timezone (TV Only)
+        </Label>
+        <Select 
+          value={filters.timezone || ''} 
+          onValueChange={(value) => updateFilter('timezone', value || undefined)}
+        >
+          <SelectTrigger data-testid="timezone-select">
+            <SelectValue placeholder="Select timezone..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Any Timezone</SelectItem>
+            {timezones.map((tz) => (
+              <SelectItem key={tz.value} value={tz.value}>
+                {tz.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  };
+
+  const renderRegionFilter = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-muted-foreground">
+        Release Region
+      </Label>
+      <Select 
+        value={filters.region || ''} 
+        onValueChange={(value) => updateFilter('region', value || undefined)}
+      >
+        <SelectTrigger data-testid="region-select">
+          <SelectValue placeholder="Any region..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Any Region</SelectItem>
+          {countries.map((country: any) => (
+            <SelectItem key={country.iso_3166_1} value={country.iso_3166_1}>
+              {country.english_name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  const renderCertificationFilters = () => (
+    <div className="space-y-3">
+      <Label className="text-sm font-medium text-muted-foreground">
+        Content Rating (Movies Only)
+      </Label>
+      <div className="space-y-2">
+        <Select 
+          value={filters.certification_country || ''} 
+          onValueChange={(value) => updateFilter('certification_country', value || undefined)}
+        >
+          <SelectTrigger data-testid="certification-country-select">
+            <SelectValue placeholder="Rating country..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Any Country</SelectItem>
+            <SelectItem value="US">United States (G, PG, PG-13, R, NC-17)</SelectItem>
+            <SelectItem value="GB">United Kingdom (U, PG, 12A, 15, 18)</SelectItem>
+            <SelectItem value="DE">Germany (FSK)</SelectItem>
+            <SelectItem value="FR">France</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        {filters.certification_country && (
+          <>
+            <Input
+              type="text"
+              value={filters.certification || ''}
+              onChange={(e) => updateFilter('certification', e.target.value || undefined)}
+              placeholder="e.g., PG-13"
+              data-testid="certification-input"
+            />
+            <Input
+              type="text"
+              value={filters.certification_lte || ''}
+              onChange={(e) => updateFilter('certification_lte', e.target.value || undefined)}
+              placeholder="Max rating (e.g., R)"
+              data-testid="certification-lte-input"
+            />
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const renderReleaseTypeFilter = () => {
+    const releaseTypes = [
+      { value: 1, label: 'Premiere' },
+      { value: 2, label: 'Theatrical (limited)' },
+      { value: 3, label: 'Theatrical' },
+      { value: 4, label: 'Digital' },
+      { value: 5, label: 'Physical' },
+      { value: 6, label: 'TV' },
+    ];
+
+    return (
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Release Type (Movies Only)
+        </Label>
+        <div className="flex flex-wrap gap-2">
+          {releaseTypes.map((type) => (
+            <Button
+              key={type.value}
+              variant={filters.with_release_type?.includes(type.value) ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                const current = filters.with_release_type || [];
+                const updated = current.includes(type.value)
+                  ? current.filter(t => t !== type.value)
+                  : [...current, type.value];
+                updateFilter('with_release_type', updated.length > 0 ? updated : undefined);
+              }}
+              data-testid={`release-type-${type.value}`}
+              className="h-7 text-xs"
+            >
+              {type.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderIncludeVideoFilter = () => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Include Video Content (Movies Only)
+        </Label>
+        <Switch
+          checked={filters.include_video || false}
+          onCheckedChange={(checked) => updateFilter('include_video', checked ? true : undefined)}
+          data-testid="include-video-switch"
+        />
+      </div>
+    </div>
+  );
+
+  const renderScreenedTheatricallyFilter = () => (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Screened Theatrically (TV Only)
+        </Label>
+        <Switch
+          checked={filters.screened_theatrically || false}
+          onCheckedChange={(checked) => updateFilter('screened_theatrically', checked ? true : undefined)}
+          data-testid="screened-theatrically-switch"
         />
       </div>
     </div>
@@ -1135,6 +1410,14 @@ export function AdvancedFilterSheet({
                             <div className="space-y-4">
                               {renderYearFilter()}
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderSpecificYearFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {filters.contentType === 'tv' && (
+                                <>
+                                  {renderTimezoneFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                </>
+                              )}
                               {renderRuntimeFilter()}
                             </div>
                           )}
@@ -1147,18 +1430,63 @@ export function AdvancedFilterSheet({
                                 onChange={(keywords) => updateFilter('with_keywords', keywords)}
                               />
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderKeywordExclusionFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              
+                              {/* People Filters */}
+                              {filters.contentType === 'movie' && (
+                                <>
+                                  {renderCastFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  {renderCrewFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                </>
+                              )}
                               <PeopleAutocomplete
                                 value={filters.with_people || []}
                                 onChange={(people) => updateFilter('with_people', people)}
                               />
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              
+                              {/* Companies & Networks */}
                               <CompaniesAutocomplete
                                 value={filters.with_companies || []}
                                 onChange={(companies) => updateFilter('with_companies', companies)}
                               />
+                              {filters.contentType === 'tv' && (
+                                <>
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  {renderNetworksFilter()}
+                                </>
+                              )}
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              
+                              {/* Language & Region */}
                               {renderLanguageFilter()}
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              {renderRegionFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                              
+                              {/* Content Rating */}
+                              {filters.contentType === 'movie' && (
+                                <>
+                                  {renderCertificationFilters()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  {renderReleaseTypeFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  {renderIncludeVideoFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                </>
+                              )}
+                              
+                              {/* TV Specific Filters */}
+                              {filters.contentType === 'tv' && (
+                                <>
+                                  {renderScreenedTheatricallyFilter()}
+                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                </>
+                              )}
+                              
                               {renderAdultContentFilter()}
                             </div>
                           )}
