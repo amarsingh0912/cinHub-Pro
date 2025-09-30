@@ -100,15 +100,6 @@ const MONETIZATION_TYPES = [
 
 const FILTER_CATEGORIES: FilterCategory[] = [
   {
-    id: 'content',
-    label: 'Content Type',
-    icon: 'Film',
-    description: 'Movies or TV Shows',
-    fields: ['contentType'],
-    collapsible: false,
-    defaultOpen: true
-  },
-  {
     id: 'genres',
     label: 'Genres',
     icon: 'Tag',
@@ -369,26 +360,6 @@ export function AdvancedFilterSheet({
     );
   };
 
-  const renderContentTypeFilter = () => (
-    <div className="space-y-4">
-      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-        <div className="p-1 rounded-md bg-primary/10 text-primary">
-          <Film className="h-4 w-4" />
-        </div>
-        Content Type
-      </Label>
-      <div className="flex justify-center">
-        <ContentTypeToggle
-          value={filters.contentType}
-          onValueChange={(value) => updateFilter('contentType', value as 'movie' | 'tv')}
-          size="md"
-          variant="premium"
-          showCounts={false}
-          data-testid="content-type-toggle"
-        />
-      </div>
-    </div>
-  );
 
   const renderGenreFilter = () => {
     const totalGenreFilters = (filters.with_genres?.length || 0) + (filters.without_genres?.length || 0);
@@ -449,7 +420,7 @@ export function AdvancedFilterSheet({
             <div className="p-1 rounded-md bg-primary/10 text-primary">
               <Calendar className="h-4 w-4" />
             </div>
-            Release Year
+            {filters.contentType === 'movie' ? 'Release Year' : 'First Air Date'}
           </Label>
           {hasYearFilter && (
             <Badge variant="secondary" className="h-5 px-2 text-xs font-medium">
@@ -795,6 +766,23 @@ export function AdvancedFilterSheet({
   const renderSortFilter = () => {
     const isSortActive = filters.sort_by && filters.sort_by !== 'popularity.desc';
     
+    // Filter sort options based on content type
+    const relevantSortOptions = SORT_OPTIONS.filter(option => {
+      const isMovieOption = option.label.includes('(Movies)');
+      const isTVOption = option.label.includes('(TV)');
+      
+      // Show generic options for both types
+      if (!isMovieOption && !isTVOption) return true;
+      
+      // Show movie-specific options only for movies
+      if (isMovieOption) return filters.contentType === 'movie';
+      
+      // Show TV-specific options only for TV shows
+      if (isTVOption) return filters.contentType === 'tv';
+      
+      return true;
+    });
+    
     return (
       <div className="space-y-3">
         <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
@@ -816,7 +804,7 @@ export function AdvancedFilterSheet({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {SORT_OPTIONS.map((option) => (
+          {relevantSortOptions.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
@@ -939,7 +927,7 @@ export function AdvancedFilterSheet({
               className="bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent"
               style={{ backgroundSize: '200% auto' }}
             >
-              Advanced Filters
+              Filters
             </span>
             {appliedFiltersCount > 0 && (
               <Badge 
@@ -951,55 +939,17 @@ export function AdvancedFilterSheet({
               </Badge>
             )}
           </SheetTitle>
-          <SheetDescription className="text-sm text-muted-foreground flex items-center gap-2 relative">
-            <TrendingUp className="h-4 w-4" />
-            Discover content with precise filtering across all TMDB categories
-          </SheetDescription>
           
-          {/* Quick filter chips */}
-          <div className="flex flex-wrap gap-2 pt-2 relative" role="group" aria-label="Quick filter presets">
-            {QUICK_FILTER_PRESETS.map((preset, index) => (
-              <motion.div
-                key={preset.id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => applyQuickFilter(preset)}
-                  data-testid={`quick-filter-${preset.id}`}
-                  className={cn(
-                    "h-7 text-xs relative overflow-hidden group",
-                    "hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10",
-                    "hover:border-primary/50",
-                    "transition-all duration-300"
-                  )}
-                  aria-label={`Apply ${preset.label} filter: ${preset.description}`}
-                  title={preset.description}
-                >
-                  {/* Shimmer effect on hover */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: '100%' }}
-                    transition={{ duration: 0.6 }}
-                  />
-                  {/* Ripple effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-primary/20 rounded-md"
-                    initial={{ scale: 0, opacity: 0 }}
-                    whileHover={{ scale: 1.5, opacity: [0.5, 0] }}
-                    transition={{ duration: 0.5 }}
-                  />
-                  <Zap className="h-3 w-3 mr-1 opacity-0 group-hover:opacity-100 transition-opacity relative z-10" />
-                  <span className="relative z-10">{preset.label}</span>
-                </Button>
-              </motion.div>
-            ))}
+          {/* Content Type Tabs */}
+          <div className="pt-3 relative">
+            <ContentTypeToggle
+              value={filters.contentType}
+              onValueChange={(value) => updateFilter('contentType', value as 'movie' | 'tv')}
+              size="lg"
+              variant="premium"
+              showCounts={false}
+              data-testid="content-type-toggle"
+            />
           </div>
           
           {/* Filter complexity indicator */}
@@ -1044,10 +994,9 @@ export function AdvancedFilterSheet({
 
             <Separator />
 
-            {/* Essential filters first - Content Type and Sort */}
-            <div className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2")}>
-              <div>{renderContentTypeFilter()}</div>
-              <div>{renderSortFilter()}</div>
+            {/* Sort Filter */}
+            <div className="space-y-4">
+              {renderSortFilter()}
             </div>
 
             <Separator />
