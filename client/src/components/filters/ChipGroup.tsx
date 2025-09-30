@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "cmdk";
 
 export interface ChipItem {
@@ -488,29 +489,30 @@ export const GenreChipGroup = ({
                 Clear All
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1">
-              <AnimatePresence mode="popLayout">
-                {selectedGenres.with_genres.map((genreId) => {
-                  const genre = genres.find(g => g.id === genreId);
-                  if (!genre) return null;
-                  return (
-                    <motion.div
-                      key={`include-${genreId}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    >
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
-                          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-                          "hover:bg-emerald-500/20 transition-all duration-200"
-                        )}
-                        data-testid={`selected-genre-${genreId}`}
+            <ScrollArea className="max-h-32 w-full pr-2">
+              <div className="flex flex-wrap gap-2">
+                <AnimatePresence mode="popLayout">
+                  {selectedGenres.with_genres.map((genreId) => {
+                    const genre = genres.find(g => g.id === genreId);
+                    if (!genre) return null;
+                    return (
+                      <motion.div
+                        key={`include-${genreId}`}
+                        layout
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
                       >
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
+                            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+                            "hover:bg-emerald-500/20 transition-all duration-200"
+                          )}
+                          data-testid={`selected-genre-${genreId}`}
+                        >
                         <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                           <Check className="w-2.5 h-2.5" />
                         </div>
@@ -597,7 +599,8 @@ export const GenreChipGroup = ({
                   );
                 })}
               </AnimatePresence>
-            </div>
+              </div>
+            </ScrollArea>
           </motion.div>
         )}
       </AnimatePresence>

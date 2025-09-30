@@ -469,6 +469,7 @@ export function AdvancedFilterSheet({
                 }
               }}
               placeholder="e.g., 2020"
+              disabled={false}
               data-testid="year-from-input"
             />
           </div>
@@ -494,6 +495,7 @@ export function AdvancedFilterSheet({
                 }
               }}
               placeholder="e.g., 2025"
+              disabled={false}
               data-testid="year-to-input"
             />
           </div>
@@ -633,6 +635,7 @@ export function AdvancedFilterSheet({
               });
             }}
             placeholder={filters.contentType === 'movie' ? '60' : '15'}
+            disabled={false}
             data-testid="runtime-min-input"
           />
         </div>
@@ -651,6 +654,7 @@ export function AdvancedFilterSheet({
               });
             }}
             placeholder={filters.contentType === 'movie' ? '240' : '120'}
+            disabled={false}
             data-testid="runtime-max-input"
           />
         </div>
@@ -790,8 +794,8 @@ export function AdvancedFilterSheet({
         value={filters.with_original_language} 
         onValueChange={(value) => updateFilter('with_original_language', value === 'all' ? undefined : value)}
       >
-        <SelectTrigger data-testid="language-select">
-          <SelectValue placeholder="Any language" />
+        <SelectTrigger data-testid="language-select" className="cursor-pointer">
+          <SelectValue placeholder="Any language" className="cursor-pointer" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Any Language</SelectItem>
@@ -869,6 +873,7 @@ export function AdvancedFilterSheet({
         <Switch
           checked={filters.include_adult || false}
           onCheckedChange={(checked) => updateFilter('include_adult', checked)}
+          disabled={false}
           data-testid="adult-content-switch"
         />
       </div>
@@ -1110,8 +1115,8 @@ export function AdvancedFilterSheet({
             }
           }}
         >
-          <SelectTrigger data-testid="certification-select">
-            <SelectValue placeholder="Any rating..." />
+          <SelectTrigger data-testid="certification-select" className="cursor-pointer">
+            <SelectValue placeholder="Any rating..." className="cursor-pointer" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">Any Rating</SelectItem>
