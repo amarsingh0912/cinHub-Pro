@@ -128,14 +128,21 @@ export interface AdvancedFilterState {
   with_keywords: number[];         // Keyword IDs to include
   without_keywords: number[];      // Keyword IDs to exclude
   
-  // Date filters
-  primary_release_date: DateRange; // Movies
-  first_air_date: DateRange;       // TV Shows
+  // Date filters - Movies
+  primary_release_date: DateRange; // Movies - primary release date
+  release_date: DateRange;         // Movies - alternative date filter
+  primary_release_year?: number;   // Movies - specific year
+  
+  // Date filters - TV
+  first_air_date: DateRange;       // TV - first air date
+  air_date: DateRange;             // TV - alternative air date
+  first_air_date_year?: number;    // TV - specific year
+  timezone?: string;               // TV - IANA timezone for airing filters
   
   // Numeric filters
   with_runtime: NumericRange;      // Runtime in minutes
   vote_average: NumericRange;      // Rating 0-10
-  vote_count: NumericRange;        // Minimum vote count
+  vote_count: NumericRange;        // Vote count range
   
   // Language & Region
   with_original_language?: string; // Language ISO code
@@ -146,17 +153,25 @@ export interface AdvancedFilterState {
   with_watch_providers: number[];     // Streaming provider IDs
   with_watch_monetization_types: WatchMonetizationType[];
   
-  // People (cast/crew)
-  with_people: number[];           // Person IDs
+  // People (cast/crew) - Movies
+  with_cast: number[];             // Cast person IDs (Movies only)
+  with_crew: number[];             // Crew person IDs (Movies only)
+  with_people: number[];           // Union of cast/crew (Movies only)
   
   // Production
   with_companies: number[];        // Production company IDs (movies & TV)
   with_networks: number[];         // TV network IDs (TV only)
   
-  // Content filtering
+  // Content filtering - Movies
   include_adult?: boolean;         // Include adult content
+  include_video?: boolean;         // Include video content (Movies only)
   certification_country?: string;  // Country for certification ratings
-  certification?: string;         // Certification rating
+  certification?: string;          // Certification rating
+  certification_lte?: string;      // Max certification rating (Movies only)
+  with_release_type?: number[];    // Release types: 1-7 (Movies only)
+  
+  // Content filtering - TV
+  screened_theatrically?: boolean; // TV shows screened theatrically
   
   // Sorting & Search
   sort_by: SortOption;
@@ -315,13 +330,20 @@ export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
   without_genres: [],
   with_keywords: [],
   without_keywords: [],
+  // Movie dates
   primary_release_date: {},
+  release_date: {},
+  // TV dates
   first_air_date: {},
+  air_date: {},
   with_runtime: {},
   vote_average: {},
   vote_count: {},
   with_watch_providers: [],
   with_watch_monetization_types: [],
+  // People
+  with_cast: [],
+  with_crew: [],
   with_people: [],
   with_companies: [],
   with_networks: [],
@@ -521,8 +543,12 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   with_genres: [],
   without_genres: [],
   without_keywords: [],
+  // Movie dates
   primary_release_date: { start: undefined, end: undefined },
+  release_date: { start: undefined, end: undefined },
+  // TV dates
   first_air_date: { start: undefined, end: undefined },
+  air_date: { start: undefined, end: undefined },
   with_runtime: { min: undefined, max: undefined },
   vote_average: { min: undefined, max: undefined },
   vote_count: { min: undefined, max: undefined },
@@ -533,6 +559,9 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   with_watch_monetization_types: [],
   with_keywords: [],
   with_companies: [],
+  // People
+  with_cast: [],
+  with_crew: [],
   with_people: [],
   with_networks: [],
   include_adult: false,

@@ -333,13 +333,20 @@ export function AdvancedFilterSheet({
       without_genres: [],
       with_keywords: [],
       without_keywords: [],
+      // Movie dates
       primary_release_date: {},
+      release_date: {},
+      // TV dates
       first_air_date: {},
+      air_date: {},
       with_runtime: {},
       vote_average: {},
       vote_count: {},
       with_watch_providers: [],
       with_watch_monetization_types: [],
+      // People
+      with_cast: [],
+      with_crew: [],
       with_people: [],
       with_companies: [],
       with_networks: [],
