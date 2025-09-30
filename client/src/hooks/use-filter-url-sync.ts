@@ -49,6 +49,15 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
   if (filters.primary_release_date.end) {
     params['primary_release_date.lte'] = filters.primary_release_date.end;
   }
+  if (filters.release_date.start) {
+    params['release_date.gte'] = filters.release_date.start;
+  }
+  if (filters.release_date.end) {
+    params['release_date.lte'] = filters.release_date.end;
+  }
+  if (filters.primary_release_year) {
+    params.primary_release_year = String(filters.primary_release_year);
+  }
 
   // Date ranges - TV Shows
   if (filters.first_air_date.start) {
@@ -56,6 +65,18 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
   }
   if (filters.first_air_date.end) {
     params['first_air_date.lte'] = filters.first_air_date.end;
+  }
+  if (filters.air_date.start) {
+    params['air_date.gte'] = filters.air_date.start;
+  }
+  if (filters.air_date.end) {
+    params['air_date.lte'] = filters.air_date.end;
+  }
+  if (filters.first_air_date_year) {
+    params.first_air_date_year = String(filters.first_air_date_year);
+  }
+  if (filters.timezone) {
+    params.timezone = filters.timezone;
   }
 
   // Numeric ranges - Runtime
@@ -102,6 +123,12 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
   }
 
   // People, companies, networks
+  if (filters.with_cast.length > 0) {
+    params.with_cast = filters.with_cast.join(',');
+  }
+  if (filters.with_crew.length > 0) {
+    params.with_crew = filters.with_crew.join(',');
+  }
   if (filters.with_people.length > 0) {
     params.with_people = filters.with_people.join(',');
   }
@@ -116,11 +143,23 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
   if (filters.include_adult === true) {
     params.include_adult = 'true';
   }
+  if (filters.include_video === true) {
+    params.include_video = 'true';
+  }
   if (filters.certification_country) {
     params.certification_country = filters.certification_country;
   }
   if (filters.certification) {
     params.certification = filters.certification;
+  }
+  if (filters.certification_lte) {
+    params.certification_lte = filters.certification_lte;
+  }
+  if (filters.with_release_type && filters.with_release_type.length > 0) {
+    params.with_release_type = filters.with_release_type.join('|');
+  }
+  if (filters.screened_theatrically === true) {
+    params.screened_theatrically = 'true';
   }
 
   // Sorting - only include if different from default
@@ -136,6 +175,9 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
   // Search query
   if (filters.search_query) {
     params.q = filters.search_query;
+  }
+  if (filters.search_type) {
+    params.search_type = filters.search_type;
   }
 
   return params;
@@ -189,6 +231,18 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
     };
   }
 
+  const releaseDateGte = params.get('release_date.gte');
+  const releaseDateLte = params.get('release_date.lte');
+  if (releaseDateGte || releaseDateLte) {
+    filters.release_date = {
+      start: releaseDateGte || undefined,
+      end: releaseDateLte || undefined
+    };
+  }
+
+  const primaryReleaseYear = params.get('primary_release_year');
+  if (primaryReleaseYear) filters.primary_release_year = Number(primaryReleaseYear);
+
   // Parse date ranges - TV Shows  
   const firstAirDateGte = params.get('first_air_date.gte');
   const firstAirDateLte = params.get('first_air_date.lte');
@@ -198,6 +252,21 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
       end: firstAirDateLte || undefined
     };
   }
+
+  const airDateGte = params.get('air_date.gte');
+  const airDateLte = params.get('air_date.lte');
+  if (airDateGte || airDateLte) {
+    filters.air_date = {
+      start: airDateGte || undefined,
+      end: airDateLte || undefined
+    };
+  }
+
+  const firstAirDateYear = params.get('first_air_date_year');
+  if (firstAirDateYear) filters.first_air_date_year = Number(firstAirDateYear);
+
+  const timezone = params.get('timezone');
+  if (timezone) filters.timezone = timezone;
 
   // Parse numeric ranges - Runtime
   const runtimeGte = params.get('with_runtime.gte');
@@ -251,6 +320,16 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
   }
 
   // Parse people, companies, networks
+  const withCast = params.get('with_cast');
+  if (withCast) {
+    filters.with_cast = withCast.split(',').map(Number).filter(Boolean);
+  }
+
+  const withCrew = params.get('with_crew');
+  if (withCrew) {
+    filters.with_crew = withCrew.split(',').map(Number).filter(Boolean);
+  }
+
   const withPeople = params.get('with_people');
   if (withPeople) {
     filters.with_people = withPeople.split(',').map(Number).filter(Boolean);
@@ -269,12 +348,26 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
   // Parse content filtering
   const includeAdult = params.get('include_adult');
   if (includeAdult === 'true') filters.include_adult = true;
+
+  const includeVideo = params.get('include_video');
+  if (includeVideo === 'true') filters.include_video = true;
   
   const certificationCountry = params.get('certification_country');
   if (certificationCountry) filters.certification_country = certificationCountry;
   
   const certification = params.get('certification');
   if (certification) filters.certification = certification;
+
+  const certificationLte = params.get('certification_lte');
+  if (certificationLte) filters.certification_lte = certificationLte;
+
+  const withReleaseType = params.get('with_release_type');
+  if (withReleaseType) {
+    filters.with_release_type = withReleaseType.split('|').map(Number).filter(Boolean);
+  }
+
+  const screenedTheatrically = params.get('screened_theatrically');
+  if (screenedTheatrically === 'true') filters.screened_theatrically = true;
 
   // Parse sorting
   const sortBy = params.get('sort_by') as SortOption;
@@ -287,6 +380,9 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
   // Parse search query
   const searchQuery = params.get('q');
   if (searchQuery) filters.search_query = searchQuery;
+
+  const searchType = params.get('search_type') as 'multi' | 'movie' | 'tv' | 'person';
+  if (searchType) filters.search_type = searchType;
 
   return filters;
 }
