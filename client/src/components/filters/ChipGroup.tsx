@@ -92,8 +92,13 @@ export const ChipGroup = ({
         setIsOpen(false);
         return;
       }
-      const updated = [...selected];
-      updated[existingIndex] = { ...existing, mode };
+      
+      // If switching to 'include' mode, remove all other 'include' selections
+      let updated = [...selected];
+      if (mode === 'include') {
+        updated = updated.filter(s => s.mode !== 'include');
+      }
+      updated[updated.findIndex(s => s.item.id === item.id)] = { ...existing, mode };
       onSelectionChange(updated);
       setIsOpen(false);
       return;
@@ -101,8 +106,14 @@ export const ChipGroup = ({
     
     if (maxSelections && selected.length >= maxSelections) return;
     
+    // If adding new 'include' selection, remove all existing 'include' selections
+    let updatedSelected = [...selected];
+    if (mode === 'include') {
+      updatedSelected = updatedSelected.filter(s => s.mode !== 'include');
+    }
+    
     const newSelection: ChipSelection = { item, mode };
-    onSelectionChange([...selected, newSelection]);
+    onSelectionChange([...updatedSelected, newSelection]);
     setIsOpen(false);
   };
 
