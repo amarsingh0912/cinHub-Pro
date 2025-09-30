@@ -376,12 +376,20 @@ export const ChipGroup = ({
                           )}
                         </div>
 
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className={cn(
+                          "flex gap-1 transition-opacity duration-200",
+                          (isIncluded || isExcluded) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        )}>
                           <Button
                             size="sm"
                             variant="ghost"
                             onClick={() => addSelection(item, 'include')}
-                            className="h-7 w-7 p-0 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-full"
+                            className={cn(
+                              "h-7 w-7 p-0 rounded-full transition-all",
+                              isIncluded 
+                                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30" 
+                                : "hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400"
+                            )}
                             title="Include this item"
                             data-testid={`include-chip-${item.id}`}
                           >
@@ -392,7 +400,12 @@ export const ChipGroup = ({
                               size="sm"
                               variant="ghost"
                               onClick={() => addSelection(item, 'exclude')}
-                              className="h-7 w-7 p-0 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 rounded-full"
+                              className={cn(
+                                "h-7 w-7 p-0 rounded-full transition-all",
+                                isExcluded 
+                                  ? "bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500/30" 
+                                  : "hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400"
+                              )}
                               title="Exclude this item"
                               data-testid={`exclude-chip-${item.id}`}
                             >
