@@ -157,8 +157,27 @@ const FILTER_CATEGORIES: FilterCategory[] = [
 
 const QUICK_FILTER_PRESETS: QuickFilterChip[] = [
   {
+    id: 'trending-now',
+    label: 'Trending Now',
+    filters: {
+      sort_by: 'popularity.desc',
+      vote_count: { min: 100 }
+    } as Partial<AdvancedFilterState>,
+    description: 'Most popular content'
+  },
+  {
+    id: 'highly-rated',
+    label: 'Top Rated',
+    filters: {
+      vote_average: { min: 7.5 },
+      vote_count: { min: 500 },
+      sort_by: 'vote_average.desc'
+    } as Partial<AdvancedFilterState>,
+    description: '7.5+ rating with 500+ votes'
+  },
+  {
     id: 'this-year',
-    label: 'This Year',
+    label: 'New This Year',
     filters: {
       primary_release_date: {
         start: `${new Date().getFullYear()}-01-01`,
@@ -167,44 +186,19 @@ const QUICK_FILTER_PRESETS: QuickFilterChip[] = [
       first_air_date: {
         start: `${new Date().getFullYear()}-01-01`, 
         end: `${new Date().getFullYear()}-12-31`
-      }
+      },
+      sort_by: 'popularity.desc'
     } as Partial<AdvancedFilterState>,
     description: 'Released this year'
   },
   {
-    id: '2010s',
-    label: '2010s',
+    id: 'hidden-gems',
+    label: 'Hidden Gems',
     filters: {
-      primary_release_date: { start: '2010-01-01', end: '2019-12-31' },
-      first_air_date: { start: '2010-01-01', end: '2019-12-31' }
+      vote_average: { min: 7.0 },
+      vote_count: { min: 50, max: 500 }
     } as Partial<AdvancedFilterState>,
-    description: 'From the 2010s decade'
-  },
-  {
-    id: 'highly-rated',
-    label: 'Highly Rated',
-    filters: {
-      vote_average: { min: 7.5 },
-      vote_count: { min: 100 }
-    } as Partial<AdvancedFilterState>,
-    description: '7.5+ rating with 100+ votes'
-  },
-  {
-    id: 'netflix',
-    label: 'Netflix',
-    filters: {
-      with_watch_providers: [8], // Netflix provider ID
-      watch_region: 'US'
-    } as Partial<AdvancedFilterState>,
-    description: 'Available on Netflix'
-  },
-  {
-    id: 'free-to-watch',
-    label: 'Free',
-    filters: {
-      with_watch_monetization_types: ['free', 'ads']
-    } as Partial<AdvancedFilterState>,
-    description: 'Free to watch'
+    description: 'Great but lesser-known'
   }
 ];
 
@@ -218,6 +212,44 @@ export function AdvancedFilterSheet({
   const isMobile = useIsMobile();
   const [collapsedSections, setCollapsedSections] = useState<string[]>(['advanced']);
   const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Calculate filter complexity
+  const filterComplexity = useMemo(() => {
+    let score = 0;
+    
+    // Genre filters
+    const genreCount = (filters.with_genres?.length || 0) + (filters.without_genres?.length || 0);
+    if (genreCount > 0) score += genreCount > 3 ? 2 : 1;
+    
+    // Rating filters
+    if (filters.vote_average?.min && filters.vote_average.min > 7) score += 2;
+    if (filters.vote_count?.min && filters.vote_count.min > 500) score += 2;
+    
+    // Date range filters
+    const hasDateFilter = filters.primary_release_date?.start || filters.first_air_date?.start;
+    if (hasDateFilter) {
+      const currentYear = new Date().getFullYear();
+      const startYear = filters.contentType === 'movie' 
+        ? parseInt(filters.primary_release_date?.start?.substring(0, 4) || `${currentYear}`)
+        : parseInt(filters.first_air_date?.start?.substring(0, 4) || `${currentYear}`);
+      const endYear = filters.contentType === 'movie'
+        ? parseInt(filters.primary_release_date?.end?.substring(0, 4) || `${currentYear}`)
+        : parseInt(filters.first_air_date?.end?.substring(0, 4) || `${currentYear}`);
+      const range = endYear - startYear;
+      if (range < 5) score += 2;
+      else if (range < 10) score += 1;
+    }
+    
+    // Provider filters
+    if (filters.with_watch_providers?.length && filters.with_watch_providers.length > 0) score += 1;
+    
+    // People, companies, keywords
+    if (filters.with_people?.length && filters.with_people.length > 0) score += 2;
+    if (filters.with_companies?.length && filters.with_companies.length > 0) score += 2;
+    if (filters.with_keywords?.length && filters.with_keywords.length > 0) score += 1;
+    
+    return score;
+  }, [filters]);
   
   // Initialize collapsed sections based on mobile state (only once)
   useEffect(() => {
@@ -358,33 +390,44 @@ export function AdvancedFilterSheet({
     </div>
   );
 
-  const renderGenreFilter = () => (
-    <div className="space-y-4">
-      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-        <div className="p-1 rounded-md bg-primary/10 text-primary">
-          <Filter className="h-4 w-4" />
-        </div>
-        Genres
-        {(filters.with_genres?.length > 0 || filters.without_genres?.length > 0) && (
-          <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-            {(filters.with_genres?.length || 0) + (filters.without_genres?.length || 0)}
-          </Badge>
+  const renderGenreFilter = () => {
+    const totalGenreFilters = (filters.with_genres?.length || 0) + (filters.without_genres?.length || 0);
+    const showWarning = totalGenreFilters > 5;
+    
+    return (
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <Filter className="h-4 w-4" />
+          </div>
+          Genres
+          {totalGenreFilters > 0 && (
+            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+              {totalGenreFilters}
+            </Badge>
+          )}
+        </Label>
+        <GenreChipGroup
+          selectedGenres={{
+            with_genres: filters.with_genres || [],
+            without_genres: filters.without_genres || []
+          }}
+          onGenresChange={(genres) => {
+            updateFilter('with_genres', genres.with_genres);
+            updateFilter('without_genres', genres.without_genres);
+          }}
+          genres={currentGenres}
+          data-testid="genre-filter"
+        />
+        {showWarning && (
+          <div className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md">
+            <span>⚠️</span>
+            <span>Too many genre filters may significantly limit results</span>
+          </div>
         )}
-      </Label>
-      <GenreChipGroup
-        selectedGenres={{
-          with_genres: filters.with_genres || [],
-          without_genres: filters.without_genres || []
-        }}
-        onGenresChange={(genres) => {
-          updateFilter('with_genres', genres.with_genres);
-          updateFilter('without_genres', genres.without_genres);
-        }}
-        genres={currentGenres}
-        data-testid="genre-filter"
-      />
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderYearFilter = () => {
     const currentYear = new Date().getFullYear();
@@ -396,6 +439,8 @@ export function AdvancedFilterSheet({
       : parseInt(filters.first_air_date?.end?.substring(0, 4) || `${currentYear}`);
 
     const hasYearFilter = (filters.primary_release_date?.start || filters.first_air_date?.start);
+    const yearRange = endYear - startYear;
+    const isNarrowRange = yearRange < 5;
 
     return (
       <div className="space-y-4">
@@ -471,6 +516,12 @@ export function AdvancedFilterSheet({
             data-testid="year-range-slider"
           />
         </div>
+        {hasYearFilter && isNarrowRange && (
+          <div className="text-xs text-blue-600 dark:text-blue-400 flex items-start gap-1 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md">
+            <span>ℹ️</span>
+            <span>Narrow date range selected. Consider expanding for more results.</span>
+          </div>
+        )}
       </div>
     );
   };
@@ -558,8 +609,13 @@ export function AdvancedFilterSheet({
             className="w-full"
             data-testid="vote-count-slider"
           />
-          <div className="text-xs text-muted-foreground">
-            Higher vote counts ensure more reliable ratings
+          <div className="text-xs text-muted-foreground flex items-center gap-1">
+            <span>💡</span>
+            {filters.vote_count?.min && filters.vote_count.min > 500 ? (
+              <span className="text-amber-600 dark:text-amber-400">Setting too high may limit results</span>
+            ) : (
+              <span>Higher vote counts ensure more reliable ratings</span>
+            )}
           </div>
         </div>
       </div>
@@ -945,6 +1001,32 @@ export function AdvancedFilterSheet({
               </motion.div>
             ))}
           </div>
+          
+          {/* Filter complexity indicator */}
+          {filterComplexity > 5 && (
+            <motion.div 
+              className="mt-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              data-testid="filter-complexity-warning"
+            >
+              <div className="flex items-start gap-2">
+                <div className="shrink-0 mt-0.5">
+                  <div className="h-5 w-5 rounded-full bg-amber-200 dark:bg-amber-800 flex items-center justify-center">
+                    <span className="text-xs">⚡</span>
+                  </div>
+                </div>
+                <div className="flex-1 text-xs">
+                  <p className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                    {filterComplexity > 8 ? 'Very Restrictive Filters' : 'Restrictive Filters'}
+                  </p>
+                  <p className="text-amber-700 dark:text-amber-300">
+                    Your filters are quite specific and may return limited results. Consider removing or adjusting some filters if you don't find what you're looking for.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </SheetHeader>
 
         <div className="flex-1 overflow-hidden">
