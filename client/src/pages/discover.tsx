@@ -15,6 +15,9 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { 
   X, 
   ChevronDown, 
@@ -41,7 +44,6 @@ import { PeopleAutocomplete } from "@/components/filters/PeopleAutocomplete";
 import { CompaniesAutocomplete } from "@/components/filters/CompaniesAutocomplete";
 import { KeywordsAutocomplete } from "@/components/filters/KeywordsAutocomplete";
 import { ContentTypeToggle } from "@/components/filters/SegmentedToggle";
-import { GenreChipGroup } from "@/components/filters/ChipGroup";
 import { RuntimeSlider } from "@/components/filters/DualRangeSlider";
 import type { 
   AdvancedFilterState, 
@@ -356,7 +358,7 @@ export default function Discover() {
                     </Label>
                     <ContentTypeToggle
                       value={pendingFilters.contentType}
-                      onChange={(value) => updatePendingFilter('contentType', value)}
+                      onValueChange={(value: string) => updatePendingFilter('contentType', value as 'movie' | 'tv')}
                       data-testid="content-type-toggle"
                     />
                   </div>
@@ -389,44 +391,68 @@ export default function Discover() {
                   <Separator className="bg-slate-800/50" />
 
                   {/* Genres */}
-                  <Collapsible open={!collapsedSections.includes('genres')}>
-                    <div className="space-y-3">
-                      <CollapsibleTrigger
-                        onClick={() => toggleSection('genres')}
-                        className="flex items-center justify-between w-full group"
-                        data-testid="toggle-genres"
-                      >
-                        <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer">
-                          <Tag className="h-4 w-4 text-primary" />
-                          Genres
-                          {(pendingFilters.with_genres?.length || pendingFilters.without_genres?.length) ? (
-                            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-                              {(pendingFilters.with_genres?.length || 0) + (pendingFilters.without_genres?.length || 0)}
-                            </Badge>
-                          ) : null}
-                        </Label>
-                        {collapsedSections.includes('genres') ? (
-                          <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                        ) : (
-                          <ChevronUp className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                        )}
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <GenreChipGroup
-                          selectedGenres={{
-                            with_genres: pendingFilters.with_genres || [],
-                            without_genres: pendingFilters.without_genres || []
-                          }}
-                          onGenresChange={(genres) => {
-                            updatePendingFilter('with_genres', genres.with_genres);
-                            updatePendingFilter('without_genres', genres.without_genres);
-                          }}
-                          genres={currentGenres}
-                          data-testid="genre-filter"
-                        />
-                      </CollapsibleContent>
-                    </div>
-                  </Collapsible>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      Genres
+                      {pendingFilters.with_genres?.length ? (
+                        <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+                          {pendingFilters.with_genres.length}
+                        </Badge>
+                      ) : null}
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-slate-900/50 border-slate-700 hover:bg-slate-900"
+                          data-testid="genre-select-trigger"
+                        >
+                          <span className="text-sm truncate">
+                            {pendingFilters.with_genres?.length 
+                              ? `${pendingFilters.with_genres.length} genre${pendingFilters.with_genres.length > 1 ? 's' : ''} selected`
+                              : 'Select genres'}
+                          </span>
+                          <ChevronDown className="h-4 w-4 opacity-50 ml-2 shrink-0" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[300px] p-0 bg-slate-900 border-slate-700" align="start">
+                        <Command className="bg-slate-900">
+                          <CommandInput placeholder="Search genres..." className="border-slate-700" />
+                          <CommandList>
+                            <CommandEmpty>No genre found.</CommandEmpty>
+                            <CommandGroup>
+                              <ScrollArea className="h-[300px]">
+                                {currentGenres.map((genre: Genre) => (
+                                  <CommandItem
+                                    key={genre.id}
+                                    value={genre.name}
+                                    onSelect={() => {
+                                      const current = pendingFilters.with_genres || [];
+                                      updatePendingFilter(
+                                        'with_genres',
+                                        current.includes(genre.id)
+                                          ? current.filter(id => id !== genre.id)
+                                          : [...current, genre.id]
+                                      );
+                                    }}
+                                    className="cursor-pointer hover:bg-slate-800"
+                                    data-testid={`genre-option-${genre.id}`}
+                                  >
+                                    <Checkbox
+                                      checked={pendingFilters.with_genres?.includes(genre.id)}
+                                      className="mr-2"
+                                    />
+                                    <span>{genre.name}</span>
+                                  </CommandItem>
+                                ))}
+                              </ScrollArea>
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
                   <Separator className="bg-slate-800/50" />
 
@@ -455,14 +481,8 @@ export default function Discover() {
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <KeywordsAutocomplete
-                          selectedKeywords={{
-                            with_keywords: pendingFilters.with_keywords || [],
-                            without_keywords: pendingFilters.without_keywords || []
-                          }}
-                          onKeywordsChange={(keywords) => {
-                            updatePendingFilter('with_keywords', keywords.with_keywords);
-                            updatePendingFilter('without_keywords', keywords.without_keywords);
-                          }}
+                          value={pendingFilters.with_keywords || []}
+                          onChange={(keywords: number[]) => updatePendingFilter('with_keywords', keywords)}
                           data-testid="keywords-filter"
                         />
                       </CollapsibleContent>
@@ -844,8 +864,8 @@ export default function Discover() {
                             Cast & Crew
                           </Label>
                           <PeopleAutocomplete
-                            selectedPeople={pendingFilters.with_people || []}
-                            onPeopleChange={(people) => updatePendingFilter('with_people', people)}
+                            value={pendingFilters.with_people || []}
+                            onChange={(people: number[]) => updatePendingFilter('with_people', people)}
                             data-testid="people-filter"
                           />
                         </div>
@@ -857,8 +877,8 @@ export default function Discover() {
                             Production Companies
                           </Label>
                           <CompaniesAutocomplete
-                            selectedCompanies={pendingFilters.with_companies || []}
-                            onCompaniesChange={(companies) => updatePendingFilter('with_companies', companies)}
+                            value={pendingFilters.with_companies || []}
+                            onChange={(companies: number[]) => updatePendingFilter('with_companies', companies)}
                             data-testid="companies-filter"
                           />
                         </div>
