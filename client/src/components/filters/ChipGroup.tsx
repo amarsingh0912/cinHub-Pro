@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Plus, X, Check, Filter, Search, ChevronsUpDown } from "lucide-react";
@@ -10,7 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
 import {
   Command,
   CommandEmpty,
@@ -65,7 +64,6 @@ export const ChipGroup = ({
 }: ChipGroupProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [hoveredChip, setHoveredChip] = useState<string | null>(null);
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {
@@ -81,21 +79,21 @@ export const ChipGroup = ({
 
   // Get items that aren't already selected
   const availableItems = useMemo(() => {
-    const selectedIds = selected.map((s) => s.item.id);
-    return filteredItems.filter((item) => !selectedIds.includes(item.id));
+    const selectedIds = new Set(selected.map((s) => s.item.id));
+    return filteredItems.filter((item) => !selectedIds.has(item.id));
   }, [filteredItems, selected]);
 
   const sizeClasses = {
     sm: "text-xs",
     md: "text-sm",
     lg: "text-base",
-  };
+  } as const;
 
   const chipSizeClasses = {
     sm: "px-2 py-1 text-xs",
     md: "px-3 py-1.5 text-sm",
     lg: "px-4 py-2 text-base",
-  };
+  } as const;
 
   const addSelection = (
     item: ChipItem,
@@ -103,8 +101,12 @@ export const ChipGroup = ({
   ) => {
     if (maxSelections && selected.length >= maxSelections) return;
 
+    // Avoid duplicate ids
+    if (selected.some((s) => s.item.id === item.id)) return;
+
     const newSelection: ChipSelection = { item, mode };
     onSelectionChange([...selected, newSelection]);
+    setIsOpen(false);
   };
 
   const removeSelection = (itemId: string | number) => {
@@ -187,10 +189,6 @@ export const ChipGroup = ({
                       getChipVariant(selection.mode),
                       chipSizeClasses[size],
                     )}
-                    onMouseEnter={() =>
-                      setHoveredChip(selection.item.id.toString())
-                    }
-                    onMouseLeave={() => setHoveredChip(null)}
                     data-testid={`selected-chip-${selection.item.id}`}
                   >
                     {/* Mode indicator */}
@@ -444,32 +442,24 @@ export const GenreChipGroup = ({
     if (mode === "include") {
       if (isInInclude) {
         onGenresChange({
-          with_genres: selectedGenres.with_genres.filter(
-            (id) => id !== genreId,
-          ),
+          with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
           without_genres: selectedGenres.without_genres,
         });
       } else {
         onGenresChange({
           with_genres: [...selectedGenres.with_genres, genreId],
-          without_genres: selectedGenres.without_genres.filter(
-            (id) => id !== genreId,
-          ),
+          without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
         });
       }
     } else {
       if (isInExclude) {
         onGenresChange({
           with_genres: selectedGenres.with_genres,
-          without_genres: selectedGenres.without_genres.filter(
-            (id) => id !== genreId,
-          ),
+          without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
         });
       } else {
         onGenresChange({
-          with_genres: selectedGenres.with_genres.filter(
-            (id) => id !== genreId,
-          ),
+          with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
           without_genres: [...selectedGenres.without_genres, genreId],
         });
       }
@@ -480,9 +470,7 @@ export const GenreChipGroup = ({
   const removeGenre = (genreId: number) => {
     onGenresChange({
       with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-      without_genres: selectedGenres.without_genres.filter(
-        (id) => id !== genreId,
-      ),
+      without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
     });
   };
 
@@ -496,9 +484,7 @@ export const GenreChipGroup = ({
     } else {
       onGenresChange({
         with_genres: [...selectedGenres.with_genres, genreId],
-        without_genres: selectedGenres.without_genres.filter(
-          (id) => id !== genreId,
-        ),
+        without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
       });
     }
   };
@@ -545,11 +531,7 @@ export const GenreChipGroup = ({
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 25,
-                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
                       >
                         <Badge
                           variant="secondary"
@@ -558,7 +540,7 @@ export const GenreChipGroup = ({
                             "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
                             "hover:bg-emerald-500/20 transition-all duration-200",
                           )}
-                          data-testid={`selected-genre-${genreId}`}
+                          data-testid={`selected-genre-include-${genreId}`}
                         >
                           <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
                             <Check className="w-2.5 h-2.5" />
@@ -572,7 +554,7 @@ export const GenreChipGroup = ({
                               }}
                               className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-600 transition-all duration-200"
                               title="Exclude this genre"
-                              data-testid={`toggle-genre-${genreId}`}
+                              data-testid={`toggle-genre-to-exclude-${genreId}`}
                             >
                               <Filter className="w-2.5 h-2.5" />
                             </button>
@@ -583,7 +565,7 @@ export const GenreChipGroup = ({
                               }}
                               className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
                               title="Remove"
-                              data-testid={`remove-genre-${genreId}`}
+                              data-testid={`remove-genre-include-${genreId}`}
                             >
                               <X className="w-2.5 h-2.5" />
                             </button>
@@ -602,11 +584,7 @@ export const GenreChipGroup = ({
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 25,
-                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
                       >
                         <Badge
                           variant="secondary"
@@ -615,7 +593,7 @@ export const GenreChipGroup = ({
                             "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30",
                             "hover:bg-rose-500/20 transition-all duration-200",
                           )}
-                          data-testid={`selected-genre-${genreId}`}
+                          data-testid={`selected-genre-exclude-${genreId}`}
                         >
                           <div className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
                             <X className="w-2.5 h-2.5" />
@@ -629,7 +607,7 @@ export const GenreChipGroup = ({
                               }}
                               className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 hover:text-emerald-600 transition-all duration-200"
                               title="Include this genre"
-                              data-testid={`toggle-genre-${genreId}`}
+                              data-testid={`toggle-genre-to-include-${genreId}`}
                             >
                               <Filter className="w-2.5 h-2.5" />
                             </button>
@@ -640,7 +618,7 @@ export const GenreChipGroup = ({
                               }}
                               className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
                               title="Remove"
-                              data-testid={`remove-genre-${genreId}`}
+                              data-testid={`remove-genre-exclude-${genreId}`}
                             >
                               <X className="w-2.5 h-2.5" />
                             </button>
@@ -682,9 +660,7 @@ export const GenreChipGroup = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className={cn(
-            "w-80 p-0 glass-panel border-white/10 backdrop-blur-md",
-          )}
+          className={cn("w-80 p-0 glass-panel border-white/10 backdrop-blur-md")}
           align="start"
           data-testid="genre-select-content"
         >
@@ -706,25 +682,27 @@ export const GenreChipGroup = ({
                     <Search className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <p>No genres found</p>
-                  {searchQuery && (
-                    <p className="text-xs">Try a different search term</p>
-                  )}
+                  {searchQuery && <p className="text-xs">Try a different search term</p>}
                 </div>
               </CommandEmpty>
               <CommandGroup>
                 {filteredGenres.map((genre) => {
-                  const isIncluded = selectedGenres.with_genres.includes(
-                    genre.id,
-                  );
-                  const isExcluded = selectedGenres.without_genres.includes(
-                    genre.id,
-                  );
+                  const isIncluded = selectedGenres.with_genres.includes(genre.id);
+                  const isExcluded = selectedGenres.without_genres.includes(genre.id);
 
                   return (
                     <CommandItem
                       key={genre.id}
                       value={genre.name}
-                      onSelect={() => {}}
+                      // Default behavior: clicking row or pressing Enter includes.
+                      onSelect={() => {
+                        if (isIncluded || isExcluded) {
+                          // Toggle between include/exclude when already present.
+                          toggleMode(genre.id);
+                        } else {
+                          handleGenreSelect(genre.id, "include");
+                        }
+                      }}
                       className={cn(
                         "flex items-center justify-between py-3 px-3 cursor-pointer group",
                         "hover:bg-primary/5 transition-all duration-200",
@@ -748,8 +726,7 @@ export const GenreChipGroup = ({
                         <span
                           className={cn(
                             "font-medium",
-                            isIncluded &&
-                              "text-emerald-600 dark:text-emerald-400",
+                            isIncluded && "text-emerald-600 dark:text-emerald-400",
                             isExcluded && "text-rose-600 dark:text-rose-400",
                           )}
                         >
@@ -759,9 +736,7 @@ export const GenreChipGroup = ({
                       <div
                         className={cn(
                           "flex gap-1 transition-opacity duration-200",
-                          hoveredGenre === genre.id
-                            ? "opacity-100"
-                            : "opacity-0",
+                          hoveredGenre === genre.id ? "opacity-100" : "opacity-0",
                         )}
                       >
                         <Button
@@ -774,8 +749,7 @@ export const GenreChipGroup = ({
                           className={cn(
                             "h-7 w-7 p-0 rounded-full",
                             "hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400",
-                            isIncluded &&
-                              "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+                            isIncluded && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
                           )}
                           title="Include this genre"
                           data-testid={`include-genre-${genre.id}`}
@@ -792,8 +766,7 @@ export const GenreChipGroup = ({
                           className={cn(
                             "h-7 w-7 p-0 rounded-full",
                             "hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400",
-                            isExcluded &&
-                              "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+                            isExcluded && "bg-rose-500/15 text-rose-600 dark:text-rose-400",
                           )}
                           title="Exclude this genre"
                           data-testid={`exclude-genre-${genre.id}`}
