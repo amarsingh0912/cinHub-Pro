@@ -206,6 +206,8 @@ export function AdvancedFilterSheet({
   const isMobile = useIsMobile();
   const [collapsedSections, setCollapsedSections] = useState<string[]>(['advanced']);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [regionOpen, setRegionOpen] = useState(false);
+  const [regionSearch, setRegionSearch] = useState("");
   
   // Calculate filter complexity
   const filterComplexity = useMemo(() => {
@@ -301,6 +303,14 @@ export function AdvancedFilterSheet({
   const watchProviders = useMemo(() => {
     return (watchProvidersData as any)?.results?.[filters.watch_region || 'US']?.flatrate || [];
   }, [watchProvidersData, filters.watch_region]);
+
+  const filteredCountries = useMemo(() => {
+    if (!regionSearch.trim()) return countries;
+    const query = regionSearch.toLowerCase();
+    return countries.filter((country: any) => 
+      country.english_name.toLowerCase().includes(query)
+    );
+  }, [countries, regionSearch]);
 
   const updateFilter = <K extends keyof AdvancedFilterState>(
     key: K, 
@@ -999,17 +1009,6 @@ export function AdvancedFilterSheet({
   };
 
   const renderRegionFilter = () => {
-    const [regionOpen, setRegionOpen] = useState(false);
-    const [regionSearch, setRegionSearch] = useState("");
-    
-    const filteredCountries = useMemo(() => {
-      if (!regionSearch.trim()) return countries;
-      const query = regionSearch.toLowerCase();
-      return countries.filter((country: any) => 
-        country.english_name.toLowerCase().includes(query)
-      );
-    }, [countries, regionSearch]);
-
     const selectedCountry = countries.find((c: any) => c.iso_3166_1 === filters.region);
 
     return (

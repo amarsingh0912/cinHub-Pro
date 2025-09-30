@@ -488,7 +488,7 @@ export const GenreChipGroup = ({
                 Clear All
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1">
               <AnimatePresence mode="popLayout">
                 {selectedGenres.with_genres.map((genreId) => {
                   const genre = genres.find(g => g.id === genreId);
