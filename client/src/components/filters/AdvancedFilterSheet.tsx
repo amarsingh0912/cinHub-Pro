@@ -21,6 +21,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "cmdk";
 import { 
   X, 
   Filter, 
@@ -39,7 +41,9 @@ import {
   Tv,
   Sparkles,
   TrendingUp,
-  Zap
+  Zap,
+  ChevronsUpDown,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -417,96 +421,73 @@ export function AdvancedFilterSheet({
   const renderYearFilter = () => {
     const currentYear = new Date().getFullYear();
     const startYear = filters.contentType === 'movie' 
-      ? parseInt(filters.primary_release_date?.start?.substring(0, 4) || `${currentYear - 20}`)
-      : parseInt(filters.first_air_date?.start?.substring(0, 4) || `${currentYear - 20}`);
+      ? filters.primary_release_date?.start?.substring(0, 4)
+      : filters.first_air_date?.start?.substring(0, 4);
     const endYear = filters.contentType === 'movie'
-      ? parseInt(filters.primary_release_date?.end?.substring(0, 4) || `${currentYear}`)
-      : parseInt(filters.first_air_date?.end?.substring(0, 4) || `${currentYear}`);
-
-    const hasYearFilter = (filters.primary_release_date?.start || filters.first_air_date?.start);
-    const yearRange = endYear - startYear;
-    const isNarrowRange = yearRange < 5;
+      ? filters.primary_release_date?.end?.substring(0, 4)
+      : filters.first_air_date?.end?.substring(0, 4);
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-            <div className="p-1 rounded-md bg-primary/10 text-primary">
-              <Calendar className="h-4 w-4" />
-            </div>
-            {filters.contentType === 'movie' ? 'Release Year' : 'First Air Date'}
-          </Label>
-          {hasYearFilter && (
-            <Badge variant="secondary" className="h-5 px-2 text-xs font-medium">
-              {startYear}-{endYear}
-            </Badge>
-          )}
-        </div>
+        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+          <div className="p-1 rounded-md bg-primary/10 text-primary">
+            <Calendar className="h-4 w-4" />
+          </div>
+          {filters.contentType === 'movie' ? 'Release Year' : 'First Air Date'}
+        </Label>
         
-        {/* Quick filter chips */}
-        <div className="flex flex-wrap gap-2">
-          {QUICK_FILTER_PRESETS.slice(0, 2).map((preset) => (
-            <Button
-              key={preset.id}
-              variant="outline"
-              size="sm"
-              onClick={() => applyQuickFilter(preset)}
-              data-testid={`quick-filter-${preset.id}`}
-              className="h-7 text-xs hover:bg-primary/10 hover:border-primary/30 transition-all"
-            >
-              {preset.label}
-            </Button>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Range: {startYear} - {endYear}
-            </Label>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">From Year</Label>
+            <Input
+              type="number"
+              min={1900}
+              max={currentYear + 2}
+              value={startYear || ''}
+              onChange={(e) => {
+                const year = e.target.value;
                 if (filters.contentType === 'movie') {
-                  updateFilter('primary_release_date', {});
+                  updateFilter('primary_release_date', {
+                    ...filters.primary_release_date,
+                    start: year ? `${year}-01-01` : undefined
+                  });
                 } else {
-                  updateFilter('first_air_date', {});
+                  updateFilter('first_air_date', {
+                    ...filters.first_air_date,
+                    start: year ? `${year}-01-01` : undefined
+                  });
                 }
               }}
-              className="h-6 px-2 text-xs hover:text-destructive"
-              disabled={!hasYearFilter}
-              data-testid="reset-year"
-            >
-              Reset
-            </Button>
+              placeholder="e.g., 2020"
+              data-testid="year-from-input"
+            />
           </div>
-          <Slider
-            value={[startYear, endYear]}
-            min={1900}
-            max={currentYear + 2}
-            step={1}
-            onValueChange={([start, end]) => {
-              const dateRange = {
-                start: `${start}-01-01`,
-                end: `${end}-12-31`
-              };
-              if (filters.contentType === 'movie') {
-                updateFilter('primary_release_date', dateRange);
-              } else {
-                updateFilter('first_air_date', dateRange);
-              }
-            }}
-            className="w-full"
-            data-testid="year-range-slider"
-          />
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground">To Year</Label>
+            <Input
+              type="number"
+              min={1900}
+              max={currentYear + 2}
+              value={endYear || ''}
+              onChange={(e) => {
+                const year = e.target.value;
+                if (filters.contentType === 'movie') {
+                  updateFilter('primary_release_date', {
+                    ...filters.primary_release_date,
+                    end: year ? `${year}-12-31` : undefined
+                  });
+                } else {
+                  updateFilter('first_air_date', {
+                    ...filters.first_air_date,
+                    end: year ? `${year}-12-31` : undefined
+                  });
+                }
+              }}
+              placeholder="e.g., 2025"
+              data-testid="year-to-input"
+            />
+          </div>
         </div>
-        {hasYearFilter && isNarrowRange && (
-          <div className="text-xs text-blue-600 dark:text-blue-400 flex items-start gap-1 bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md">
-            <span>ℹ️</span>
-            <span>Narrow date range selected. Consider expanding for more results.</span>
-          </div>
-        )}
       </div>
     );
   };
@@ -619,23 +600,51 @@ export function AdvancedFilterSheet({
 
   const renderRuntimeFilter = () => (
     <div className="space-y-4">
-      <RuntimeSlider
-        value={[
-          filters.with_runtime?.min || (filters.contentType === 'movie' ? 60 : 15),
-          filters.with_runtime?.max || (filters.contentType === 'movie' ? 240 : 120)
-        ]}
-        onValueChange={([min, max]) => {
-          const minValue = filters.contentType === 'movie' ? (min > 60 ? min : undefined) : (min > 15 ? min : undefined);
-          const maxValue = filters.contentType === 'movie' ? (max < 240 ? max : undefined) : (max < 120 ? max : undefined);
-          
-          updateFilter('with_runtime', {
-            min: minValue,
-            max: maxValue
-          });
-        }}
-        contentType={filters.contentType}
-        data-testid="runtime-filter"
-      />
+      <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+        <div className="p-1 rounded-md bg-primary/10 text-primary">
+          <Clock className="h-4 w-4" />
+        </div>
+        Runtime (minutes)
+      </Label>
+      
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Min</Label>
+          <Input
+            type="number"
+            min={0}
+            max={500}
+            value={filters.with_runtime?.min || ''}
+            onChange={(e) => {
+              const value = e.target.value ? Number(e.target.value) : undefined;
+              updateFilter('with_runtime', {
+                ...filters.with_runtime,
+                min: value
+              });
+            }}
+            placeholder={filters.contentType === 'movie' ? '60' : '15'}
+            data-testid="runtime-min-input"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Max</Label>
+          <Input
+            type="number"
+            min={0}
+            max={500}
+            value={filters.with_runtime?.max || ''}
+            onChange={(e) => {
+              const value = e.target.value ? Number(e.target.value) : undefined;
+              updateFilter('with_runtime', {
+                ...filters.with_runtime,
+                max: value
+              });
+            }}
+            placeholder={filters.contentType === 'movie' ? '240' : '120'}
+            data-testid="runtime-max-input"
+          />
+        </div>
+      </div>
     </div>
   );
 
@@ -989,101 +998,134 @@ export function AdvancedFilterSheet({
     );
   };
 
-  const renderRegionFilter = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
+  const renderRegionFilter = () => {
+    const [regionOpen, setRegionOpen] = useState(false);
+    const [regionSearch, setRegionSearch] = useState("");
+    
+    const filteredCountries = useMemo(() => {
+      if (!regionSearch.trim()) return countries;
+      const query = regionSearch.toLowerCase();
+      return countries.filter((country: any) => 
+        country.english_name.toLowerCase().includes(query)
+      );
+    }, [countries, regionSearch]);
+
+    const selectedCountry = countries.find((c: any) => c.iso_3166_1 === filters.region);
+
+    return (
+      <div className="space-y-3">
         <Label className="text-sm font-medium text-muted-foreground">
           Release Region
         </Label>
-        {filters.region && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => updateFilter('region', undefined)}
-            className="h-6 px-2 text-xs hover:text-destructive"
-          >
-            Clear
-          </Button>
-        )}
+        <Popover open={regionOpen} onOpenChange={setRegionOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={regionOpen}
+              className="w-full justify-between"
+              data-testid="region-select-trigger"
+            >
+              {selectedCountry ? selectedCountry.english_name : "Any region..."}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0" align="start">
+            <Command>
+              <CommandInput
+                placeholder="Search regions..."
+                value={regionSearch}
+                onValueChange={setRegionSearch}
+                data-testid="region-search-input"
+              />
+              <CommandList>
+                <CommandEmpty>No region found.</CommandEmpty>
+                <CommandGroup>
+                  <CommandItem
+                    value="none"
+                    onSelect={() => {
+                      updateFilter('region', undefined);
+                      setRegionOpen(false);
+                    }}
+                    data-testid="region-option-none"
+                  >
+                    <span>Any Region</span>
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        !filters.region ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                  {filteredCountries.map((country: any) => (
+                    <CommandItem
+                      key={country.iso_3166_1}
+                      value={country.english_name}
+                      onSelect={() => {
+                        updateFilter('region', country.iso_3166_1);
+                        setRegionOpen(false);
+                      }}
+                      data-testid={`region-option-${country.iso_3166_1}`}
+                    >
+                      <span>{country.english_name}</span>
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          filters.region === country.iso_3166_1 ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
-      <Select 
-        value={filters.region || 'none'} 
-        onValueChange={(value) => updateFilter('region', value === 'none' ? undefined : value)}
-      >
-        <SelectTrigger data-testid="region-select">
-          <SelectValue placeholder="Any region..." />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="none">Any Region</SelectItem>
-          {countries.map((country: any) => (
-            <SelectItem key={country.iso_3166_1} value={country.iso_3166_1}>
-              {country.english_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
+    );
+  };
 
-  const renderCertificationFilters = () => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
+  const renderCertificationFilter = () => {
+    const US_RATINGS = [
+      { value: 'G', label: 'G - General Audiences' },
+      { value: 'PG', label: 'PG - Parental Guidance' },
+      { value: 'PG-13', label: 'PG-13 - Parents Strongly Cautioned' },
+      { value: 'R', label: 'R - Restricted' },
+      { value: 'NC-17', label: 'NC-17 - Adults Only' }
+    ];
+
+    return (
+      <div className="space-y-3">
         <Label className="text-sm font-medium text-muted-foreground">
-          Content Rating (Movies Only)
+          Content Rating (US)
         </Label>
-        {filters.certification_country && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              updateFilter('certification_country', undefined);
-              updateFilter('certification', undefined);
-              updateFilter('certification_lte', undefined);
-            }}
-            className="h-6 px-2 text-xs hover:text-destructive"
-          >
-            Clear
-          </Button>
-        )}
-      </div>
-      <div className="space-y-2">
         <Select 
-          value={filters.certification_country || 'none'} 
-          onValueChange={(value) => updateFilter('certification_country', value === 'none' ? undefined : value)}
+          value={filters.certification || 'none'} 
+          onValueChange={(value) => {
+            if (value === 'none') {
+              updateFilter('certification', undefined);
+              updateFilter('certification_country', undefined);
+            } else {
+              updateFilter('certification', value);
+              updateFilter('certification_country', 'US');
+            }
+          }}
         >
-          <SelectTrigger data-testid="certification-country-select">
-            <SelectValue placeholder="Rating country..." />
+          <SelectTrigger data-testid="certification-select">
+            <SelectValue placeholder="Any rating..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">Any Country</SelectItem>
-            <SelectItem value="US">United States (G, PG, PG-13, R, NC-17)</SelectItem>
-            <SelectItem value="GB">United Kingdom (U, PG, 12A, 15, 18)</SelectItem>
-            <SelectItem value="DE">Germany (FSK)</SelectItem>
-            <SelectItem value="FR">France</SelectItem>
+            <SelectItem value="none">Any Rating</SelectItem>
+            {US_RATINGS.map((rating) => (
+              <SelectItem key={rating.value} value={rating.value}>
+                {rating.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        
-        {filters.certification_country && filters.certification_country !== 'none' && (
-          <>
-            <Input
-              type="text"
-              value={filters.certification || ''}
-              onChange={(e) => updateFilter('certification', e.target.value || undefined)}
-              placeholder="e.g., PG-13"
-              data-testid="certification-input"
-            />
-            <Input
-              type="text"
-              value={filters.certification_lte || ''}
-              onChange={(e) => updateFilter('certification_lte', e.target.value || undefined)}
-              placeholder="Max rating (e.g., R)"
-              data-testid="certification-lte-input"
-            />
-          </>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderReleaseTypeFilter = () => {
     const releaseTypes = [
@@ -1437,14 +1479,6 @@ export function AdvancedFilterSheet({
                             <div className="space-y-4">
                               {renderYearFilter()}
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {renderSpecificYearFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  {renderTimezoneFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
                               {renderRuntimeFilter()}
                             </div>
                           )}
@@ -1452,40 +1486,18 @@ export function AdvancedFilterSheet({
                           {category.id === 'streaming' && renderStreamingFilter()}
                           {category.id === 'advanced' && (
                             <div className="space-y-4">
-                              <KeywordsAutocomplete
-                                value={filters.with_keywords || []}
-                                onChange={(keywords) => updateFilter('with_keywords', keywords)}
-                              />
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {renderKeywordExclusionFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              
-                              {/* People Filters */}
-                              {filters.contentType === 'movie' && (
-                                <>
-                                  {renderCastFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderCrewFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
+                              {/* People Filter */}
                               <PeopleAutocomplete
                                 value={filters.with_people || []}
                                 onChange={(people) => updateFilter('with_people', people)}
                               />
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
                               
-                              {/* Companies & Networks */}
+                              {/* Production Companies */}
                               <CompaniesAutocomplete
                                 value={filters.with_companies || []}
                                 onChange={(companies) => updateFilter('with_companies', companies)}
                               />
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderNetworksFilter()}
-                                </>
-                              )}
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
                               
                               {/* Language & Region */}
@@ -1495,25 +1507,10 @@ export function AdvancedFilterSheet({
                               <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
                               
                               {/* Content Rating */}
-                              {filters.contentType === 'movie' && (
-                                <>
-                                  {renderCertificationFilters()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderReleaseTypeFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderIncludeVideoFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
+                              {renderCertificationFilter()}
+                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
                               
-                              {/* TV Specific Filters */}
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  {renderScreenedTheatricallyFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
-                              
+                              {/* Adult Content */}
                               {renderAdultContentFilter()}
                             </div>
                           )}

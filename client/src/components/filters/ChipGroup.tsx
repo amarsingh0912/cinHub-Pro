@@ -379,7 +379,7 @@ export const ChipGroup = ({
   );
 };
 
-// Genre-specific implementation with searchable select
+// Genre-specific implementation matching the autocomplete UI pattern
 export interface GenreChipGroupProps {
   selectedGenres: { with_genres: number[]; without_genres: number[] };
   onGenresChange: (genres: { with_genres: number[]; without_genres: number[] }) => void;
@@ -404,33 +404,29 @@ export const GenreChipGroup = ({
     return genres.filter(genre => genre.name.toLowerCase().includes(query));
   }, [genres, searchQuery]);
 
-  const handleGenreToggle = (genreId: number, mode: 'include' | 'exclude') => {
+  const handleGenreSelect = (genreId: number) => {
     const isInInclude = selectedGenres.with_genres.includes(genreId);
     const isInExclude = selectedGenres.without_genres.includes(genreId);
 
-    let newWithGenres = [...selectedGenres.with_genres];
-    let newWithoutGenres = [...selectedGenres.without_genres];
-
-    if (mode === 'include') {
-      if (isInInclude) {
-        newWithGenres = newWithGenres.filter(id => id !== genreId);
-      } else {
-        newWithGenres.push(genreId);
-        newWithoutGenres = newWithoutGenres.filter(id => id !== genreId);
-      }
+    if (isInInclude) {
+      // Remove from include
+      onGenresChange({
+        with_genres: selectedGenres.with_genres.filter(id => id !== genreId),
+        without_genres: selectedGenres.without_genres
+      });
+    } else if (isInExclude) {
+      // Remove from exclude
+      onGenresChange({
+        with_genres: selectedGenres.with_genres,
+        without_genres: selectedGenres.without_genres.filter(id => id !== genreId)
+      });
     } else {
-      if (isInExclude) {
-        newWithoutGenres = newWithoutGenres.filter(id => id !== genreId);
-      } else {
-        newWithoutGenres.push(genreId);
-        newWithGenres = newWithGenres.filter(id => id !== genreId);
-      }
+      // Add to include
+      onGenresChange({
+        with_genres: [...selectedGenres.with_genres, genreId],
+        without_genres: selectedGenres.without_genres
+      });
     }
-
-    onGenresChange({ 
-      with_genres: newWithGenres, 
-      without_genres: newWithoutGenres 
-    });
   };
 
   const removeGenre = (genreId: number) => {
@@ -447,100 +443,33 @@ export const GenreChipGroup = ({
   return (
     <div className={cn("space-y-3", className)} data-testid="genre-chip-group">
       {/* Selected genres display */}
-      <AnimatePresence mode="popLayout">
-        {selectedGenreIds.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                Selected ({selectedGenreIds.length})
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAll}
-                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                data-testid="clear-all-genres"
+      {selectedGenreIds.length > 0 && (
+        <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+          {selectedGenres.with_genres.map((genreId) => {
+            const genre = genres.find(g => g.id === genreId);
+            if (!genre) return null;
+            return (
+              <Badge
+                key={`include-${genreId}`}
+                variant="secondary"
+                className="flex items-center gap-1 text-xs"
+                data-testid={`selected-genre-${genreId}`}
               >
-                Clear All
-              </Button>
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              <AnimatePresence mode="popLayout">
-                {selectedGenres.with_genres.map((genreId) => {
-                  const genre = genres.find(g => g.id === genreId);
-                  if (!genre) return null;
-                  return (
-                    <motion.div
-                      key={`include-${genreId}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm",
-                        "transition-all duration-200 cursor-pointer group",
-                        "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                      )}
-                      data-testid={`selected-genre-${genreId}`}
-                    >
-                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30">
-                        <Check className="w-3 h-3 font-bold" />
-                      </div>
-                      <span className="font-medium">{genre.name}</span>
-                      <button
-                        onClick={() => removeGenre(genreId)}
-                        className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/20 hover:text-destructive hover:scale-110 active:scale-95"
-                        title="Remove"
-                        data-testid={`remove-genre-${genreId}`}
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
-                    </motion.div>
-                  );
-                })}
-                {selectedGenres.without_genres.map((genreId) => {
-                  const genre = genres.find(g => g.id === genreId);
-                  if (!genre) return null;
-                  return (
-                    <motion.div
-                      key={`exclude-${genreId}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm",
-                        "transition-all duration-200 cursor-pointer group",
-                        "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20"
-                      )}
-                      data-testid={`selected-genre-${genreId}`}
-                    >
-                      <div className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30">
-                        <X className="w-3 h-3 font-bold" />
-                      </div>
-                      <span className="font-medium">{genre.name}</span>
-                      <button
-                        onClick={() => removeGenre(genreId)}
-                        className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/20 hover:text-destructive hover:scale-110 active:scale-95"
-                        title="Remove"
-                        data-testid={`remove-genre-${genreId}`}
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {genre.name}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  onClick={() => removeGenre(genreId)}
+                  data-testid={`remove-genre-${genreId}`}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            );
+          })}
+        </div>
+      )}
 
       {/* Searchable select */}
       <Popover open={open} onOpenChange={setOpen}>
@@ -549,79 +478,42 @@ export const GenreChipGroup = ({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between glass-panel border-white/10 hover:bg-primary/5 transition-all duration-200"
+            className="w-full justify-between"
             data-testid="genre-select-trigger"
           >
-            <span className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              Search and select genres...
-            </span>
+            Search genres...
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0 glass-panel border-white/10 backdrop-blur-md" align="start" data-testid="genre-select-content">
-          <Command className="rounded-lg border-0">
+        <PopoverContent className="w-full p-0" align="start" data-testid="genre-select-content">
+          <Command>
             <CommandInput 
               placeholder="Search genres..." 
               value={searchQuery}
               onValueChange={setSearchQuery}
-              className="h-9"
               data-testid="genre-search-input"
             />
             <CommandList>
               <CommandEmpty>No genres found.</CommandEmpty>
-              <CommandGroup className="max-h-64 overflow-y-auto">
+              <CommandGroup>
                 {filteredGenres.map((genre) => {
-                  const isIncluded = selectedGenres.with_genres.includes(genre.id);
-                  const isExcluded = selectedGenres.without_genres.includes(genre.id);
+                  const isSelected = selectedGenres.with_genres.includes(genre.id);
                   
                   return (
                     <CommandItem
                       key={genre.id}
                       value={genre.name}
-                      className="flex items-center justify-between cursor-pointer"
-                      onSelect={() => {}}
+                      onSelect={() => handleGenreSelect(genre.id)}
+                      className="flex items-center justify-between"
                       data-testid={`genre-option-${genre.id}`}
                     >
-                      <span className="flex-1">{genre.name}</span>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleGenreToggle(genre.id, 'include');
-                          }}
-                          className={cn(
-                            "h-7 w-7 p-0 rounded-full transition-all",
-                            isIncluded 
-                              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30" 
-                              : "hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400"
-                          )}
-                          title="Include this genre"
-                          data-testid={`include-genre-${genre.id}`}
-                        >
-                          <Check className={cn("w-3.5 h-3.5", isIncluded && "font-bold")} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleGenreToggle(genre.id, 'exclude');
-                          }}
-                          className={cn(
-                            "h-7 w-7 p-0 rounded-full transition-all",
-                            isExcluded 
-                              ? "bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-500/30" 
-                              : "hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400"
-                          )}
-                          title="Exclude this genre"
-                          data-testid={`exclude-genre-${genre.id}`}
-                        >
-                          <X className={cn("w-3.5 h-3.5", isExcluded && "font-bold")} />
-                        </Button>
-                      </div>
+                      <span>{genre.name}</span>
+                      <Check
+                        className={cn(
+                          "h-4 w-4",
+                          isSelected ? "opacity-100" : "opacity-0"
+                        )}
+                      />
                     </CommandItem>
                   );
                 })}
