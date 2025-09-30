@@ -1,0 +1,125 @@
+{
+  "$schema": "https://example.com/tmdb-filter-schema.json",
+  "version": "1.0.0",
+  "baseUrl": "https://api.themoviedb.org/3",
+  "endpoints": {
+    "movie": {
+      "path": "/discover/movie",
+      "params": [
+        { "key": "language", "type": "string", "default": "en-US", "ui": { "control": "select", "group": "Localization", "note": "Response language (ISO-639-1)" } },
+        { "key": "region", "type": "string", "requiredIf": "with_watch_providers", "ui": { "control": "select", "group": "Localization", "note": "Release/Watch Region (ISO-3166-1)" } },
+
+        { "key": "sort_by", "type": "enum", "default": "popularity.desc",
+          "values": ["popularity.asc","popularity.desc","release_date.asc","release_date.desc","revenue.asc","revenue.desc","primary_release_date.asc","primary_release_date.desc","original_title.asc","original_title.desc","vote_average.asc","vote_average.desc","vote_count.asc","vote_count.desc"],
+          "ui": { "control": "select", "group": "Sort" }
+        },
+
+        { "key": "certification_country", "type": "string", "dependsOn": ["certification","certification.lte"], "ui": { "control": "select", "group": "Certification" } },
+        { "key": "certification", "type": "string", "ui": { "control": "chip", "group": "Certification" } },
+        { "key": "certification.lte", "type": "string", "ui": { "control": "chip", "group": "Certification", "note": "Max rating" } },
+
+        { "key": "include_adult", "type": "boolean", "default": false, "ui": { "control": "switch", "group": "Content Flags" } },
+        { "key": "include_video", "type": "boolean", "default": false, "ui": { "control": "switch", "group": "Content Flags" } },
+
+        { "key": "primary_release_year", "type": "number", "ui": { "control": "number", "group": "Dates" } },
+        { "key": "primary_release_date.gte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "primary_release_date.lte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "release_date.gte", "type": "date", "ui": { "control": "date", "group": "Dates", "note": "Alternative date filter" } },
+        { "key": "release_date.lte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+
+        { "key": "vote_count.gte", "type": "number", "min": 0, "ui": { "control": "number", "group": "Ratings" } },
+        { "key": "vote_count.lte", "type": "number", "min": 0, "ui": { "control": "number", "group": "Ratings" } },
+        { "key": "vote_average.gte", "type": "number", "min": 0, "max": 10, "step": 0.1, "ui": { "control": "slider", "group": "Ratings" } },
+        { "key": "vote_average.lte", "type": "number", "min": 0, "max": 10, "step": 0.1, "ui": { "control": "slider", "group": "Ratings" } },
+
+        { "key": "with_runtime.gte", "type": "number", "min": 0, "ui": { "control": "slider", "group": "Runtime" } },
+        { "key": "with_runtime.lte", "type": "number", "min": 0, "ui": { "control": "slider", "group": "Runtime" } },
+
+        { "key": "with_genres", "type": "csv<number>", "ui": { "control": "chips", "group": "Genres", "mode": "include" } },
+        { "key": "without_genres", "type": "csv<number>", "ui": { "control": "chips", "group": "Genres", "mode": "exclude" } },
+
+        { "key": "with_keywords", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Keywords", "source": "/search/keyword" } },
+        { "key": "without_keywords", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Keywords", "mode": "exclude", "source": "/search/keyword" } },
+
+        { "key": "with_cast", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "People", "source": "/search/person" } },
+        { "key": "with_crew", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "People", "source": "/search/person" } },
+        { "key": "with_people", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "People", "source": "/search/person", "note": "Union of cast/crew" } },
+
+        { "key": "with_companies", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Companies", "source": "/search/company" } },
+
+        { "key": "with_original_language", "type": "string", "ui": { "control": "select", "group": "Languages", "note": "ISO-639-1" } },
+
+        { "key": "with_watch_providers", "type": "csv<number>", "ui": { "control": "logo-grid", "group": "Providers", "source": "/watch/providers/movie" } },
+        { "key": "watch_region", "type": "string", "ui": { "control": "select", "group": "Providers", "note": "ISO-3166-1; required with providers" } },
+        { "key": "with_watch_monetization_types", "type": "enumCsv",
+          "values": ["flatrate","free","ads","rent","buy"],
+          "ui": { "control": "chip-toggle-multi", "group": "Providers" }
+        },
+
+        { "key": "with_release_type", "type": "enumCsv",
+          "values": ["1","2","3","4","5","6","7"],
+          "ui": { "control": "chip-toggle-multi", "group": "Availability", "note": "Premiere(1), Theatrical Limited(2), Theatrical(3), Digital(4), Physical(5), TV(6), Streaming(7)" }
+        },
+
+        { "key": "page", "type": "number", "min": 1, "max": 500, "default": 1, "ui": { "control": "pagination" } }
+      ]
+    },
+
+    "tv": {
+      "path": "/discover/tv",
+      "params": [
+        { "key": "language", "type": "string", "default": "en-US", "ui": { "control": "select", "group": "Localization" } },
+
+        { "key": "sort_by", "type": "enum", "default": "popularity.desc",
+          "values": ["popularity.asc","popularity.desc","first_air_date.asc","first_air_date.desc","vote_average.asc","vote_average.desc","vote_count.asc","vote_count.desc"],
+          "ui": { "control": "select", "group": "Sort" }
+        },
+
+        { "key": "air_date.gte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "air_date.lte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "first_air_date.gte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "first_air_date.lte", "type": "date", "ui": { "control": "date", "group": "Dates" } },
+        { "key": "first_air_date_year", "type": "number", "ui": { "control": "number", "group": "Dates" } },
+        { "key": "timezone", "type": "string", "ui": { "control": "select", "group": "Dates", "note": "IANA tz, affects airing filters" } },
+
+        { "key": "vote_count.gte", "type": "number", "min": 0, "ui": { "control": "number", "group": "Ratings" } },
+        { "key": "vote_count.lte", "type": "number", "min": 0, "ui": { "control": "number", "group": "Ratings" } },
+        { "key": "vote_average.gte", "type": "number", "min": 0, "max": 10, "step": 0.1, "ui": { "control": "slider", "group": "Ratings" } },
+        { "key": "vote_average.lte", "type": "number", "min": 0, "max": 10, "step": 0.1, "ui": { "control": "slider", "group": "Ratings" } },
+
+        { "key": "with_runtime.gte", "type": "number", "min": 0, "ui": { "control": "slider", "group": "Runtime" } },
+        { "key": "with_runtime.lte", "type": "number", "min": 0, "ui": { "control": "slider", "group": "Runtime" } },
+
+        { "key": "with_genres", "type": "csv<number>", "ui": { "control": "chips", "group": "Genres", "mode": "include" } },
+        { "key": "without_genres", "type": "csv<number>", "ui": { "control": "chips", "group": "Genres", "mode": "exclude" } },
+
+        { "key": "with_keywords", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Keywords", "source": "/search/keyword" } },
+        { "key": "without_keywords", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Keywords", "mode": "exclude", "source": "/search/keyword" } },
+
+        { "key": "with_networks", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Networks", "source": "/network/{id}" } },
+        { "key": "with_companies", "type": "csv<number>", "ui": { "control": "autocomplete-multi", "group": "Companies", "source": "/search/company" } },
+
+        { "key": "with_original_language", "type": "string", "ui": { "control": "select", "group": "Languages" } },
+
+        { "key": "with_watch_providers", "type": "csv<number>", "ui": { "control": "logo-grid", "group": "Providers", "source": "/watch/providers/tv" } },
+        { "key": "watch_region", "type": "string", "ui": { "control": "select", "group": "Providers" } },
+        { "key": "with_watch_monetization_types", "type": "enumCsv",
+          "values": ["flatrate","free","ads","rent","buy"],
+          "ui": { "control": "chip-toggle-multi", "group": "Providers" }
+        },
+
+        { "key": "screened_theatrically", "type": "boolean", "ui": { "control": "switch", "group": "Availability" } },
+
+        { "key": "page", "type": "number", "min": 1, "max": 500, "default": 1, "ui": { "control": "pagination" } }
+      ]
+    }
+  },
+
+  "commonUi": {
+    "chipsInclude": { "component": "ChipGroup", "multi": true },
+    "chipsExclude": { "component": "ChipGroup", "multi": true, "variant": "outline" },
+    "slider": { "component": "DualRangeSlider", "debounceMs": 250 },
+    "logoGrid": { "component": "ProviderLogoGrid", "multi": true },
+    "autocomplete": { "component": "Autocomplete", "debounceMs": 250, "multi": true }
+  }
+}
