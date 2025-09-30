@@ -31,7 +31,6 @@ interface ChipGroupProps {
   maxSelections?: number;
   allowExclude?: boolean;
   searchable?: boolean;
-  singleIncludeMode?: boolean;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'premium' | 'minimal';
@@ -47,7 +46,6 @@ export const ChipGroup = ({
   maxSelections,
   allowExclude = true,
   searchable = true,
-  singleIncludeMode = false,
   className,
   size = 'md',
   variant = 'premium',
@@ -95,9 +93,9 @@ export const ChipGroup = ({
         return;
       }
       
-      // If switching to 'include' mode in single mode, remove all other 'include' selections
+      // If switching to 'include' mode, remove all other 'include' selections
       let updated = [...selected];
-      if (mode === 'include' && singleIncludeMode) {
+      if (mode === 'include') {
         updated = updated.filter(s => s.mode !== 'include');
       }
       updated[updated.findIndex(s => s.item.id === item.id)] = { ...existing, mode };
@@ -108,9 +106,9 @@ export const ChipGroup = ({
     
     if (maxSelections && selected.length >= maxSelections) return;
     
-    // If adding new 'include' selection in single mode, remove all existing 'include' selections
+    // If adding new 'include' selection, remove all existing 'include' selections
     let updatedSelected = [...selected];
-    if (mode === 'include' && singleIncludeMode) {
+    if (mode === 'include') {
       updatedSelected = updatedSelected.filter(s => s.mode !== 'include');
     }
     
@@ -432,7 +430,6 @@ export interface GenreChipGroupProps {
   selectedGenres: { with_genres: number[]; without_genres: number[] };
   onGenresChange: (genres: { with_genres: number[]; without_genres: number[] }) => void;
   genres: Array<{ id: number; name: string }>;
-  singleIncludeMode?: boolean;
   className?: string;
 }
 
@@ -440,7 +437,6 @@ export const GenreChipGroup = ({
   selectedGenres,
   onGenresChange,
   genres,
-  singleIncludeMode = false,
   className
 }: GenreChipGroupProps) => {
   // Convert genres to chip items
@@ -489,7 +485,6 @@ export const GenreChipGroup = ({
       emptyMessage="No genres available"
       allowExclude={true}
       searchable={true}
-      singleIncludeMode={singleIncludeMode}
       size="md"
       variant="premium"
       className={className}
