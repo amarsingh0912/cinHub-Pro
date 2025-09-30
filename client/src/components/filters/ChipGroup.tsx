@@ -89,6 +89,7 @@ export const ChipGroup = ({
     if (existingIndex !== -1) {
       const existing = selected[existingIndex];
       if (existing.mode === mode) {
+        setIsOpen(false);
         return;
       }
       const updated = [...selected];
