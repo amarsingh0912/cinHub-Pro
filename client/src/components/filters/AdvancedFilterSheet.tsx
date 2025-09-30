@@ -955,18 +955,30 @@ export function AdvancedFilterSheet({
 
     return (
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-muted-foreground">
-          Timezone (TV Only)
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">
+            Timezone (TV Only)
+          </Label>
+          {filters.timezone && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => updateFilter('timezone', undefined)}
+              className="h-6 px-2 text-xs hover:text-destructive"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
         <Select 
-          value={filters.timezone || ''} 
-          onValueChange={(value) => updateFilter('timezone', value || undefined)}
+          value={filters.timezone || 'none'} 
+          onValueChange={(value) => updateFilter('timezone', value === 'none' ? undefined : value)}
         >
           <SelectTrigger data-testid="timezone-select">
             <SelectValue placeholder="Select timezone..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Any Timezone</SelectItem>
+            <SelectItem value="none">Any Timezone</SelectItem>
             {timezones.map((tz) => (
               <SelectItem key={tz.value} value={tz.value}>
                 {tz.label}
@@ -980,18 +992,30 @@ export function AdvancedFilterSheet({
 
   const renderRegionFilter = () => (
     <div className="space-y-3">
-      <Label className="text-sm font-medium text-muted-foreground">
-        Release Region
-      </Label>
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Release Region
+        </Label>
+        {filters.region && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => updateFilter('region', undefined)}
+            className="h-6 px-2 text-xs hover:text-destructive"
+          >
+            Clear
+          </Button>
+        )}
+      </div>
       <Select 
-        value={filters.region || ''} 
-        onValueChange={(value) => updateFilter('region', value || undefined)}
+        value={filters.region || 'none'} 
+        onValueChange={(value) => updateFilter('region', value === 'none' ? undefined : value)}
       >
         <SelectTrigger data-testid="region-select">
           <SelectValue placeholder="Any region..." />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Any Region</SelectItem>
+          <SelectItem value="none">Any Region</SelectItem>
           {countries.map((country: any) => (
             <SelectItem key={country.iso_3166_1} value={country.iso_3166_1}>
               {country.english_name}
@@ -1004,19 +1028,35 @@ export function AdvancedFilterSheet({
 
   const renderCertificationFilters = () => (
     <div className="space-y-3">
-      <Label className="text-sm font-medium text-muted-foreground">
-        Content Rating (Movies Only)
-      </Label>
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-medium text-muted-foreground">
+          Content Rating (Movies Only)
+        </Label>
+        {filters.certification_country && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              updateFilter('certification_country', undefined);
+              updateFilter('certification', undefined);
+              updateFilter('certification_lte', undefined);
+            }}
+            className="h-6 px-2 text-xs hover:text-destructive"
+          >
+            Clear
+          </Button>
+        )}
+      </div>
       <div className="space-y-2">
         <Select 
-          value={filters.certification_country || ''} 
-          onValueChange={(value) => updateFilter('certification_country', value || undefined)}
+          value={filters.certification_country || 'none'} 
+          onValueChange={(value) => updateFilter('certification_country', value === 'none' ? undefined : value)}
         >
           <SelectTrigger data-testid="certification-country-select">
             <SelectValue placeholder="Rating country..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Any Country</SelectItem>
+            <SelectItem value="none">Any Country</SelectItem>
             <SelectItem value="US">United States (G, PG, PG-13, R, NC-17)</SelectItem>
             <SelectItem value="GB">United Kingdom (U, PG, 12A, 15, 18)</SelectItem>
             <SelectItem value="DE">Germany (FSK)</SelectItem>
@@ -1024,7 +1064,7 @@ export function AdvancedFilterSheet({
           </SelectContent>
         </Select>
         
-        {filters.certification_country && (
+        {filters.certification_country && filters.certification_country !== 'none' && (
           <>
             <Input
               type="text"
