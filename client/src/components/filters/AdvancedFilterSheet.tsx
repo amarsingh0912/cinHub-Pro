@@ -18,28 +18,19 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   X, 
   Filter, 
   ChevronDown, 
-  ChevronUp, 
   Star, 
   Calendar, 
-  Clock, 
   Globe, 
   MonitorPlay, 
   Users, 
-  Building2, 
-  Shield,
-  Search,
-  Film,
   Tv,
   Sparkles,
   TrendingUp,
-  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -54,13 +45,6 @@ import { RatingSlider } from "./StarSlider";
 import type { 
   AdvancedFilterState, 
   FilterCategory, 
-  Genre,
-  Language,
-  Country,
-  WatchProvider,
-  Person,
-  Company,
-  Network,
   QuickFilterChip
 } from "@/types/filters";
 
@@ -202,19 +186,19 @@ export function AdvancedFilterSheet({
   const isMobile = useIsMobile();
   const [collapsedSections, setCollapsedSections] = useState<string[]>(['advanced']);
   const [hasInitialized, setHasInitialized] = useState(false);
-  
+
   // Calculate filter complexity
   const filterComplexity = useMemo(() => {
     let score = 0;
-    
+
     // Genre filters
     const genreCount = (filters.with_genres?.length || 0) + (filters.without_genres?.length || 0);
     if (genreCount > 0) score += genreCount > 3 ? 2 : 1;
-    
+
     // Rating filters
     if (filters.vote_average?.min && filters.vote_average.min > 7) score += 2;
     if (filters.vote_count?.min && filters.vote_count.min > 500) score += 2;
-    
+
     // Date range filters
     const hasDateFilter = filters.primary_release_date?.start || filters.first_air_date?.start;
     if (hasDateFilter) {
@@ -229,18 +213,18 @@ export function AdvancedFilterSheet({
       if (range < 5) score += 2;
       else if (range < 10) score += 1;
     }
-    
+
     // Provider filters
     if (filters.with_watch_providers?.length && filters.with_watch_providers.length > 0) score += 1;
-    
+
     // People, companies, keywords
     if (filters.with_people?.length && filters.with_people.length > 0) score += 2;
     if (filters.with_companies?.length && filters.with_companies.length > 0) score += 2;
     if (filters.with_keywords?.length && filters.with_keywords.length > 0) score += 1;
-    
+
     return score;
   }, [filters]);
-  
+
   // Initialize collapsed sections based on mobile state (only once)
   useEffect(() => {
     if (!hasInitialized) {
@@ -305,14 +289,6 @@ export function AdvancedFilterSheet({
     onFiltersChange({ ...filters, [key]: value });
   };
 
-  const toggleGenre = (genreId: number) => {
-    const currentGenres = filters.with_genres || [];
-    const updatedGenres = currentGenres.includes(genreId)
-      ? currentGenres.filter(id => id !== genreId)
-      : [...currentGenres, genreId];
-    updateFilter('with_genres', updatedGenres);
-  };
-
   const toggleWatchProvider = (providerId: number) => {
     const currentProviders = filters.with_watch_providers || [];
     const updatedProviders = currentProviders.includes(providerId)
@@ -374,46 +350,7 @@ export function AdvancedFilterSheet({
     );
   };
 
-
-  const renderGenreFilter = () => {
-    const totalGenreFilters = (filters.with_genres?.length || 0) + (filters.without_genres?.length || 0);
-    const showWarning = totalGenreFilters > 5;
-    
-    return (
-      <div className="space-y-4">
-        <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
-          <div className="p-1 rounded-md bg-primary/10 text-primary">
-            <Filter className="h-4 w-4" />
-          </div>
-          Genres
-          {totalGenreFilters > 0 && (
-            <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
-              {totalGenreFilters}
-            </Badge>
-          )}
-        </Label>
-        <GenreChipGroup
-          selectedGenres={{
-            with_genres: filters.with_genres || [],
-            without_genres: filters.without_genres || []
-          }}
-          onGenresChange={(genres) => {
-            updateFilter('with_genres', genres.with_genres);
-            updateFilter('without_genres', genres.without_genres);
-          }}
-          genres={currentGenres}
-          data-testid="genre-filter"
-        />
-        {showWarning && (
-          <div className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md">
-            <span>⚠️</span>
-            <span>Too many genre filters may significantly limit results</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
+  // --- UPDATED: Year/Release filter (removed quick chips like Trending & Top Rated)
   const renderYearFilter = () => {
     const currentYear = new Date().getFullYear();
     const startYear = filters.contentType === 'movie' 
@@ -442,22 +379,8 @@ export function AdvancedFilterSheet({
             </Badge>
           )}
         </div>
-        
-        {/* Quick filter chips */}
-        <div className="flex flex-wrap gap-2">
-          {QUICK_FILTER_PRESETS.slice(0, 2).map((preset) => (
-            <Button
-              key={preset.id}
-              variant="outline"
-              size="sm"
-              onClick={() => applyQuickFilter(preset)}
-              data-testid={`quick-filter-${preset.id}`}
-              className="h-7 text-xs hover:bg-primary/10 hover:border-primary/30 transition-all"
-            >
-              {preset.label}
-            </Button>
-          ))}
-        </div>
+
+        {/* Quick filter chips REMOVED from runtime section */}
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -513,7 +436,7 @@ export function AdvancedFilterSheet({
 
   const renderRatingFilter = () => {
     const hasRatingFilter = filters.vote_average?.min || filters.vote_average?.max || filters.vote_count?.min || filters.vote_count?.max;
-    
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -529,92 +452,92 @@ export function AdvancedFilterSheet({
             </Badge>
           )}
         </div>
-      
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Rating: {(filters.vote_average?.min || 0).toFixed(1)} - {(filters.vote_average?.max || 10).toFixed(1)} ⭐
-            </Label>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => updateFilter('vote_average', {})}
-              className="h-6 px-2 text-xs hover:text-destructive"
-              disabled={!filters.vote_average?.min && !filters.vote_average?.max}
-              data-testid="reset-rating"
-            >
-              Reset
-            </Button>
-          </div>
-          <Slider
-            value={[filters.vote_average?.min || 0, filters.vote_average?.max || 10]}
-            min={0}
-            max={10}
-            step={0.1}
-            onValueChange={([min, max]) => {
-              updateFilter('vote_average', { min: min > 0 ? min : undefined, max: max < 10 ? max : undefined });
-            }}
-            className="w-full"
-            data-testid="rating-slider"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground px-1">
-            <span>0</span>
-            <span>2.5</span>
-            <span>5.0</span>
-            <span>7.5</span>
-            <span>10</span>
-          </div>
-        </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">
-              Vote Count: {filters.vote_count?.min || 0}{filters.vote_count?.max ? ` - ${filters.vote_count.max}` : '+'}
-            </Label>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => updateFilter('vote_count', {})}
-              className="h-6 px-2 text-xs hover:text-destructive"
-              disabled={!filters.vote_count?.min && !filters.vote_count?.max}
-              data-testid="reset-vote-count"
-            >
-              Reset
-            </Button>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Rating: {(filters.vote_average?.min || 0).toFixed(1)} - {(filters.vote_average?.max || 10).toFixed(1)} ⭐
+              </Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter('vote_average', {})}
+                className="h-6 px-2 text-xs hover:text-destructive"
+                disabled={!filters.vote_average?.min && !filters.vote_average?.max}
+                data-testid="reset-rating"
+              >
+                Reset
+              </Button>
+            </div>
+            <Slider
+              value={[filters.vote_average?.min || 0, filters.vote_average?.max || 10]}
+              min={0}
+              max={10}
+              step={0.1}
+              onValueChange={([min, max]) => {
+                updateFilter('vote_average', { min: min > 0 ? min : undefined, max: max < 10 ? max : undefined });
+              }}
+              className="w-full"
+              data-testid="rating-slider"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground px-1">
+              <span>0</span>
+              <span>2.5</span>
+              <span>5.0</span>
+              <span>7.5</span>
+              <span>10</span>
+            </div>
           </div>
-          <Slider
-            value={[filters.vote_count?.min || 0, filters.vote_count?.max || 5000]}
-            min={0}
-            max={5000}
-            step={50}
-            onValueChange={([min, max]) => {
-              updateFilter('vote_count', { 
-                min: min > 0 ? min : undefined, 
-                max: max < 5000 ? max : undefined 
-              });
-            }}
-            className="w-full"
-            data-testid="vote-count-slider"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground px-1">
-            <span>0</span>
-            <span>1k</span>
-            <span>2.5k</span>
-            <span>5k</span>
-          </div>
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            <span>💡</span>
-            {filters.vote_count?.min && filters.vote_count.min > 500 ? (
-              <span className="text-amber-600 dark:text-amber-400">High minimum may limit results</span>
-            ) : (
-              <span>Set vote count range for better quality control</span>
-            )}
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Vote Count: {filters.vote_count?.min || 0}{filters.vote_count?.max ? ` - ${filters.vote_count.max}` : '+'}
+              </Label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter('vote_count', {})}
+                className="h-6 px-2 text-xs hover:text-destructive"
+                disabled={!filters.vote_count?.min && !filters.vote_count?.max}
+                data-testid="reset-vote-count"
+              >
+                Reset
+              </Button>
+            </div>
+            <Slider
+              value={[filters.vote_count?.min || 0, filters.vote_count?.max || 5000]}
+              min={0}
+              max={5000}
+              step={50}
+              onValueChange={([min, max]) => {
+                updateFilter('vote_count', { 
+                  min: min > 0 ? min : undefined, 
+                  max: max < 5000 ? max : undefined 
+                });
+              }}
+              className="w-full"
+              data-testid="vote-count-slider"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground px-1">
+              <span>0</span>
+              <span>1k</span>
+              <span>2.5k</span>
+              <span>5k</span>
+            </div>
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <span>💡</span>
+              {filters.vote_count?.min && filters.vote_count.min > 500 ? (
+                <span className="text-amber-600 dark:text-amber-400">High minimum may limit results</span>
+              ) : (
+                <span>Set vote count range for better quality control</span>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
   };
 
   const renderRuntimeFilter = () => (
@@ -627,7 +550,7 @@ export function AdvancedFilterSheet({
         onValueChange={([min, max]) => {
           const minValue = filters.contentType === 'movie' ? (min > 60 ? min : undefined) : (min > 15 ? min : undefined);
           const maxValue = filters.contentType === 'movie' ? (max < 240 ? max : undefined) : (max < 120 ? max : undefined);
-          
+
           updateFilter('with_runtime', {
             min: minValue,
             max: maxValue
@@ -641,7 +564,7 @@ export function AdvancedFilterSheet({
 
   const renderStreamingFilter = () => {
     const hasStreamingFilter = filters.with_watch_providers?.length > 0 || filters.with_watch_monetization_types?.length > 0;
-    
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -658,100 +581,100 @@ export function AdvancedFilterSheet({
           )}
         </div>
 
-      {/* Region selection */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground">Region</Label>
-        <Select 
-          value={filters.watch_region} 
-          onValueChange={(value) => updateFilter('watch_region', value)}
-        >
-          <SelectTrigger data-testid="region-select" className="h-9">
-            <SelectValue placeholder="Select region" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map((country: any) => (
-              <SelectItem key={country.iso_3166_1} value={country.iso_3166_1}>
-                {country.english_name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="text-xs text-muted-foreground">
-          Availability varies by region
-        </div>
-      </div>
-
-      {/* Streaming providers */}
-      {watchProviders.length > 0 ? (
+        {/* Region selection */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">Providers</Label>
-            {filters.with_watch_providers?.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => updateFilter('with_watch_providers', [])}
-                className="h-6 px-2 text-xs hover:text-destructive"
-                data-testid="clear-providers"
-              >
-                Clear
-              </Button>
-            )}
+          <Label className="text-xs font-medium text-muted-foreground">Region</Label>
+          <Select 
+            value={filters.watch_region} 
+            onValueChange={(value) => updateFilter('watch_region', value)}
+          >
+            <SelectTrigger data-testid="region-select" className="h-9">
+              <SelectValue placeholder="Select region" />
+            </SelectTrigger>
+            <SelectContent>
+              {countries.map((country: any) => (
+                <SelectItem key={country.iso_3166_1} value={country.iso_3166_1}>
+                  {country.english_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="text-xs text-muted-foreground">
+            Availability varies by region
           </div>
-          <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
-            {watchProviders.map((provider: any) => (
-              <div 
-                key={provider.provider_id} 
-                className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
-              >
-                <Checkbox
-                  id={`provider-${provider.provider_id}`}
-                  checked={filters.with_watch_providers?.includes(provider.provider_id) || false}
-                  onCheckedChange={() => toggleWatchProvider(provider.provider_id)}
-                  data-testid={`provider-${provider.provider_id}`}
-                />
-                <Label 
-                  htmlFor={`provider-${provider.provider_id}`} 
-                  className="text-sm font-normal cursor-pointer flex-1 leading-tight"
+        </div>
+
+        {/* Streaming providers */}
+        {watchProviders.length > 0 ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-medium text-muted-foreground">Providers</Label>
+              {filters.with_watch_providers?.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateFilter('with_watch_providers', [])}
+                  className="h-6 px-2 text-xs hover:text-destructive"
+                  data-testid="clear-providers"
                 >
-                  {provider.provider_name}
-                </Label>
-              </div>
+                  Clear
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+              {watchProviders.map((provider: any) => (
+                <div 
+                  key={provider.provider_id} 
+                  className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 transition-colors"
+                >
+                  <Checkbox
+                    id={`provider-${provider.provider_id}`}
+                    checked={filters.with_watch_providers?.includes(provider.provider_id) || false}
+                    onCheckedChange={() => toggleWatchProvider(provider.provider_id)}
+                    data-testid={`provider-${provider.provider_id}`}
+                  />
+                  <Label 
+                    htmlFor={`provider-${provider.provider_id}`} 
+                    className="text-sm font-normal cursor-pointer flex-1 leading-tight"
+                  >
+                    {provider.provider_name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground text-center py-4 bg-muted/20 rounded-lg">
+            No providers available for this region
+          </div>
+        )}
+
+        {/* Monetization types */}
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">Availability Type</Label>
+          <div className="flex flex-wrap gap-2">
+            {MONETIZATION_TYPES.map((type) => (
+              <Button
+                key={type.value}
+                variant={filters.with_watch_monetization_types?.includes(type.value as any) ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  const current = filters.with_watch_monetization_types || [];
+                  const updated = current.includes(type.value as any)
+                    ? current.filter(t => t !== type.value)
+                    : [...current, type.value as any];
+                  updateFilter('with_watch_monetization_types', updated);
+                }}
+                data-testid={`monetization-${type.value}`}
+                className="h-7 text-xs hover:scale-105 transition-all"
+              >
+                {type.label}
+              </Button>
             ))}
           </div>
         </div>
-      ) : (
-        <div className="text-sm text-muted-foreground text-center py-4 bg-muted/20 rounded-lg">
-          No providers available for this region
-        </div>
-      )}
-
-      {/* Monetization types */}
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground">Availability Type</Label>
-        <div className="flex flex-wrap gap-2">
-          {MONETIZATION_TYPES.map((type) => (
-            <Button
-              key={type.value}
-              variant={filters.with_watch_monetization_types?.includes(type.value as any) ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                const current = filters.with_watch_monetization_types || [];
-                const updated = current.includes(type.value as any)
-                  ? current.filter(t => t !== type.value)
-                  : [...current, type.value as any];
-                updateFilter('with_watch_monetization_types', updated);
-              }}
-              data-testid={`monetization-${type.value}`}
-              className="h-7 text-xs hover:scale-105 transition-all"
-            >
-              {type.label}
-            </Button>
-          ))}
-        </div>
       </div>
-    </div>
-  );
+    );
   };
 
   const renderLanguageFilter = () => (
@@ -788,24 +711,24 @@ export function AdvancedFilterSheet({
 
   const renderSortFilter = () => {
     const isSortActive = filters.sort_by && filters.sort_by !== 'popularity.desc';
-    
+
     // Filter sort options based on content type
     const relevantSortOptions = SORT_OPTIONS.filter(option => {
       const isMovieOption = option.label.includes('(Movies)');
       const isTVOption = option.label.includes('(TV)');
-      
+
       // Show generic options for both types
       if (!isMovieOption && !isTVOption) return true;
-      
+
       // Show movie-specific options only for movies
       if (isMovieOption) return filters.contentType === 'movie';
-      
+
       // Show TV-specific options only for TV shows
       if (isTVOption) return filters.contentType === 'tv';
-      
+
       return true;
     });
-    
+
     return (
       <div className="space-y-3">
         <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
@@ -819,23 +742,23 @@ export function AdvancedFilterSheet({
             </Badge>
           )}
         </Label>
-      <Select 
-        value={filters.sort_by} 
-        onValueChange={(value) => updateFilter('sort_by', value as any)}
-      >
-        <SelectTrigger data-testid="sort-select">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {relevantSortOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
+        <Select 
+          value={filters.sort_by} 
+          onValueChange={(value) => updateFilter('sort_by', value as any)}
+        >
+          <SelectTrigger data-testid="sort-select">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {relevantSortOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
   };
 
   const renderAdultContentFilter = () => (
@@ -843,7 +766,7 @@ export function AdvancedFilterSheet({
       <div className="flex items-center justify-between">
         <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
           <div className="p-1 rounded-md bg-primary/10 text-primary">
-            <Shield className="h-4 w-4" />
+            <ShieldIcon />
           </div>
           Include Adult Content
         </Label>
@@ -914,7 +837,7 @@ export function AdvancedFilterSheet({
 
   const renderSpecificYearFilter = () => {
     const currentYear = new Date().getFullYear();
-    
+
     return (
       <div className="space-y-3">
         <Label className="text-sm font-medium text-muted-foreground">
@@ -1062,7 +985,7 @@ export function AdvancedFilterSheet({
             <SelectItem value="FR">France</SelectItem>
           </SelectContent>
         </Select>
-        
+
         {filters.certification_country && filters.certification_country !== 'none' && (
           <>
             <Input
@@ -1218,7 +1141,7 @@ export function AdvancedFilterSheet({
               />
             ))}
           </div>
-          
+
           <SheetTitle className="flex items-center gap-3 text-xl font-bold relative">
             <motion.div 
               className="relative"
@@ -1260,7 +1183,7 @@ export function AdvancedFilterSheet({
               </Badge>
             )}
           </SheetTitle>
-          
+
           {/* Content Type Tabs */}
           <div className="pt-3 relative">
             <ContentTypeToggle
@@ -1272,7 +1195,7 @@ export function AdvancedFilterSheet({
               data-testid="content-type-toggle"
             />
           </div>
-          
+
           {/* Filter complexity indicator */}
           {filterComplexity > 5 && (
             <motion.div 
@@ -1303,227 +1226,259 @@ export function AdvancedFilterSheet({
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             <div className={cn("py-4", isMobile ? "space-y-4 px-4" : "space-y-6 px-6")}>
-            {/* Sort Filter */}
-            <div className="space-y-4">
-              {renderSortFilter()}
-            </div>
+              {/* Sort Filter */}
+              <div className="space-y-4">
+                {renderSortFilter()}
+              </div>
 
-            <Separator />
+              <Separator />
 
-            {/* Filter Categories */}
-            {FILTER_CATEGORIES.map((category, index) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.08 }}
-              >
-                <Collapsible
-                  open={!collapsedSections.includes(category.id)}
-                  onOpenChange={() => toggleSection(category.id)}
+              {/* Filter Categories */}
+              {FILTER_CATEGORIES.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.08 }}
                 >
-                  <CollapsibleTrigger asChild>
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "flex w-full items-center justify-between p-3 mb-2 relative overflow-hidden",
-                          "hover:bg-gradient-to-r hover:from-primary/10 hover:to-transparent",
-                          "focus:bg-gradient-to-r focus:from-primary/15 focus:to-transparent",
-                          "focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-lg",
-                          "transition-all duration-300 group",
-                          !collapsedSections.includes(category.id) && "bg-primary/5"
-                        )}
-                        data-testid={`toggle-${category.id}`}
-                        aria-expanded={!collapsedSections.includes(category.id)}
-                        aria-controls={`filter-category-${category.id}`}
-                        aria-label={`Toggle ${category.label} filter section`}
-                      >
-                        {/* Hover glow effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0"
-                          initial={{ x: '-100%', opacity: 0 }}
-                          whileHover={{ x: '100%', opacity: 1 }}
-                          transition={{ duration: 0.8, ease: "easeInOut" }}
-                        />
-                      <div className="flex items-center gap-3 relative z-10">
-                        <motion.div 
-                          className={cn(
-                            "p-1.5 rounded-md transition-colors duration-300 relative",
-                            !collapsedSections.includes(category.id) 
-                              ? "bg-primary/20 text-primary" 
-                              : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                          )}
-                          whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {/* Icon glow on hover */}
-                          {!collapsedSections.includes(category.id) && (
-                            <motion.div
-                              className="absolute inset-0 bg-primary/40 blur-md rounded-md"
-                              animate={{ 
-                                scale: [1, 1.2, 1],
-                                opacity: [0.3, 0.6, 0.3]
-                              }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
-                          )}
-                          {category.id === 'genres' && <Filter className="h-4 w-4 relative z-10" />}
-                          {category.id === 'release' && <Calendar className="h-4 w-4 relative z-10" />}
-                          {category.id === 'ratings' && <Star className="h-4 w-4 relative z-10" />}
-                          {category.id === 'streaming' && <MonitorPlay className="h-4 w-4 relative z-10" />}
-                          {category.id === 'advanced' && <Sparkles className="h-4 w-4 relative z-10" />}
-                        </motion.div>
-                        <div className="text-left">
-                          <span className="text-sm font-semibold block">{category.label}</span>
-                          {category.description && (
-                            <span className="text-xs text-muted-foreground hidden lg:block">
-                              {category.description}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                  <Collapsible
+                    open={!collapsedSections.includes(category.id)}
+                    onOpenChange={() => toggleSection(category.id)}
+                  >
+                    <CollapsibleTrigger asChild>
                       <motion.div
-                        className="relative z-10"
-                        animate={{ rotate: collapsedSections.includes(category.id) ? 0 : 180 }}
-                        transition={{ duration: 0.3, type: "spring" }}
-                        whileHover={{ scale: 1.2 }}
+                        whileHover={{ x: 4 }}
+                        transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </motion.div>
-                    </Button>
-                    </motion.div>
-                  </CollapsibleTrigger>
-                  <AnimatePresence>
-                    {!collapsedSections.includes(category.id) && (
-                      <CollapsibleContent 
-                        forceMount
-                        className={cn("overflow-hidden")}
-                        id={`filter-category-${category.id}`}
-                        role="region"
-                        aria-labelledby={`toggle-${category.id}`}
-                      >
-                        <motion.div
-                          initial={{ opacity: 0, height: 0, y: -20 }}
-                          animate={{ opacity: 1, height: "auto", y: 0 }}
-                          exit={{ opacity: 0, height: 0, y: -20 }}
-                          transition={{ 
-                            duration: 0.4,
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 30
-                          }}
+                        <Button
+                          variant="ghost"
                           className={cn(
-                            "pt-3 pb-4 px-3 rounded-lg relative overflow-hidden",
-                            "bg-gradient-to-br from-muted/30 to-transparent",
-                            "border border-border/50",
-                            isMobile ? "space-y-3" : "space-y-4"
+                            "flex w-full items-center justify-between p-3 mb-2 relative overflow-hidden",
+                            "hover:bg-gradient-to-r hover:from-primary/10 hover:to-transparent",
+                            "focus:bg-gradient-to-r focus:from-primary/15 focus:to-transparent",
+                            "focus:outline-none focus:ring-2 focus:ring-primary/30 rounded-lg",
+                            "transition-all duration-300 group",
+                            !collapsedSections.includes(category.id) && "bg-primary/5"
                           )}
+                          data-testid={`toggle-${category.id}`}
+                          aria-expanded={!collapsedSections.includes(category.id)}
+                          aria-controls={`filter-category-${category.id}`}
+                          aria-label={`Toggle ${category.label} filter section`}
                         >
-                          {/* Subtle animated background */}
+                          {/* Hover glow effect */}
                           <motion.div
-                            className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"
-                            animate={{ 
-                              opacity: [0.3, 0.5, 0.3],
-                              scale: [1, 1.02, 1]
-                            }}
-                            transition={{ duration: 3, repeat: Infinity }}
+                            className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0"
+                            initial={{ x: '-100%', opacity: 0 }}
+                            whileHover={{ x: '100%', opacity: 1 }}
+                            transition={{ duration: 0.8, ease: "easeInOut" }}
                           />
-                          {category.id === 'genres' && renderGenreFilter()}
-                          {category.id === 'release' && (
-                            <div className="space-y-4">
-                              {renderYearFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {renderSpecificYearFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  {renderTimezoneFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
+                          <div className="flex items-center gap-3 relative z-10">
+                            <motion.div 
+                              className={cn(
+                                "p-1.5 rounded-md transition-colors duration-300 relative",
+                                !collapsedSections.includes(category.id) 
+                                  ? "bg-primary/20 text-primary" 
+                                  : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                               )}
-                              {renderRuntimeFilter()}
+                              whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              {/* Icon glow on hover */}
+                              {!collapsedSections.includes(category.id) && (
+                                <motion.div
+                                  className="absolute inset-0 bg-primary/40 blur-md rounded-md"
+                                  animate={{ 
+                                    scale: [1, 1.2, 1],
+                                    opacity: [0.3, 0.6, 0.3]
+                                  }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                />
+                              )}
+                              {category.id === 'genres' && <Filter className="h-4 w-4 relative z-10" />}
+                              {category.id === 'release' && <Calendar className="h-4 w-4 relative z-10" />}
+                              {category.id === 'ratings' && <Star className="h-4 w-4 relative z-10" />}
+                              {category.id === 'streaming' && <MonitorPlay className="h-4 w-4 relative z-10" />}
+                              {category.id === 'advanced' && <Sparkles className="h-4 w-4 relative z-10" />}
+                            </motion.div>
+                            <div className="text-left">
+                              <span className="text-sm font-semibold block">{category.label}</span>
+                              {category.description && (
+                                <span className="text-xs text-muted-foreground hidden lg:block">
+                                  {category.description}
+                                </span>
+                              )}
                             </div>
-                          )}
-                          {category.id === 'ratings' && renderRatingFilter()}
-                          {category.id === 'streaming' && renderStreamingFilter()}
-                          {category.id === 'advanced' && (
-                            <div className="space-y-4">
-                              <KeywordsAutocomplete
-                                value={filters.with_keywords || []}
-                                onChange={(keywords) => updateFilter('with_keywords', keywords)}
-                              />
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {renderKeywordExclusionFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              
-                              {/* People Filters */}
-                              {filters.contentType === 'movie' && (
-                                <>
-                                  {renderCastFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderCrewFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
-                              <PeopleAutocomplete
-                                value={filters.with_people || []}
-                                onChange={(people) => updateFilter('with_people', people)}
-                              />
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              
-                              {/* Companies & Networks */}
-                              <CompaniesAutocomplete
-                                value={filters.with_companies || []}
-                                onChange={(companies) => updateFilter('with_companies', companies)}
-                              />
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderNetworksFilter()}
-                                </>
-                              )}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              
-                              {/* Language & Region */}
-                              {renderLanguageFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              {renderRegionFilter()}
-                              <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                              
-                              {/* Content Rating */}
-                              {filters.contentType === 'movie' && (
-                                <>
-                                  {renderCertificationFilters()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderReleaseTypeFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                  {renderIncludeVideoFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
-                              
-                              {/* TV Specific Filters */}
-                              {filters.contentType === 'tv' && (
-                                <>
-                                  {renderScreenedTheatricallyFilter()}
-                                  <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                </>
-                              )}
-                              
-                              {renderAdultContentFilter()}
-                            </div>
-                          )}
-                        </motion.div>
-                      </CollapsibleContent>
-                    )}
-                  </AnimatePresence>
-                </Collapsible>
-              </motion.div>
-            ))}
+                          </div>
+                          <motion.div
+                            className="relative z-10"
+                            animate={{ rotate: collapsedSections.includes(category.id) ? 0 : 180 }}
+                            transition={{ duration: 0.3, type: "spring" }}
+                            whileHover={{ scale: 1.2 }}
+                          >
+                            <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </motion.div>
+                        </Button>
+                      </motion.div>
+                    </CollapsibleTrigger>
+                    <AnimatePresence>
+                      {!collapsedSections.includes(category.id) && (
+                        <CollapsibleContent 
+                          forceMount
+                          className={cn("overflow-hidden")}
+                          id={`filter-category-${category.id}`}
+                          role="region"
+                          aria-labelledby={`toggle-${category.id}`}
+                        >
+                          <motion.div
+                            initial={{ opacity: 0, height: 0, y: -20 }}
+                            animate={{ opacity: 1, height: "auto", y: 0 }}
+                            exit={{ opacity: 0, height: 0, y: -20 }}
+                            transition={{ 
+                              duration: 0.4,
+                              type: "spring",
+                              stiffness: 300,
+                              damping: 30
+                            }}
+                            className={cn(
+                              "pt-3 pb-4 px-3 rounded-lg relative overflow-hidden",
+                              "bg-gradient-to-br from-muted/30 to-transparent",
+                              "border border-border/50",
+                              isMobile ? "space-y-3" : "space-y-4"
+                            )}
+                          >
+                            {/* Subtle animated background */}
+                            <motion.div
+                              className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"
+                              animate={{ 
+                                opacity: [0.3, 0.5, 0.3],
+                                scale: [1, 1.02, 1]
+                              }}
+                              transition={{ duration: 3, repeat: Infinity }}
+                            />
+                            {category.id === 'genres' && (
+                              <div className="space-y-4">
+                                <Label className="text-sm font-semibold flex items-center gap-2 text-foreground/90">
+                                  <div className="p-1 rounded-md bg-primary/10 text-primary">
+                                    <Filter className="h-4 w-4" />
+                                  </div>
+                                  Genres
+                                  {(filters.with_genres?.length || 0) + (filters.without_genres?.length || 0) > 0 && (
+                                    <Badge variant="secondary" className="ml-2 h-5 px-2 text-xs">
+                                      {(filters.with_genres?.length || 0) + (filters.without_genres?.length || 0)}
+                                    </Badge>
+                                  )}
+                                </Label>
+                                <GenreChipGroup
+                                  selectedGenres={{
+                                    with_genres: filters.with_genres || [],
+                                    without_genres: filters.without_genres || []
+                                  }}
+                                  onGenresChange={(genres) => {
+                                    updateFilter('with_genres', genres.with_genres);
+                                    updateFilter('without_genres', genres.without_genres);
+                                  }}
+                                  genres={currentGenres}
+                                  data-testid="genre-filter"
+                                />
+                                {((filters.with_genres?.length || 0) + (filters.without_genres?.length || 0)) > 5 && (
+                                  <div className="text-xs text-amber-600 dark:text-amber-400 flex items-start gap-1 bg-amber-50 dark:bg-amber-950/30 p-2 rounded-md">
+                                    <span>⚠️</span>
+                                    <span>Too many genre filters may significantly limit results</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {category.id === 'release' && (
+                              <div className="space-y-4">
+                                {renderYearFilter()}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                {renderSpecificYearFilter()}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                {filters.contentType === 'tv' && (
+                                  <>
+                                    {renderTimezoneFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  </>
+                                )}
+                                {renderRuntimeFilter()}
+                              </div>
+                            )}
+                            {category.id === 'ratings' && renderRatingFilter()}
+                            {category.id === 'streaming' && renderStreamingFilter()}
+                            {category.id === 'advanced' && (
+                              <div className="space-y-4">
+                                <KeywordsAutocomplete
+                                  value={filters.with_keywords || []}
+                                  onChange={(keywords) => updateFilter('with_keywords', keywords)}
+                                />
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                {renderKeywordExclusionFilter()}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                                {/* People Filters */}
+                                {filters.contentType === 'movie' && (
+                                  <>
+                                    {renderCastFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                    {renderCrewFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  </>
+                                )}
+                                <PeopleAutocomplete
+                                  value={filters.with_people || []}
+                                  onChange={(people) => updateFilter('with_people', people)}
+                                />
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                                {/* Companies & Networks */}
+                                <CompaniesAutocomplete
+                                  value={filters.with_companies || []}
+                                  onChange={(companies) => updateFilter('with_companies', companies)}
+                                />
+                                {filters.contentType === 'tv' && (
+                                  <>
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                    {renderNetworksFilter()}
+                                  </>
+                                )}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                                {/* Language & Region */}
+                                {renderLanguageFilter()}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                {renderRegionFilter()}
+                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                                {/* Content Rating */}
+                                {filters.contentType === 'movie' && (
+                                  <>
+                                    {renderCertificationFilters()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                    {renderReleaseTypeFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                    {renderIncludeVideoFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  </>
+                                )}
+
+                                {/* TV Specific Filters */}
+                                {filters.contentType === 'tv' && (
+                                  <>
+                                    {renderScreenedTheatricallyFilter()}
+                                    <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+                                  </>
+                                )}
+
+                                {renderAdultContentFilter()}
+                              </div>
+                            )}
+                          </motion.div>
+                        </CollapsibleContent>
+                      )}
+                    </AnimatePresence>
+                  </Collapsible>
+                </motion.div>
+              ))}
             </div>
           </ScrollArea>
         </div>
@@ -1558,7 +1513,7 @@ export function AdvancedFilterSheet({
                   Clear All
                 </Button>
               </div>
-              
+
               {/* Quick applied filters preview */}
               <div 
                 className="flex flex-wrap gap-1 max-h-16 overflow-y-auto" 
@@ -1569,18 +1524,16 @@ export function AdvancedFilterSheet({
                   <button
                     onClick={(e) => {
                       updateFilter('with_genres', []);
-                      // Focus management: move to next focusable element or Clear All button
                       const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                       nextElement?.focus();
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         updateFilter('with_genres', []);
-                        // Focus management: move to next focusable element or Clear All button
                         const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                         nextElement?.focus();
                       }
                     }}
@@ -1597,9 +1550,8 @@ export function AdvancedFilterSheet({
                     onClick={(e) => {
                       updateFilter('primary_release_date', {});
                       updateFilter('first_air_date', {});
-                      // Focus management: move to next focusable element or Clear All button
                       const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                       nextElement?.focus();
                     }}
                     onKeyDown={(e) => {
@@ -1607,9 +1559,8 @@ export function AdvancedFilterSheet({
                         e.preventDefault();
                         updateFilter('primary_release_date', {});
                         updateFilter('first_air_date', {});
-                        // Focus management: move to next focusable element or Clear All button
                         const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                         nextElement?.focus();
                       }
                     }}
@@ -1625,18 +1576,16 @@ export function AdvancedFilterSheet({
                   <button
                     onClick={(e) => {
                       updateFilter('vote_average', {});
-                      // Focus management: move to next focusable element or Clear All button
                       const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                       nextElement?.focus();
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         updateFilter('vote_average', {});
-                        // Focus management: move to next focusable element or Clear All button
                         const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                         nextElement?.focus();
                       }
                     }}
@@ -1652,18 +1601,16 @@ export function AdvancedFilterSheet({
                   <button
                     onClick={(e) => {
                       updateFilter('with_watch_providers', []);
-                      // Focus management: move to next focusable element or Clear All button
                       const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                       nextElement?.focus();
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         updateFilter('with_watch_providers', []);
-                        // Focus management: move to next focusable element or Clear All button
                         const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                         nextElement?.focus();
                       }
                     }}
@@ -1679,18 +1626,16 @@ export function AdvancedFilterSheet({
                   <button
                     onClick={(e) => {
                       updateFilter('sort_by', 'popularity.desc');
-                      // Focus management: move to next focusable element or Clear All button
                       const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                        document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                       nextElement?.focus();
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         updateFilter('sort_by', 'popularity.desc');
-                        // Focus management: move to next focusable element or Clear All button
                         const nextElement = e.currentTarget.nextElementSibling as HTMLElement || 
-                                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
+                          document.querySelector('[data-testid="clear-all-quick"]') as HTMLElement;
                         nextElement?.focus();
                       }
                     }}
@@ -1705,7 +1650,7 @@ export function AdvancedFilterSheet({
               </div>
             </motion.div>
           )}
-          
+
           <div className="flex gap-3 w-full">
             {appliedFiltersCount === 0 ? (
               <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -1805,3 +1750,24 @@ export function AdvancedFilterSheet({
     </Sheet>
   );
 }
+
+// Small inline shield icon to avoid adding another lucide import in the middle
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" className="inline-block">
+      <path
+        d="M12 3l7 4v5c0 4.418-3.134 8.167-7.5 9-4.366-.833-7.5-4.582-7.5-9V7l8-4z"
+        fill="currentColor"
+        opacity="0.15"
+      />
+      <path
+        d="M12 3l7 4v5c0 4.418-3.134 8.167-7.5 9-4.366-.833-7.5-4.582-7.5-9V7l8-4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+export default AdvancedFilterSheet;

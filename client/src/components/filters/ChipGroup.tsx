@@ -58,7 +58,7 @@ export const ChipGroup = ({
   // Filter items based on search query
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return items;
-    
+
     const query = searchQuery.toLowerCase();
     return items.filter(item => 
       item.label.toLowerCase().includes(query) ||
@@ -85,7 +85,7 @@ export const ChipGroup = ({
 
   const addSelection = (item: ChipItem, mode: 'include' | 'exclude' = 'include') => {
     const existingIndex = selected.findIndex(s => s.item.id === item.id);
-    
+
     if (existingIndex !== -1) {
       const existing = selected[existingIndex];
       if (existing.mode === mode) {
@@ -98,9 +98,9 @@ export const ChipGroup = ({
       setIsOpen(false);
       return;
     }
-    
+
     if (maxSelections && selected.length >= maxSelections) return;
-    
+
     const newSelection: ChipSelection = { item, mode };
     onSelectionChange([...selected, newSelection]);
     setIsOpen(false);
@@ -161,7 +161,7 @@ export const ChipGroup = ({
                 Clear All
               </Button>
             </div>
-            
+
             <div className="flex flex-wrap gap-2">
               <AnimatePresence mode="popLayout">
                 {selected.map((selection, index) => (
@@ -238,7 +238,7 @@ export const ChipGroup = ({
                           <Filter className="w-2.5 h-2.5" />
                         </button>
                       )}
-                      
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -289,7 +289,7 @@ export const ChipGroup = ({
             )}
           </Button>
         </PopoverTrigger>
-        
+
         <PopoverContent
           className={cn(
             "w-80 p-0 glass-panel border-white/10",
@@ -325,7 +325,7 @@ export const ChipGroup = ({
                     const selection = selected.find(s => s.item.id === item.id);
                     const isIncluded = selection?.mode === 'include';
                     const isExcluded = selection?.mode === 'exclude';
-                    
+
                     return (
                     <motion.div
                       key={item.id}
@@ -441,6 +441,23 @@ export const GenreChipGroup = ({
   genres,
   className
 }: GenreChipGroupProps) => {
+  // --- NEW: initialize with "all included" once genres load and nothing is selected ---
+  useEffect(() => {
+    if (
+      genres?.length &&
+      selectedGenres.with_genres.length === 0 &&
+      selectedGenres.without_genres.length === 0
+    ) {
+      onGenresChange({
+        with_genres: genres.map((g) => g.id),
+        without_genres: []
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genres]);
+
+  const allIds = useMemo(() => genres.map((g) => g.id), [genres]);
+
   // Convert genres to chip items
   const chipItems: ChipItem[] = genres.map(genre => ({
     id: genre.id,
@@ -448,7 +465,7 @@ export const GenreChipGroup = ({
     value: genre.id
   }));
 
-  // Convert selections to chip format
+  // Convert selections to chip format (keeps UI in sync)
   const chipSelections: ChipSelection[] = [
     ...selectedGenres.with_genres.map(id => {
       const genre = genres.find(g => g.id === id);
@@ -466,16 +483,36 @@ export const GenreChipGroup = ({
     }).filter(Boolean) as ChipSelection[]
   ];
 
-  const handleSelectionChange = (selections: ChipSelection[]) => {
-    const with_genres = selections
-      .filter(s => s.mode === 'include')
-      .map(s => s.item.id as number);
-    
-    const without_genres = selections
-      .filter(s => s.mode === 'exclude')
-      .map(s => s.item.id as number);
+  // --- NEW: normalize behavior
+  // Rule:
+  // 1) If there is at least one INCLUDE -> all others become EXCLUDE automatically.
+  // 2) If there are zero INCLUDEs -> respect EXCLUDE list (meaning "include all except excluded").
+  const normalizeSelections = (selections: ChipSelection[]) => {
+    const includeIds = new Set<number>(
+      selections.filter(s => s.mode === 'include').map(s => Number(s.item.id))
+    );
+    const explicitExcludeIds = new Set<number>(
+      selections.filter(s => s.mode === 'exclude').map(s => Number(s.item.id))
+    );
 
-    onGenresChange({ with_genres, without_genres });
+    if (includeIds.size > 0) {
+      const without = allIds.filter(id => !includeIds.has(id));
+      return {
+        with_genres: Array.from(includeIds),
+        without_genres: without
+      };
+    }
+
+    // includeIds.size === 0 -> "include everything except explicitly excluded"
+    return {
+      with_genres: [],
+      without_genres: Array.from(explicitExcludeIds)
+    };
+  };
+
+  const handleSelectionChange = (selections: ChipSelection[]) => {
+    const next = normalizeSelections(selections);
+    onGenresChange(next);
   };
 
   return (
