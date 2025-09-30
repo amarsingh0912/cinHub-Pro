@@ -395,6 +395,7 @@ export const GenreChipGroup = ({
 }: GenreChipGroupProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hoveredGenre, setHoveredGenre] = useState<number | null>(null);
 
   const selectedGenreIds = [...selectedGenres.with_genres, ...selectedGenres.without_genres];
   
@@ -404,29 +405,36 @@ export const GenreChipGroup = ({
     return genres.filter(genre => genre.name.toLowerCase().includes(query));
   }, [genres, searchQuery]);
 
-  const handleGenreSelect = (genreId: number) => {
+  const handleGenreSelect = (genreId: number, mode: 'include' | 'exclude' = 'include') => {
     const isInInclude = selectedGenres.with_genres.includes(genreId);
     const isInExclude = selectedGenres.without_genres.includes(genreId);
 
-    if (isInInclude) {
-      // Remove from include
-      onGenresChange({
-        with_genres: selectedGenres.with_genres.filter(id => id !== genreId),
-        without_genres: selectedGenres.without_genres
-      });
-    } else if (isInExclude) {
-      // Remove from exclude
-      onGenresChange({
-        with_genres: selectedGenres.with_genres,
-        without_genres: selectedGenres.without_genres.filter(id => id !== genreId)
-      });
+    if (mode === 'include') {
+      if (isInInclude) {
+        onGenresChange({
+          with_genres: selectedGenres.with_genres.filter(id => id !== genreId),
+          without_genres: selectedGenres.without_genres
+        });
+      } else {
+        onGenresChange({
+          with_genres: [...selectedGenres.with_genres, genreId],
+          without_genres: selectedGenres.without_genres.filter(id => id !== genreId)
+        });
+      }
     } else {
-      // Add to include
-      onGenresChange({
-        with_genres: [...selectedGenres.with_genres, genreId],
-        without_genres: selectedGenres.without_genres
-      });
+      if (isInExclude) {
+        onGenresChange({
+          with_genres: selectedGenres.with_genres,
+          without_genres: selectedGenres.without_genres.filter(id => id !== genreId)
+        });
+      } else {
+        onGenresChange({
+          with_genres: selectedGenres.with_genres.filter(id => id !== genreId),
+          without_genres: [...selectedGenres.without_genres, genreId]
+        });
+      }
     }
+    setOpen(false);
   };
 
   const removeGenre = (genreId: number) => {
@@ -436,6 +444,21 @@ export const GenreChipGroup = ({
     });
   };
 
+  const toggleMode = (genreId: number) => {
+    const isInInclude = selectedGenres.with_genres.includes(genreId);
+    if (isInInclude) {
+      onGenresChange({
+        with_genres: selectedGenres.with_genres.filter(id => id !== genreId),
+        without_genres: [...selectedGenres.without_genres, genreId]
+      });
+    } else {
+      onGenresChange({
+        with_genres: [...selectedGenres.with_genres, genreId],
+        without_genres: selectedGenres.without_genres.filter(id => id !== genreId)
+      });
+    }
+  };
+
   const clearAll = () => {
     onGenresChange({ with_genres: [], without_genres: [] });
   };
@@ -443,82 +466,288 @@ export const GenreChipGroup = ({
   return (
     <div className={cn("space-y-3", className)} data-testid="genre-chip-group">
       {/* Selected genres display */}
-      {selectedGenreIds.length > 0 && (
-        <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
-          {selectedGenres.with_genres.map((genreId) => {
-            const genre = genres.find(g => g.id === genreId);
-            if (!genre) return null;
-            return (
-              <Badge
-                key={`include-${genreId}`}
-                variant="secondary"
-                className="flex items-center gap-1 text-xs"
-                data-testid={`selected-genre-${genreId}`}
+      <AnimatePresence mode="popLayout">
+        {selectedGenreIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="space-y-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">
+                Selected ({selectedGenreIds.length})
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAll}
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                data-testid="clear-all-genres"
               >
-                {genre.name}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => removeGenre(genreId)}
-                  data-testid={`remove-genre-${genreId}`}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            );
-          })}
-        </div>
-      )}
+                Clear All
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <AnimatePresence mode="popLayout">
+                {selectedGenres.with_genres.map((genreId) => {
+                  const genre = genres.find(g => g.id === genreId);
+                  if (!genre) return null;
+                  return (
+                    <motion.div
+                      key={`include-${genreId}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
+                          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+                          "hover:bg-emerald-500/20 transition-all duration-200"
+                        )}
+                        data-testid={`selected-genre-${genreId}`}
+                      >
+                        <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                          <Check className="w-2.5 h-2.5" />
+                        </div>
+                        <span className="font-medium">{genre.name}</span>
+                        <div className="flex items-center gap-1 ml-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMode(genreId);
+                            }}
+                            className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-600 transition-all duration-200"
+                            title="Exclude this genre"
+                            data-testid={`toggle-genre-${genreId}`}
+                          >
+                            <Filter className="w-2.5 h-2.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeGenre(genreId);
+                            }}
+                            className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
+                            title="Remove"
+                            data-testid={`remove-genre-${genreId}`}
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      </Badge>
+                    </motion.div>
+                  );
+                })}
+                {selectedGenres.without_genres.map((genreId) => {
+                  const genre = genres.find(g => g.id === genreId);
+                  if (!genre) return null;
+                  return (
+                    <motion.div
+                      key={`exclude-${genreId}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
+                          "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30",
+                          "hover:bg-rose-500/20 transition-all duration-200"
+                        )}
+                        data-testid={`selected-genre-${genreId}`}
+                      >
+                        <div className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
+                          <X className="w-2.5 h-2.5" />
+                        </div>
+                        <span className="font-medium">{genre.name}</span>
+                        <div className="flex items-center gap-1 ml-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleMode(genreId);
+                            }}
+                            className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 hover:text-emerald-600 transition-all duration-200"
+                            title="Include this genre"
+                            data-testid={`toggle-genre-${genreId}`}
+                          >
+                            <Filter className="w-2.5 h-2.5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeGenre(genreId);
+                            }}
+                            className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
+                            title="Remove"
+                            data-testid={`remove-genre-${genreId}`}
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      </Badge>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Searchable select */}
+      {/* Enhanced searchable select */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className={cn(
+              "w-full justify-between glass-panel border-white/10",
+              "hover:bg-primary/5 transition-all duration-200",
+              open && "ring-2 ring-primary/30"
+            )}
             data-testid="genre-select-trigger"
           >
-            Search genres...
+            <div className="flex items-center gap-2">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                {selectedGenreIds.length > 0 
+                  ? `${selectedGenreIds.length} genre${selectedGenreIds.length > 1 ? 's' : ''} selected` 
+                  : "Search and select genres..."}
+              </span>
+            </div>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start" data-testid="genre-select-content">
-          <Command>
-            <CommandInput 
-              placeholder="Search genres..." 
-              value={searchQuery}
-              onValueChange={setSearchQuery}
-              data-testid="genre-search-input"
-            />
-            <CommandList>
-              <CommandEmpty>No genres found.</CommandEmpty>
+        <PopoverContent 
+          className={cn(
+            "w-80 p-0 glass-panel border-white/10 backdrop-blur-md"
+          )} 
+          align="start" 
+          data-testid="genre-select-content"
+        >
+          <Command className="rounded-lg border-0">
+            <div className="flex items-center border-b border-border/50 px-3">
+              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              <CommandInput 
+                placeholder="Type to search genres..." 
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                data-testid="genre-search-input"
+                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <CommandList className="max-h-[300px]">
+              <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Search className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p>No genres found</p>
+                  {searchQuery && (
+                    <p className="text-xs">Try a different search term</p>
+                  )}
+                </div>
+              </CommandEmpty>
               <CommandGroup>
                 {filteredGenres.map((genre) => {
-                  const isSelected = selectedGenres.with_genres.includes(genre.id);
+                  const isIncluded = selectedGenres.with_genres.includes(genre.id);
+                  const isExcluded = selectedGenres.without_genres.includes(genre.id);
                   
                   return (
                     <CommandItem
                       key={genre.id}
                       value={genre.name}
-                      onSelect={() => handleGenreSelect(genre.id)}
-                      className="flex items-center justify-between"
+                      onSelect={() => {}}
+                      className={cn(
+                        "flex items-center justify-between py-3 px-3 cursor-pointer group",
+                        "hover:bg-primary/5 transition-all duration-200",
+                        (isIncluded || isExcluded) && "bg-muted/30"
+                      )}
                       data-testid={`genre-option-${genre.id}`}
+                      onMouseEnter={() => setHoveredGenre(genre.id)}
+                      onMouseLeave={() => setHoveredGenre(null)}
                     >
-                      <span>{genre.name}</span>
-                      <Check
-                        className={cn(
-                          "h-4 w-4",
-                          isSelected ? "opacity-100" : "opacity-0"
+                      <div className="flex items-center gap-2">
+                        {isIncluded && (
+                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                            <Check className="w-3 h-3" />
+                          </div>
                         )}
-                      />
+                        {isExcluded && (
+                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
+                            <X className="w-3 h-3" />
+                          </div>
+                        )}
+                        <span className={cn(
+                          "font-medium",
+                          isIncluded && "text-emerald-600 dark:text-emerald-400",
+                          isExcluded && "text-rose-600 dark:text-rose-400"
+                        )}>
+                          {genre.name}
+                        </span>
+                      </div>
+                      <div className={cn(
+                        "flex gap-1 transition-opacity duration-200",
+                        hoveredGenre === genre.id ? "opacity-100" : "opacity-0"
+                      )}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGenreSelect(genre.id, 'include');
+                          }}
+                          className={cn(
+                            "h-7 w-7 p-0 rounded-full",
+                            "hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400",
+                            isIncluded && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                          )}
+                          title="Include this genre"
+                          data-testid={`include-genre-${genre.id}`}
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGenreSelect(genre.id, 'exclude');
+                          }}
+                          className={cn(
+                            "h-7 w-7 p-0 rounded-full",
+                            "hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400",
+                            isExcluded && "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                          )}
+                          title="Exclude this genre"
+                          data-testid={`exclude-genre-${genre.id}`}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </CommandItem>
                   );
                 })}
               </CommandGroup>
             </CommandList>
+            <div className="border-t border-border/50 p-2 bg-muted/30">
+              <p className="text-xs text-muted-foreground text-center">
+                <Check className="w-3 h-3 inline-block mr-1 text-emerald-600 dark:text-emerald-400" />
+                Include genre
+                <span className="mx-2">•</span>
+                <X className="w-3 h-3 inline-block mr-1 text-rose-600 dark:text-rose-400" />
+                Exclude genre
+              </p>
+            </div>
           </Command>
         </PopoverContent>
       </Popover>
