@@ -99,35 +99,27 @@ export function CompaniesAutocomplete({
         )}
       </div>
 
-      {/* Selected companies display - logos only */}
+      {/* Selected companies display */}
       {selectedCompanies.length > 0 && (
-        <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+        <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
           {selectedCompanies.map((company) => (
-            <div
+            <Badge
               key={company.id}
-              className="relative group"
+              variant="secondary"
+              className="flex items-center gap-1 text-xs"
               data-testid={`selected-company-${company.id}`}
             >
-              {company.logo_path ? (
-                <img
-                  src={`https://image.tmdb.org/t/p/w92${company.logo_path}`}
-                  alt={company.name}
-                  className="h-8 w-auto object-contain bg-white/5 rounded border border-border/50 p-1"
-                  title={company.name}
-                />
-              ) : (
-                <div className="h-8 px-3 flex items-center justify-center bg-muted/50 rounded border border-border/50 text-xs font-medium">
-                  {company.name}
-                </div>
-              )}
-              <button
+              {company.name}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 p-0 hover:bg-transparent"
                 onClick={() => handleRemove(company.id)}
-                className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 data-testid={`remove-company-${company.id}`}
               >
-                <X className="h-2.5 w-2.5" />
-              </button>
-            </div>
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
           ))}
         </div>
       )}
@@ -184,16 +176,7 @@ export function CompaniesAutocomplete({
                         className="flex items-center justify-between"
                         data-testid={`company-option-${company.id}`}
                       >
-                        <div className="flex items-center space-x-3 flex-1">
-                          {company.logo_path ? (
-                            <img
-                              src={`https://image.tmdb.org/t/p/w92${company.logo_path}`}
-                              alt={company.name}
-                              className="h-6 w-auto object-contain bg-white/5 rounded p-0.5"
-                            />
-                          ) : (
-                            <Building2 className="h-6 w-6 text-muted-foreground" />
-                          )}
+                        <div className="flex items-center space-x-2">
                           <div className="flex-1">
                             <div className="font-medium">{company.name}</div>
                             {company.origin_country && (

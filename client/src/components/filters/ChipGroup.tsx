@@ -1,23 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Plus, X, Check, Filter, Search, ChevronsUpDown } from "lucide-react";
+import { Plus, X, Check, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "cmdk";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 export interface ChipItem {
   id: string | number;
@@ -30,7 +19,7 @@ export interface ChipItem {
 
 export interface ChipSelection {
   item: ChipItem;
-  mode: "include" | "exclude";
+  mode: 'include' | 'exclude';
 }
 
 interface ChipGroupProps {
@@ -43,9 +32,9 @@ interface ChipGroupProps {
   allowExclude?: boolean;
   searchable?: boolean;
   className?: string;
-  size?: "sm" | "md" | "lg";
-  variant?: "default" | "premium" | "minimal";
-  "data-testid"?: string;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'premium' | 'minimal';
+  'data-testid'?: string;
 }
 
 export const ChipGroup = ({
@@ -58,68 +47,61 @@ export const ChipGroup = ({
   allowExclude = true,
   searchable = true,
   className,
-  size = "md",
-  variant = "premium",
-  "data-testid": testId,
+  size = 'md',
+  variant = 'premium',
+  'data-testid': testId
 }: ChipGroupProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredChip, setHoveredChip] = useState<string | null>(null);
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) return items;
-
+    
     const query = searchQuery.toLowerCase();
-    return items.filter(
-      (item) =>
-        item.label.toLowerCase().includes(query) ||
-        item.description?.toLowerCase().includes(query),
+    return items.filter(item => 
+      item.label.toLowerCase().includes(query) ||
+      item.description?.toLowerCase().includes(query)
     );
   }, [items, searchQuery]);
 
   // Get items that aren't already selected
   const availableItems = useMemo(() => {
-    const selectedIds = new Set(selected.map((s) => s.item.id));
-    return filteredItems.filter((item) => !selectedIds.has(item.id));
+    const selectedIds = selected.map(s => s.item.id);
+    return filteredItems.filter(item => !selectedIds.includes(item.id));
   }, [filteredItems, selected]);
 
   const sizeClasses = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base",
-  } as const;
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base'
+  };
 
   const chipSizeClasses = {
-    sm: "px-2 py-1 text-xs",
-    md: "px-3 py-1.5 text-sm",
-    lg: "px-4 py-2 text-base",
-  } as const;
+    sm: 'px-2 py-1 text-xs',
+    md: 'px-3 py-1.5 text-sm',
+    lg: 'px-4 py-2 text-base'
+  };
 
-  const addSelection = (
-    item: ChipItem,
-    mode: "include" | "exclude" = "include",
-  ) => {
+  const addSelection = (item: ChipItem, mode: 'include' | 'exclude' = 'include') => {
     if (maxSelections && selected.length >= maxSelections) return;
-
-    // Avoid duplicate ids
-    if (selected.some((s) => s.item.id === item.id)) return;
-
+    
     const newSelection: ChipSelection = { item, mode };
     onSelectionChange([...selected, newSelection]);
-    setIsOpen(false);
   };
 
   const removeSelection = (itemId: string | number) => {
-    onSelectionChange(selected.filter((s) => s.item.id !== itemId));
+    onSelectionChange(selected.filter(s => s.item.id !== itemId));
   };
 
   const toggleSelectionMode = (itemId: string | number) => {
     onSelectionChange(
-      selected.map((s) =>
-        s.item.id === itemId
-          ? { ...s, mode: s.mode === "include" ? "exclude" : "include" }
-          : s,
-      ),
+      selected.map(s => 
+        s.item.id === itemId 
+          ? { ...s, mode: s.mode === 'include' ? 'exclude' : 'include' }
+          : s
+      )
     );
   };
 
@@ -127,17 +109,20 @@ export const ChipGroup = ({
     onSelectionChange([]);
   };
 
-  const getChipVariant = (mode: "include" | "exclude") => {
+  const getChipVariant = (mode: 'include' | 'exclude') => {
     switch (mode) {
-      case "include":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20";
-      case "exclude":
-        return "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20";
+      case 'include':
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20';
+      case 'exclude':
+        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20';
     }
   };
 
   return (
-    <div className={cn("space-y-3", className)} data-testid={testId}>
+    <div 
+      className={cn("space-y-3", className)}
+      data-testid={testId}
+    >
       {/* Selected chips */}
       <AnimatePresence mode="popLayout">
         {selected.length > 0 && (
@@ -148,14 +133,8 @@ export const ChipGroup = ({
             className="space-y-2"
           >
             <div className="flex items-center justify-between">
-              <span
-                className={cn(
-                  "font-medium text-muted-foreground",
-                  sizeClasses[size],
-                )}
-              >
-                Selected ({selected.length}
-                {maxSelections && `/${maxSelections}`})
+              <span className={cn("font-medium text-muted-foreground", sizeClasses[size])}>
+                Selected ({selected.length}{maxSelections && `/${maxSelections}`})
               </span>
               <Button
                 variant="ghost"
@@ -167,7 +146,7 @@ export const ChipGroup = ({
                 Clear All
               </Button>
             </div>
-
+            
             <div className="flex flex-wrap gap-2">
               <AnimatePresence mode="popLayout">
                 {selected.map((selection, index) => (
@@ -181,14 +160,16 @@ export const ChipGroup = ({
                       type: "spring",
                       stiffness: 300,
                       damping: 25,
-                      delay: index * 0.05,
+                      delay: index * 0.05
                     }}
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-lg border",
                       "transition-all duration-200 cursor-pointer group",
                       getChipVariant(selection.mode),
-                      chipSizeClasses[size],
+                      chipSizeClasses[size]
                     )}
+                    onMouseEnter={() => setHoveredChip(selection.item.id.toString())}
+                    onMouseLeave={() => setHoveredChip(null)}
                     data-testid={`selected-chip-${selection.item.id}`}
                   >
                     {/* Mode indicator */}
@@ -196,12 +177,12 @@ export const ChipGroup = ({
                       className={cn(
                         "flex items-center justify-center w-5 h-5 rounded-full",
                         "transition-all duration-200 shadow-sm",
-                        selection.mode === "include"
-                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30"
-                          : "bg-rose-500/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30",
+                        selection.mode === 'include' 
+                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/30" 
+                          : "bg-rose-500/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30"
                       )}
                     >
-                      {selection.mode === "include" ? (
+                      {selection.mode === 'include' ? (
                         <Check className="w-3 h-3 font-bold" />
                       ) : (
                         <X className="w-3 h-3 font-bold" />
@@ -209,7 +190,9 @@ export const ChipGroup = ({
                     </div>
 
                     {/* Label */}
-                    <span className="font-medium">{selection.item.label}</span>
+                    <span className="font-medium">
+                      {selection.item.label}
+                    </span>
 
                     {/* Count */}
                     {selection.item.count && (
@@ -230,19 +213,17 @@ export const ChipGroup = ({
                             "flex items-center justify-center w-4 h-4 rounded-full",
                             "opacity-0 group-hover:opacity-100 transition-all duration-200",
                             "hover:scale-110 active:scale-95",
-                            selection.mode === "include"
+                            selection.mode === 'include'
                               ? "hover:bg-destructive/20 hover:text-destructive"
-                              : "hover:bg-primary/20 hover:text-primary",
+                              : "hover:bg-primary/20 hover:text-primary"
                           )}
-                          title={
-                            selection.mode === "include" ? "Exclude" : "Include"
-                          }
+                          title={selection.mode === 'include' ? 'Exclude' : 'Include'}
                           data-testid={`toggle-chip-mode-${selection.item.id}`}
                         >
                           <Filter className="w-2.5 h-2.5" />
                         </button>
                       )}
-
+                      
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -252,7 +233,7 @@ export const ChipGroup = ({
                           "flex items-center justify-center w-4 h-4 rounded-full",
                           "opacity-0 group-hover:opacity-100 transition-all duration-200",
                           "hover:bg-destructive/20 hover:text-destructive",
-                          "hover:scale-110 active:scale-95",
+                          "hover:scale-110 active:scale-95"
                         )}
                         title="Remove"
                         data-testid={`remove-chip-${selection.item.id}`}
@@ -276,19 +257,16 @@ export const ChipGroup = ({
             className={cn(
               "w-full justify-start gap-2 glass-panel border-white/10",
               "hover:bg-primary/5 transition-all duration-200",
-              variant === "premium" && "glass-panel border-white/10",
-              size === "sm" && "h-8",
-              size === "md" && "h-10",
-              size === "lg" && "h-12",
+              variant === 'premium' && "glass-panel border-white/10",
+              size === 'sm' && "h-8",
+              size === 'md' && "h-10",
+              size === 'lg' && "h-12"
             )}
             disabled={maxSelections ? selected.length >= maxSelections : false}
             data-testid="add-chips-trigger"
           >
             <Plus className="w-4 h-4" />
-            Add{" "}
-            {items.length > 0
-              ? items[0].label.split(" ").pop()?.toLowerCase() || "items"
-              : "items"}
+            Add {items.length > 0 ? items[0].label.split(' ').pop()?.toLowerCase() || 'items' : 'items'}
             {maxSelections && (
               <Badge variant="secondary" className="ml-auto">
                 {selected.length}/{maxSelections}
@@ -296,11 +274,11 @@ export const ChipGroup = ({
             )}
           </Button>
         </PopoverTrigger>
-
+        
         <PopoverContent
           className={cn(
             "w-80 p-0 glass-panel border-white/10",
-            variant === "premium" && "backdrop-blur-md",
+            variant === 'premium' && "backdrop-blur-md"
           )}
           align="start"
           data-testid="chips-popover"
@@ -341,7 +319,7 @@ export const ChipGroup = ({
                         className={cn(
                           "flex items-center justify-between p-2 rounded-lg",
                           "hover:bg-primary/5 cursor-pointer transition-all duration-200",
-                          "border border-transparent hover:border-primary/10",
+                          "border border-transparent hover:border-primary/10"
                         )}
                         data-testid={`available-chip-${item.id}`}
                       >
@@ -367,7 +345,7 @@ export const ChipGroup = ({
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => addSelection(item, "include")}
+                            onClick={() => addSelection(item, 'include')}
                             className="h-7 w-7 p-0 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-full"
                             title="Include this item"
                             data-testid={`include-chip-${item.id}`}
@@ -378,7 +356,7 @@ export const ChipGroup = ({
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => addSelection(item, "exclude")}
+                              onClick={() => addSelection(item, 'exclude')}
                               className="h-7 w-7 p-0 hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 rounded-full"
                               title="Exclude this item"
                               data-testid={`exclude-chip-${item.id}`}
@@ -400,13 +378,10 @@ export const ChipGroup = ({
   );
 };
 
-// Genre-specific implementation matching the autocomplete UI pattern
+// Genre-specific implementation
 export interface GenreChipGroupProps {
   selectedGenres: { with_genres: number[]; without_genres: number[] };
-  onGenresChange: (genres: {
-    with_genres: number[];
-    without_genres: number[];
-  }) => void;
+  onGenresChange: (genres: { with_genres: number[]; without_genres: number[] }) => void;
   genres: Array<{ id: number; name: string }>;
   className?: string;
 }
@@ -415,375 +390,59 @@ export const GenreChipGroup = ({
   selectedGenres,
   onGenresChange,
   genres,
-  className,
+  className
 }: GenreChipGroupProps) => {
-  const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [hoveredGenre, setHoveredGenre] = useState<number | null>(null);
+  // Convert genres to chip items
+  const chipItems: ChipItem[] = genres.map(genre => ({
+    id: genre.id,
+    label: genre.name,
+    value: genre.id
+  }));
 
-  const selectedGenreIds = [
-    ...selectedGenres.with_genres,
-    ...selectedGenres.without_genres,
+  // Convert selections to chip format
+  const chipSelections: ChipSelection[] = [
+    ...selectedGenres.with_genres.map(id => {
+      const genre = genres.find(g => g.id === id);
+      return genre ? {
+        item: { id: genre.id, label: genre.name, value: genre.id },
+        mode: 'include' as const
+      } : null;
+    }).filter(Boolean) as ChipSelection[],
+    ...selectedGenres.without_genres.map(id => {
+      const genre = genres.find(g => g.id === id);
+      return genre ? {
+        item: { id: genre.id, label: genre.name, value: genre.id },
+        mode: 'exclude' as const
+      } : null;
+    }).filter(Boolean) as ChipSelection[]
   ];
 
-  const filteredGenres = useMemo(() => {
-    if (!searchQuery.trim()) return genres;
-    const query = searchQuery.toLowerCase();
-    return genres.filter((genre) => genre.name.toLowerCase().includes(query));
-  }, [genres, searchQuery]);
+  const handleSelectionChange = (selections: ChipSelection[]) => {
+    const with_genres = selections
+      .filter(s => s.mode === 'include')
+      .map(s => s.item.id as number);
+    
+    const without_genres = selections
+      .filter(s => s.mode === 'exclude')
+      .map(s => s.item.id as number);
 
-  const handleGenreSelect = (
-    genreId: number,
-    mode: "include" | "exclude" = "include",
-  ) => {
-    const isInInclude = selectedGenres.with_genres.includes(genreId);
-    const isInExclude = selectedGenres.without_genres.includes(genreId);
-
-    if (mode === "include") {
-      if (isInInclude) {
-        return;
-      }
-      onGenresChange({
-        with_genres: [...selectedGenres.with_genres, genreId],
-        without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
-      });
-    } else {
-      if (isInExclude) {
-        return;
-      }
-      onGenresChange({
-        with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-        without_genres: [...selectedGenres.without_genres, genreId],
-      });
-    }
-    setOpen(false);
-  };
-
-  const removeGenre = (genreId: number) => {
-    onGenresChange({
-      with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-      without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
-    });
-  };
-
-  const toggleMode = (genreId: number) => {
-    const isInInclude = selectedGenres.with_genres.includes(genreId);
-    if (isInInclude) {
-      onGenresChange({
-        with_genres: selectedGenres.with_genres.filter((id) => id !== genreId),
-        without_genres: [...selectedGenres.without_genres, genreId],
-      });
-    } else {
-      onGenresChange({
-        with_genres: [...selectedGenres.with_genres, genreId],
-        without_genres: selectedGenres.without_genres.filter((id) => id !== genreId),
-      });
-    }
-  };
-
-  const clearAll = () => {
-    onGenresChange({ with_genres: [], without_genres: [] });
+    onGenresChange({ with_genres, without_genres });
   };
 
   return (
-    <div className={cn("space-y-3", className)} data-testid="genre-chip-group">
-      {/* Selected genres display */}
-      <AnimatePresence mode="popLayout">
-        {selectedGenreIds.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                Selected ({selectedGenreIds.length})
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAll}
-                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                data-testid="clear-all-genres"
-              >
-                Clear All
-              </Button>
-            </div>
-            <div className="max-h-32 w-full overflow-y-auto overflow-x-hidden">
-              <div className="flex flex-wrap gap-2 pr-2">
-                <AnimatePresence mode="popLayout">
-                  {selectedGenres.with_genres.map((genreId) => {
-                    const genre = genres.find((g) => g.id === genreId);
-                    if (!genre) return null;
-                    return (
-                      <motion.div
-                        key={`include-${genreId}`}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
-                            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-                            "hover:bg-emerald-500/20 transition-all duration-200",
-                          )}
-                          data-testid={`selected-genre-include-${genreId}`}
-                        >
-                          <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                            <Check className="w-2.5 h-2.5" />
-                          </div>
-                          <span className="font-medium">{genre.name}</span>
-                          <div className="flex items-center gap-1 ml-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleMode(genreId);
-                              }}
-                              className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-600 transition-all duration-200"
-                              title="Exclude this genre"
-                              data-testid={`toggle-genre-to-exclude-${genreId}`}
-                            >
-                              <Filter className="w-2.5 h-2.5" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeGenre(genreId);
-                              }}
-                              className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
-                              title="Remove"
-                              data-testid={`remove-genre-include-${genreId}`}
-                            >
-                              <X className="w-2.5 h-2.5" />
-                            </button>
-                          </div>
-                        </Badge>
-                      </motion.div>
-                    );
-                  })}
-                  {selectedGenres.without_genres.map((genreId) => {
-                    const genre = genres.find((g) => g.id === genreId);
-                    if (!genre) return null;
-                    return (
-                      <motion.div
-                        key={`exclude-${genreId}`}
-                        layout
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 text-xs group cursor-pointer",
-                            "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30",
-                            "hover:bg-rose-500/20 transition-all duration-200",
-                          )}
-                          data-testid={`selected-genre-exclude-${genreId}`}
-                        >
-                          <div className="flex items-center justify-center w-4 h-4 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
-                            <X className="w-2.5 h-2.5" />
-                          </div>
-                          <span className="font-medium">{genre.name}</span>
-                          <div className="flex items-center gap-1 ml-1">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleMode(genreId);
-                              }}
-                              className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 hover:text-emerald-600 transition-all duration-200"
-                              title="Include this genre"
-                              data-testid={`toggle-genre-to-include-${genreId}`}
-                            >
-                              <Filter className="w-2.5 h-2.5" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeGenre(genreId);
-                              }}
-                              className="flex items-center justify-center w-4 h-4 rounded-full opacity-0 group-hover:opacity-100 hover:bg-destructive/20 hover:text-destructive transition-all duration-200"
-                              title="Remove"
-                              data-testid={`remove-genre-exclude-${genreId}`}
-                            >
-                              <X className="w-2.5 h-2.5" />
-                            </button>
-                          </div>
-                        </Badge>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Enhanced searchable select */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className={cn(
-              "w-full justify-between glass-panel border-white/10",
-              "hover:bg-primary/5 transition-all duration-200",
-              open && "ring-2 ring-primary/30",
-            )}
-            data-testid="genre-select-trigger"
-          >
-            <div className="flex items-center gap-2">
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {selectedGenreIds.length > 0
-                  ? `${selectedGenreIds.length} genre${selectedGenreIds.length > 1 ? "s" : ""} selected`
-                  : "Search and select genres..."}
-              </span>
-            </div>
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className={cn("w-80 p-0 glass-panel border-white/10 backdrop-blur-md")}
-          align="start"
-          data-testid="genre-select-content"
-        >
-          <Command className="rounded-lg border-0">
-            <div className="flex items-center border-b border-border/50 px-3">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <CommandInput
-                placeholder="Type to search genres..."
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-                data-testid="genre-search-input"
-                className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            </div>
-            <CommandList className="max-h-[300px]">
-              <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                    <Search className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p>No genres found</p>
-                  {searchQuery && <p className="text-xs">Try a different search term</p>}
-                </div>
-              </CommandEmpty>
-              <CommandGroup>
-                {filteredGenres.map((genre) => {
-                  const isIncluded = selectedGenres.with_genres.includes(genre.id);
-                  const isExcluded = selectedGenres.without_genres.includes(genre.id);
-
-                  return (
-                    <CommandItem
-                      key={genre.id}
-                      value={genre.name}
-                      // Default behavior: clicking row or pressing Enter includes.
-                      onSelect={() => {
-                        if (isIncluded || isExcluded) {
-                          // Toggle between include/exclude when already present.
-                          toggleMode(genre.id);
-                        } else {
-                          handleGenreSelect(genre.id, "include");
-                        }
-                      }}
-                      className={cn(
-                        "flex items-center justify-between py-3 px-3 cursor-pointer group",
-                        "hover:bg-primary/5 transition-all duration-200",
-                        (isIncluded || isExcluded) && "bg-muted/30",
-                      )}
-                      data-testid={`genre-option-${genre.id}`}
-                      onMouseEnter={() => setHoveredGenre(genre.id)}
-                      onMouseLeave={() => setHoveredGenre(null)}
-                    >
-                      <div className="flex items-center gap-2">
-                        {isIncluded && (
-                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                            <Check className="w-3 h-3" />
-                          </div>
-                        )}
-                        {isExcluded && (
-                          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-400">
-                            <X className="w-3 h-3" />
-                          </div>
-                        )}
-                        <span
-                          className={cn(
-                            "font-medium",
-                            isIncluded && "text-emerald-600 dark:text-emerald-400",
-                            isExcluded && "text-rose-600 dark:text-rose-400",
-                          )}
-                        >
-                          {genre.name}
-                        </span>
-                      </div>
-                      <div
-                        className={cn(
-                          "flex gap-1 transition-opacity duration-200",
-                          hoveredGenre === genre.id ? "opacity-100" : "opacity-0",
-                        )}
-                      >
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleGenreSelect(genre.id, "include");
-                          }}
-                          className={cn(
-                            "h-7 w-7 p-0 rounded-full",
-                            "hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-400",
-                            isIncluded && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-                          )}
-                          title="Include this genre"
-                          data-testid={`include-genre-${genre.id}`}
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleGenreSelect(genre.id, "exclude");
-                          }}
-                          className={cn(
-                            "h-7 w-7 p-0 rounded-full",
-                            "hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400",
-                            isExcluded && "bg-rose-500/15 text-rose-600 dark:text-rose-400",
-                          )}
-                          title="Exclude this genre"
-                          data-testid={`exclude-genre-${genre.id}`}
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
-            <div className="border-t border-border/50 p-2 bg-muted/30">
-              <p className="text-xs text-muted-foreground text-center">
-                <Check className="w-3 h-3 inline-block mr-1 text-emerald-600 dark:text-emerald-400" />
-                Include genre
-                <span className="mx-2">•</span>
-                <X className="w-3 h-3 inline-block mr-1 text-rose-600 dark:text-rose-400" />
-                Exclude genre
-              </p>
-            </div>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+    <ChipGroup
+      items={chipItems}
+      selected={chipSelections}
+      onSelectionChange={handleSelectionChange}
+      placeholder="Search genres..."
+      emptyMessage="No genres available"
+      allowExclude={true}
+      searchable={true}
+      size="md"
+      variant="premium"
+      className={className}
+      data-testid="genre-chip-group"
+    />
   );
 };
 
