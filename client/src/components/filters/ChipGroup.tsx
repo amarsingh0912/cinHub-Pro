@@ -216,46 +216,23 @@ export const ChipGroup = ({
                       </span>
                     )}
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 ml-1">
-                      {allowExclude && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSelectionMode(selection.item.id);
-                          }}
-                          className={cn(
-                            "flex items-center justify-center w-4 h-4 rounded-full",
-                            "opacity-60 group-hover:opacity-100 transition-all duration-200",
-                            "hover:scale-110 active:scale-95",
-                            selection.mode === 'include'
-                              ? "hover:bg-destructive/20 hover:text-destructive"
-                              : "hover:bg-primary/20 hover:text-primary"
-                          )}
-                          title={selection.mode === 'include' ? 'Exclude' : 'Include'}
-                          data-testid={`toggle-chip-mode-${selection.item.id}`}
-                        >
-                          <Filter className="w-2.5 h-2.5" />
-                        </button>
+                    {/* Remove button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeSelection(selection.item.id);
+                      }}
+                      className={cn(
+                        "flex items-center justify-center w-5 h-5 rounded-full ml-1",
+                        "hover:bg-destructive/20 hover:text-destructive",
+                        "transition-all duration-200",
+                        "hover:scale-110 active:scale-95"
                       )}
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeSelection(selection.item.id);
-                        }}
-                        className={cn(
-                          "flex items-center justify-center w-4 h-4 rounded-full",
-                          "opacity-60 group-hover:opacity-100 transition-all duration-200",
-                          "hover:bg-destructive/20 hover:text-destructive",
-                          "hover:scale-110 active:scale-95"
-                        )}
-                        title="Remove"
-                        data-testid={`remove-chip-${selection.item.id}`}
-                      >
-                        <X className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
+                      title="Remove"
+                      data-testid={`remove-chip-${selection.item.id}`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </motion.div>
                 ))}
               </AnimatePresence>
