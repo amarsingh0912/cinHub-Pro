@@ -226,7 +226,7 @@ export const ChipGroup = ({
                           }}
                           className={cn(
                             "flex items-center justify-center w-4 h-4 rounded-full",
-                            "opacity-0 group-hover:opacity-100 transition-all duration-200",
+                            "opacity-60 group-hover:opacity-100 transition-all duration-200",
                             "hover:scale-110 active:scale-95",
                             selection.mode === 'include'
                               ? "hover:bg-destructive/20 hover:text-destructive"
@@ -246,7 +246,7 @@ export const ChipGroup = ({
                         }}
                         className={cn(
                           "flex items-center justify-center w-4 h-4 rounded-full",
-                          "opacity-0 group-hover:opacity-100 transition-all duration-200",
+                          "opacity-60 group-hover:opacity-100 transition-all duration-200",
                           "hover:bg-destructive/20 hover:text-destructive",
                           "hover:scale-110 active:scale-95"
                         )}
