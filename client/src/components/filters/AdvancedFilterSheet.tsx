@@ -37,7 +37,6 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PeopleAutocomplete } from "./PeopleAutocomplete";
 import { CompaniesAutocomplete } from "./CompaniesAutocomplete";
-import { KeywordsAutocomplete } from "./KeywordsAutocomplete";
 import { ContentTypeToggle } from "./SegmentedToggle";
 import { GenreChipGroup } from "./ChipGroup";
 import { RuntimeSlider } from "./DualRangeSlider";
@@ -123,7 +122,7 @@ const FILTER_CATEGORIES: FilterCategory[] = [
     label: 'Advanced Filters',
     icon: 'Settings',
     description: 'Language, people, companies, and more',
-    fields: ['with_keywords', 'without_keywords', 'with_cast', 'with_crew', 'with_people', 'with_companies', 'with_networks', 'with_original_language', 'region', 'certification_country', 'certification', 'certification_lte', 'with_release_type', 'include_video', 'screened_theatrically', 'include_adult'],
+    fields: ['with_cast', 'with_crew', 'with_people', 'with_companies', 'with_networks', 'with_original_language', 'region', 'certification_country', 'certification', 'certification_lte', 'with_release_type', 'include_video', 'screened_theatrically', 'include_adult'],
     collapsible: true,
     defaultOpen: false
   }
@@ -217,10 +216,9 @@ export function AdvancedFilterSheet({
     // Provider filters
     if (filters.with_watch_providers?.length && filters.with_watch_providers.length > 0) score += 1;
 
-    // People, companies, keywords
+    // People, companies
     if (filters.with_people?.length && filters.with_people.length > 0) score += 2;
     if (filters.with_companies?.length && filters.with_companies.length > 0) score += 2;
-    if (filters.with_keywords?.length && filters.with_keywords.length > 0) score += 1;
 
     return score;
   }, [filters]);
@@ -306,8 +304,6 @@ export function AdvancedFilterSheet({
       contentType: filters.contentType, // Keep content type
       with_genres: [],
       without_genres: [],
-      with_keywords: [],
-      without_keywords: [],
       // Movie dates
       primary_release_date: {},
       release_date: {},
@@ -821,19 +817,6 @@ export function AdvancedFilterSheet({
     </div>
   );
 
-  const renderKeywordExclusionFilter = () => (
-    <div className="space-y-3">
-      <Label className="text-sm font-medium flex items-center gap-2">
-        <X className="h-4 w-4" />
-        Exclude Keywords
-      </Label>
-      <KeywordsAutocomplete
-        value={filters.without_keywords || []}
-        onChange={(keywords) => updateFilter('without_keywords', keywords)}
-        placeholder="Search keywords to exclude..."
-      />
-    </div>
-  );
 
   const renderSpecificYearFilter = () => {
     const currentYear = new Date().getFullYear();
@@ -1407,14 +1390,6 @@ export function AdvancedFilterSheet({
                             {category.id === 'streaming' && renderStreamingFilter()}
                             {category.id === 'advanced' && (
                               <div className="space-y-4">
-                                <KeywordsAutocomplete
-                                  value={filters.with_keywords || []}
-                                  onChange={(keywords) => updateFilter('with_keywords', keywords)}
-                                />
-                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-                                {renderKeywordExclusionFilter()}
-                                <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
-
                                 {/* People Filters */}
                                 {filters.contentType === 'movie' && (
                                   <>

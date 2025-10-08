@@ -125,8 +125,6 @@ export interface AdvancedFilterState {
   // Multi-select filters
   with_genres: number[];           // Genre IDs to include
   without_genres: number[];        // Genre IDs to exclude
-  with_keywords: number[];         // Keyword IDs to include
-  without_keywords: number[];      // Keyword IDs to exclude
   
   // Date filters - Movies
   primary_release_date: DateRange; // Movies - primary release date
@@ -212,8 +210,6 @@ export interface TMDBFilterParams {
   // Content filtering
   with_genres?: string;        // Comma-separated genre IDs
   without_genres?: string;     // Comma-separated genre IDs
-  with_keywords?: string;      // Comma-separated keyword IDs
-  without_keywords?: string;   // Comma-separated keyword IDs
   
   // Date ranges - Complete coverage
   'primary_release_date.gte'?: string;  // Movies
@@ -290,8 +286,6 @@ export interface FilterQueryParams extends Record<string, string | string[] | un
   category?: string;               // discover, trending, etc.
   with_genres?: string;            // comma-separated IDs
   without_genres?: string;
-  with_keywords?: string;
-  without_keywords?: string;
   'primary_release_date.gte'?: string;
   'primary_release_date.lte'?: string;
   'first_air_date.gte'?: string;
@@ -328,8 +322,6 @@ export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
   category: 'discover',
   with_genres: [],
   without_genres: [],
-  with_keywords: [],
-  without_keywords: [],
   // Movie dates
   primary_release_date: {},
   release_date: {},
@@ -482,7 +474,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
     label: 'Advanced Filters',
     icon: 'Settings',
     description: 'Language, people, companies, and more',
-    fields: ['with_keywords', 'without_keywords', 'with_original_language', 'with_people', 'with_companies', 'with_networks', 'certification'],
+    fields: ['with_original_language', 'with_people', 'with_companies', 'with_networks', 'certification'],
     collapsible: true,
     defaultOpen: false
   }
@@ -499,8 +491,6 @@ export interface UseAdvancedFiltersReturn {
   setRatingRange: (min: number, max: number) => void;
   setYearRange: (startYear?: number, endYear?: number) => void;
   toggleWatchProvider: (providerId: number) => void;
-  addKeyword: (keywordId: number) => void;
-  removeKeyword: (keywordId: number) => void;
   clearAllFilters: () => void;
   resetToDefaults: (newDefaults?: Partial<AdvancedFilterState>) => void;
   hasActiveFilters: boolean;
@@ -542,7 +532,6 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   sort_by: 'popularity.desc',
   with_genres: [],
   without_genres: [],
-  without_keywords: [],
   // Movie dates
   primary_release_date: { start: undefined, end: undefined },
   release_date: { start: undefined, end: undefined },
@@ -557,7 +546,6 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   watch_region: 'US',
   with_watch_providers: [],
   with_watch_monetization_types: [],
-  with_keywords: [],
   with_companies: [],
   // People
   with_cast: [],
