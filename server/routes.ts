@@ -2141,6 +2141,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         certification,
       } = req.query;
 
+      // Helper to normalize array parameters with correct delimiters
+      // TMDB uses '|' for OR semantics and ',' for AND semantics
+      const normalizeArrayParam = (
+        param: any,
+        useOrSemantic: boolean = false,
+      ): string => {
+        if (!param) return param;
+        const delimiter = useOrSemantic ? "|" : ",";
+        return Array.isArray(param) ? param.join(delimiter) : param;
+      };
+
       const params: Record<string, any> = {
         page,
         sort_by,
@@ -2165,9 +2176,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         params.with_original_language = with_original_language;
       if (watch_region) params.watch_region = watch_region;
       if (with_watch_providers)
-        params.with_watch_providers = with_watch_providers;
+        params.with_watch_providers = normalizeArrayParam(
+          with_watch_providers,
+          true,
+        ); // OR semantic for providers
       if (with_watch_monetization_types)
-        params.with_watch_monetization_types = with_watch_monetization_types;
+        params.with_watch_monetization_types = normalizeArrayParam(
+          with_watch_monetization_types,
+          true,
+        );
       if (with_people) params.with_people = with_people;
       if (with_companies) params.with_companies = with_companies;
       if (with_networks) params.with_networks = with_networks;
