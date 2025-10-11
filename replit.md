@@ -4,6 +4,16 @@
 
 CineHub Pro is a full-stack movie discovery platform that allows users to browse, search, and manage their movie and TV show collections. The application provides features for creating personal watchlists, favoriting content, rating and reviewing movies, and discovering trending content through integration with The Movie Database (TMDB) API.
 
+### Recent Updates (October 2025)
+
+**Enhanced Home Page Experience:**
+- **Dynamic Hero Carousel**: Auto-playing cinematic carousel with smooth fade transitions, backdrop blur effects, and gradient overlays showcasing featured movies
+- **Horizontally Scrollable Content Rows**: Netflix-style scrollable rows with smooth snap behavior, navigation arrows, and inertia scrolling for movies and TV shows
+- **Personalized Sections**: Continue Watching with progress indicators, Recently Watched history, and recommendations based on user favorites
+- **Interactive Genre Filtering**: Quick genre filter chips below the hero section for instant content filtering across all rows
+- **Enhanced Movie Cards**: Hover tooltips showing movie details, ratings, and descriptions, with progress bars for continue watching
+- **Performance Optimizations**: Lazy loading images, skeleton loaders during data fetching, and memoized filtering logic for smooth interactions
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
