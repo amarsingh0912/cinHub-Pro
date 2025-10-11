@@ -183,22 +183,6 @@ export function useAdvancedFilters(
     }));
   }, []);
 
-  const addKeyword = useCallback((keywordId: number) => {
-    setFilters(prev => ({
-      ...prev,
-      with_keywords: prev.with_keywords.includes(keywordId)
-        ? prev.with_keywords
-        : [...prev.with_keywords, keywordId],
-    }));
-  }, []);
-
-  const removeKeyword = useCallback((keywordId: number) => {
-    setFilters(prev => ({
-      ...prev,
-      with_keywords: prev.with_keywords.filter(k => k !== keywordId),
-    }));
-  }, []);
-
   const clearAllFilters = useCallback(() => {
     setFilters(createDefaultFilters());
   }, []);
@@ -226,8 +210,6 @@ export function useAdvancedFilters(
     setRatingRange,
     setYearRange,
     toggleWatchProvider,
-    addKeyword,
-    removeKeyword,
     clearAllFilters,
     resetToDefaults,
     hasActiveFilters,
@@ -369,13 +351,7 @@ export function useAdvancedFilteredQuery<T = any>(
       params.with_watch_providers = filters.with_watch_providers.join('|');
     }
 
-    // Keywords and companies
-    if (filters.with_keywords?.length) {
-      params.with_keywords = filters.with_keywords.join(',');
-    }
-    if (filters.without_keywords?.length) {
-      params.without_keywords = filters.without_keywords.join(',');
-    }
+    // Companies
     if (filters.with_companies?.length) {
       params.with_companies = filters.with_companies.join(',');
     }

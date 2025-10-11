@@ -60,8 +60,6 @@ export default function TVShows() {
     return [
       filters.with_genres?.length || 0,
       filters.without_genres?.length || 0,
-      filters.with_keywords?.length || 0,
-      filters.without_keywords?.length || 0,
       filters.with_watch_providers?.length || 0,
       filters.with_watch_monetization_types?.length || 0,
       filters.with_people?.length || 0,

@@ -34,14 +34,6 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
     params.without_genres = filters.without_genres.join(',');
   }
 
-  // Keywords - multi-select arrays
-  if (filters.with_keywords.length > 0) {
-    params.with_keywords = filters.with_keywords.join(',');
-  }
-  if (filters.without_keywords.length > 0) {
-    params.without_keywords = filters.without_keywords.join(',');
-  }
-
   // Date ranges - Movies
   if (filters.primary_release_date.start) {
     params['primary_release_date.gte'] = filters.primary_release_date.start;
@@ -209,16 +201,6 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
   const withoutGenres = params.get('without_genres');
   if (withoutGenres) {
     filters.without_genres = withoutGenres.split(',').map(Number).filter(Boolean);
-  }
-
-  // Parse keywords
-  const withKeywords = params.get('with_keywords');
-  if (withKeywords) {
-    filters.with_keywords = withKeywords.split(',').map(Number).filter(Boolean);
-  }
-  const withoutKeywords = params.get('without_keywords');
-  if (withoutKeywords) {
-    filters.without_keywords = withoutKeywords.split(',').map(Number).filter(Boolean);
   }
 
   // Parse date ranges - Movies
@@ -655,7 +637,7 @@ export const FilterURLUtils = {
   hasFilterParams(): boolean {
     const searchParams = new URLSearchParams(window.location.search);
     const filterKeys = [
-      'type', 'category', 'with_genres', 'without_genres', 'with_keywords', 
+      'type', 'category', 'with_genres', 'without_genres',
       'primary_release_date.gte', 'first_air_date.gte', 'vote_average.gte',
       'with_runtime.gte', 'sort_by'
     ];

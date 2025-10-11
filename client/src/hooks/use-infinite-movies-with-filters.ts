@@ -70,8 +70,6 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
       debouncedFilters.with_original_language ||
       debouncedFilters.region ||
       debouncedFilters.with_watch_providers?.length ||
-      debouncedFilters.with_keywords?.length ||
-      debouncedFilters.without_keywords?.length ||
       debouncedFilters.with_companies?.length ||
       debouncedFilters.with_people?.length ||
       debouncedFilters.certification_country ||
@@ -150,13 +148,7 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
         params.with_watch_providers = debouncedFilters.with_watch_providers.join('|');
       }
 
-      // Keywords and companies
-      if (debouncedFilters.with_keywords?.length) {
-        params.with_keywords = debouncedFilters.with_keywords.join(',');
-      }
-      if (debouncedFilters.without_keywords?.length) {
-        params.without_keywords = debouncedFilters.without_keywords.join(',');
-      }
+      // Companies
       if (debouncedFilters.with_companies?.length) {
         params.with_companies = debouncedFilters.with_companies.join(',');
       }
