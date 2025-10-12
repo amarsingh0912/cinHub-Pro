@@ -8,6 +8,26 @@ CineHub Pro is a full-stack movie discovery platform that allows users to browse
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Codebase Cleanup (October 2025)
+The following unused code and files were removed to improve maintainability and reduce bundle size:
+
+**Frontend:**
+- Removed 15 unused filter component files from `client/src/components/filters/` directory (kept only `PeopleAutocomplete.tsx` which is actively used)
+- Removed 3 unused filter hooks: `use-filter-presets.ts`, `use-filter-result-count.ts`, `use-undo-reset.ts`
+
+**Backend:**
+- Removed unused `imageCache` service from `server/services/`
+- Cleaned up corresponding imports in `server/routes.ts`
+- Fixed security issue: Removed plaintext TMDB API key logging in development mode
+
+**Other Files:**
+- Removed development/testing files: `cookies.txt`, `trailer_modal.png`
+- Cleaned up pasted design documents from `attached_assets/` directory
+
+**Note:** All schema tables, active services (tmdbCache, cacheQueue, websocketService, cloudinaryService, otpService), and core functionality remain intact and fully operational.
+
 ## System Architecture
 
 ### Frontend Architecture
