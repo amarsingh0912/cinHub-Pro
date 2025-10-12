@@ -64,12 +64,11 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
   };
 
   return (
-    <motion.div
+    <div
       className={cn(
-        "sticky top-0 z-40 glass-panel border-b border-border/50 backdrop-blur-xl",
+        "sticky top-0 z-40 glass-panel border-b border-border/50 backdrop-blur-xl bg-background/80",
         className
       )}
-      {...filterMotion.ribbonSlide}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 py-3">
@@ -202,6 +201,6 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
