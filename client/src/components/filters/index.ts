@@ -1,5 +1,7 @@
 export { AdvancedFilterSheet } from './AdvancedFilterSheet';
 export { FloatingFiltersButton } from './FloatingFiltersButton';
+export { QuickFilterBar } from './QuickFilterBar';
+export { FilterPresetsDialog } from './FilterPresetsDialog';
 export { PeopleAutocomplete } from './PeopleAutocomplete';
 export { CompaniesAutocomplete } from './CompaniesAutocomplete';
 export { CountrySelect } from './CountrySelect';

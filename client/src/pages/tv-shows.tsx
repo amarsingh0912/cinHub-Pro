@@ -1,14 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import { FloatingFiltersButton } from "@/components/filters";
+import { FloatingFiltersButton, QuickFilterBar, FilterPresetsDialog } from "@/components/filters";
 import { Loader2 } from "lucide-react";
 import { DEFAULT_TV_FILTERS } from "@/types/filters";
 
 export default function TVShows() {
+  const [isPresetsDialogOpen, setIsPresetsDialogOpen] = useState(false);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+
   // Use the complete filter system with URL sync and debouncing
   const {
     filters,
@@ -17,6 +20,7 @@ export default function TVShows() {
     debouncedFilters,
     isDebouncing,
     data: shows,
+    totalResults,
     isLoading,
     hasNextPage,
     isFetchingNextPage,
@@ -82,8 +86,17 @@ export default function TVShows() {
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="tv-shows-page">
       <Header />
+
+      {/* Quick Filter Bar */}
+      <QuickFilterBar
+        filters={filters}
+        onFiltersChange={setFilters}
+        onOpenAdvanced={() => setIsAdvancedFiltersOpen(true)}
+        resultCount={totalResults}
+        isLoading={isLoading || isDebouncing}
+      />
       
-      <main className="pt-16">
+      <main className="pt-0">
         {/* Page Header */}
         <section className="py-8 md:py-12 border-b border-border/50" data-testid="tv-shows-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -205,6 +218,14 @@ export default function TVShows() {
       <FloatingFiltersButton
         filters={filters}
         onFiltersChange={setFilters}
+      />
+
+      {/* Filter Presets Dialog */}
+      <FilterPresetsDialog
+        isOpen={isPresetsDialogOpen}
+        onOpenChange={setIsPresetsDialogOpen}
+        currentFilters={filters}
+        onLoadPreset={setFilters}
       />
     </div>
   );

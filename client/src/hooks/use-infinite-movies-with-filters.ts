@@ -193,6 +193,7 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     
     // Combined state
     isLoadingOrDebouncing: infiniteQuery.isLoading || isDebouncing,
+    isLoadingCount: infiniteQuery.isLoading || isDebouncing,
     
     // Convenience methods
     getQueryKey: () => [endpoint, queryParams, debouncedFilters.contentType],
