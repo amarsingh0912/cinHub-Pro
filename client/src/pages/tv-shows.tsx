@@ -1,17 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import { FloatingFiltersButton, QuickFilterBar, FilterPresetsDialog } from "@/components/filters";
+import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
 import { Loader2 } from "lucide-react";
 import { DEFAULT_TV_FILTERS } from "@/types/filters";
 
 export default function TVShows() {
-  const [isPresetsDialogOpen, setIsPresetsDialogOpen] = useState(false);
-  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
-
   // Use the complete filter system with URL sync and debouncing
   const {
     filters,
@@ -87,12 +84,11 @@ export default function TVShows() {
     <div className="min-h-screen bg-background text-foreground" data-testid="tv-shows-page">
       <Header />
 
-      {/* Quick Filter Bar */}
-      <QuickFilterBar
+      {/* Context Ribbon - New Filter UI */}
+      <ContextRibbon
         filters={filters}
         onFiltersChange={setFilters}
-        onOpenAdvanced={() => setIsAdvancedFiltersOpen(true)}
-        resultCount={totalResults}
+        totalResults={totalResults}
         isLoading={isLoading || isDebouncing}
       />
       
@@ -214,18 +210,16 @@ export default function TVShows() {
 
       <Footer />
 
-      {/* Floating Filters Button - Desktop: fixed bottom-right, Mobile: bottom sheet */}
-      <FloatingFiltersButton
+      {/* Filter Dock - Responsive drawer */}
+      <FilterDock
         filters={filters}
         onFiltersChange={setFilters}
       />
 
-      {/* Filter Presets Dialog */}
-      <FilterPresetsDialog
-        isOpen={isPresetsDialogOpen}
-        onOpenChange={setIsPresetsDialogOpen}
-        currentFilters={filters}
-        onLoadPreset={setFilters}
+      {/* Filter Lab - Advanced modal */}
+      <FilterLab
+        filters={filters}
+        onFiltersChange={setFilters}
       />
     </div>
   );
