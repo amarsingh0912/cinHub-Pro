@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Home from "@/pages/enhanced-home";
+import Home from "@/pages/home";
 import Movies from "@/pages/movies";
 import TVShows from "@/pages/tv-shows";
 import MovieDetail from "@/pages/movie-detail";
