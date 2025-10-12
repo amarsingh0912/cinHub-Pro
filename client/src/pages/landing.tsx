@@ -7,25 +7,25 @@ import {
   Play, 
   TrendingUp, 
   Globe, 
-  List, 
   Star, 
   ChevronRight,
   Sparkles,
   Film,
-  Tv,
   Heart,
   Zap,
-  Download,
   Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SiApple, SiAndroid, SiGoogleplay } from "react-icons/si";
+import { useRevealAnimation, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [nextHeroIndex, setNextHeroIndex] = useState(0);
 
   const { data: trendingMovies } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/trending"],
@@ -37,29 +37,44 @@ export default function Landing() {
     staleTime: 1000 * 60 * 15,
   });
 
-  // Handle scroll for navigation transparency
+  // Reveal animations for sections
+  const heroTitleReveal = useRevealAnimation(REVEAL_PRESETS.heroTitle);
+  const heroSubtitleReveal = useRevealAnimation(REVEAL_PRESETS.heroSubtitle);
+  const heroButtonsReveal = useRevealAnimation(REVEAL_PRESETS.heroButtons);
+  const featuresSectionReveal = useRevealAnimation({ animation: 'fade-in-up', threshold: 0.2 });
+  const genresSectionReveal = useRevealAnimation({ animation: 'fade-in-up', threshold: 0.2 });
+  const testimonialsSectionReveal = useRevealAnimation({ animation: 'fade-in-up', threshold: 0.2 });
+
+  // Handle scroll for navigation transparency and parallax
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 50);
+      setScrollY(currentScrollY);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Auto-rotate hero images
+  // Auto-rotate hero images with smooth crossfade
   useEffect(() => {
     if (!trendingMovies?.results?.length) return;
     
     const interval = setInterval(() => {
-      setCurrentHeroIndex((prev) => 
-        (prev + 1) % Math.min(5, trendingMovies.results.length)
-      );
-    }, 5000);
+      const next = (currentHeroIndex + 1) % Math.min(5, trendingMovies.results.length);
+      setNextHeroIndex(next);
+      
+      // After crossfade duration, swap current to next
+      setTimeout(() => {
+        setCurrentHeroIndex(next);
+      }, 1200);
+    }, 6000);
     
     return () => clearInterval(interval);
-  }, [trendingMovies]);
+  }, [trendingMovies, currentHeroIndex]);
 
-  const heroMovie = trendingMovies?.results?.[currentHeroIndex];
+  const currentHero = trendingMovies?.results?.[currentHeroIndex];
+  const nextHero = trendingMovies?.results?.[nextHeroIndex];
 
   const genres = [
     { id: 28, name: "Action", emoji: "💥", color: "from-red-500/20 to-orange-500/20" },
@@ -161,19 +176,42 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section with Smooth Crossfade */}
       <section 
         className="relative h-[90vh] flex items-center justify-center overflow-hidden"
         data-testid="hero-section"
         aria-label="Hero banner"
       >
-        {/* Background Image with Parallax */}
+        {/* Layered Background Images with Parallax and Crossfade */}
         <div className="absolute inset-0 z-0">
-          {heroMovie && (
+          {/* Base Layer - Current Image (always visible) */}
+          {currentHero && (
             <div 
-              className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+              key={`current-${currentHeroIndex}`}
+              className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url(${getImageUrl(heroMovie.backdrop_path, 'original')})`,
+                backgroundImage: `url(${getImageUrl(currentHero.backdrop_path, 'original')})`,
+                transform: `translateY(${scrollY * 0.3}px) scale(${1 + scrollY * 0.0002})`,
+                opacity: 1,
+                zIndex: 0
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-transparent to-background/60" />
+            </div>
+          )}
+          
+          {/* Overlay Layer - Next Image (crossfades in) */}
+          {nextHero && nextHeroIndex !== currentHeroIndex && (
+            <div 
+              key={`next-${nextHeroIndex}`}
+              className="absolute inset-0 bg-cover bg-center animate-fade-in"
+              style={{
+                backgroundImage: `url(${getImageUrl(nextHero.backdrop_path, 'original')})`,
+                transform: `translateY(${scrollY * 0.3}px) scale(${1 + scrollY * 0.0002})`,
+                animationDuration: '1200ms',
+                animationFillMode: 'forwards',
+                zIndex: 1
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
@@ -182,7 +220,7 @@ export default function Landing() {
           )}
         </div>
 
-        {/* Hero Content */}
+        {/* Hero Content with Reveal Animations */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Badge className="mb-6 text-sm px-4 py-1" data-testid="badge-trending">
             <TrendingUp className="w-4 h-4 mr-2" />
@@ -190,7 +228,8 @@ export default function Landing() {
           </Badge>
           
           <h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6 animate-fade-in-up"
+            ref={heroTitleReveal.ref as any}
+            className={`text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6 ${heroTitleReveal.className}`}
             data-testid="hero-title"
           >
             <span className="bg-gradient-to-r from-white via-primary to-secondary bg-clip-text text-transparent">
@@ -206,11 +245,18 @@ export default function Landing() {
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 animate-fade-in-up animation-delay-200" data-testid="hero-description">
+          <p 
+            ref={heroSubtitleReveal.ref as any}
+            className={`text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 ${heroSubtitleReveal.className}`}
+            data-testid="hero-description"
+          >
             Stream thousands of movies and TV shows in stunning 4K. Your next favorite story is just a click away.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up animation-delay-400">
+          <div 
+            ref={heroButtonsReveal.ref as any}
+            className={`flex flex-col sm:flex-row gap-4 justify-center ${heroButtonsReveal.className}`}
+          >
             <Button 
               size="lg" 
               className="text-lg px-8 py-6 bg-gradient-to-r from-primary to-secondary hover:shadow-primary group"
@@ -237,8 +283,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section with Scroll Triggers */}
-      <section className="py-24 relative overflow-hidden" data-testid="features-section" aria-label="Platform features">
+      {/* Features Section with Scroll-Triggered Reveal */}
+      <section 
+        ref={featuresSectionReveal.ref as any}
+        className={`py-24 relative overflow-hidden ${featuresSectionReveal.className}`}
+        data-testid="features-section" 
+        aria-label="Platform features"
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -257,6 +308,9 @@ export default function Landing() {
                 key={index}
                 className="group hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 bg-card/50 backdrop-blur border-border/50"
                 data-testid={`feature-card-${index}`}
+                style={{
+                  animationDelay: `${index * 100}ms`
+                }}
               >
                 <CardContent className="p-6 text-center">
                   <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${feature.color === 'text-purple-400' ? 'from-purple-500/20 to-pink-500/20' : feature.color === 'text-blue-400' ? 'from-blue-500/20 to-cyan-500/20' : feature.color === 'text-green-400' ? 'from-green-500/20 to-emerald-500/20' : 'from-red-500/20 to-rose-500/20'} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
@@ -277,8 +331,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Interactive Genre Showcase */}
-      <section className="py-24 bg-card/30" data-testid="genres-section" aria-label="Browse genres">
+      {/* Interactive Genre Showcase with Scroll Reveal */}
+      <section 
+        ref={genresSectionReveal.ref as any}
+        className={`py-24 bg-card/30 ${genresSectionReveal.className}`}
+        data-testid="genres-section" 
+        aria-label="Browse genres"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-4" data-testid="genres-title">
@@ -290,11 +349,14 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {genres.map((genre) => (
+            {genres.map((genre, index) => (
               <Link key={genre.id} href={`/genre/${genre.id}`}>
                 <Card 
                   className="group cursor-pointer hover:scale-105 transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-primary/50 bg-gradient-to-br hover:shadow-2xl"
                   data-testid={`genre-card-${genre.id}`}
+                  style={{
+                    animationDelay: `${index * 80}ms`
+                  }}
                 >
                   <CardContent className={`p-8 text-center bg-gradient-to-br ${genre.color} group-hover:opacity-100 opacity-90 transition-opacity`}>
                     <div className="text-5xl mb-3 transform group-hover:scale-125 transition-transform duration-300">
@@ -311,8 +373,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials & Social Proof */}
-      <section className="py-24 relative overflow-hidden" data-testid="testimonials-section" aria-label="User testimonials">
+      {/* Testimonials & Social Proof with Scroll Reveal */}
+      <section 
+        ref={testimonialsSectionReveal.ref as any}
+        className={`py-24 relative overflow-hidden ${testimonialsSectionReveal.className}`}
+        data-testid="testimonials-section" 
+        aria-label="User testimonials"
+      >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -332,6 +399,9 @@ export default function Landing() {
                 key={index}
                 className="bg-card/50 backdrop-blur border-border/50"
                 data-testid={`testimonial-card-${index}`}
+                style={{
+                  animationDelay: `${index * 150}ms`
+                }}
               >
                 <CardContent className="p-6">
                   <div className="flex gap-1 mb-4" data-testid={`testimonial-rating-${index}`}>
