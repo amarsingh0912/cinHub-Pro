@@ -17,10 +17,10 @@ interface ContextRibbonProps {
 export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoading, className }: ContextRibbonProps) {
   const { toggleDock, toggleLab } = useFilterContext();
 
-  const toggleContentType = () => {
+  const setContentType = (type: 'movie' | 'tv') => {
     onFiltersChange({
       ...filters,
-      contentType: filters.contentType === 'movie' ? 'tv' : 'movie'
+      contentType: type
     });
   };
 
@@ -73,31 +73,58 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 py-3">
-          {/* Left: Content Type Toggle */}
+          {/* Left: Content Type Tabs */}
           <div className="flex items-center gap-3">
-            <motion.button
-              onClick={toggleContentType}
-              className={cn(
-                "relative flex items-center gap-2 px-4 py-2 rounded-full",
-                "border backdrop-blur-sm transition-all duration-300",
-                "hover:scale-105 active:scale-95",
-                filters.contentType === 'movie'
-                  ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400"
-                  : "bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400"
-              )}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              data-testid="content-type-toggle"
-            >
-              {filters.contentType === 'movie' ? (
+            {/* Tabs for Movies and TV Shows */}
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/30 border border-border/50">
+              <motion.button
+                onClick={() => setContentType('movie')}
+                className={cn(
+                  "relative flex items-center gap-2 px-4 py-1.5 rounded-md",
+                  "transition-all duration-300 font-medium text-sm",
+                  filters.contentType === 'movie'
+                    ? "bg-background text-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                )}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                data-testid="tab-movies"
+              >
                 <Film className="h-4 w-4" />
-              ) : (
+                <span>Movies</span>
+                {filters.contentType === 'movie' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-500/10 to-blue-600/10"
+                    layoutId="activeTab"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </motion.button>
+
+              <motion.button
+                onClick={() => setContentType('tv')}
+                className={cn(
+                  "relative flex items-center gap-2 px-4 py-1.5 rounded-md",
+                  "transition-all duration-300 font-medium text-sm",
+                  filters.contentType === 'tv'
+                    ? "bg-background text-foreground shadow-md"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                )}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                data-testid="tab-tv-shows"
+              >
                 <Tv className="h-4 w-4" />
-              )}
-              <span className="font-semibold text-sm">
-                {filters.contentType === 'movie' ? 'Movies' : 'TV Shows'}
-              </span>
-            </motion.button>
+                <span>TV Shows</span>
+                {filters.contentType === 'tv' && (
+                  <motion.div
+                    className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/10 to-purple-600/10"
+                    layoutId="activeTab"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </motion.button>
+            </div>
 
             {/* Results count */}
             {totalResults !== undefined && (
