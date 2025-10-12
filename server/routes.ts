@@ -40,7 +40,6 @@ import {
   isCloudinaryConfigured,
 } from "./services/cloudinaryService";
 import { tmdbCacheService } from "./services/tmdbCache.js";
-import { imageCacheService } from "./services/imageCache.js";
 import { websocketService } from "./services/websocketService.js";
 import { cacheQueueService } from "./services/cacheQueue.js";
 
