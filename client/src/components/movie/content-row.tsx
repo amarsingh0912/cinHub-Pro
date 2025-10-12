@@ -7,7 +7,7 @@ import type { Movie, TVShow } from "@/types/movie";
 
 interface ContentRowProps {
   title: string;
-  items: (Movie | TVShow | (Movie & { watchProgress?: number }))[];
+  items: (Movie | TVShow | (Movie & { watchProgress?: number; mediaType?: string }) | (TVShow & { watchProgress?: number; mediaType?: string }))[];
   isLoading?: boolean;
   mediaType?: "movie" | "tv";
   icon?: React.ReactNode;
@@ -121,6 +121,7 @@ export default function ContentRow({
             items.map((item) => {
               const movieItem = item as Movie;
               const watchProgress = 'watchProgress' in item ? item.watchProgress : undefined;
+              const itemMediaType = ('mediaType' in item && item.mediaType) ? item.mediaType as "movie" | "tv" : mediaType;
               
               return (
                 <div 
@@ -131,12 +132,12 @@ export default function ContentRow({
                   {useEnhancedCards ? (
                     <EnhancedMovieCard 
                       movie={movieItem} 
-                      mediaType={mediaType} 
+                      mediaType={itemMediaType} 
                       watchProgress={watchProgress}
                       showProgress={showProgress}
                     />
                   ) : (
-                    <MovieCard movie={item} mediaType={mediaType} />
+                    <MovieCard movie={item} mediaType={itemMediaType} />
                   )}
                 </div>
               );

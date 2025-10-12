@@ -1,12 +1,12 @@
 import { Link } from "wouter";
 import { Star, Play, Info } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import type { Movie } from "@/types/movie";
+import type { Movie, TVShow } from "@/types/movie";
 
 interface EnhancedMovieCardProps {
-  movie: Movie;
+  movie: Movie | TVShow;
   mediaType?: "movie" | "tv";
-  watchProgress?: number; // 0-100 percentage
+  watchProgress?: number;
   showProgress?: boolean;
 }
 
@@ -20,9 +20,10 @@ export default function EnhancedMovieCard({
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/placeholder-movie.png";
 
-  const year = movie.release_date 
-    ? new Date(movie.release_date).getFullYear() 
-    : "N/A";
+  const isMovie = 'title' in movie;
+  const title = isMovie ? movie.title : (movie as TVShow).name;
+  const releaseDate = isMovie ? movie.release_date : (movie as TVShow).first_air_date;
+  const year = releaseDate ? new Date(releaseDate).getFullYear() : "N/A";
 
   const detailLink = `/${mediaType}/${movie.id}`;
 
@@ -37,7 +38,7 @@ export default function EnhancedMovieCard({
             <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-card">
               <img
                 src={posterUrl}
-                alt={movie.title}
+                alt={title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 loading="lazy"
               />
@@ -70,7 +71,7 @@ export default function EnhancedMovieCard({
 
             <div className="mt-2">
               <h3 className="font-medium text-sm line-clamp-1" data-testid={`card-title-${movie.id}`}>
-                {movie.title}
+                {title}
               </h3>
               <p className="text-xs text-muted-foreground">{year}</p>
             </div>
@@ -86,7 +87,7 @@ export default function EnhancedMovieCard({
       >
         <div className="space-y-3">
           <div>
-            <h4 className="font-semibold text-base mb-1">{movie.title}</h4>
+            <h4 className="font-semibold text-base mb-1">{title}</h4>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <span>{year}</span>
               {movie.vote_average > 0 && (
