@@ -92,7 +92,7 @@ export default function TVShows() {
         isLoading={isLoading || isDebouncing}
       />
       
-      <main className="pt-0">
+      <main className="pt-20">
         {/* Page Header */}
         <section className="py-8 md:py-12 border-b border-border/50" data-testid="tv-shows-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
