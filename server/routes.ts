@@ -74,7 +74,6 @@ async function fetchFromTMDB(
 
   // Debug URL construction (remove in production) - API key redacted for security
   if (process.env.NODE_ENV === "development") {
-    console.log(`TMDB API URL: ${url}`);
     const debugUrl = url.replace(/api_key=[^&]+/, "api_key=***REDACTED***");
     console.log(`TMDB API URL: ${debugUrl}`);
   }
