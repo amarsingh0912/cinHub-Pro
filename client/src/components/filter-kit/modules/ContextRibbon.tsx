@@ -66,9 +66,10 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
   return (
     <div
       className={cn(
-        "sticky top-0 z-40 glass-panel border-b border-border/50 backdrop-blur-xl bg-background/80",
+        "sticky top-16 z-40 backdrop-blur-xl bg-background/95 border-b-2 border-border shadow-lg",
         className
       )}
+      data-testid="context-ribbon"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 py-3">
