@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useInfiniteMovies } from "@/hooks/use-infinite-movies";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -138,7 +138,7 @@ export default function SearchPage() {
                     placeholder="Search movies, TV shows, actors..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="h-16 pl-14 pr-32 text-lg rounded-2xl border-2 border-border/50 bg-background/80 backdrop-blur-sm focus:border-primary shadow-lg shadow-black/5 transition-all"
+                    className="h-16 pl-14 pr-32 text-lg rounded-2xl border-2 border-border/50 bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-sm focus:border-primary shadow-lg shadow-black/5 transition-all text-foreground placeholder:text-muted-foreground"
                     data-testid="input-search"
                   />
                   <Search className="w-6 h-6 absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -370,10 +370,29 @@ export default function SearchPage() {
                             };
                           }
                         });
+
+                      // Apply client-side sorting
+                      const sortedResults = [...processedResults].sort((a, b) => {
+                        switch (sortBy) {
+                          case "rating.desc":
+                            return (b.vote_average || 0) - (a.vote_average || 0);
+                          case "rating.asc":
+                            return (a.vote_average || 0) - (b.vote_average || 0);
+                          case "release_date.desc":
+                            return new Date(b.release_date || 0).getTime() - new Date(a.release_date || 0).getTime();
+                          case "release_date.asc":
+                            return new Date(a.release_date || 0).getTime() - new Date(b.release_date || 0).getTime();
+                          case "popularity.desc":
+                            return (b.popularity || 0) - (a.popularity || 0);
+                          case "relevance":
+                          default:
+                            return 0; // Keep original order (relevance from TMDB)
+                        }
+                      });
                       
-                      return processedResults.length > 0 ? (
+                      return sortedResults.length > 0 ? (
                         <MovieGrid
-                          movies={processedResults as any}
+                          movies={sortedResults as any}
                           isLoading={false}
                           hasNextPage={hasNextPage}
                           isFetchingNextPage={isFetchingNextPage}
