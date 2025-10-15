@@ -2,6 +2,8 @@ import { AdvancedFilterState } from "@/types/filters";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { LanguageSelect } from "../../atoms/LanguageSelect";
+import { CountrySelect } from "../../atoms/CountrySelect";
 
 interface AdvancedFiltersProps {
   filters: AdvancedFilterState;
@@ -39,6 +41,30 @@ export function AdvancedFilters({ filters, onFiltersChange }: AdvancedFiltersPro
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Language Filter */}
+      <div className="space-y-3">
+        <Label htmlFor="language-select" className="text-sm font-medium text-foreground">Original Language</Label>
+        <LanguageSelect
+          id="language-select"
+          value={filters.with_original_language}
+          onValueChange={(value) => onFiltersChange({ ...filters, with_original_language: value })}
+          placeholder="All languages"
+          className="w-full"
+        />
+      </div>
+
+      {/* Country Filter */}
+      <div className="space-y-3">
+        <Label htmlFor="country-select" className="text-sm font-medium text-foreground">Country</Label>
+        <CountrySelect
+          id="country-select"
+          value={filters.region}
+          onValueChange={(value) => onFiltersChange({ ...filters, region: value })}
+          placeholder="All countries"
+          className="w-full"
+        />
       </div>
 
       {/* Include Adult */}
