@@ -1,0 +1,76 @@
+
+
+> I want to build a unified filtering and data-fetching system using **The Movie Database (TMDB) Discover API** for both **Movies** (`/discover/movie`) and **TV Shows** (`/discover/tv`). The system should dynamically apply TMDB’s supported filters to fetch content based on user selections such as genre, rating, release date, region, and more. The implementation should be TypeScript-based and reusable across categories like *Upcoming*, *Now Playing*, *Popular*, *Trending*, and *Top Rated*.
+>
+> ### 🎬 For Movies (`/discover/movie`)
+>
+> Implement support for all key filters:
+>
+> * `language`, `region`, `include_adult`, `include_video`, and `page` for base configurations.
+> * Sorting filters such as `sort_by=popularity.desc`, `sort_by=primary_release_date.asc`, or `sort_by=vote_average.desc`.
+> * Date-based filters like `primary_release_date.gte` and `primary_release_date.lte` for Upcoming and Now Playing movies.
+> * `vote_average.gte` and `vote_count.gte` to surface highly rated or trending movies.
+> * Content filters such as `with_genres`, `without_genres`, `with_keywords`, `with_cast`, `with_crew`, and `with_companies`.
+> * Certification filters like `certification_country=US` and `certification.lte=PG-13` to restrict by rating.
+> * `with_release_type=2|3` for theatrical-only movies, or `4` for digital releases.
+>
+> **Example usages:**
+>
+> * Upcoming Movies in India:
+>
+>   ```
+>   /discover/movie?region=IN&sort_by=primary_release_date.asc&primary_release_date.gte=2025-10-15&with_release_type=2|3
+>   ```
+> * Highly Rated Sci-Fi Movies:
+>
+>   ```
+>   /discover/movie?with_genres=878&vote_average.gte=8&sort_by=vote_average.desc&vote_count.gte=1000
+>   ```
+> * Family-Friendly Animated Movies:
+>
+>   ```
+>   /discover/movie?with_genres=16|10751&certification_country=US&certification.lte=PG&sort_by=popularity.desc
+>   ```
+>
+> ### 📺 For TV Shows (`/discover/tv`)
+>
+> Include equivalent TV-specific filters:
+>
+> * `language`, `page`, `sort_by`, `vote_count.gte`, `vote_average.gte`, and `include_null_first_air_dates`.
+> * Date filters like `first_air_date.gte` and `first_air_date.lte` for Upcoming or Currently Airing shows.
+> * Network-based filtering via `with_networks` (e.g., Netflix = 213, HBO = 49).
+> * Genre and keyword filters via `with_genres` and `with_keywords`.
+> * `with_status` to include only running or ended shows.
+>
+> **Example usages:**
+>
+> * Currently Airing TV Shows:
+>
+>   ```
+>   /discover/tv?air_date.gte=2025-10-01&air_date.lte=2025-10-15&sort_by=popularity.desc
+>   ```
+> * Top Rated Dramas:
+>
+>   ```
+>   /discover/tv?with_genres=18&vote_average.gte=8&vote_count.gte=200&sort_by=vote_average.desc
+>   ```
+> * Trending Netflix Originals:
+>
+>   ```
+>   /discover/tv?with_networks=213&sort_by=popularity.desc&first_air_date.gte=2024-01-01
+>   ```
+>
+> ### ⚙️ Implementation Requirements
+>
+> * Create **utility functions** such as `buildMovieDiscoverParams(filters)` and `buildTvDiscoverParams(filters)` that construct query strings dynamically based on selected filters.
+> * Integrate them with **React Query** hooks like `useDiscoverMovies(filters)` and `useDiscoverTvShows(filters)` for data fetching and pagination.
+> * Apply correct AND (`comma`) and OR (`|`) logic for filters like genres and keywords.
+> * All requests must include headers:
+>
+>   ```
+>   Authorization: Bearer <ACCESS_TOKEN>  
+>   accept: application/json
+>   ```
+> * Ensure type safety via TypeScript interfaces for all filters, and default values like `language=en-US`, `include_adult=false`, and `region=IN`.
+>
+> The final implementation should be modular, production-ready, and visually integrate with the CineHub Pro frontend, enabling users to discover movies and TV shows dynamically by combining any filters in the TMDB Discover API.
