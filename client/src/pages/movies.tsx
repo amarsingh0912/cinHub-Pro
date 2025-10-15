@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
-import { Loader2 } from "lucide-react";
+import { Loader2, Code, X } from "lucide-react";
 import { DEFAULT_MOVIE_FILTERS } from "@/types/filters";
 
 export default function Movies() {
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  
   // Use the complete filter system with URL sync and debouncing
   const {
     filters,
@@ -24,6 +26,8 @@ export default function Movies() {
     isFetchingNextPage,
     triggerRef,
     hasActiveFilters,
+    queryString,
+    endpoint,
   } = useInfiniteMoviesWithFilters({
     initialFilters: DEFAULT_MOVIE_FILTERS,
     debounceDelay: 250,
@@ -107,6 +111,56 @@ export default function Movies() {
       />
       
       <main className="pt-20">
+        {/* Debug Panel */}
+        {showDebugPanel && (
+          <div className="bg-muted/30 border-b border-border/50 overflow-hidden" data-testid="debug-panel">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Code className="h-4 w-4 text-primary" />
+                    <h3 className="font-semibold text-sm">Filter Debug Panel</h3>
+                  </div>
+                  
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="font-medium text-muted-foreground">Active Preset:</span>{' '}
+                      <code className="px-2 py-0.5 rounded bg-background border">{filters.activePreset || 'none'}</code>
+                    </div>
+                    
+                    <div>
+                      <span className="font-medium text-muted-foreground">Endpoint:</span>{' '}
+                      <code className="px-2 py-0.5 rounded bg-background border">{endpoint}</code>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="font-medium text-muted-foreground">Query String:</div>
+                      <div className="p-2 rounded bg-background border font-mono text-xs break-all">
+                        {queryString || '(empty)'}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="font-medium text-muted-foreground">Full URL:</div>
+                      <div className="p-2 rounded bg-background border font-mono text-xs break-all">
+                        {endpoint}?{queryString}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => setShowDebugPanel(false)}
+                  className="p-1 rounded hover:bg-background transition-colors"
+                  data-testid="close-debug-panel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Page Header */}
         <section className="py-8 md:py-12 border-b border-border/50" data-testid="movies-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -134,6 +188,14 @@ export default function Movies() {
                       Updating...
                     </div>
                   )}
+                  <button
+                    onClick={() => setShowDebugPanel(!showDebugPanel)}
+                    className="p-2 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+                    title="Toggle debug panel"
+                    data-testid="toggle-debug-panel"
+                  >
+                    <Code className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
               
