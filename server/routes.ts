@@ -1595,6 +1595,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced discover movies endpoint - Comprehensive TMDB Discover API support
+  // MUST be before /api/movies/:id route
+  app.get("/api/movies/discover", async (req, res) => {
+    try {
+      // Extract all TMDB discover parameters for movies
+      const {
+        page = 1,
+        sort_by = "popularity.desc",
+        language = "en-US",
+        // Genre & Keywords
+        with_genres,
+        without_genres,
+        with_keywords,
+        without_keywords,
+        // Date Filters
+        "primary_release_date.gte": primaryReleaseDateGte,
+        "primary_release_date.lte": primaryReleaseDateLte,
+        "release_date.gte": releaseDateGte,
+        "release_date.lte": releaseDateLte,
+        primary_release_year,
+        year,
+        // Runtime & Ratings
+        "with_runtime.gte": withRuntimeGte,
+        "with_runtime.lte": withRuntimeLte,
+        "vote_average.gte": voteAverageGte,
+        "vote_average.lte": voteAverageLte,
+        "vote_count.gte": voteCountGte,
+        "vote_count.lte": voteCountLte,
+        // People (Cast & Crew)
+        with_cast,
+        with_crew,
+        with_people,
+        // Production
+        with_companies,
+        // Language & Region
+        with_original_language,
+        region,
+        watch_region,
+        // Streaming
+        with_watch_providers,
+        with_watch_monetization_types,
+        // Content Filters
+        include_adult,
+        include_video,
+        // Certification
+        certification_country,
+        certification,
+        "certification.gte": certificationGte,
+        "certification.lte": certificationLte,
+        with_release_type,
+      } = req.query;
+
+      const params: Record<string, any> = {
+        page,
+        sort_by,
+        language,
+      };
+
+      // Add all filter parameters if they exist (TMDB uses '|' for OR, ',' for AND)
+      if (with_genres) params.with_genres = with_genres;
+      if (without_genres) params.without_genres = without_genres;
+      if (with_keywords) params.with_keywords = with_keywords;
+      if (without_keywords) params.without_keywords = without_keywords;
+      
+      // Date filters
+      if (primaryReleaseDateGte) params["primary_release_date.gte"] = primaryReleaseDateGte;
+      if (primaryReleaseDateLte) params["primary_release_date.lte"] = primaryReleaseDateLte;
+      if (releaseDateGte) params["release_date.gte"] = releaseDateGte;
+      if (releaseDateLte) params["release_date.lte"] = releaseDateLte;
+      if (primary_release_year) params.primary_release_year = primary_release_year;
+      if (year) params.year = year;
+      
+      // Runtime & Ratings
+      if (withRuntimeGte) params["with_runtime.gte"] = withRuntimeGte;
+      if (withRuntimeLte) params["with_runtime.lte"] = withRuntimeLte;
+      if (voteAverageGte) params["vote_average.gte"] = voteAverageGte;
+      if (voteAverageLte) params["vote_average.lte"] = voteAverageLte;
+      if (voteCountGte) params["vote_count.gte"] = voteCountGte;
+      if (voteCountLte) params["vote_count.lte"] = voteCountLte;
+      
+      // People filters
+      if (with_cast) params.with_cast = with_cast;
+      if (with_crew) params.with_crew = with_crew;
+      if (with_people) params.with_people = with_people;
+      
+      // Production
+      if (with_companies) params.with_companies = with_companies;
+      
+      // Language & Region
+      if (with_original_language) params.with_original_language = with_original_language;
+      if (region) params.region = region;
+      if (watch_region) params.watch_region = watch_region;
+      
+      // Streaming
+      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
+      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
+      
+      // Content filters
+      if (include_adult !== undefined) params.include_adult = include_adult;
+      if (include_video !== undefined) params.include_video = include_video;
+      
+      // Certification
+      if (certification_country) params.certification_country = certification_country;
+      if (certification) params.certification = certification;
+      if (certificationGte) params["certification.gte"] = certificationGte;
+      if (certificationLte) params["certification.lte"] = certificationLte;
+      if (with_release_type) params.with_release_type = with_release_type;
+
+      // Use Bearer token if available, otherwise fallback to API key
+      const useBearer = !!process.env.TMDB_ACCESS_TOKEN;
+      const data = await fetchFromTMDB("/discover/movie", params, { useBearer });
+      res.json(data);
+    } catch (error) {
+      console.error("Error discovering movies:", error);
+      res.status(500).json({ message: "Failed to discover movies" });
+    }
+  });
+
   app.get("/api/movies/:id", async (req, res) => {
     try {
       const movieId = parseInt(req.params.id);
@@ -1827,123 +1945,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching certifications:", error);
       res.status(500).json({ message: "Failed to fetch certifications" });
-    }
-  });
-
-  // Enhanced discover movies endpoint - Comprehensive TMDB Discover API support
-  app.get("/api/movies/discover", async (req, res) => {
-    try {
-      // Extract all TMDB discover parameters for movies
-      const {
-        page = 1,
-        sort_by = "popularity.desc",
-        language = "en-US",
-        // Genre & Keywords
-        with_genres,
-        without_genres,
-        with_keywords,
-        without_keywords,
-        // Date Filters
-        "primary_release_date.gte": primaryReleaseDateGte,
-        "primary_release_date.lte": primaryReleaseDateLte,
-        "release_date.gte": releaseDateGte,
-        "release_date.lte": releaseDateLte,
-        primary_release_year,
-        year,
-        // Runtime & Ratings
-        "with_runtime.gte": withRuntimeGte,
-        "with_runtime.lte": withRuntimeLte,
-        "vote_average.gte": voteAverageGte,
-        "vote_average.lte": voteAverageLte,
-        "vote_count.gte": voteCountGte,
-        "vote_count.lte": voteCountLte,
-        // People (Cast & Crew)
-        with_cast,
-        with_crew,
-        with_people,
-        // Production
-        with_companies,
-        // Language & Region
-        with_original_language,
-        region,
-        watch_region,
-        // Streaming
-        with_watch_providers,
-        with_watch_monetization_types,
-        // Content Filters
-        include_adult,
-        include_video,
-        // Certification
-        certification_country,
-        certification,
-        "certification.gte": certificationGte,
-        "certification.lte": certificationLte,
-        with_release_type,
-      } = req.query;
-
-      const params: Record<string, any> = {
-        page,
-        sort_by,
-        language,
-      };
-
-      // Add all filter parameters if they exist (TMDB uses '|' for OR, ',' for AND)
-      if (with_genres) params.with_genres = with_genres;
-      if (without_genres) params.without_genres = without_genres;
-      if (with_keywords) params.with_keywords = with_keywords;
-      if (without_keywords) params.without_keywords = without_keywords;
-      
-      // Date filters
-      if (primaryReleaseDateGte) params["primary_release_date.gte"] = primaryReleaseDateGte;
-      if (primaryReleaseDateLte) params["primary_release_date.lte"] = primaryReleaseDateLte;
-      if (releaseDateGte) params["release_date.gte"] = releaseDateGte;
-      if (releaseDateLte) params["release_date.lte"] = releaseDateLte;
-      if (primary_release_year) params.primary_release_year = primary_release_year;
-      if (year) params.year = year;
-      
-      // Runtime & Ratings
-      if (withRuntimeGte) params["with_runtime.gte"] = withRuntimeGte;
-      if (withRuntimeLte) params["with_runtime.lte"] = withRuntimeLte;
-      if (voteAverageGte) params["vote_average.gte"] = voteAverageGte;
-      if (voteAverageLte) params["vote_average.lte"] = voteAverageLte;
-      if (voteCountGte) params["vote_count.gte"] = voteCountGte;
-      if (voteCountLte) params["vote_count.lte"] = voteCountLte;
-      
-      // People filters
-      if (with_cast) params.with_cast = with_cast;
-      if (with_crew) params.with_crew = with_crew;
-      if (with_people) params.with_people = with_people;
-      
-      // Production
-      if (with_companies) params.with_companies = with_companies;
-      
-      // Language & Region
-      if (with_original_language) params.with_original_language = with_original_language;
-      if (region) params.region = region;
-      if (watch_region) params.watch_region = watch_region;
-      
-      // Streaming
-      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
-      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
-      
-      // Content filters
-      if (include_adult !== undefined) params.include_adult = include_adult;
-      if (include_video !== undefined) params.include_video = include_video;
-      
-      // Certification
-      if (certification_country) params.certification_country = certification_country;
-      if (certification) params.certification = certification;
-      if (certificationGte) params["certification.gte"] = certificationGte;
-      if (certificationLte) params["certification.lte"] = certificationLte;
-      if (with_release_type) params.with_release_type = with_release_type;
-
-      // Use Bearer token if available, otherwise fallback to API key
-      const useBearer = !!process.env.TMDB_ACCESS_TOKEN;
-      const data = await fetchFromTMDB("/discover/movie", params, { useBearer });
-      res.json(data);
-    } catch (error) {
-      console.error("Error discovering movies:", error);
-      res.status(500).json({ message: "Failed to discover movies" });
     }
   });
 
