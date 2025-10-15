@@ -50,6 +50,38 @@ Refactored data fetching logic to use the unified TMDB Discover API for both Mov
 - Top-rated uses `vote_count.gte` (500 for movies, 200 for TV) with `sort_by=vote_average.desc`
 - Airing today uses 7-day forward date range with `air_date.gte/lte`
 
+### Comprehensive TMDB Discover API Implementation (October 2025)
+Enhanced the TMDB Discover API integration to support ALL available filters for both movies and TV shows, enabling complex filtering combinations.
+
+**Backend Enhancements:**
+- **Enhanced TypeScript Interfaces**: Added comprehensive `MovieDiscoverParams` and `TVDiscoverParams` interfaces in `server/utils/tmdbDiscover.ts` covering all TMDB filter options
+- **Bearer Token Authentication**: Updated `fetchFromTMDB` to support Bearer token authentication (TMDB_ACCESS_TOKEN) with fallback to API key
+- **Comprehensive Discover Endpoints**: Enhanced `/api/movies/discover` and `/api/tv/discover` to accept all TMDB filter parameters:
+  - **Movies**: genres, keywords, cast, crew, people, companies, release types, certifications (including .lte), date filters, runtime, ratings, language, region, streaming providers
+  - **TV Shows**: genres, keywords, networks, companies, date filters, runtime, ratings, language, streaming providers, TV-specific filters (status, type, screened_theatrically, timezone)
+- **Removed Duplicate Endpoints**: Cleaned up duplicate discover endpoints to ensure the comprehensive versions are used
+
+**Frontend Enhancements:**
+- **Enhanced Hooks**: Updated `useDiscoverMovies` and `useDiscoverTvShows` hooks with comprehensive filter support via `MovieDiscoverParams` and `TVDiscoverParams`
+- **Custom Filter Hooks**: Added `useDiscoverMoviesCustom` and `useDiscoverTvShowsCustom` for full parameter control
+- **Helper Functions**: Added `buildMovieFilters` and `buildTVFilters` for creating filter objects with sensible defaults
+- **Example Page**: Created `/discover-examples` page demonstrating real-world filter combinations:
+  * Upcoming Movies in India (region + date + release type filters)
+  * Highly Rated Sci-Fi Movies (genre + rating + vote count filters)
+  * Family-Friendly Animated Movies (genre OR logic + certification filters)
+  * Currently Airing TV Shows (date range filters)
+  * Top Rated Dramas (genre + rating + vote count filters)
+  * Trending Netflix Originals (network + date filters)
+
+**Filter Logic:**
+- Supports OR logic with `|` (pipe) and AND logic with `,` (comma) as per TMDB API specification
+- Example: `with_genres=16|10751` means Animation OR Family
+- Example: `with_cast=500,190` means Leonardo DiCaprio AND Samuel L. Jackson
+
+**Available Filters:**
+- **Movies**: with_genres, without_genres, with_keywords, without_keywords, with_cast, with_crew, with_people, with_companies, with_release_type, certification, certification.gte, certification.lte, primary_release_date.gte/lte, release_date.gte/lte, vote_average.gte/lte, vote_count.gte/lte, with_runtime.gte/lte, with_original_language, region, watch_region, with_watch_providers, with_watch_monetization_types, include_adult, include_video
+- **TV Shows**: with_genres, without_genres, with_keywords, without_keywords, with_networks, with_companies, with_status, with_type, first_air_date.gte/lte, air_date.gte/lte, vote_average.gte/lte, vote_count.gte/lte, with_runtime.gte/lte, with_original_language, watch_region, with_watch_providers, with_watch_monetization_types, include_adult, include_null_first_air_dates, screened_theatrically, timezone
+
 ## System Architecture
 
 ### Frontend Architecture

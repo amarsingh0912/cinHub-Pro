@@ -25,6 +25,7 @@ import Contact from "@/pages/contact";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import TermsOfService from "@/pages/terms-of-service";
 import NotificationsDemo from "@/pages/notifications-demo";
+import DiscoverExamples from "@/pages/discover-examples";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -65,6 +66,7 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/notifications-demo" component={NotificationsDemo} />
+      <Route path="/discover-examples" component={DiscoverExamples} />
       
       {/* Conditional home page based on authentication */}
       {isLoading || !isAuthenticated ? (
