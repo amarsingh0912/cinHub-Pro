@@ -51,13 +51,21 @@ export function useDebouncedFilters(
     // Check if only instant-update fields changed (category, contentType, sort_by)
     // These should not be debounced for immediate UI feedback
     const instantFields = ['category', 'contentType', 'sort_by'];
-    const onlyInstantFieldsChanged = instantFields.some(field => 
+    
+    // Check if any instant field changed
+    const hasInstantFieldChange = instantFields.some(field => 
       filters[field as keyof AdvancedFilterState] !== debouncedFilters[field as keyof AdvancedFilterState]
-    ) && Object.keys(filters).every(key => {
-      if (instantFields.includes(key)) return true;
-      return JSON.stringify(filters[key as keyof AdvancedFilterState]) === 
+    );
+    
+    // Check if any non-instant field changed
+    const nonInstantFieldsChanged = Object.keys(filters).some(key => {
+      if (instantFields.includes(key)) return false; // Skip instant fields
+      return JSON.stringify(filters[key as keyof AdvancedFilterState]) !== 
              JSON.stringify(debouncedFilters[key as keyof AdvancedFilterState]);
     });
+    
+    // Only instant fields changed means: instant field changed AND no non-instant fields changed
+    const onlyInstantFieldsChanged = hasInstantFieldChange && !nonInstantFieldsChanged;
 
     // If only instant fields changed, update immediately without debouncing
     if (onlyInstantFieldsChanged) {
