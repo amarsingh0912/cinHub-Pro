@@ -81,7 +81,9 @@ async function fetchFromTMDB(
   });
 
   const searchParams = new URLSearchParams(filteredParams);
-  const url = `https://api.themoviedb.org/3${endpoint}?${searchParams}`;
+  // TMDB API expects literal pipe characters for OR logic, not URL-encoded %7C
+  const queryString = searchParams.toString().replace(/%7C/g, '|');
+  const url = `https://api.themoviedb.org/3${endpoint}?${queryString}`;
 
   // Debug URL construction - credentials redacted for security
   if (process.env.NODE_ENV === "development") {
