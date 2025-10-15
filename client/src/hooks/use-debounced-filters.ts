@@ -9,9 +9,11 @@ import type {
   AdvancedFilterState, 
   UseAdvancedFiltersReturn,
   UseDebouncedFiltersReturn,
-  UseAdvancedFiltersWithURLReturn 
+  UseAdvancedFiltersWithURLReturn,
+  PresetCategory,
+  ContentType 
 } from '@/types/filters';
-import { createDefaultFilters, deepEqual } from '@/types/filters';
+import { createDefaultFilters, deepEqual, mergeFilters } from '@/types/filters';
 import { useAutoFilterURLSync } from './use-filter-url-sync';
 
 /**
@@ -168,7 +170,44 @@ export function useAdvancedFilters(
     key: K,
     value: AdvancedFilterState[K]
   ) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      // Always merge updates, never replace
+      return { ...prev, [key]: value };
+    });
+  }, []);
+  
+  // Set preset while preserving user overrides
+  const setPreset = useCallback((presetCategory: PresetCategory) => {
+    setFilters(prev => {
+      // Collect user overrides (filters that differ from current preset defaults)
+      const userOverrides: Partial<AdvancedFilterState> = {};
+      
+      // Preserve critical user-selected filters
+      if (prev.with_original_language && prev.with_original_language !== 'hi') {
+        userOverrides.with_original_language = prev.with_original_language;
+      }
+      if (prev.region && prev.region !== 'IN') {
+        userOverrides.region = prev.region;
+      }
+      if (prev.with_genres?.length) {
+        userOverrides.with_genres = prev.with_genres;
+      }
+      if (prev.without_genres?.length) {
+        userOverrides.without_genres = prev.without_genres;
+      }
+      if (prev.vote_average?.min || prev.vote_average?.max) {
+        userOverrides.vote_average = prev.vote_average;
+      }
+      if (prev.vote_count?.min) {
+        userOverrides.vote_count = prev.vote_count;
+      }
+      if (prev.with_watch_providers?.length) {
+        userOverrides.with_watch_providers = prev.with_watch_providers;
+      }
+      
+      // Merge preset defaults with user overrides
+      return mergeFilters(presetCategory, prev.contentType, userOverrides);
+    });
   }, []);
 
   const toggleGenre = useCallback((genreId: number) => {
@@ -242,6 +281,7 @@ export function useAdvancedFilters(
     filters,
     setFilters,
     updateFilter,
+    setPreset,
     toggleGenre,
     setGenres,
     clearGenres,

@@ -14,6 +14,7 @@ export default function Movies() {
     filters,
     setFilters,
     updateFilter,
+    setPreset,
     debouncedFilters,
     isDebouncing,
     data: movies,
@@ -100,6 +101,7 @@ export default function Movies() {
       <ContextRibbon
         filters={filters}
         onFiltersChange={setFilters}
+        setPreset={setPreset}
         totalResults={totalResults}
         isLoading={isLoading || isDebouncing}
       />

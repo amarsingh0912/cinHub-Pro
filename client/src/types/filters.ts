@@ -114,10 +114,25 @@ export interface QuickFilterChip {
   description?: string;
 }
 
+// Preset category types
+export type MoviePresetCategory = 'discover' | 'trending' | 'popular' | 'upcoming' | 'now_playing' | 'top_rated';
+export type TVPresetCategory = 'discover' | 'trending' | 'popular' | 'airing_today' | 'on_the_air' | 'top_rated';
+export type PresetCategory = MoviePresetCategory | TVPresetCategory;
+
+// Preset configuration defining default parameters for each category
+export interface PresetConfig {
+  category: string;
+  label: string;
+  params: Partial<AdvancedFilterState>;
+}
+
 // Complete filter state structure
 export interface AdvancedFilterState {
   // Core filtering
   contentType: ContentType;
+  
+  // Active preset tracking (explicit state for preset management)
+  activePreset?: PresetCategory;
   
   // Content discovery category (trending, popular, etc.)
   category?: string;
@@ -487,6 +502,7 @@ export interface UseAdvancedFiltersReturn {
   filters: AdvancedFilterState;
   setFilters: (filters: AdvancedFilterState | ((prev: AdvancedFilterState) => AdvancedFilterState)) => void;
   updateFilter: <K extends keyof AdvancedFilterState>(key: K, value: AdvancedFilterState[K]) => void;
+  setPreset: (presetCategory: PresetCategory) => void;
   toggleGenre: (genreId: number) => void;
   setGenres: (genres: number[]) => void;
   clearGenres: () => void;
@@ -593,4 +609,252 @@ export function deepEqual(a: any, b: any): boolean {
   if (keysA.length !== keysB.length) return false;
   
   return keysA.every(key => deepEqual(a[key], b[key]));
+}
+
+/**
+ * Get today's date in YYYY-MM-DD format
+ */
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+/**
+ * Get date N days from today in YYYY-MM-DD format
+ */
+function getDateOffset(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Movie preset configurations with category-specific parameters
+ * These define the default filters for each movie category/preset
+ */
+export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
+  discover: {
+    category: 'discover',
+    label: 'Discover',
+    params: {
+      sort_by: 'popularity.desc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+    }
+  },
+  trending: {
+    category: 'trending',
+    label: 'Trending',
+    params: {
+      sort_by: 'popularity.desc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+      vote_count: { min: 500 },
+      with_release_type: [2, 3], // Theatrical releases
+      primary_release_date: { start: getDateOffset(-45) }, // Last 45 days
+    }
+  },
+  popular: {
+    category: 'popular',
+    label: 'Popular',
+    params: {
+      sort_by: 'popularity.desc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+      vote_count: { min: 50 },
+      with_release_type: [2, 3], // Theatrical releases
+    }
+  },
+  upcoming: {
+    category: 'upcoming',
+    label: 'Upcoming',
+    params: {
+      sort_by: 'primary_release_date.asc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+      with_release_type: [2, 3], // Theatrical releases
+      primary_release_date: { start: getDateOffset(1) }, // Tomorrow onwards
+    }
+  },
+  now_playing: {
+    category: 'now_playing',
+    label: 'Now Playing',
+    params: {
+      sort_by: 'primary_release_date.desc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+      with_release_type: [2, 3], // Theatrical releases
+      primary_release_date: {
+        start: getDateOffset(-30), // Last 30 days
+        end: getTodayDate(),
+      },
+    }
+  },
+  top_rated: {
+    category: 'top_rated',
+    label: 'Top Rated',
+    params: {
+      sort_by: 'vote_average.desc',
+      with_original_language: 'hi',
+      region: 'IN',
+      include_adult: false,
+      include_video: false,
+      certification_country: 'US',
+      vote_count: { min: 500 },
+      with_release_type: [2, 3], // Theatrical releases
+    }
+  },
+};
+
+/**
+ * TV preset configurations with category-specific parameters
+ */
+export const TV_PRESETS: Record<TVPresetCategory, PresetConfig> = {
+  discover: {
+    category: 'discover',
+    label: 'Discover',
+    params: {
+      sort_by: 'popularity.desc',
+      include_adult: false,
+    }
+  },
+  trending: {
+    category: 'trending',
+    label: 'Trending',
+    params: {
+      sort_by: 'popularity.desc',
+      include_adult: false,
+      first_air_date: { start: getDateOffset(-365) }, // Last year
+    }
+  },
+  popular: {
+    category: 'popular',
+    label: 'Popular',
+    params: {
+      sort_by: 'popularity.desc',
+      include_adult: false,
+    }
+  },
+  airing_today: {
+    category: 'airing_today',
+    label: 'Airing Today',
+    params: {
+      sort_by: 'popularity.desc',
+      include_adult: false,
+      air_date: {
+        start: getTodayDate(),
+        end: getDateOffset(7), // Next 7 days
+      },
+    }
+  },
+  on_the_air: {
+    category: 'on_the_air',
+    label: 'On The Air',
+    params: {
+      sort_by: 'popularity.desc',
+      include_adult: false,
+      air_date: {
+        start: getTodayDate(),
+        end: getDateOffset(7), // Next 7 days
+      },
+    }
+  },
+  top_rated: {
+    category: 'top_rated',
+    label: 'Top Rated',
+    params: {
+      sort_by: 'vote_average.desc',
+      include_adult: false,
+      vote_count: { min: 200 },
+    }
+  },
+};
+
+/**
+ * Merge preset defaults with user overrides
+ * Always preserves user-selected filters while applying preset-specific parameters
+ */
+export function mergeFilters(
+  presetCategory: PresetCategory,
+  contentType: ContentType,
+  userOverrides: Partial<AdvancedFilterState> = {}
+): AdvancedFilterState {
+  const presets = contentType === 'movie' ? MOVIE_PRESETS : TV_PRESETS;
+  const preset = presets[presetCategory as keyof typeof presets];
+  
+  if (!preset) {
+    console.warn(`Unknown preset category: ${presetCategory} for ${contentType}`);
+    return createDefaultFilters();
+  }
+  
+  // Start with default filters
+  const baseFilters = createDefaultFilters();
+  
+  // Apply preset defaults
+  const presetParams = preset.params;
+  
+  // Deep merge preset params into base
+  const withPreset = {
+    ...baseFilters,
+    ...presetParams,
+    contentType,
+    category: preset.category,
+    activePreset: presetCategory,
+  };
+  
+  // Apply user overrides on top (these always take precedence)
+  const merged = {
+    ...withPreset,
+    ...userOverrides,
+    // Ensure these core fields are preserved
+    contentType,
+    category: preset.category,
+    activePreset: presetCategory,
+  };
+  
+  return merged;
+}
+
+/**
+ * Build query string from filters with proper URL encoding
+ * Encodes pipes (|) as %7C and preserves commas for TMDB API compatibility
+ */
+export function buildQueryString(params: Record<string, any>): string {
+  const searchParams = new URLSearchParams();
+  
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    
+    let stringValue: string;
+    
+    // Handle arrays - join with pipe for OR logic (TMDB convention)
+    if (Array.isArray(value)) {
+      if (value.length === 0) return;
+      stringValue = value.join('|');
+    } else if (typeof value === 'object') {
+      // Skip object values (they should be flattened before this)
+      return;
+    } else {
+      stringValue = String(value);
+    }
+    
+    // URL encode the value (this will encode | as %7C automatically)
+    searchParams.append(key, stringValue);
+  });
+  
+  return searchParams.toString();
 }

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Film, Tv, SlidersHorizontal, X, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
-import { AdvancedFilterState } from "@/types/filters";
+import { AdvancedFilterState, PresetCategory } from "@/types/filters";
 import { cn } from "@/lib/utils";
 import { FilterChip, MetricPill } from "../atoms";
 import { filterMotion } from "../filter-motion";
@@ -9,12 +9,13 @@ import { useFilterContext } from "@/contexts/FilterContext";
 interface ContextRibbonProps {
   filters: AdvancedFilterState;
   onFiltersChange: (filters: AdvancedFilterState) => void;
+  setPreset?: (presetCategory: PresetCategory) => void;
   totalResults?: number;
   isLoading?: boolean;
   className?: string;
 }
 
-export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoading, className }: ContextRibbonProps) {
+export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResults, isLoading, className }: ContextRibbonProps) {
   const { toggleDock, toggleLab } = useFilterContext();
 
   const setContentType = (type: 'movie' | 'tv') => {
@@ -39,10 +40,17 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
   };
 
   const setCategory = (category: string) => {
-    onFiltersChange({
-      ...filters,
-      category
-    });
+    // Use setPreset if available to preserve user filters while switching presets
+    if (setPreset) {
+      setPreset(category as PresetCategory);
+    } else {
+      // Fallback: just update category without merging preset defaults
+      onFiltersChange({
+        ...filters,
+        category,
+        activePreset: category as PresetCategory,
+      });
+    }
   };
 
   const movieCategories = [
