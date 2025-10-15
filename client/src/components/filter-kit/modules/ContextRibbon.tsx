@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Film, Tv, SlidersHorizontal, X, RotateCcw } from "lucide-react";
+import { Film, Tv, SlidersHorizontal, X, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
 import { AdvancedFilterState } from "@/types/filters";
 import { cn } from "@/lib/utils";
 import { FilterChip, MetricPill } from "../atoms";
@@ -18,11 +18,52 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
   const { toggleDock, toggleLab } = useFilterContext();
 
   const setContentType = (type: 'movie' | 'tv') => {
+    const currentCategory = filters.category || 'discover';
+    
+    const movieOnlyCategories = ['upcoming', 'now_playing'];
+    const tvOnlyCategories = ['airing_today', 'on_the_air'];
+    
+    let newCategory = currentCategory;
+    
+    if (type === 'tv' && movieOnlyCategories.includes(currentCategory)) {
+      newCategory = 'discover';
+    } else if (type === 'movie' && tvOnlyCategories.includes(currentCategory)) {
+      newCategory = 'discover';
+    }
+    
     onFiltersChange({
       ...filters,
-      contentType: type
+      contentType: type,
+      category: newCategory
     });
   };
+
+  const setCategory = (category: string) => {
+    onFiltersChange({
+      ...filters,
+      category
+    });
+  };
+
+  const movieCategories = [
+    { value: 'discover', label: 'Discover', icon: Film },
+    { value: 'trending', label: 'Trending', icon: TrendingUp },
+    { value: 'popular', label: 'Popular', icon: Star },
+    { value: 'upcoming', label: 'Upcoming', icon: Calendar },
+    { value: 'top_rated', label: 'Top Rated', icon: Star },
+    { value: 'now_playing', label: 'Now Playing', icon: PlayCircle },
+  ];
+
+  const tvCategories = [
+    { value: 'discover', label: 'Discover', icon: Tv },
+    { value: 'trending', label: 'Trending', icon: TrendingUp },
+    { value: 'popular', label: 'Popular', icon: Star },
+    { value: 'airing_today', label: 'Airing Today', icon: Radio },
+    { value: 'on_the_air', label: 'On The Air', icon: Clock },
+    { value: 'top_rated', label: 'Top Rated', icon: Star },
+  ];
+
+  const categories = filters.contentType === 'movie' ? movieCategories : tvCategories;
 
   // Count active filters
   const activeFiltersCount = [
@@ -72,6 +113,7 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
       data-testid="context-ribbon"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* First Row: Content Type and Actions */}
         <div className="flex items-center justify-between gap-4 py-3">
           {/* Left: Content Type Tabs */}
           <div className="flex items-center gap-3">
@@ -226,6 +268,36 @@ export function ContextRibbon({ filters, onFiltersChange, totalResults, isLoadin
                 </span>
               )}
             </motion.button>
+          </div>
+        </div>
+
+        {/* Second Row: Category Selector */}
+        <div className="border-t border-border/30 py-2 overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-max">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const isActive = filters.category === category.value || (!filters.category && category.value === 'discover');
+              
+              return (
+                <motion.button
+                  key={category.value}
+                  onClick={() => setCategory(category.value)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+                    "transition-all duration-200 font-medium text-sm whitespace-nowrap",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  data-testid={`category-${category.value}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{category.label}</span>
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       </div>
