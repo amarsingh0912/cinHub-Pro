@@ -543,7 +543,7 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   vote_count: { min: undefined, max: undefined },
   with_original_language: undefined,
   region: undefined,
-  watch_region: 'US',
+  watch_region: undefined,
   with_watch_providers: [],
   with_watch_monetization_types: [],
   with_companies: [],

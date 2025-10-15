@@ -15,10 +15,10 @@ interface MovieGridProps {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   infiniteScrollTriggerRef?: React.RefObject<HTMLDivElement>;
-  mediaType?: 'movie' | 'tv';
+  mediaType?: "movie" | "tv";
   // Animation props
   enableAnimations?: boolean;
-  animationType?: 'staggered' | 'fade' | 'none';
+  animationType?: "staggered" | "fade" | "none";
 }
 
 export default function MovieGrid({
@@ -31,9 +31,9 @@ export default function MovieGrid({
   hasNextPage,
   isFetchingNextPage,
   infiniteScrollTriggerRef,
-  mediaType = 'movie',
+  mediaType = "movie",
   enableAnimations = true,
-  animationType = 'staggered',
+  animationType = "staggered",
 }: MovieGridProps) {
   if (isLoading) {
     return (
@@ -57,7 +57,13 @@ export default function MovieGrid({
     <section className="py-16" data-testid="movie-grid-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {title && (
-          <RevealOnScroll options={enableAnimations ? REVEAL_PRESETS.sectionHeader : {animation: 'fade-in', once: false}}>
+          <RevealOnScroll
+            options={
+              enableAnimations
+                ? REVEAL_PRESETS.sectionHeader
+                : { animation: "fade-in", once: false }
+            }
+          >
             <div className="flex items-center justify-between mb-8">
               <h2
                 className="text-3xl font-display font-bold"
@@ -78,25 +84,33 @@ export default function MovieGrid({
           </RevealOnScroll>
         )}
 
-        {enableAnimations && animationType === 'staggered' ? (
+        {enableAnimations && animationType === "staggered" ? (
           <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
             <div
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
               data-testid="movie-grid"
             >
               {movies.map((movie) => (
-                <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+                <MovieCard
+                  key={`${mediaType}-${movie.id}`}
+                  movie={movie}
+                  mediaType={mediaType}
+                />
               ))}
             </div>
           </RevealOnScroll>
-        ) : enableAnimations && animationType === 'fade' ? (
+        ) : enableAnimations && animationType === "fade" ? (
           <RevealOnScroll options={REVEAL_PRESETS.fadeIn}>
             <div
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
               data-testid="movie-grid"
             >
               {movies.map((movie) => (
-                <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+                <MovieCard
+                  key={`${mediaType}-${movie.id}`}
+                  movie={movie}
+                  mediaType={mediaType}
+                />
               ))}
             </div>
           </RevealOnScroll>
@@ -106,7 +120,11 @@ export default function MovieGrid({
             data-testid="movie-grid"
           >
             {movies.map((movie) => (
-              <MovieCard key={`${mediaType}-${movie.id}`} movie={movie} mediaType={mediaType} />
+              <MovieCard
+                key={`${mediaType}-${movie.id}`}
+                movie={movie}
+                mediaType={mediaType}
+              />
             ))}
           </div>
         )}
@@ -115,12 +133,17 @@ export default function MovieGrid({
         {(hasNextPage || isFetchingNextPage) && (
           <div className="mt-8">
             {isFetchingNextPage && (
-              <div className="flex items-center justify-center py-8" data-testid="loading-more">
+              <div
+                className="flex items-center justify-center py-8"
+                data-testid="loading-more"
+              >
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">Loading more...</span>
+                <span className="ml-2 text-muted-foreground">
+                  Loading more...
+                </span>
               </div>
             )}
-            
+
             {/* Invisible trigger element for infinite scroll */}
             {infiniteScrollTriggerRef && (
               <div
@@ -129,13 +152,6 @@ export default function MovieGrid({
                 data-testid="infinite-scroll-trigger"
               />
             )}
-          </div>
-        )}
-
-        {/* End of content message */}
-        {!hasNextPage && !isFetchingNextPage && movies.length > 0 && (
-          <div className="text-center mt-8 py-4" data-testid="end-of-content">
-            <p className="text-muted-foreground">You've reached the end of the results</p>
           </div>
         )}
       </div>
