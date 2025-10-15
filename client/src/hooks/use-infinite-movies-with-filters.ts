@@ -90,10 +90,14 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
       baseEndpoint = '/api/movies/upcoming';
     } else if (category === 'now_playing' && contentType === 'movie') {
       baseEndpoint = '/api/movies/now_playing';
+    } else if (category === 'top_rated' && contentType === 'movie') {
+      baseEndpoint = '/api/movies/top-rated';
     } else if (category === 'airing_today' && contentType === 'tv') {
       baseEndpoint = '/api/tv/airing_today';
     } else if (category === 'on_the_air' && contentType === 'tv') {
       baseEndpoint = '/api/tv/on-the-air';
+    } else if (category === 'top_rated' && contentType === 'tv') {
+      baseEndpoint = '/api/tv/top-rated';
     } else {
       // Default to discover endpoint
       baseEndpoint = contentType === 'movie' ? '/api/movies/discover' : '/api/tv/discover';
@@ -175,9 +179,9 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     return { endpoint: baseEndpoint, queryParams: params };
   }, [debouncedFilters]);
 
-  // Use the enhanced infinite movies hook with abort signal
+  // Use the enhanced infinite movies hook
   const infiniteQuery = useInfiniteMovies({
-    queryKey: [endpoint, queryParams, debouncedFilters.contentType, getAbortSignal()],
+    queryKey: [endpoint, queryParams],
     enabled: enabled && !isDebouncing, // Don't fetch while debouncing for better UX
     staleTime,
     rootMargin,
@@ -196,6 +200,6 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     isLoadingCount: infiniteQuery.isLoading || isDebouncing,
     
     // Convenience methods
-    getQueryKey: () => [endpoint, queryParams, debouncedFilters.contentType],
+    getQueryKey: () => [endpoint, queryParams],
   };
 }

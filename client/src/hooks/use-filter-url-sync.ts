@@ -24,7 +24,7 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
 
   // Core content type and category
   if (filters.contentType) params.type = filters.contentType;
-  if (filters.category && filters.category !== 'discover') params.category = filters.category;
+  if (filters.category) params.category = filters.category;
 
   // Genres - multi-select arrays
   if (filters.with_genres.length > 0) {
