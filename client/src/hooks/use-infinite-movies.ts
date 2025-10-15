@@ -34,8 +34,12 @@ export function useInfiniteMovies({
   const infiniteQuery = useInfiniteQuery<TMDBResponse, Error>({
     queryKey,
     queryFn: async ({ pageParam = 1 }) => {
-      // Extract the base path from queryKey
-      const [endpoint, params] = queryKey;
+      // Extract the base path and params from queryKey
+      // queryKey format can be:
+      // - [endpoint, category, contentType, params] (new format from useInfiniteMoviesWithFilters)
+      // - [endpoint, params] (old format for direct usage like search)
+      const endpoint = queryKey[0] as string;
+      const params = queryKey.length === 4 ? queryKey[3] : queryKey[1];
       
       // Build query parameters
       const queryParams = new URLSearchParams({
