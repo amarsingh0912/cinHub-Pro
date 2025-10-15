@@ -1,0 +1,87 @@
+
+* `region=IN` makes TMDB use *regional release dates* (so date-based filters and some endpoint behaviors will reflect India release dates).
+* `with_original_language=hi` **restricts results to content whose original language is Hindi** (not dubbed or secondary language).
+* `certification_country=US` by itself does not filter anything — it only sets the country used when you also use `certification` or `certification.lte`.
+* I include `include_adult=false` and `include_video=false` and URL-encode `|` as needed. I also add `vote_count.gte` where helpful to reduce noise.
+
+For date filters I used the current date **2025-10-16** (today) and simple ranges:
+
+* Now Playing window = last 30 days: `primary_release_date.gte=2025-09-16` and `primary_release_date.lte=2025-10-16`
+* Upcoming = release after today: `primary_release_date.gte=2025-10-17`
+* Trending example uses recent releases since `2025-09-01` (adjustable)
+
+---
+
+## 1) Generic **Discover** (same shape as your app call)
+
+Use this to fetch general discover results restricted to Hindi originals and India region:
+
+```bash
+curl -X GET \
+  "https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=popularity.desc&with_original_language=hi&region=IN&include_adult=false&include_video=false&certification_country=US" \
+  -H "Authorization: Bearer YOUR_TMDB_ACCESS_TOKEN" \
+  -H "accept: application/json"
+```
+
+---
+
+## 2) **Popular** (Discover-based)
+
+Popular = sort by popularity desc. Keep theatrical filter if you want theatrical-only:
+
+```bash
+curl -X GET \
+  "https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=popularity.desc&with_original_language=hi&region=IN&include_adult=false&include_video=false&with_release_type=2%7C3&vote_count.gte=50" \
+  -H "Authorization: Bearer YOUR_TMDB_ACCESS_TOKEN" \
+  -H "accept: application/json"
+```
+
+---
+
+## 3) **Trending** (approximate via Discover)
+
+Trending ≈ recent + popular + engagement. Example: popularity sorted but limited to recent releases (last ~45 days) and minimum votes:
+
+```bash
+curl -X GET \
+  "https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=popularity.desc&with_original_language=hi&region=IN&include_adult=false&include_video=false&with_release_type=2%7C3&vote_count.gte=500&primary_release_date.gte=2025-09-01" \
+  -H "Authorization: Bearer YOUR_TMDB_ACCESS_TOKEN" \
+  -H "accept: application/json"
+```
+
+*Adjust `primary_release_date.gte` or `vote_count.gte` to tune sensitivity.*
+
+---
+
+## 4) **Upcoming** (Discover-based)
+
+Upcoming theatrical movies in India (release date after today):
+
+```bash
+curl -X GET \
+  "https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=primary_release_date.asc&with_original_language=hi&region=IN&include_adult=false&include_video=false&with_release_type=2%7C3&primary_release_date.gte=2025-10-17" \
+  -H "Authorization: Bearer YOUR_TMDB_ACCESS_TOKEN" \
+  -H "accept: application/json"
+```
+
+---
+
+## 5) **Now Playing** (Discover-based)
+
+Movies released within the last 30 days (India dates), theatrical only:
+
+```bash
+curl -X GET \
+  "https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&sort_by=primary_release_date.desc&with_original_language=hi&region=IN&include_adult=false&include_video=false&with_release_type=2%7C3&primary_release_date.gte=2025-09-16&primary_release_date.lte=2025-10-16" \
+  -H "Authorization: Bearer YOUR_TMDB_ACCESS_TOKEN" \
+  -H "accept: application/json"
+```
+
+---
+
+## Extra useful parameter tips
+
+* If you want to filter by certification (e.g., US PG-13), add `&certification_country=US&certification.lte=PG-13`.
+* If you want non-theatrical or streaming-only content, use `with_release_type=4` instead of `2|3`. Encode `|` as `%7C` in raw URLs.
+* If you want broader trending (not just Hindi originals), remove `with_original_language=hi`.
+* To reduce obscure results, include `vote_count.gte=...` (e.g., 50, 100, 500 depending on strictness).
