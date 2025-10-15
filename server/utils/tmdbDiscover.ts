@@ -180,21 +180,19 @@ export function buildMovieDiscoverParams(
 
   switch (category) {
     case 'upcoming':
-      // Upcoming movies: released after today, theatrical releases only
+      // Upcoming movies: released after today
       return {
         ...baseParams,
         'primary_release_date.gte': tomorrow,
         sort_by: 'primary_release_date.asc',
-        with_release_type: '2|3', // Theatrical releases only
       };
 
     case 'now_playing':
-      // Now Playing: released in the last 30 days, theatrical releases
+      // Now Playing: released in the last 30 days
       return {
         ...baseParams,
         'primary_release_date.lte': today,
         'primary_release_date.gte': thirtyDaysAgo,
-        with_release_type: '2|3', // Theatrical releases only
         sort_by: 'primary_release_date.desc',
       };
 
@@ -203,7 +201,6 @@ export function buildMovieDiscoverParams(
       return {
         ...baseParams,
         sort_by: 'popularity.desc',
-        with_release_type: '2|3', // Theatrical releases only
         'vote_count.gte': 50,
       };
 
@@ -213,7 +210,6 @@ export function buildMovieDiscoverParams(
         ...baseParams,
         sort_by: 'popularity.desc',
         'vote_count.gte': 500,
-        with_release_type: '2|3',
         'primary_release_date.gte': fortyFiveDaysAgo,
       };
 
@@ -223,7 +219,6 @@ export function buildMovieDiscoverParams(
         ...baseParams,
         sort_by: 'vote_average.desc',
         'vote_count.gte': 500,
-        with_release_type: '2|3',
       };
 
     default:

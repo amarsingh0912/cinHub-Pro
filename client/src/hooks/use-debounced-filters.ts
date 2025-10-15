@@ -182,13 +182,7 @@ export function useAdvancedFilters(
       // Collect user overrides (filters that differ from current preset defaults)
       const userOverrides: Partial<AdvancedFilterState> = {};
       
-      // Preserve critical user-selected filters
-      if (prev.with_original_language && prev.with_original_language !== 'hi') {
-        userOverrides.with_original_language = prev.with_original_language;
-      }
-      if (prev.region && prev.region !== 'IN') {
-        userOverrides.region = prev.region;
-      }
+      // Preserve only explicit user-selected filters (not region/language defaults)
       if (prev.with_genres?.length) {
         userOverrides.with_genres = prev.with_genres;
       }

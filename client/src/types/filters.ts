@@ -689,8 +689,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Discover",
     params: {
       sort_by: "popularity.desc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
@@ -701,13 +699,10 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Trending",
     params: {
       sort_by: "popularity.desc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
-      vote_count: { min: 500 },
-      with_release_type: [2, 3], // Theatrical releases
+      vote_count: { min: 50 },
       primary_release_date: { start: getDateOffset(-45) }, // Last 45 days
     },
   },
@@ -716,13 +711,10 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Popular",
     params: {
       sort_by: "popularity.desc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
       vote_count: { min: 50 },
-      with_release_type: [2, 3], // Theatrical releases
     },
   },
   upcoming: {
@@ -730,12 +722,9 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Upcoming",
     params: {
       sort_by: "primary_release_date.asc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
-      with_release_type: [2, 3], // Theatrical releases
       primary_release_date: { start: getDateOffset(1) }, // Tomorrow onwards
     },
   },
@@ -744,12 +733,9 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Now Playing",
     params: {
       sort_by: "primary_release_date.desc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
-      with_release_type: [2, 3], // Theatrical releases
       primary_release_date: {
         start: getDateOffset(-30), // Last 30 days
         end: getTodayDate(),
@@ -761,13 +747,10 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     label: "Top Rated",
     params: {
       sort_by: "vote_average.desc",
-      with_original_language: "hi",
-      region: "IN",
       include_adult: false,
       include_video: false,
       certification_country: "US",
       vote_count: { min: 500 },
-      with_release_type: [2, 3], // Theatrical releases
     },
   },
 };
