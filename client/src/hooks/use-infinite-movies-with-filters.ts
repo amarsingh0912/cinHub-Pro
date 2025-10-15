@@ -54,7 +54,7 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     const contentType = debouncedFilters.contentType;
     const category = debouncedFilters.category;
     
-    // Check if any advanced filters are applied (excluding contentType and category)
+    // Check if any advanced filters are applied (excluding contentType, category, and default values)
     const hasAdvancedFilters = 
       debouncedFilters.with_genres?.length ||
       debouncedFilters.without_genres?.length ||
@@ -72,7 +72,8 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
       debouncedFilters.with_watch_providers?.length ||
       debouncedFilters.with_companies?.length ||
       debouncedFilters.with_people?.length ||
-      debouncedFilters.certification_country ||
+      // Only consider certification_country as advanced filter if it's different from default 'US' or explicitly set
+      (debouncedFilters.certification_country && debouncedFilters.certification_country !== 'US') ||
       debouncedFilters.certification;
     
     let baseEndpoint: string;
