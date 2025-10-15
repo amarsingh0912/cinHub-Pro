@@ -609,22 +609,35 @@ export function useAutoFilterURLSync(
     }
   }, [filters, syncToURL, stableOptions]); // Removed hasHydrated dependency, using ref instead
 
+  // Track the last URL we synced to prevent circular updates
+  const lastSyncedUrlRef = useRef('');
+  
+  // Update ref when we sync to URL
+  useEffect(() => {
+    if (hydratedFiltersRef.current) {
+      const currentParams = filtersToQueryParams(filters);
+      const searchParams = new URLSearchParams();
+      Object.entries(currentParams).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+          searchParams.set(key, String(value));
+        }
+      });
+      lastSyncedUrlRef.current = searchParams.toString();
+    }
+  }, [filters]);
+  
   // Watch for external URL parameter changes (browser navigation, manual edits)  
   useEffect(() => {
     if (hydratedFiltersRef.current && onFiltersChange) {
-      const urlFilters = syncFromURL();
-      
-      // Check if URL filters differ from current filters
-      const currentParams = filtersToQueryParams(filters);
-      const urlParamsString = new URLSearchParams(currentParams as any).toString();
       const currentUrlParams = new URLSearchParams(window.location.search).toString();
       
-      if (urlParamsString !== currentUrlParams) {
-        // URL changed externally (back/forward, manual edit), update filters
+      // Only sync from URL if it changed externally (not from our own sync)
+      if (currentUrlParams && currentUrlParams !== lastSyncedUrlRef.current) {
+        const urlFilters = syncFromURL();
         onFiltersChange(urlFilters);
       }
     }
-  }, [urlParams, syncFromURL, onFiltersChange, filters]);
+  }, [urlParams, syncFromURL, onFiltersChange]);
 }
 
 /**
