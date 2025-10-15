@@ -78,8 +78,12 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     
     let baseEndpoint: string;
     
-    // For specific categories, always use their dedicated endpoints (ignore filters)
-    if (category === 'trending') {
+    // If advanced filters are applied, always use discover endpoint
+    if (hasAdvancedFilters || category === 'discover') {
+      baseEndpoint = contentType === 'movie' ? '/api/movies/discover' : '/api/tv/discover';
+    }
+    // For specific categories without filters, use dedicated endpoints
+    else if (category === 'trending') {
       baseEndpoint = contentType === 'movie' ? '/api/movies/trending' : '/api/tv/trending';
     } else if (category === 'popular') {
       baseEndpoint = contentType === 'movie' ? '/api/movies/popular' : '/api/tv/popular';
@@ -95,17 +99,16 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
       baseEndpoint = '/api/tv/on-the-air';
     } else if (category === 'top_rated' && contentType === 'tv') {
       baseEndpoint = '/api/tv/top-rated';
-    }
-    // For discover category or when no specific category is set, use discover endpoint
-    else {
+    } else {
+      // Default to discover endpoint
       baseEndpoint = contentType === 'movie' ? '/api/movies/discover' : '/api/tv/discover';
     }
 
     // Build query parameters from debounced filters
     const params: Record<string, any> = {};
 
-    // Only add filters when using discover category
-    if (category === 'discover' || !category) {
+    // Add filters when using discover endpoint or when advanced filters are applied
+    if (hasAdvancedFilters || category === 'discover') {
       if (debouncedFilters.sort_by) params.sort_by = debouncedFilters.sort_by;
       
       if (debouncedFilters.with_genres?.length) {
