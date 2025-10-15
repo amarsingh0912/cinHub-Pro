@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Search, Save, RotateCcw, Sparkles } from "lucide-react";
+import { X, Search, Save, RotateCcw, Sparkles, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { AdvancedFilterState } from "@/types/filters";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ import { StreamingFilters } from "./facets/StreamingFilters";
 import { PeopleFilters } from "./facets/PeopleFilters";
 import { AdvancedFilters } from "./facets/AdvancedFilters";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 interface FilterLabProps {
   filters: AdvancedFilterState;
@@ -24,10 +25,169 @@ interface FilterLabProps {
   className?: string;
 }
 
+// Utility function to build TMDB query string from filters
+function buildTMDBQueryString(filters: AdvancedFilterState): string {
+  const params = new URLSearchParams();
+  const isMovie = filters.contentType === 'movie';
+
+  // Genres
+  if (filters.with_genres?.length > 0) {
+    params.append('with_genres', filters.with_genres.join(','));
+  }
+  if (filters.without_genres?.length > 0) {
+    params.append('without_genres', filters.without_genres.join(','));
+  }
+
+  // Keywords
+  if (filters.with_keywords && filters.with_keywords.length > 0) {
+    params.append('with_keywords', filters.with_keywords.join(','));
+  }
+  if (filters.without_keywords && filters.without_keywords.length > 0) {
+    params.append('without_keywords', filters.without_keywords.join(','));
+  }
+
+  // Date filters - Movies
+  if (isMovie) {
+    if (filters.primary_release_date?.start) {
+      params.append('primary_release_date.gte', filters.primary_release_date.start);
+    }
+    if (filters.primary_release_date?.end) {
+      params.append('primary_release_date.lte', filters.primary_release_date.end);
+    }
+    if (filters.release_date?.start) {
+      params.append('release_date.gte', filters.release_date.start);
+    }
+    if (filters.release_date?.end) {
+      params.append('release_date.lte', filters.release_date.end);
+    }
+    if (filters.primary_release_year) {
+      params.append('primary_release_year', filters.primary_release_year.toString());
+    }
+  }
+
+  // Date filters - TV
+  if (!isMovie) {
+    if (filters.first_air_date?.start) {
+      params.append('first_air_date.gte', filters.first_air_date.start);
+    }
+    if (filters.first_air_date?.end) {
+      params.append('first_air_date.lte', filters.first_air_date.end);
+    }
+    if (filters.air_date?.start) {
+      params.append('air_date.gte', filters.air_date.start);
+    }
+    if (filters.air_date?.end) {
+      params.append('air_date.lte', filters.air_date.end);
+    }
+    if (filters.first_air_date_year) {
+      params.append('first_air_date_year', filters.first_air_date_year.toString());
+    }
+    if (filters.timezone) {
+      params.append('timezone', filters.timezone);
+    }
+  }
+
+  // Numeric filters
+  if (filters.with_runtime?.min !== undefined) {
+    params.append('with_runtime.gte', filters.with_runtime.min.toString());
+  }
+  if (filters.with_runtime?.max !== undefined) {
+    params.append('with_runtime.lte', filters.with_runtime.max.toString());
+  }
+  if (filters.vote_average?.min !== undefined) {
+    params.append('vote_average.gte', filters.vote_average.min.toString());
+  }
+  if (filters.vote_average?.max !== undefined) {
+    params.append('vote_average.lte', filters.vote_average.max.toString());
+  }
+  if (filters.vote_count?.min !== undefined) {
+    params.append('vote_count.gte', filters.vote_count.min.toString());
+  }
+  if (filters.vote_count?.max !== undefined) {
+    params.append('vote_count.lte', filters.vote_count.max.toString());
+  }
+
+  // Language & Region
+  if (filters.with_original_language) {
+    params.append('with_original_language', filters.with_original_language);
+  }
+  if (filters.region) {
+    params.append('region', filters.region);
+  }
+  if (filters.watch_region) {
+    params.append('watch_region', filters.watch_region);
+  }
+
+  // Streaming
+  if (filters.with_watch_providers?.length > 0) {
+    params.append('with_watch_providers', filters.with_watch_providers.join('|'));
+  }
+  if (filters.with_watch_monetization_types?.length > 0) {
+    params.append('with_watch_monetization_types', filters.with_watch_monetization_types.join('|'));
+  }
+
+  // People - Movies only
+  if (isMovie) {
+    if (filters.with_cast?.length > 0) {
+      params.append('with_cast', filters.with_cast.join(','));
+    }
+    if (filters.with_crew?.length > 0) {
+      params.append('with_crew', filters.with_crew.join(','));
+    }
+    if (filters.with_people?.length > 0) {
+      params.append('with_people', filters.with_people.join(','));
+    }
+  }
+
+  // Production
+  if (filters.with_companies?.length > 0) {
+    params.append('with_companies', filters.with_companies.join(','));
+  }
+  if (!isMovie && filters.with_networks?.length > 0) {
+    params.append('with_networks', filters.with_networks.join(','));
+  }
+
+  // Content filtering - Movies
+  if (isMovie) {
+    if (filters.include_adult !== undefined) {
+      params.append('include_adult', filters.include_adult.toString());
+    }
+    if (filters.include_video !== undefined) {
+      params.append('include_video', filters.include_video.toString());
+    }
+    if (filters.certification_country) {
+      params.append('certification_country', filters.certification_country);
+    }
+    if (filters.certification) {
+      params.append('certification', filters.certification);
+    }
+    if (filters.certification_lte) {
+      params.append('certification.lte', filters.certification_lte);
+    }
+    if (filters.with_release_type && filters.with_release_type.length > 0) {
+      params.append('with_release_type', filters.with_release_type.join('|'));
+    }
+  }
+
+  // Content filtering - TV
+  if (!isMovie && filters.screened_theatrically !== undefined) {
+    params.append('screened_theatrically', filters.screened_theatrically.toString());
+  }
+
+  // Sorting
+  if (filters.sort_by) {
+    params.append('sort_by', filters.sort_by);
+  }
+
+  return params.toString();
+}
+
 export function FilterLab({ filters, onFiltersChange, onSavePreset, className }: FilterLabProps) {
   const { isLabOpen, setLabOpen } = useFilterContext();
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   if (!isLabOpen) return null;
 
@@ -54,6 +214,26 @@ export function FilterLab({ filters, onFiltersChange, onSavePreset, className }:
       sort_by: 'popularity.desc',
     };
     onFiltersChange(defaultFilters);
+  };
+
+  const tmdbQueryString = buildTMDBQueryString(filters);
+
+  const copyQueryString = async () => {
+    try {
+      await navigator.clipboard.writeText(tmdbQueryString);
+      setCopied(true);
+      toast({
+        title: "Copied!",
+        description: "TMDB query string copied to clipboard",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy query string to clipboard",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -179,6 +359,32 @@ export function FilterLab({ filters, onFiltersChange, onSavePreset, className }:
                 </Tabs>
               </div>
             </ScrollArea>
+
+            {/* TMDB Query String Display */}
+            {tmdbQueryString && (
+              <div className="flex-shrink-0 glass-panel border-t border-border/50 backdrop-blur-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">TMDB Discover Query</h4>
+                    <div className="relative">
+                      <code className="text-xs text-foreground/80 bg-muted/50 px-3 py-2 rounded-lg block overflow-x-auto whitespace-nowrap">
+                        {tmdbQueryString}
+                      </code>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={copyQueryString}
+                    className="flex-shrink-0 gap-2"
+                    data-testid="copy-query-string"
+                  >
+                    {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                    <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </>
       )}
