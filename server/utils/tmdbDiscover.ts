@@ -165,22 +165,27 @@ export function buildMovieDiscoverParams(
   additionalParams: Record<string, any> = {}
 ): MovieDiscoverParams {
   const today = getTodayDate();
+  const tomorrow = getDateOffset(1);
   const thirtyDaysAgo = getDateOffset(-30);
+  const fortyFiveDaysAgo = getDateOffset(-45);
   
   const baseParams: MovieDiscoverParams = {
     page,
     language: 'en-US',
     region: 'IN',
+    with_original_language: 'hi',
     include_adult: false,
+    include_video: false,
+    certification_country: 'US',
     ...additionalParams,
   };
 
   switch (category) {
     case 'upcoming':
-      // Upcoming movies: released in the future, theatrical releases only
+      // Upcoming movies: released after today, theatrical releases only
       return {
         ...baseParams,
-        'primary_release_date.gte': today,
+        'primary_release_date.gte': tomorrow,
         sort_by: 'primary_release_date.asc',
         with_release_type: '2|3', // Theatrical releases only
       };
@@ -192,24 +197,26 @@ export function buildMovieDiscoverParams(
         'primary_release_date.lte': today,
         'primary_release_date.gte': thirtyDaysAgo,
         with_release_type: '2|3', // Theatrical releases only
-        sort_by: 'release_date.desc',
+        sort_by: 'primary_release_date.desc',
       };
 
     case 'popular':
-      // Popular movies: sorted by popularity
+      // Popular movies: sorted by popularity with minimum votes to reduce noise
       return {
         ...baseParams,
         sort_by: 'popularity.desc',
         with_release_type: '2|3', // Theatrical releases only
+        'vote_count.gte': 50,
       };
 
     case 'trending':
-      // Trending: high popularity with significant votes
+      // Trending: recent releases (last ~45 days) with high popularity and engagement
       return {
         ...baseParams,
         sort_by: 'popularity.desc',
-        'vote_count.gte': 1000,
+        'vote_count.gte': 500,
         with_release_type: '2|3',
+        'primary_release_date.gte': fortyFiveDaysAgo,
       };
 
     case 'top_rated':
