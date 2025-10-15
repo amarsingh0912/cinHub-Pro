@@ -28,6 +28,28 @@ The following unused code and files were removed to improve maintainability and 
 
 **Note:** All schema tables, active services (tmdbCache, cacheQueue, websocketService, cloudinaryService, otpService), and core functionality remain intact and fully operational.
 
+### TMDB Discover API Refactoring (October 2025)
+Refactored data fetching logic to use the unified TMDB Discover API for both Movies and TV Shows, replacing category-specific endpoints with dynamic, reusable API functions.
+
+**Backend Changes:**
+- Created `server/utils/tmdbDiscover.ts` with utility functions (`buildMovieDiscoverParams`, `buildTVDiscoverParams`) to generate discover API parameters for each category
+- Refactored all movie endpoints (popular, upcoming, now_playing, top-rated) to use `/discover/movie` with category-specific parameters
+- Refactored all TV endpoints (popular, airing_today, on-the-air, top-rated) to use `/discover/tv` with category-specific parameters
+- Trending endpoints intentionally kept using original `/trending/` API for more accurate trending data
+
+**Frontend Changes:**
+- Created TypeScript types for discover parameters and categories in `client/src/types/tmdb.ts`
+- Created React Query hooks (`useDiscoverMovies`, `useDiscoverTvShows`) for simplified data fetching
+- All hooks properly typed with category-specific return types
+
+**Key Implementation Details:**
+- All discover endpoints include standard filters: `language=en-US`, `region=IN`, `include_adult=false`
+- Movies include `with_release_type=2|3` for theatrical releases
+- Upcoming uses `primary_release_date.gte` with current date
+- Now playing uses 30-day date range with `primary_release_date.lte/gte`
+- Top-rated uses `vote_count.gte` (500 for movies, 200 for TV) with `sort_by=vote_average.desc`
+- Airing today uses 7-day forward date range with `air_date.gte/lte`
+
 ## System Architecture
 
 ### Frontend Architecture
