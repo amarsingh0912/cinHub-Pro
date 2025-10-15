@@ -56,7 +56,7 @@ export function FilterDock({ filters, onFiltersChange, className }: FilterDockPr
         {isDockOpen && (
           <motion.div
             className={cn(
-              "fixed z-50 glass-panel border",
+              "fixed z-50 glass-panel border flex flex-col",
               isMobile
                 ? "inset-x-0 bottom-0 rounded-t-3xl border-t border-x-0 max-h-[85vh]"
                 : "top-0 right-0 bottom-0 w-full max-w-md border-l border-y-0 rounded-l-3xl",
@@ -118,7 +118,7 @@ export function FilterDock({ filters, onFiltersChange, className }: FilterDockPr
             </div>
 
             {/* Content Area */}
-            <div className="overflow-y-auto h-full pb-24 px-4">
+            <div className="overflow-y-auto flex-1 pb-24 px-4">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeSection}
