@@ -166,15 +166,14 @@ export default function Movies() {
               <>
                 <MovieGrid movies={movies} mediaType={filters.contentType} />
                 
-                {/* Infinite scroll trigger */}
-                {hasNextPage && (
-                  <div ref={triggerRef} className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
+                {/* Infinite scroll trigger - hidden but functional */}
+                {hasNextPage && !isFetchingNextPage && (
+                  <div ref={triggerRef} className="h-1" />
                 )}
                 
+                {/* Show skeleton while fetching next page */}
                 {isFetchingNextPage && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
+                  <div ref={triggerRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <MovieCardSkeleton key={i} />
                     ))}
