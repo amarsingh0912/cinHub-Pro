@@ -40,7 +40,9 @@ app.use((req, res, next) => {
         if (safeResponse.password) safeResponse.password = "[REDACTED]";
         logLine += ` :: ${JSON.stringify(safeResponse)}`;
       }
-
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
       log(logLine);
     }
   });

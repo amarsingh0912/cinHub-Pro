@@ -42,6 +42,7 @@ import {
 import { tmdbCacheService } from "./services/tmdbCache.js";
 import { websocketService } from "./services/websocketService.js";
 import { cacheQueueService } from "./services/cacheQueue.js";
+import { buildMovieDiscoverParams, buildTVDiscoverParams, shouldUseTrendingEndpoint, type MovieCategory, type TVCategory } from "./utils/tmdbDiscover.js";
 
 // Robust TMDB API helper function with retry logic
 async function fetchFromTMDB(
@@ -391,12 +392,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate OTP for verification (email or phone)
       const verificationTarget = userData.email || userData.phoneNumber;
       if (!verificationTarget) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "Either email or phone number is required for verification",
-          });
+        return res.status(400).json({
+          message: "Either email or phone number is required for verification",
+        });
       }
 
       // Generate 6-digit OTP
@@ -440,11 +438,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(400)
           .json({ message: "Invalid input", errors: error.errors });
       }
-      res
-        .status(400)
-        .json({
-          message: error instanceof Error ? error.message : "Signup failed",
-        });
+      res.status(400).json({
+        message: error instanceof Error ? error.message : "Signup failed",
+      });
     }
   });
 
@@ -517,11 +513,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(400)
           .json({ message: "Invalid input", errors: error.errors });
       }
-      res
-        .status(401)
-        .json({
-          message: error instanceof Error ? error.message : "Signin failed",
-        });
+      res.status(401).json({
+        message: error instanceof Error ? error.message : "Signin failed",
+      });
     }
   });
 
@@ -563,11 +557,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the user's email or phone number for OTP delivery
       const otpTarget = user.email || user.phoneNumber;
       if (!otpTarget) {
-        return res
-          .status(400)
-          .json({
-            message: "User has no email or phone number for password reset",
-          });
+        return res.status(400).json({
+          message: "User has no email or phone number for password reset",
+        });
       }
 
       // Generate 6-digit OTP
@@ -666,11 +658,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { identifier, newPassword, otpCode } = req.body;
 
       if (!identifier || !newPassword || !otpCode) {
-        return res
-          .status(400)
-          .json({
-            message: "Identifier, new password, and OTP code are required",
-          });
+        return res.status(400).json({
+          message: "Identifier, new password, and OTP code are required",
+        });
       }
 
       if (newPassword.length < 8) {
@@ -697,11 +687,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get the actual target that was used for OTP (email or phone)
       const otpTarget = user.email || user.phoneNumber;
       if (!otpTarget) {
-        return res
-          .status(400)
-          .json({
-            message: "User has no email or phone number for password reset",
-          });
+        return res.status(400).json({
+          message: "User has no email or phone number for password reset",
+        });
       }
 
       // Verify OTP against the actual target (not the identifier)
@@ -803,11 +791,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(400)
           .json({ message: "Invalid input", errors: error.errors });
       }
-      res
-        .status(401)
-        .json({
-          message: error instanceof Error ? error.message : "Signin failed",
-        });
+      res.status(401).json({
+        message: error instanceof Error ? error.message : "Signin failed",
+      });
     }
   });
 
@@ -1176,11 +1162,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // TMDB proxy endpoints (to avoid CORS and secure API key)
   app.get("/api/movies/trending", async (req, res) => {
     try {
-      const timeWindow = req.query.time_window || "week";
-      const page = req.query.page || 1;
+      const page = Number(req.query.page) || 1;
+      
+      // Use the original trending endpoint for most accurate trending results
+      const timeWindow = req.query.time_window || "day";
       const data = await fetchFromTMDB(`/trending/movie/${timeWindow}`, {
         page,
       });
+      
       res.json(data);
     } catch (error) {
       console.error("Error fetching trending movies:", error);
@@ -1190,9 +1179,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tv/trending", async (req, res) => {
     try {
+      const page = Number(req.query.page) || 1;
+      
+      // Use the original trending endpoint for most accurate trending results
       const timeWindow = req.query.time_window || "week";
-      const page = req.query.page || 1;
       const data = await fetchFromTMDB(`/trending/tv/${timeWindow}`, { page });
+      
       res.json(data);
     } catch (error) {
       console.error("Error fetching trending TV shows:", error);
@@ -1202,8 +1194,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tv/popular", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/popular", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('popular', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching popular TV shows:", error);
@@ -1213,8 +1206,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tv/top-rated", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/top_rated", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('top_rated', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching top rated TV shows:", error);
@@ -1224,8 +1218,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tv/on-the-air", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/on_the_air", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('on_the_air', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching on-the-air TV shows:", error);
@@ -1236,8 +1231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add alias with underscore for frontend compatibility
   app.get("/api/tv/on_the_air", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/on_the_air", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('on_the_air', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching on-the-air TV shows:", error);
@@ -1248,8 +1244,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add alias with underscore for frontend compatibility
   app.get("/api/tv/airing_today", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/airing_today", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('airing_today', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching airing today TV shows:", error);
@@ -1261,8 +1258,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/tv/airing-today", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/tv/airing_today", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildTVDiscoverParams('airing_today', page);
+      const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching airing today TV shows:", error);
@@ -1573,8 +1571,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/movies/popular", async (req, res) => {
     try {
-      const page = req.query.page || 1;
-      const data = await fetchFromTMDB("/movie/popular", { page });
+      const page = Number(req.query.page) || 1;
+      const params = buildMovieDiscoverParams('popular', page);
+      const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching popular movies:", error);
@@ -1584,14 +1583,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/movies/top-rated", async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: "TMDB API key not configured" });
-      }
-      const page = req.query.page || 1;
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/top_rated?api_key=${process.env.TMDB_API_KEY}&page=${page}`,
-      );
-      const data = await response.json();
+      const page = Number(req.query.page) || 1;
+      const params = buildMovieDiscoverParams('top_rated', page);
+      const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching top rated movies:", error);
@@ -1601,14 +1595,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/movies/upcoming", async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: "TMDB API key not configured" });
-      }
-      const page = req.query.page || 1;
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/upcoming?api_key=${process.env.TMDB_API_KEY}&page=${page}`,
-      );
-      const data = await response.json();
+      const page = Number(req.query.page) || 1;
+      const params = buildMovieDiscoverParams('upcoming', page);
+      const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching upcoming movies:", error);
@@ -1619,14 +1608,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add alias with underscore for frontend compatibility
   app.get("/api/movies/now_playing", async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: "TMDB API key not configured" });
-      }
-      const page = req.query.page || 1;
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY}&page=${page}`,
-      );
-      const data = await response.json();
+      const page = Number(req.query.page) || 1;
+      const params = buildMovieDiscoverParams('now_playing', page);
+      const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching now playing movies:", error);
@@ -1636,14 +1620,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/movies/now-playing", async (req, res) => {
     try {
-      if (!process.env.TMDB_API_KEY) {
-        return res.status(500).json({ message: "TMDB API key not configured" });
-      }
-      const page = req.query.page || 1;
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.TMDB_API_KEY}&page=${page}`,
-      );
-      const data = await response.json();
+      const page = Number(req.query.page) || 1;
+      const params = buildMovieDiscoverParams('now_playing', page);
+      const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
       console.error("Error fetching now playing movies:", error);
@@ -2292,11 +2271,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if the user owns this watchlist
       if (existingWatchlist.userId !== userId) {
-        return res
-          .status(403)
-          .json({
-            message: "Unauthorized: You can only edit your own watchlists",
-          });
+        return res.status(403).json({
+          message: "Unauthorized: You can only edit your own watchlists",
+        });
       }
 
       // Validate request body, explicitly omitting protected fields
@@ -2328,11 +2305,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if the user owns this watchlist
       if (existingWatchlist.userId !== userId) {
-        return res
-          .status(403)
-          .json({
-            message: "Unauthorized: You can only delete your own watchlists",
-          });
+        return res.status(403).json({
+          message: "Unauthorized: You can only delete your own watchlists",
+        });
       }
 
       await storage.deleteWatchlist(watchlistId);
@@ -2366,12 +2341,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (watchlist.userId !== userId) {
-        return res
-          .status(403)
-          .json({
-            message:
-              "Unauthorized: You can only add items to your own watchlists",
-          });
+        return res.status(403).json({
+          message:
+            "Unauthorized: You can only add items to your own watchlists",
+        });
       }
 
       const data = insertWatchlistItemSchema.parse({
@@ -2403,12 +2376,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         if (watchlist.userId !== userId) {
-          return res
-            .status(403)
-            .json({
-              message:
-                "Unauthorized: You can only remove items from your own watchlists",
-            });
+          return res.status(403).json({
+            message:
+              "Unauthorized: You can only remove items from your own watchlists",
+          });
         }
 
         await storage.removeWatchlistItem(watchlistId, mediaType, mediaId);
