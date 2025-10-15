@@ -48,6 +48,36 @@ export function useDebouncedFilters(
       return;
     }
 
+    // Check if only instant-update fields changed (category, contentType, sort_by)
+    // These should not be debounced for immediate UI feedback
+    const instantFields = ['category', 'contentType', 'sort_by'];
+    const onlyInstantFieldsChanged = instantFields.some(field => 
+      filters[field as keyof AdvancedFilterState] !== debouncedFilters[field as keyof AdvancedFilterState]
+    ) && Object.keys(filters).every(key => {
+      if (instantFields.includes(key)) return true;
+      return JSON.stringify(filters[key as keyof AdvancedFilterState]) === 
+             JSON.stringify(debouncedFilters[key as keyof AdvancedFilterState]);
+    });
+
+    // If only instant fields changed, update immediately without debouncing
+    if (onlyInstantFieldsChanged) {
+      // Cancel any in-flight requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Clear existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      setDebouncedFilters(filters);
+      setIsDebouncing(false);
+      // Create new abort controller for new requests
+      abortControllerRef.current = new AbortController();
+      return;
+    }
+
     setIsDebouncing(true);
 
     // Cancel any in-flight requests
