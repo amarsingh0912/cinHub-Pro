@@ -181,7 +181,7 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
 
   // Use the enhanced infinite movies hook
   const infiniteQuery = useInfiniteMovies({
-    queryKey: [endpoint, queryParams],
+    queryKey: [endpoint, debouncedFilters.category || 'discover', debouncedFilters.contentType, queryParams],
     enabled: enabled, // Query key changes handle debouncing naturally
     staleTime,
     rootMargin,
@@ -200,6 +200,6 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     isLoadingCount: infiniteQuery.isLoading || isDebouncing,
     
     // Convenience methods
-    getQueryKey: () => [endpoint, queryParams],
+    getQueryKey: () => [endpoint, debouncedFilters.category || 'discover', debouncedFilters.contentType, queryParams],
   };
 }
