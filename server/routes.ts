@@ -1899,6 +1899,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search TV networks - for Networks filter
+  app.get("/api/search/network", async (req, res) => {
+    try {
+      const { query } = req.query;
+
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      // TMDB doesn't have a direct network search endpoint, so we fetch all networks and filter
+      const data = await fetchFromTMDB("/configuration/networks");
+      
+      // Filter networks based on query
+      const searchTerm = (query as string).toLowerCase();
+      const filteredResults = data.filter((network: any) =>
+        network.name.toLowerCase().includes(searchTerm)
+      );
+
+      res.json({ results: filteredResults.slice(0, 20) });
+    } catch (error) {
+      console.error("Error searching networks:", error);
+      res.status(500).json({ message: "Failed to search networks" });
+    }
+  });
+
   // Get watch providers by region - for Streaming Providers filter
   app.get("/api/watch/providers/:region", async (req, res) => {
     try {

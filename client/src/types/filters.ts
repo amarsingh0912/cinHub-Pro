@@ -125,6 +125,8 @@ export interface AdvancedFilterState {
   // Multi-select filters
   with_genres: number[];           // Genre IDs to include
   without_genres: number[];        // Genre IDs to exclude
+  with_keywords?: number[];        // Keyword IDs to include
+  without_keywords?: number[];     // Keyword IDs to exclude
   
   // Date filters - Movies
   primary_release_date: DateRange; // Movies - primary release date

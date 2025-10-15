@@ -3,6 +3,8 @@ import { AdvancedFilterState } from "@/types/filters";
 import { FilterChip } from "../../atoms";
 import { motion } from "framer-motion";
 import { filterMotion } from "../../filter-motion";
+import { CountrySelect } from "../../atoms/CountrySelect";
+import { Label } from "@/components/ui/label";
 
 interface StreamingFiltersProps {
   filters: AdvancedFilterState;
@@ -46,6 +48,21 @@ export function StreamingFilters({ filters, onFiltersChange }: StreamingFiltersP
 
   return (
     <div className="space-y-6">
+      {/* Watch Region */}
+      <div className="space-y-3">
+        <Label htmlFor="watch-region" className="text-sm font-medium text-foreground">Streaming Region</Label>
+        <CountrySelect
+          id="watch-region"
+          value={filters.watch_region}
+          onValueChange={(value) => onFiltersChange({ ...filters, watch_region: value })}
+          placeholder="Select region (default: US)"
+          className="w-full"
+        />
+        <p className="text-xs text-muted-foreground">
+          Choose a region to see available streaming services
+        </p>
+      </div>
+
       {/* Monetization Types */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-foreground">Availability Type</h4>
