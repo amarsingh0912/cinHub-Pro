@@ -182,7 +182,7 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
   // Use the enhanced infinite movies hook
   const infiniteQuery = useInfiniteMovies({
     queryKey: [endpoint, queryParams],
-    enabled: enabled && !isDebouncing, // Don't fetch while debouncing for better UX
+    enabled: enabled, // Query key changes handle debouncing naturally
     staleTime,
     rootMargin,
     threshold,
