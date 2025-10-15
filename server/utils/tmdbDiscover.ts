@@ -174,7 +174,6 @@ export function buildMovieDiscoverParams(
     language: 'en-US',
     include_adult: false,
     include_video: false,
-    certification_country: 'US',
     ...additionalParams,
   };
 

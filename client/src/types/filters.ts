@@ -691,7 +691,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
     },
   },
   trending: {
@@ -701,7 +700,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
       vote_count: { min: 50 },
       primary_release_date: { start: getDateOffset(-45) }, // Last 45 days
     },
@@ -713,7 +711,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
       vote_count: { min: 50 },
     },
   },
@@ -724,7 +721,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "primary_release_date.asc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
       primary_release_date: { start: getDateOffset(1) }, // Tomorrow onwards
     },
   },
@@ -735,7 +731,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "primary_release_date.desc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
       primary_release_date: {
         start: getDateOffset(-30), // Last 30 days
         end: getTodayDate(),
@@ -749,7 +744,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "vote_average.desc",
       include_adult: false,
       include_video: false,
-      certification_country: "US",
       vote_count: { min: 500 },
     },
   },
