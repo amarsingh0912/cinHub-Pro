@@ -4,25 +4,35 @@
  */
 
 // Base content types
-export type ContentType = 'movie' | 'tv';
+export type ContentType = "movie" | "tv";
 export type MediaType = ContentType; // Alias for compatibility
 
 // Sort options mapped to TMDB sort_by parameter - Complete TMDB API coverage
-export type SortOption = 
+export type SortOption =
   // General sorting (available for both movies and TV)
-  | 'popularity.desc' | 'popularity.asc'
-  | 'vote_average.desc' | 'vote_average.asc'
-  | 'vote_count.desc' | 'vote_count.asc'
+  | "popularity.desc"
+  | "popularity.asc"
+  | "vote_average.desc"
+  | "vote_average.asc"
+  | "vote_count.desc"
+  | "vote_count.asc"
   // Title/Name sorting
-  | 'original_title.asc' | 'original_title.desc'  // Movies
-  | 'name.asc' | 'name.desc'                      // TV Shows
+  | "original_title.asc"
+  | "original_title.desc" // Movies
+  | "name.asc"
+  | "name.desc" // TV Shows
   // Movie-specific sorting
-  | 'primary_release_date.desc' | 'primary_release_date.asc'
-  | 'release_date.desc' | 'release_date.asc'      // Alternative date format
-  | 'revenue.desc' | 'revenue.asc'
+  | "primary_release_date.desc"
+  | "primary_release_date.asc"
+  | "release_date.desc"
+  | "release_date.asc" // Alternative date format
+  | "revenue.desc"
+  | "revenue.asc"
   // TV-specific sorting
-  | 'first_air_date.desc' | 'first_air_date.asc'
-  | 'air_date.desc' | 'air_date.asc';
+  | "first_air_date.desc"
+  | "first_air_date.asc"
+  | "air_date.desc"
+  | "air_date.asc";
 
 // Genre structure from TMDB
 export interface Genre {
@@ -91,12 +101,17 @@ export interface Certification {
 }
 
 // Watch monetization types
-export type WatchMonetizationType = 'flatrate' | 'free' | 'ads' | 'rent' | 'buy';
+export type WatchMonetizationType =
+  | "flatrate"
+  | "free"
+  | "ads"
+  | "rent"
+  | "buy";
 
 // Date range for filtering
 export interface DateRange {
   start?: string; // YYYY-MM-DD format
-  end?: string;   // YYYY-MM-DD format
+  end?: string; // YYYY-MM-DD format
 }
 
 // Numeric range for ratings, runtime, etc.
@@ -115,8 +130,20 @@ export interface QuickFilterChip {
 }
 
 // Preset category types
-export type MoviePresetCategory = 'discover' | 'trending' | 'popular' | 'upcoming' | 'now_playing' | 'top_rated';
-export type TVPresetCategory = 'discover' | 'trending' | 'popular' | 'airing_today' | 'on_the_air' | 'top_rated';
+export type MoviePresetCategory =
+  | "discover"
+  | "trending"
+  | "popular"
+  | "upcoming"
+  | "now_playing"
+  | "top_rated";
+export type TVPresetCategory =
+  | "discover"
+  | "trending"
+  | "popular"
+  | "airing_today"
+  | "on_the_air"
+  | "top_rated";
 export type PresetCategory = MoviePresetCategory | TVPresetCategory;
 
 // Preset configuration defining default parameters for each category
@@ -130,74 +157,74 @@ export interface PresetConfig {
 export interface AdvancedFilterState {
   // Core filtering
   contentType: ContentType;
-  
+
   // Active preset tracking (explicit state for preset management)
   activePreset?: PresetCategory;
-  
+
   // Content discovery category (trending, popular, etc.)
   category?: string;
-  
+
   // Multi-select filters
-  with_genres: number[];           // Genre IDs to include
-  without_genres: number[];        // Genre IDs to exclude
-  with_keywords?: number[];        // Keyword IDs to include
-  without_keywords?: number[];     // Keyword IDs to exclude
-  
+  with_genres: number[]; // Genre IDs to include
+  without_genres: number[]; // Genre IDs to exclude
+  with_keywords?: number[]; // Keyword IDs to include
+  without_keywords?: number[]; // Keyword IDs to exclude
+
   // Date filters - Movies
   primary_release_date: DateRange; // Movies - primary release date
-  release_date: DateRange;         // Movies - alternative date filter
-  primary_release_year?: number;   // Movies - specific year
-  
+  release_date: DateRange; // Movies - alternative date filter
+  primary_release_year?: number; // Movies - specific year
+
   // Date filters - TV
-  first_air_date: DateRange;       // TV - first air date
-  air_date: DateRange;             // TV - alternative air date
-  first_air_date_year?: number;    // TV - specific year
-  timezone?: string;               // TV - IANA timezone for airing filters
-  
+  first_air_date: DateRange; // TV - first air date
+  air_date: DateRange; // TV - alternative air date
+  first_air_date_year?: number; // TV - specific year
+  timezone?: string; // TV - IANA timezone for airing filters
+
   // Numeric filters
-  with_runtime: NumericRange;      // Runtime in minutes
-  vote_average: NumericRange;      // Rating 0-10
-  vote_count: NumericRange;        // Vote count range
-  
+  with_runtime: NumericRange; // Runtime in minutes
+  vote_average: NumericRange; // Rating 0-10
+  vote_count: NumericRange; // Vote count range
+
   // Language & Region
   with_original_language?: string; // Language ISO code
-  region?: string;                 // Country ISO code for releases
-  watch_region?: string;           // Country ISO code for streaming
-  
+  region?: string; // Country ISO code for releases
+  watch_region?: string; // Country ISO code for streaming
+
   // Streaming & Monetization
-  with_watch_providers: number[];     // Streaming provider IDs
+  with_watch_providers: number[]; // Streaming provider IDs
   with_watch_monetization_types: WatchMonetizationType[];
-  
+
   // People (cast/crew) - Movies
-  with_cast: number[];             // Cast person IDs (Movies only)
-  with_crew: number[];             // Crew person IDs (Movies only)
-  with_people: number[];           // Union of cast/crew (Movies only)
-  
+  with_cast: number[]; // Cast person IDs (Movies only)
+  with_crew: number[]; // Crew person IDs (Movies only)
+  with_people: number[]; // Union of cast/crew (Movies only)
+
   // Production
-  with_companies: number[];        // Production company IDs (movies & TV)
-  with_networks: number[];         // TV network IDs (TV only)
-  
+  with_companies: number[]; // Production company IDs (movies & TV)
+  with_networks: number[]; // TV network IDs (TV only)
+
   // Content filtering - Movies
-  include_adult?: boolean;         // Include adult content
-  include_video?: boolean;         // Include video content (Movies only)
-  certification_country?: string;  // Country for certification ratings
-  certification?: string;          // Certification rating
-  certification_lte?: string;      // Max certification rating (Movies only)
-  with_release_type?: number[];    // Release types: 1-7 (Movies only)
-  
+  include_adult?: boolean; // Include adult content
+  include_video?: boolean; // Include video content (Movies only)
+  certification_country?: string; // Country for certification ratings
+  certification?: string; // Certification rating
+  certification_lte?: string; // Max certification rating (Movies only)
+  with_release_type?: number[]; // Release types: 1-7 (Movies only)
+
   // Content filtering - TV
   screened_theatrically?: boolean; // TV shows screened theatrically
-  
+
   // Sorting & Search
   sort_by: SortOption;
-  
+
   // Search integration
-  search_query?: string;           // Global search term
-  search_type?: 'multi' | 'movie' | 'tv' | 'person';
-  
+  search_query?: string; // Global search term
+  search_type?: "multi" | "movie" | "tv" | "person";
+
   // Pagination
   page?: number;
-  
+
   // UI state (not sent to API)
   ui?: {
     showAdvancedFilters: boolean;
@@ -223,48 +250,48 @@ export interface TMDBFilterParams {
   // Core
   api_key: string;
   page?: number;
-  
+
   // Content filtering
-  with_genres?: string;        // Comma-separated genre IDs
-  without_genres?: string;     // Comma-separated genre IDs
-  
+  with_genres?: string; // Comma-separated genre IDs
+  without_genres?: string; // Comma-separated genre IDs
+
   // Date ranges - Complete coverage
-  'primary_release_date.gte'?: string;  // Movies
-  'primary_release_date.lte'?: string;  // Movies
-  'release_date.gte'?: string;          // Movies alternative
-  'release_date.lte'?: string;          // Movies alternative
-  'first_air_date.gte'?: string;        // TV
-  'first_air_date.lte'?: string;        // TV
-  'air_date.gte'?: string;              // TV alternative
-  'air_date.lte'?: string;              // TV alternative
-  
+  "primary_release_date.gte"?: string; // Movies
+  "primary_release_date.lte"?: string; // Movies
+  "release_date.gte"?: string; // Movies alternative
+  "release_date.lte"?: string; // Movies alternative
+  "first_air_date.gte"?: string; // TV
+  "first_air_date.lte"?: string; // TV
+  "air_date.gte"?: string; // TV alternative
+  "air_date.lte"?: string; // TV alternative
+
   // Numeric ranges - Symmetric coverage
-  'with_runtime.gte'?: string;
-  'with_runtime.lte'?: string;
-  'vote_average.gte'?: string;
-  'vote_average.lte'?: string;
-  'vote_count.gte'?: string;            // Minimum votes
-  'vote_count.lte'?: string;            // Maximum votes - CRITICAL FIX
-  
+  "with_runtime.gte"?: string;
+  "with_runtime.lte"?: string;
+  "vote_average.gte"?: string;
+  "vote_average.lte"?: string;
+  "vote_count.gte"?: string; // Minimum votes
+  "vote_count.lte"?: string; // Maximum votes - CRITICAL FIX
+
   // Language & Region
   with_original_language?: string;
   region?: string;
   watch_region?: string;
-  
+
   // Streaming
-  with_watch_providers?: string;  // Comma-separated provider IDs
+  with_watch_providers?: string; // Comma-separated provider IDs
   with_watch_monetization_types?: string; // Pipe-separated types
-  
+
   // People & Production
-  with_people?: string;          // Comma-separated person IDs
-  with_companies?: string;       // Comma-separated company IDs
-  with_networks?: string;        // Comma-separated network IDs
-  
+  with_people?: string; // Comma-separated person IDs
+  with_companies?: string; // Comma-separated company IDs
+  with_networks?: string; // Comma-separated network IDs
+
   // Content
-  include_adult?: string;        // "true" or "false"
+  include_adult?: string; // "true" or "false"
   certification_country?: string;
   certification?: string;
-  
+
   // Sorting - All TMDB supported options
   sort_by?: string;
 }
@@ -273,7 +300,7 @@ export interface TMDBFilterParams {
 export interface FilterValidationError {
   field: keyof AdvancedFilterState;
   message: string;
-  severity: 'error' | 'warning' | 'info';
+  severity: "error" | "warning" | "info";
 }
 
 // Filter change event
@@ -298,25 +325,26 @@ export interface FilterPreset {
 }
 
 // URL query parameters structure for deep links - Complete symmetric coverage
-export interface FilterQueryParams extends Record<string, string | string[] | undefined> {
-  type?: string;                    // movie | tv
-  category?: string;               // discover, trending, etc.
-  with_genres?: string;            // comma-separated IDs
+export interface FilterQueryParams
+  extends Record<string, string | string[] | undefined> {
+  type?: string; // movie | tv
+  category?: string; // discover, trending, etc.
+  with_genres?: string; // comma-separated IDs
   without_genres?: string;
-  'primary_release_date.gte'?: string;
-  'primary_release_date.lte'?: string;
-  'first_air_date.gte'?: string;
-  'first_air_date.lte'?: string;
-  'release_date.gte'?: string;     // Alternative date format
-  'release_date.lte'?: string;
-  'air_date.gte'?: string;         // Alternative TV date format
-  'air_date.lte'?: string;
-  'with_runtime.gte'?: string;
-  'with_runtime.lte'?: string;
-  'vote_average.gte'?: string;
-  'vote_average.lte'?: string;
-  'vote_count.gte'?: string;       // Minimum votes
-  'vote_count.lte'?: string;       // Maximum votes - CRITICAL FIX
+  "primary_release_date.gte"?: string;
+  "primary_release_date.lte"?: string;
+  "first_air_date.gte"?: string;
+  "first_air_date.lte"?: string;
+  "release_date.gte"?: string; // Alternative date format
+  "release_date.lte"?: string;
+  "air_date.gte"?: string; // Alternative TV date format
+  "air_date.lte"?: string;
+  "with_runtime.gte"?: string;
+  "with_runtime.lte"?: string;
+  "vote_average.gte"?: string;
+  "vote_average.lte"?: string;
+  "vote_count.gte"?: string; // Minimum votes
+  "vote_count.lte"?: string; // Maximum votes - CRITICAL FIX
   with_original_language?: string;
   region?: string;
   watch_region?: string;
@@ -330,13 +358,13 @@ export interface FilterQueryParams extends Record<string, string | string[] | un
   certification?: string;
   sort_by?: string;
   page?: string;
-  q?: string;                      // search query
+  q?: string; // search query
 }
 
 // Default filter states
 export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
-  contentType: 'movie',
-  category: 'discover',
+  contentType: "movie",
+  category: "discover",
   with_genres: [],
   without_genres: [],
   // Movie dates
@@ -356,77 +384,77 @@ export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
   with_people: [],
   with_companies: [],
   with_networks: [],
-  sort_by: 'popularity.desc',
+  sort_by: "popularity.desc",
   ui: {
     showAdvancedFilters: false,
     collapsedSections: [],
-    recentFilters: []
-  }
+    recentFilters: [],
+  },
 };
 
 export const DEFAULT_TV_FILTERS: AdvancedFilterState = {
   ...DEFAULT_MOVIE_FILTERS,
-  contentType: 'tv',
-  sort_by: 'popularity.desc'
+  contentType: "tv",
+  sort_by: "popularity.desc",
 };
 
 // Quick filter presets
 export const QUICK_FILTER_PRESETS: QuickFilterChip[] = [
   {
-    id: 'this-year',
-    label: 'This Year',
-    icon: 'Calendar',
+    id: "this-year",
+    label: "This Year",
+    icon: "Calendar",
     filters: {
       primary_release_date: {
-        start: new Date().getFullYear() + '-01-01',
-        end: new Date().getFullYear() + '-12-31'
+        start: new Date().getFullYear() + "-01-01",
+        end: new Date().getFullYear() + "-12-31",
       },
       first_air_date: {
-        start: new Date().getFullYear() + '-01-01', 
-        end: new Date().getFullYear() + '-12-31'
-      }
+        start: new Date().getFullYear() + "-01-01",
+        end: new Date().getFullYear() + "-12-31",
+      },
     },
-    description: 'Released this year'
+    description: "Released this year",
   },
   {
-    id: '2010s',
-    label: '2010s',
-    icon: 'Calendar',
+    id: "2010s",
+    label: "2010s",
+    icon: "Calendar",
     filters: {
-      primary_release_date: { start: '2010-01-01', end: '2019-12-31' },
-      first_air_date: { start: '2010-01-01', end: '2019-12-31' }
+      primary_release_date: { start: "2010-01-01", end: "2019-12-31" },
+      first_air_date: { start: "2010-01-01", end: "2019-12-31" },
     },
-    description: 'From the 2010s decade'
+    description: "From the 2010s decade",
   },
   {
-    id: 'highly-rated',
-    label: 'Highly Rated',
-    icon: 'Star',
+    id: "highly-rated",
+    label: "Highly Rated",
+    icon: "Star",
     filters: {
       vote_average: { min: 7.5 },
-      vote_count: { min: 100 }
+      vote_count: { min: 100 },
     },
-    description: '7.5+ rating with 100+ votes'
+    description: "7.5+ rating with 100+ votes",
   },
   {
-    id: 'netflix',
-    label: 'Netflix',
-    icon: 'Monitor',
+    id: "netflix",
+    label: "Netflix",
+    icon: "Monitor",
     filters: {
       with_watch_providers: [8], // Netflix provider ID
-      watch_region: 'US'
+      watch_region: "US",
     },
-    description: 'Available on Netflix'
+    description: "Available on Netflix",
   },
   {
-    id: 'free-to-watch',
-    label: 'Free',
-    icon: 'DollarSign',
+    id: "free-to-watch",
+    label: "Free",
+    icon: "DollarSign",
     filters: {
-      with_watch_monetization_types: ['free', 'ads']
+      with_watch_monetization_types: ["free", "ads"],
     },
-    description: 'Free to watch'
-  }
+    description: "Free to watch",
+  },
 ];
 
 // Filter categories for UI organization
@@ -442,66 +470,83 @@ export interface FilterCategory {
 
 export const FILTER_CATEGORIES: FilterCategory[] = [
   {
-    id: 'content',
-    label: 'Content Type',
-    icon: 'Film',
-    description: 'Movies or TV Shows',
-    fields: ['contentType', 'category'],
+    id: "content",
+    label: "Content Type",
+    icon: "Film",
+    description: "Movies or TV Shows",
+    fields: ["contentType", "category"],
     collapsible: false,
-    defaultOpen: true
+    defaultOpen: true,
   },
   {
-    id: 'genres',
-    label: 'Genres',
-    icon: 'Tag',
-    description: 'Include or exclude specific genres',
-    fields: ['with_genres', 'without_genres'],
+    id: "genres",
+    label: "Genres",
+    icon: "Tag",
+    description: "Include or exclude specific genres",
+    fields: ["with_genres", "without_genres"],
     collapsible: true,
-    defaultOpen: true
+    defaultOpen: true,
   },
   {
-    id: 'release',
-    label: 'Release & Runtime',
-    icon: 'Calendar',
-    description: 'Release dates and runtime duration',
-    fields: ['primary_release_date', 'first_air_date', 'with_runtime'],
+    id: "release",
+    label: "Release & Runtime",
+    icon: "Calendar",
+    description: "Release dates and runtime duration",
+    fields: ["primary_release_date", "first_air_date", "with_runtime"],
     collapsible: true,
-    defaultOpen: false
+    defaultOpen: false,
   },
   {
-    id: 'ratings',
-    label: 'Ratings & Reviews',
-    icon: 'Star',
-    description: 'User ratings and vote counts',
-    fields: ['vote_average', 'vote_count'],
+    id: "ratings",
+    label: "Ratings & Reviews",
+    icon: "Star",
+    description: "User ratings and vote counts",
+    fields: ["vote_average", "vote_count"],
     collapsible: true,
-    defaultOpen: false
+    defaultOpen: false,
   },
   {
-    id: 'streaming',
-    label: 'Streaming & Availability',
-    icon: 'Monitor',
-    description: 'Streaming services and availability',
-    fields: ['with_watch_providers', 'with_watch_monetization_types', 'watch_region'],
+    id: "streaming",
+    label: "Streaming & Availability",
+    icon: "Monitor",
+    description: "Streaming services and availability",
+    fields: [
+      "with_watch_providers",
+      "with_watch_monetization_types",
+      "watch_region",
+    ],
     collapsible: true,
-    defaultOpen: false
+    defaultOpen: false,
   },
   {
-    id: 'advanced',
-    label: 'Advanced Filters',
-    icon: 'Settings',
-    description: 'Language, people, companies, and more',
-    fields: ['with_original_language', 'with_people', 'with_companies', 'with_networks', 'certification'],
+    id: "advanced",
+    label: "Advanced Filters",
+    icon: "Settings",
+    description: "Language, people, companies, and more",
+    fields: [
+      "with_original_language",
+      "with_people",
+      "with_companies",
+      "with_networks",
+      "certification",
+    ],
     collapsible: true,
-    defaultOpen: false
-  }
+    defaultOpen: false,
+  },
 ];
 
 // Hook return types
 export interface UseAdvancedFiltersReturn {
   filters: AdvancedFilterState;
-  setFilters: (filters: AdvancedFilterState | ((prev: AdvancedFilterState) => AdvancedFilterState)) => void;
-  updateFilter: <K extends keyof AdvancedFilterState>(key: K, value: AdvancedFilterState[K]) => void;
+  setFilters: (
+    filters:
+      | AdvancedFilterState
+      | ((prev: AdvancedFilterState) => AdvancedFilterState),
+  ) => void;
+  updateFilter: <K extends keyof AdvancedFilterState>(
+    key: K,
+    value: AdvancedFilterState[K],
+  ) => void;
   setPreset: (presetCategory: PresetCategory) => void;
   toggleGenre: (genreId: number) => void;
   setGenres: (genres: number[]) => void;
@@ -515,10 +560,16 @@ export interface UseAdvancedFiltersReturn {
 }
 
 export interface UseFilterURLSyncReturn {
-  syncToURL: (filters: AdvancedFilterState, options?: { pushState?: boolean }) => void;
+  syncToURL: (
+    filters: AdvancedFilterState,
+    options?: { pushState?: boolean },
+  ) => void;
   syncFromURL: () => AdvancedFilterState;
   urlParams: FilterQueryParams;
-  updateURL: (params: Partial<FilterQueryParams>, options?: { pushState?: boolean }) => void;
+  updateURL: (
+    params: Partial<FilterQueryParams>,
+    options?: { pushState?: boolean },
+  ) => void;
 }
 
 export interface UseDebouncedFiltersReturn {
@@ -530,7 +581,8 @@ export interface UseDebouncedFiltersReturn {
 }
 
 // Enhanced hook for complete filter management with URL sync
-export interface UseAdvancedFiltersWithURLReturn extends UseAdvancedFiltersReturn {
+export interface UseAdvancedFiltersWithURLReturn
+  extends UseAdvancedFiltersReturn {
   // Debouncing properties
   debouncedFilters: AdvancedFilterState;
   isDebouncing: boolean;
@@ -545,9 +597,9 @@ export interface UseAdvancedFiltersWithURLReturn extends UseAdvancedFiltersRetur
 
 // Memoized default filter state to avoid reference comparison issues
 const DEFAULT_FILTERS: AdvancedFilterState = {
-  contentType: 'movie',
-  category: 'discover',
-  sort_by: 'popularity.desc',
+  contentType: "movie",
+  category: "discover",
+  sort_by: "popularity.desc",
   with_genres: [],
   without_genres: [],
   // Movie dates
@@ -571,10 +623,10 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   with_people: [],
   with_networks: [],
   include_adult: false,
-  certification_country: 'US',
+  certification_country: "US",
   certification: undefined,
   search_query: undefined,
-  search_type: 'movie',
+  search_type: "movie",
   page: 1,
   ui: {
     showAdvancedFilters: false,
@@ -596,26 +648,26 @@ export function createDefaultFilters(): AdvancedFilterState {
 export function deepEqual(a: any, b: any): boolean {
   if (a === b) return true;
   if (a == null || b == null) return false;
-  if (typeof a !== 'object' || typeof b !== 'object') return a === b;
-  
+  if (typeof a !== "object" || typeof b !== "object") return a === b;
+
   if (Array.isArray(a) !== Array.isArray(b)) return false;
   if (Array.isArray(a)) {
     if (a.length !== b.length) return false;
     return a.every((item, index) => deepEqual(item, b[index]));
   }
-  
+
   const keysA = Object.keys(a);
   const keysB = Object.keys(b);
   if (keysA.length !== keysB.length) return false;
-  
-  return keysA.every(key => deepEqual(a[key], b[key]));
+
+  return keysA.every((key) => deepEqual(a[key], b[key]));
 }
 
 /**
  * Get today's date in YYYY-MM-DD format
  */
 function getTodayDate(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 /**
@@ -624,7 +676,7 @@ function getTodayDate(): string {
 function getDateOffset(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split("T")[0];
 }
 
 /**
@@ -633,90 +685,90 @@ function getDateOffset(days: number): string {
  */
 export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
   discover: {
-    category: 'discover',
-    label: 'Discover',
+    category: "discover",
+    label: "Discover",
     params: {
-      sort_by: 'popularity.desc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "popularity.desc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
-    }
+      certification_country: "US",
+    },
   },
   trending: {
-    category: 'trending',
-    label: 'Trending',
+    category: "trending",
+    label: "Trending",
     params: {
-      sort_by: 'popularity.desc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "popularity.desc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
+      certification_country: "US",
       vote_count: { min: 500 },
       with_release_type: [2, 3], // Theatrical releases
       primary_release_date: { start: getDateOffset(-45) }, // Last 45 days
-    }
+    },
   },
   popular: {
-    category: 'popular',
-    label: 'Popular',
+    category: "popular",
+    label: "Popular",
     params: {
-      sort_by: 'popularity.desc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "popularity.desc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
+      certification_country: "US",
       vote_count: { min: 50 },
       with_release_type: [2, 3], // Theatrical releases
-    }
+    },
   },
   upcoming: {
-    category: 'upcoming',
-    label: 'Upcoming',
+    category: "upcoming",
+    label: "Upcoming",
     params: {
-      sort_by: 'primary_release_date.asc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "primary_release_date.asc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
+      certification_country: "US",
       with_release_type: [2, 3], // Theatrical releases
       primary_release_date: { start: getDateOffset(1) }, // Tomorrow onwards
-    }
+    },
   },
   now_playing: {
-    category: 'now_playing',
-    label: 'Now Playing',
+    category: "now_playing",
+    label: "Now Playing",
     params: {
-      sort_by: 'primary_release_date.desc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "primary_release_date.desc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
+      certification_country: "US",
       with_release_type: [2, 3], // Theatrical releases
       primary_release_date: {
         start: getDateOffset(-30), // Last 30 days
         end: getTodayDate(),
       },
-    }
+    },
   },
   top_rated: {
-    category: 'top_rated',
-    label: 'Top Rated',
+    category: "top_rated",
+    label: "Top Rated",
     params: {
-      sort_by: 'vote_average.desc',
-      with_original_language: 'hi',
-      region: 'IN',
+      sort_by: "vote_average.desc",
+      with_original_language: "hi",
+      region: "IN",
       include_adult: false,
       include_video: false,
-      certification_country: 'US',
+      certification_country: "US",
       vote_count: { min: 500 },
       with_release_type: [2, 3], // Theatrical releases
-    }
+    },
   },
 };
 
@@ -725,62 +777,62 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
  */
 export const TV_PRESETS: Record<TVPresetCategory, PresetConfig> = {
   discover: {
-    category: 'discover',
-    label: 'Discover',
+    category: "discover",
+    label: "Discover",
     params: {
-      sort_by: 'popularity.desc',
+      sort_by: "popularity.desc",
       include_adult: false,
-    }
+    },
   },
   trending: {
-    category: 'trending',
-    label: 'Trending',
+    category: "trending",
+    label: "Trending",
     params: {
-      sort_by: 'popularity.desc',
+      sort_by: "popularity.desc",
       include_adult: false,
       first_air_date: { start: getDateOffset(-365) }, // Last year
-    }
+    },
   },
   popular: {
-    category: 'popular',
-    label: 'Popular',
+    category: "popular",
+    label: "Popular",
     params: {
-      sort_by: 'popularity.desc',
+      sort_by: "popularity.desc",
       include_adult: false,
-    }
+    },
   },
   airing_today: {
-    category: 'airing_today',
-    label: 'Airing Today',
+    category: "airing_today",
+    label: "Airing Today",
     params: {
-      sort_by: 'popularity.desc',
+      sort_by: "popularity.desc",
       include_adult: false,
       air_date: {
         start: getTodayDate(),
         end: getDateOffset(7), // Next 7 days
       },
-    }
+    },
   },
   on_the_air: {
-    category: 'on_the_air',
-    label: 'On The Air',
+    category: "on_the_air",
+    label: "On The Air",
     params: {
-      sort_by: 'popularity.desc',
+      sort_by: "popularity.desc",
       include_adult: false,
       air_date: {
         start: getTodayDate(),
         end: getDateOffset(7), // Next 7 days
       },
-    }
+    },
   },
   top_rated: {
-    category: 'top_rated',
-    label: 'Top Rated',
+    category: "top_rated",
+    label: "Top Rated",
     params: {
-      sort_by: 'vote_average.desc',
+      sort_by: "vote_average.desc",
       include_adult: false,
       vote_count: { min: 200 },
-    }
+    },
   },
 };
 
@@ -791,22 +843,24 @@ export const TV_PRESETS: Record<TVPresetCategory, PresetConfig> = {
 export function mergeFilters(
   presetCategory: PresetCategory,
   contentType: ContentType,
-  userOverrides: Partial<AdvancedFilterState> = {}
+  userOverrides: Partial<AdvancedFilterState> = {},
 ): AdvancedFilterState {
-  const presets = contentType === 'movie' ? MOVIE_PRESETS : TV_PRESETS;
+  const presets = contentType === "movie" ? MOVIE_PRESETS : TV_PRESETS;
   const preset = presets[presetCategory as keyof typeof presets];
-  
+
   if (!preset) {
-    console.warn(`Unknown preset category: ${presetCategory} for ${contentType}`);
+    console.warn(
+      `Unknown preset category: ${presetCategory} for ${contentType}`,
+    );
     return createDefaultFilters();
   }
-  
+
   // Start with default filters
   const baseFilters = createDefaultFilters();
-  
+
   // Apply preset defaults
   const presetParams = preset.params;
-  
+
   // Deep merge preset params into base
   const withPreset = {
     ...baseFilters,
@@ -815,7 +869,7 @@ export function mergeFilters(
     category: preset.category,
     activePreset: presetCategory,
   };
-  
+
   // Apply user overrides on top (these always take precedence)
   const merged = {
     ...withPreset,
@@ -825,7 +879,7 @@ export function mergeFilters(
     category: preset.category,
     activePreset: presetCategory,
   };
-  
+
   return merged;
 }
 
@@ -835,26 +889,26 @@ export function mergeFilters(
  */
 export function buildQueryString(params: Record<string, any>): string {
   const searchParams = new URLSearchParams();
-  
+
   Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === '') return;
-    
+    if (value === undefined || value === null || value === "") return;
+
     let stringValue: string;
-    
+
     // Handle arrays - join with pipe for OR logic (TMDB convention)
     if (Array.isArray(value)) {
       if (value.length === 0) return;
-      stringValue = value.join('|');
-    } else if (typeof value === 'object') {
+      stringValue = value.join("|");
+    } else if (typeof value === "object") {
       // Skip object values (they should be flattened before this)
       return;
     } else {
       stringValue = String(value);
     }
-    
+
     // URL encode the value (this will encode | as %7C automatically)
     searchParams.append(key, stringValue);
   });
-  
+
   return searchParams.toString();
 }

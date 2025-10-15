@@ -17,7 +17,7 @@ describe('mergeFilters', () => {
     expect(result.with_original_language).toBe('hi');
     expect(result.sort_by).toBe('primary_release_date.asc');
     expect(result.primary_release_date?.start).toBeDefined();
-    expect(result.with_release_type).toEqual([2, 3]);
+    expect(result.with_release_type).toEqual([2|3]);
     expect(result.region).toBe('IN');
   });
 
@@ -52,7 +52,7 @@ describe('mergeFilters', () => {
     expect(result.activePreset).toBe('trending');
     expect(result.category).toBe('trending');
     expect(result.vote_count?.min).toBe(500);
-    expect(result.with_release_type).toEqual([2, 3]);
+    expect(result.with_release_type).toEqual([2|3]);
     expect(result.primary_release_date?.start).toBeDefined();
     expect(result.with_original_language).toBe('hi');
   });
@@ -71,7 +71,7 @@ describe('mergeFilters', () => {
 describe('buildQueryString', () => {
   it('should encode pipes as %7C for array values', () => {
     const params = {
-      with_release_type: [2, 3],
+      with_release_type: [2|3],
       with_watch_providers: [8, 9, 10],
     };
 
@@ -131,7 +131,7 @@ describe('buildQueryString', () => {
       include_adult: false,
       include_video: false,
       certification_country: 'US',
-      with_release_type: [2, 3],
+      with_release_type: [2|3],
       'primary_release_date.gte': '2025-10-17',
     };
 
