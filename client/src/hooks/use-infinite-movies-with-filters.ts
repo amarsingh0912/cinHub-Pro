@@ -148,12 +148,6 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
 
     // Build query string with proper URL encoding (pipes as %7C)
     const qs = buildQueryString(params);
-    
-    // Log the final URL for debugging
-    const fullUrl = `${baseEndpoint}?${qs}`;
-    console.log(`[Filter Debug] Fetching: ${fullUrl}`);
-    console.log(`[Filter Debug] Active Preset: ${debouncedFilters.activePreset || 'none'}`);
-    console.log(`[Filter Debug] Params:`, params);
 
     return { endpoint: baseEndpoint, queryParams: params, queryString: qs };
   }, [debouncedFilters]);

@@ -322,7 +322,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const forgotPasswordMutation = useMutation({
     mutationFn: async (data: ForgotPasswordFormData) => {
-      // TODO: Implement forgot password API
       const response = await apiRequest("POST", "/api/auth/forgot-password", data);
       return response.json();
     },
