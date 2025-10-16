@@ -1467,6 +1467,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced discover TV shows endpoint - MUST be before /api/tv/:id route
+  app.get("/api/tv/discover", async (req, res) => {
+    try {
+      // Extract all TMDB discover parameters for TV shows
+      const {
+        page = 1,
+        sort_by = "popularity.desc",
+        language = "en-US",
+        // Genre & Keywords
+        with_genres,
+        without_genres,
+        with_keywords,
+        without_keywords,
+        // Date Filters
+        "first_air_date.gte": firstAirDateGte,
+        "first_air_date.lte": firstAirDateLte,
+        "air_date.gte": airDateGte,
+        "air_date.lte": airDateLte,
+        first_air_date_year,
+        timezone,
+        // Runtime & Ratings
+        "with_runtime.gte": withRuntimeGte,
+        "with_runtime.lte": withRuntimeLte,
+        "vote_average.gte": voteAverageGte,
+        "vote_average.lte": voteAverageLte,
+        "vote_count.gte": voteCountGte,
+        "vote_count.lte": voteCountLte,
+        // Networks & Production
+        with_networks,
+        with_companies,
+        // Language & Region
+        with_original_language,
+        watch_region,
+        // Streaming
+        with_watch_providers,
+        with_watch_monetization_types,
+        // Content Filters
+        include_adult,
+        include_null_first_air_dates,
+        screened_theatrically,
+        // TV-Specific
+        with_status,
+        with_type,
+        // Certification
+        certification_country,
+        certification,
+      } = req.query;
+
+      const params: Record<string, any> = {
+        page,
+        sort_by,
+        language,
+      };
+
+      // Add all filter parameters if they exist (TMDB uses '|' for OR, ',' for AND)
+      if (with_genres) params.with_genres = with_genres;
+      if (without_genres) params.without_genres = without_genres;
+      if (with_keywords) params.with_keywords = with_keywords;
+      if (without_keywords) params.without_keywords = without_keywords;
+      
+      // Date filters
+      if (firstAirDateGte) params["first_air_date.gte"] = firstAirDateGte;
+      if (firstAirDateLte) params["first_air_date.lte"] = firstAirDateLte;
+      if (airDateGte) params["air_date.gte"] = airDateGte;
+      if (airDateLte) params["air_date.lte"] = airDateLte;
+      if (first_air_date_year) params.first_air_date_year = first_air_date_year;
+      if (timezone) params.timezone = timezone;
+      
+      // Runtime & Ratings
+      if (withRuntimeGte) params["with_runtime.gte"] = withRuntimeGte;
+      if (withRuntimeLte) params["with_runtime.lte"] = withRuntimeLte;
+      if (voteAverageGte) params["vote_average.gte"] = voteAverageGte;
+      if (voteAverageLte) params["vote_average.lte"] = voteAverageLte;
+      if (voteCountGte) params["vote_count.gte"] = voteCountGte;
+      if (voteCountLte) params["vote_count.lte"] = voteCountLte;
+      
+      // Networks & Production
+      if (with_networks) params.with_networks = with_networks;
+      if (with_companies) params.with_companies = with_companies;
+      
+      // Language & Region
+      if (with_original_language) params.with_original_language = with_original_language;
+      if (watch_region) params.watch_region = watch_region;
+      
+      // Streaming
+      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
+      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
+      
+      // Content filters
+      if (include_adult !== undefined) params.include_adult = include_adult;
+      if (include_null_first_air_dates !== undefined) params.include_null_first_air_dates = include_null_first_air_dates;
+      if (screened_theatrically !== undefined) params.screened_theatrically = screened_theatrically;
+      
+      // TV-Specific
+      if (with_status) params.with_status = with_status;
+      if (with_type) params.with_type = with_type;
+      
+      // Certification
+      if (certification_country) params.certification_country = certification_country;
+      if (certification) params.certification = certification;
+
+      // Use Bearer token if available, otherwise fallback to API key
+      const useBearer = !!process.env.TMDB_ACCESS_TOKEN;
+      const data = await fetchFromTMDB("/discover/tv", params, { useBearer });
+      res.json(data);
+    } catch (error) {
+      console.error("Error discovering TV shows:", error);
+      res.status(500).json({ message: "Failed to discover TV shows" });
+    }
+  });
+
   app.get("/api/tv/:id", async (req, res) => {
     try {
       const tvId = parseInt(req.params.id);
@@ -1994,117 +2105,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching countries:", error);
       res.status(500).json({ message: "Failed to fetch countries" });
-    }
-  });
-
-  // Enhanced discover TV shows endpoint - Comprehensive TMDB Discover API support
-  app.get("/api/tv/discover", async (req, res) => {
-    try {
-      // Extract all TMDB discover parameters for TV shows
-      const {
-        page = 1,
-        sort_by = "popularity.desc",
-        language = "en-US",
-        // Genre & Keywords
-        with_genres,
-        without_genres,
-        with_keywords,
-        without_keywords,
-        // Date Filters
-        "first_air_date.gte": firstAirDateGte,
-        "first_air_date.lte": firstAirDateLte,
-        "air_date.gte": airDateGte,
-        "air_date.lte": airDateLte,
-        first_air_date_year,
-        timezone,
-        // Runtime & Ratings
-        "with_runtime.gte": withRuntimeGte,
-        "with_runtime.lte": withRuntimeLte,
-        "vote_average.gte": voteAverageGte,
-        "vote_average.lte": voteAverageLte,
-        "vote_count.gte": voteCountGte,
-        "vote_count.lte": voteCountLte,
-        // Networks & Production
-        with_networks,
-        with_companies,
-        // Language & Region
-        with_original_language,
-        watch_region,
-        // Streaming
-        with_watch_providers,
-        with_watch_monetization_types,
-        // Content Filters
-        include_adult,
-        include_null_first_air_dates,
-        screened_theatrically,
-        // TV-Specific
-        with_status,
-        with_type,
-        // Certification
-        certification_country,
-        certification,
-      } = req.query;
-
-      const params: Record<string, any> = {
-        page,
-        sort_by,
-        language,
-      };
-
-      // Add all filter parameters if they exist (TMDB uses '|' for OR, ',' for AND)
-      if (with_genres) params.with_genres = with_genres;
-      if (without_genres) params.without_genres = without_genres;
-      if (with_keywords) params.with_keywords = with_keywords;
-      if (without_keywords) params.without_keywords = without_keywords;
-      
-      // Date filters
-      if (firstAirDateGte) params["first_air_date.gte"] = firstAirDateGte;
-      if (firstAirDateLte) params["first_air_date.lte"] = firstAirDateLte;
-      if (airDateGte) params["air_date.gte"] = airDateGte;
-      if (airDateLte) params["air_date.lte"] = airDateLte;
-      if (first_air_date_year) params.first_air_date_year = first_air_date_year;
-      if (timezone) params.timezone = timezone;
-      
-      // Runtime & Ratings
-      if (withRuntimeGte) params["with_runtime.gte"] = withRuntimeGte;
-      if (withRuntimeLte) params["with_runtime.lte"] = withRuntimeLte;
-      if (voteAverageGte) params["vote_average.gte"] = voteAverageGte;
-      if (voteAverageLte) params["vote_average.lte"] = voteAverageLte;
-      if (voteCountGte) params["vote_count.gte"] = voteCountGte;
-      if (voteCountLte) params["vote_count.lte"] = voteCountLte;
-      
-      // Networks & Production
-      if (with_networks) params.with_networks = with_networks;
-      if (with_companies) params.with_companies = with_companies;
-      
-      // Language & Region
-      if (with_original_language) params.with_original_language = with_original_language;
-      if (watch_region) params.watch_region = watch_region;
-      
-      // Streaming
-      if (with_watch_providers) params.with_watch_providers = with_watch_providers;
-      if (with_watch_monetization_types) params.with_watch_monetization_types = with_watch_monetization_types;
-      
-      // Content filters
-      if (include_adult !== undefined) params.include_adult = include_adult;
-      if (include_null_first_air_dates !== undefined) params.include_null_first_air_dates = include_null_first_air_dates;
-      if (screened_theatrically !== undefined) params.screened_theatrically = screened_theatrically;
-      
-      // TV-Specific
-      if (with_status) params.with_status = with_status;
-      if (with_type) params.with_type = with_type;
-      
-      // Certification
-      if (certification_country) params.certification_country = certification_country;
-      if (certification) params.certification = certification;
-
-      // Use Bearer token if available, otherwise fallback to API key
-      const useBearer = !!process.env.TMDB_ACCESS_TOKEN;
-      const data = await fetchFromTMDB("/discover/tv", params, { useBearer });
-      res.json(data);
-    } catch (error) {
-      console.error("Error discovering TV shows:", error);
-      res.status(500).json({ message: "Failed to discover TV shows" });
     }
   });
 
