@@ -13,7 +13,7 @@ import type {
   PresetCategory,
   ContentType 
 } from '@/types/filters';
-import { createDefaultFilters, deepEqual, mergeFilters } from '@/types/filters';
+import { createDefaultFilters, deepEqual, mergeFilters, MOVIE_PRESETS, TV_PRESETS } from '@/types/filters';
 import { useAutoFilterURLSync } from './use-filter-url-sync';
 
 /**
@@ -179,25 +179,27 @@ export function useAdvancedFilters(
   // Set preset while preserving user overrides
   const setPreset = useCallback((presetCategory: PresetCategory) => {
     setFilters(prev => {
-      // Collect user overrides (filters that differ from current preset defaults)
+      // Collect user overrides (only truly user-selected filters, not preset parameters)
       const userOverrides: Partial<AdvancedFilterState> = {};
       
-      // Preserve only explicit user-selected filters (not region/language defaults)
+      // Preserve user-selected filters that are independent of presets
+      // These are filters that users explicitly select via UI controls
       if (prev.with_genres?.length) {
         userOverrides.with_genres = prev.with_genres;
       }
       if (prev.without_genres?.length) {
         userOverrides.without_genres = prev.without_genres;
       }
-      if (prev.vote_average?.min || prev.vote_average?.max) {
-        userOverrides.vote_average = prev.vote_average;
-      }
-      if (prev.vote_count?.min) {
-        userOverrides.vote_count = prev.vote_count;
-      }
       if (prev.with_watch_providers?.length) {
         userOverrides.with_watch_providers = prev.with_watch_providers;
       }
+      
+      // DO NOT preserve preset-specific parameters like:
+      // - vote_count (varies by preset: trending=100, top_rated=500, popular=500)
+      // - vote_average (can be preset-specific)
+      // - sort_by (each preset has its own)
+      // - date ranges (presets define their own date ranges)
+      // These should come fresh from the new preset, not carried over from the old one
       
       // Merge preset defaults with user overrides
       return mergeFilters(presetCategory, prev.contentType, userOverrides);
