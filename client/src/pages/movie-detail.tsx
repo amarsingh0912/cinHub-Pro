@@ -447,32 +447,40 @@ export default function MovieDetail() {
                     </Button>
                   )}
                   
-                  {isAuthenticated && (
-                    <>
-                      <Button
-                        variant={isFavorite ? "destructive" : "outline"}
-                        size="lg"
-                        onClick={() => isFavorite ? removeFromFavoritesMutation.mutate() : addToFavoritesMutation.mutate()}
-                        disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
-                        className="flex items-center gap-2"
-                        data-testid="button-favorite"
-                      >
-                        <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                        {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        className="flex items-center gap-2" 
-                        onClick={() => setIsWatchlistDialogOpen(true)}
-                        data-testid="button-add-to-watchlist"
-                      >
-                        <Plus className="w-5 h-5" />
-                        Add to Watchlist
-                      </Button>
-                    </>
-                  )}
+                  <Button
+                    variant={isFavorite ? "destructive" : "outline"}
+                    size="lg"
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = "/api/login";
+                        return;
+                      }
+                      isFavorite ? removeFromFavoritesMutation.mutate() : addToFavoritesMutation.mutate();
+                    }}
+                    disabled={isAuthenticated && (addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending)}
+                    className="flex items-center gap-2"
+                    data-testid="button-favorite"
+                  >
+                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                    {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="flex items-center gap-2" 
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = "/api/login";
+                        return;
+                      }
+                      setIsWatchlistDialogOpen(true);
+                    }}
+                    data-testid="button-add-to-watchlist"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add to Watchlist
+                  </Button>
                 </div>
                 
                 {/* Detailed Cache Status */}

@@ -378,46 +378,60 @@ export default function TVDetail() {
                     </Button>
                   )}
                   
-                  {isAuthenticated ? (
-                    <>
-                      {favoriteStatus?.isFavorite ? (
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={() => removeFromFavoritesMutation.mutate()}
-                          disabled={removeFromFavoritesMutation.isPending}
-                          className="min-w-[140px]"
-                          data-testid="button-remove-favorite"
-                        >
-                          <Heart className="w-5 h-5 mr-2 fill-current text-red-500" />
-                          Remove Favorite
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          onClick={() => addToFavoritesMutation.mutate()}
-                          disabled={addToFavoritesMutation.isPending}
-                          className="min-w-[140px]"
-                          data-testid="button-add-favorite"
-                        >
-                          <Heart className="w-5 h-5 mr-2" />
-                          Add to Favorites
-                        </Button>
-                      )}
-                      
-                      <Button 
-                        variant="outline" 
-                        size="lg" 
-                        className="min-w-[140px] flex items-center gap-2" 
-                        onClick={() => setIsWatchlistDialogOpen(true)}
-                        data-testid="button-add-to-watchlist"
-                      >
-                        <Plus className="w-5 h-5" />
-                        Add to Watchlist
-                      </Button>
-                    </>
-                  ) : null}
+                  {favoriteStatus?.isFavorite ? (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          window.location.href = "/api/login";
+                          return;
+                        }
+                        removeFromFavoritesMutation.mutate();
+                      }}
+                      disabled={isAuthenticated && removeFromFavoritesMutation.isPending}
+                      className="min-w-[140px]"
+                      data-testid="button-remove-favorite"
+                    >
+                      <Heart className="w-5 h-5 mr-2 fill-current text-red-500" />
+                      Remove Favorite
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          window.location.href = "/api/login";
+                          return;
+                        }
+                        addToFavoritesMutation.mutate();
+                      }}
+                      disabled={isAuthenticated && addToFavoritesMutation.isPending}
+                      className="min-w-[140px]"
+                      data-testid="button-add-favorite"
+                    >
+                      <Heart className="w-5 h-5 mr-2" />
+                      Add to Favorites
+                    </Button>
+                  )}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="min-w-[140px] flex items-center gap-2" 
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = "/api/login";
+                        return;
+                      }
+                      setIsWatchlistDialogOpen(true);
+                    }}
+                    data-testid="button-add-to-watchlist"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add to Watchlist
+                  </Button>
                 </div>
               </div>
             </div>
