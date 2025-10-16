@@ -760,8 +760,8 @@ export default function TVDetail() {
                 <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended TV Shows</h2>
                 {tvShow?.recommendations?.results && tvShow.recommendations.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {tvShow.recommendations.results.slice(0, 12).map((rec: any) => (
-                      <MovieCard key={rec.id} movie={rec} mediaType="tv" />
+                    {tvShow.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
+                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="tv" />
                     ))}
                   </div>
                 ) : tvShow?.recommendations?.results ? (
@@ -783,8 +783,8 @@ export default function TVDetail() {
                 <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar TV Shows</h2>
                 {tvShow?.similar?.results && tvShow.similar.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {tvShow.similar.results.slice(0, 12).map((sim: any) => (
-                      <MovieCard key={sim.id} movie={sim} mediaType="tv" />
+                    {tvShow.similar.results.slice(0, 12).map((sim: any, index: number) => (
+                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="tv" />
                     ))}
                   </div>
                 ) : tvShow?.similar?.results ? (
