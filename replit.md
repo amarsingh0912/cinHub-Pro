@@ -51,6 +51,8 @@ Preferred communication style: Simple, everyday language.
 - **Dashboard Enhancements**: Clickable Quick Actions and interactive "Add to Favorites"/"Add to Watchlist" buttons on trending items.
 - **Activity Tracking**: Implemented activity history for favorite additions and watchlist updates.
 - **Infinite Scroll Skeleton Optimization** (October 2025): Fixed movie-grid skeleton rendering to fill incomplete rows during infinite scroll loading instead of starting new rows. The issue was that Movies and TV Shows pages had separate skeleton grids that created new rows with 12 skeletons. Updated pages to use MovieGrid's built-in infinite scroll skeleton support, which calculates based on grid columns (responsive breakpoints: 2 on mobile, 3 on sm, 4 on md, 6 on lg) and renders the correct number to complete the current row or show a full new row when the previous row is complete. All skeleton cards include proper accessibility attributes (role="status", aria-hidden="true").
+- **Codebase Cleanup** (October 2025): Removed 1,060 lines of unused code including 11 unused UI components (accordion, aspect-ratio, collapsible, context-menu, hover-card, menubar, navigation-menu, progress, radio-group, resizable, toggle-group), 6 unused asset files, debug console.log statements, and outdated TODO comments. Verified all pages, hooks, and server services are actively used.
+- **React Error Fixes** (October 2025): Fixed duplicate key warnings in person filmography by adding index fallbacks and unique prefixes. Corrected MovieCard prop usage (changed `isTV` to `mediaType="tv"`) to resolve TypeScript errors.
 
 ## External Dependencies
 
