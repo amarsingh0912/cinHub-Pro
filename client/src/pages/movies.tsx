@@ -5,7 +5,7 @@ import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
-import { Loader2, Code, X } from "lucide-react";
+import { Loader2, Code, X, Film, TrendingUp, Star, Calendar, PlayCircle, Sparkles } from "lucide-react";
 import { DEFAULT_MOVIE_FILTERS } from "@/types/filters";
 
 export default function Movies() {
@@ -37,32 +37,65 @@ export default function Movies() {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
-  // Get the display title based on category
-  const getTitle = () => {
+  // Get the display title and icon based on category
+  const getCategoryInfo = () => {
     const { category } = filters;
     
-    switch (category) {
-      case 'trending': return 'Trending Movies';
-      case 'popular': return 'Popular Movies';
-      case 'upcoming': return 'Upcoming Movies';
-      case 'now_playing': return 'Now in Theaters';
-      case 'top_rated': return 'Top Rated Movies';
-      default: return 'Trending Movies';
-    }
+    const categoryMap: Record<string, {
+      title: string;
+      description: string;
+      icon: any;
+      gradient: string;
+      iconColor: string;
+    }> = {
+      trending: {
+        title: 'Trending Movies',
+        description: 'Discover the hottest movies trending right now',
+        icon: TrendingUp,
+        gradient: 'from-orange-500/20 via-red-500/20 to-pink-500/20',
+        iconColor: 'text-orange-500',
+      },
+      popular: {
+        title: 'Popular Movies',
+        description: 'Explore the most popular movies of all time',
+        icon: Film,
+        gradient: 'from-blue-500/20 via-purple-500/20 to-pink-500/20',
+        iconColor: 'text-blue-500',
+      },
+      upcoming: {
+        title: 'Upcoming Movies',
+        description: 'Get ready for upcoming movie releases',
+        icon: Calendar,
+        gradient: 'from-green-500/20 via-teal-500/20 to-cyan-500/20',
+        iconColor: 'text-green-500',
+      },
+      now_playing: {
+        title: 'Now in Theaters',
+        description: "See what's playing in theaters now",
+        icon: PlayCircle,
+        gradient: 'from-purple-500/20 via-violet-500/20 to-indigo-500/20',
+        iconColor: 'text-purple-500',
+      },
+      top_rated: {
+        title: 'Top Rated Movies',
+        description: 'Browse the highest-rated movies',
+        icon: Star,
+        gradient: 'from-yellow-500/20 via-amber-500/20 to-orange-500/20',
+        iconColor: 'text-yellow-500',
+      },
+    };
+    
+    return categoryMap[category || 'trending'] || {
+      title: 'Trending Movies',
+      description: 'Browse and filter thousands of movies with advanced options',
+      icon: Sparkles,
+      gradient: 'from-orange-500/20 via-red-500/20 to-pink-500/20',
+      iconColor: 'text-orange-500',
+    };
   };
 
-  const getDescription = () => {
-    const { category } = filters;
-    
-    switch (category) {
-      case 'trending': return 'Discover the hottest movies trending right now';
-      case 'popular': return 'Explore the most popular movies of all time';
-      case 'upcoming': return 'Get ready for upcoming movie releases';
-      case 'now_playing': return 'See what\'s playing in theaters now';
-      case 'top_rated': return 'Browse the highest-rated movies';
-      default: return 'Browse and filter thousands of movies with advanced options';
-    }
-  };
+  const categoryInfo = getCategoryInfo();
+  const CategoryIcon = categoryInfo.icon;
 
   // Count applied filters for the badge
   const appliedFiltersCount = useMemo(() => {
@@ -152,63 +185,74 @@ export default function Movies() {
           </div>
         )}
         
-        {/* Page Header */}
-        <section className="py-8 md:py-12 border-b border-border/50" data-testid="movies-header">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-display font-bold mb-2" data-testid="content-title">
-                    {getTitle()}
-                  </h1>
-                  <p className="text-lg md:text-xl text-muted-foreground" data-testid="content-description">
-                    {getDescription()}
-                  </p>
-                </div>
-                
-                {/* Show filter badge on desktop */}
-                <div className="hidden md:flex items-center gap-2">
-                  {appliedFiltersCount > 0 && (
-                    <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary" data-testid="filter-count-badge">
-                      {appliedFiltersCount} {appliedFiltersCount === 1 ? 'filter' : 'filters'} applied
-                    </div>
-                  )}
-                  {isDebouncing && (
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border text-sm text-muted-foreground" data-testid="debouncing-indicator">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Updating...
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setShowDebugPanel(!showDebugPanel)}
-                    className="p-2 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                    title="Toggle debug panel"
-                    data-testid="toggle-debug-panel"
-                  >
-                    <Code className="h-4 w-4" />
-                  </button>
-                </div>
+        {/* Modern Hero Section */}
+        <section className="relative overflow-hidden" data-testid="movies-header">
+          {/* Gradient Background */}
+          <div className={`absolute inset-0 bg-gradient-to-br ${categoryInfo.gradient} dark:opacity-30 opacity-50`} />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            {/* Category Icon Badge */}
+            <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 dark:bg-background/60 backdrop-blur-sm border border-border/50 shadow-lg">
+              <CategoryIcon className={`h-5 w-5 ${categoryInfo.iconColor}`} />
+              <span className="text-sm font-medium">Movies</span>
+            </div>
+
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+              <div className="flex-1">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-4 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent" data-testid="content-title">
+                  {categoryInfo.title}
+                </h1>
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed" data-testid="content-description">
+                  {categoryInfo.description}
+                </p>
               </div>
               
-              {/* Mobile filter info */}
-              <div className="md:hidden flex items-center gap-2">
+              {/* Stats & Actions Card */}
+              <div className="flex flex-wrap gap-3 items-center">
+                {/* Results Count */}
+                {!isLoading && totalResults > 0 && (
+                  <div className="px-4 py-2.5 rounded-xl bg-background/80 dark:bg-background/60 backdrop-blur-sm border border-border/50 shadow-lg">
+                    <div className="text-xs text-muted-foreground mb-0.5">Total Results</div>
+                    <div className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                      {totalResults.toLocaleString()}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Filter Badge */}
                 {appliedFiltersCount > 0 && (
-                  <div className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
-                    {appliedFiltersCount} {appliedFiltersCount === 1 ? 'filter' : 'filters'}
+                  <div className="px-4 py-2.5 rounded-xl bg-primary/10 dark:bg-primary/20 backdrop-blur-sm border border-primary/30 shadow-lg" data-testid="filter-count-badge">
+                    <div className="text-xs text-primary/70 mb-0.5">Active Filters</div>
+                    <div className="text-2xl font-bold text-primary">
+                      {appliedFiltersCount}
+                    </div>
                   </div>
                 )}
+                
+                {/* Debouncing Indicator */}
                 {isDebouncing && (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/50 border border-border text-xs text-muted-foreground">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Updating...
+                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background/80 dark:bg-background/60 backdrop-blur-sm border border-border/50 shadow-lg" data-testid="debouncing-indicator">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm font-medium">Updating...</span>
                   </div>
                 )}
+                
+                {/* Debug Toggle */}
+                <button
+                  onClick={() => setShowDebugPanel(!showDebugPanel)}
+                  className="p-3 rounded-xl hover:bg-background/80 dark:hover:bg-background/60 backdrop-blur-sm border border-border/50 transition-all hover:shadow-lg text-muted-foreground hover:text-foreground"
+                  title="Toggle debug panel"
+                  data-testid="toggle-debug-panel"
+                >
+                  <Code className="h-5 w-5" />
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Movies Grid */}
+        {/* Movies Grid Section */}
         <section className="py-8 md:py-12" data-testid="movies-grid-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
@@ -236,35 +280,31 @@ export default function Movies() {
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-16 md:py-24" data-testid="no-results">
-                <div className="w-full max-w-md text-center">
-                  <svg
-                    className="mx-auto h-16 w-16 md:h-20 md:w-20 text-muted-foreground/50 mb-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <h3 className="text-lg md:text-xl font-semibold text-foreground mb-2">
-                    No results found
+              <div className="flex flex-col items-center justify-center py-20 md:py-32" data-testid="no-results">
+                <div className="w-full max-w-lg text-center">
+                  {/* Empty State Icon */}
+                  <div className="mb-8 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full blur-3xl" />
+                    <div className="relative mx-auto w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center border border-border/50">
+                      <Film className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground/50" />
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                    No movies found
                   </h3>
-                  <p className="text-sm md:text-base text-muted-foreground mb-6">
-                    Try adjusting your filters or search criteria to find what you're looking for.
+                  <p className="text-base md:text-lg text-muted-foreground mb-8 max-w-md mx-auto">
+                    We couldn't find any movies matching your criteria. Try adjusting your filters or explore different categories.
                   </p>
+                  
                   {hasActiveFilters && (
                     <button
                       onClick={() => setFilters(DEFAULT_MOVIE_FILTERS)}
-                      className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl text-base font-semibold"
                       data-testid="reset-filters-button"
                     >
-                      Reset Filters
+                      <X className="h-5 w-5" />
+                      Clear All Filters
                     </button>
                   )}
                 </div>
