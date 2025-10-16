@@ -492,6 +492,7 @@ export default function Dashboard() {
       });
     },
     onSuccess: async (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists", variables.watchlistId, "items"] });
       queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
       
       try {
