@@ -71,6 +71,7 @@ export default function Dashboard() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedTrendingItem, setSelectedTrendingItem] = useState<any>(null);
   const [isWatchlistSelectionOpen, setIsWatchlistSelectionOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Preferences and History state
   const [userPreferences, setUserPreferences] = useState<any>({});
@@ -1377,7 +1378,7 @@ export default function Dashboard() {
         {/* Dashboard Content */}
         <section className="py-8" data-testid="dashboard-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Tabs defaultValue="overview" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto glassmorphism border border-border/20">
                 <TabsTrigger value="overview" data-testid="dashboard-tab-overview" className="data-[state=active]:bg-primary/20">
                   <BarChart3 className="w-4 h-4 mr-2" />
@@ -1536,7 +1537,10 @@ export default function Dashboard() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start hover:bg-accent/50"
-                              onClick={() => setIsCreateWatchlistOpen(true)}
+                              onClick={() => {
+                                setActiveTab("watchlists");
+                                setIsCreateWatchlistOpen(true);
+                              }}
                               data-testid="quick-action-create-watchlist"
                             >
                               <Plus className="w-4 h-4 mr-2" />
@@ -1546,7 +1550,7 @@ export default function Dashboard() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start hover:bg-accent/50"
-                              onClick={() => (document.querySelector('[data-testid="dashboard-tab-reviews"]') as HTMLElement)?.click()}
+                              onClick={() => setActiveTab("reviews")}
                               data-testid="quick-action-write-review"
                             >
                               <Star className="w-4 h-4 mr-2" />
@@ -1558,7 +1562,7 @@ export default function Dashboard() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start hover:bg-accent/50"
-                              onClick={() => (document.querySelector('[data-testid="dashboard-tab-profile"]') as HTMLElement)?.click()}
+                              onClick={() => setActiveTab("profile")}
                               data-testid="quick-action-settings"
                             >
                               <Settings className="w-4 h-4 mr-2" />
