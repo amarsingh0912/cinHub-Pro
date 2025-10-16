@@ -881,22 +881,22 @@ export default function MovieDetail() {
             <TabsContent value="recommended" className="mt-6">
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended Movies</h2>
-                {movie?.recommendations?.results && movie.recommendations.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {movie.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
-                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="movie" />
-                    ))}
-                  </div>
-                ) : movie?.recommendations?.results ? (
-                  <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
-                    No recommended movies available.
-                  </p>
-                ) : (
+                {movieLoading || !movie?.recommendations ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="recommended-loading">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <MovieCardSkeleton key={i} />
                     ))}
                   </div>
+                ) : movie.recommendations.results && movie.recommendations.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {movie.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
+                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="movie" />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
+                    No recommended movies available.
+                  </p>
                 )}
               </div>
             </TabsContent>
@@ -904,22 +904,22 @@ export default function MovieDetail() {
             <TabsContent value="similar" className="mt-6">
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar Movies</h2>
-                {movie?.similar?.results && movie.similar.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {movie.similar.results.slice(0, 12).map((sim: any, index: number) => (
-                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="movie" />
-                    ))}
-                  </div>
-                ) : movie?.similar?.results ? (
-                  <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
-                    No similar movies available.
-                  </p>
-                ) : (
+                {movieLoading || !movie?.similar ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="similar-loading">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <MovieCardSkeleton key={i} />
                     ))}
                   </div>
+                ) : movie.similar.results && movie.similar.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {movie.similar.results.slice(0, 12).map((sim: any, index: number) => (
+                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="movie" />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
+                    No similar movies available.
+                  </p>
                 )}
               </div>
             </TabsContent>
