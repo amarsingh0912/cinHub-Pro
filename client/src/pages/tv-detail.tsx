@@ -768,22 +768,22 @@ export default function TVDetail() {
             <TabsContent value="recommended" className="mt-6">
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended TV Shows</h2>
-                {tvShow?.recommendations?.results && tvShow.recommendations.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {tvShow.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
-                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : tvShow?.recommendations?.results ? (
-                  <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
-                    No recommended TV shows available.
-                  </p>
-                ) : (
+                {tvLoading || !tvShow?.recommendations ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="recommended-loading">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <MovieCardSkeleton key={i} />
                     ))}
                   </div>
+                ) : tvShow.recommendations.results && tvShow.recommendations.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {tvShow.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
+                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="tv" />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
+                    No recommended TV shows available.
+                  </p>
                 )}
               </div>
             </TabsContent>
@@ -791,22 +791,22 @@ export default function TVDetail() {
             <TabsContent value="similar" className="mt-6">
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar TV Shows</h2>
-                {tvShow?.similar?.results && tvShow.similar.results.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {tvShow.similar.results.slice(0, 12).map((sim: any, index: number) => (
-                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="tv" />
-                    ))}
-                  </div>
-                ) : tvShow?.similar?.results ? (
-                  <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
-                    No similar TV shows available.
-                  </p>
-                ) : (
+                {tvLoading || !tvShow?.similar ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="similar-loading">
                     {Array.from({ length: 12 }).map((_, i) => (
                       <MovieCardSkeleton key={i} />
                     ))}
                   </div>
+                ) : tvShow.similar.results && tvShow.similar.results.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {tvShow.similar.results.slice(0, 12).map((sim: any, index: number) => (
+                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="tv" />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
+                    No similar TV shows available.
+                  </p>
                 )}
               </div>
             </TabsContent>
