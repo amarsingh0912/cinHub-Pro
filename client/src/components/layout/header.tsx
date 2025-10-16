@@ -107,7 +107,7 @@ export default function Header() {
               </Link>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-2">
+              <nav className="hidden nav:flex items-center space-x-2">
                 {navItems.map((item) => {
                   const isActive = location === item.href;
                   return (
@@ -161,7 +161,7 @@ export default function Header() {
               <Button
                 variant="glass"
                 size="icon"
-                className="md:hidden hover:scale-105 hover:shadow-lg transition-all duration-300"
+                className="nav:hidden hover:scale-105 hover:shadow-lg transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? (
@@ -173,7 +173,7 @@ export default function Header() {
 
               {/* Auth Section */}
               {isAuthenticated ? (
-                <div className="hidden md:flex items-center">
+                <div className="hidden nav:flex items-center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="glass" className="flex items-center gap-2 h-10">
@@ -218,7 +218,7 @@ export default function Header() {
               ) : (
                 <Button
                   onClick={() => setIsSignInOpen(true)}
-                  className="hidden md:inline-flex"
+                  className="hidden nav:inline-flex"
                   variant="gradient"
                 >
                   Sign In
@@ -229,7 +229,7 @@ export default function Header() {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-border/30 py-4 backdrop-blur-lg">
+            <div className="nav:hidden border-t border-border/30 py-4 backdrop-blur-lg">
               <nav className="flex flex-col space-y-2">
                 {navItems.map((item) => (
                   <Link key={item.href} href={item.href}>

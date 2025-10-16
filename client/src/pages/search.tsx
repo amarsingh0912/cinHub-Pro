@@ -42,8 +42,7 @@ export default function SearchPage() {
     totalResults
   } = useInfiniteMovies({
     queryKey: ["/api/search", { 
-      query: searchTerm,
-      sort: sortBy !== "relevance" ? sortBy : undefined
+      query: searchTerm
     }],
     enabled: searchTerm.length > 0,
     staleTime: 1000 * 60 * 5,

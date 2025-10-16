@@ -1,8 +1,9 @@
 import { Movie } from "@/types/movie";
 import { RevealOnScroll, REVEAL_PRESETS } from "@/hooks/useRevealAnimation";
 import MovieCard from "./movie-card";
+import MovieCardSkeleton from "./movie-card-skeleton";
 import MovieGridSkeleton from "./movie-grid-skeleton";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface MovieGridProps {
   movies: Movie[];
@@ -21,6 +22,36 @@ interface MovieGridProps {
   animationType?: "staggered" | "fade" | "none";
 }
 
+// Hook to track grid columns based on viewport and react to resize
+function useGridColumns() {
+  const [columns, setColumns] = useState(() => {
+    if (typeof window === 'undefined') return 6;
+    const width = window.innerWidth;
+    if (width >= 1024) return 6;
+    if (width >= 768) return 4;
+    if (width >= 640) return 3;
+    return 2;
+  });
+
+  useEffect(() => {
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width >= 1024) setColumns(6);
+      else if (width >= 768) setColumns(4);
+      else if (width >= 640) setColumns(3);
+      else setColumns(2);
+    };
+
+    // Update immediately on mount to fix SSR hydration
+    updateColumns();
+    
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
+
+  return columns;
+}
+
 export default function MovieGrid({
   movies,
   title,
@@ -35,6 +66,14 @@ export default function MovieGrid({
   enableAnimations = true,
   animationType = "staggered",
 }: MovieGridProps) {
+  const gridColumns = useGridColumns();
+  
+  // Calculate skeletons needed to fill incomplete row
+  const getSkeletonCount = () => {
+    const remainder = movies.length % gridColumns;
+    return remainder > 0 ? gridColumns - remainder : 0;
+  };
+
   if (isLoading) {
     return (
       <MovieGridSkeleton
@@ -97,6 +136,9 @@ export default function MovieGrid({
                   mediaType={mediaType}
                 />
               ))}
+              {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
+                <MovieCardSkeleton key={`skeleton-${index}`} />
+              ))}
             </div>
           </RevealOnScroll>
         ) : enableAnimations && animationType === "fade" ? (
@@ -112,6 +154,9 @@ export default function MovieGrid({
                   mediaType={mediaType}
                 />
               ))}
+              {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
+                <MovieCardSkeleton key={`skeleton-${index}`} />
+              ))}
             </div>
           </RevealOnScroll>
         ) : (
@@ -126,33 +171,19 @@ export default function MovieGrid({
                 mediaType={mediaType}
               />
             ))}
+            {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
+              <MovieCardSkeleton key={`skeleton-${index}`} />
+            ))}
           </div>
         )}
 
-        {/* Infinite scroll trigger and loading state */}
-        {(hasNextPage || isFetchingNextPage) && (
-          <div className="mt-8">
-            {isFetchingNextPage && (
-              <div
-                className="flex items-center justify-center py-8"
-                data-testid="loading-more"
-              >
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="ml-2 text-muted-foreground">
-                  Loading more...
-                </span>
-              </div>
-            )}
-
-            {/* Invisible trigger element for infinite scroll */}
-            {infiniteScrollTriggerRef && (
-              <div
-                ref={infiniteScrollTriggerRef}
-                className="h-4"
-                data-testid="infinite-scroll-trigger"
-              />
-            )}
-          </div>
+        {/* Infinite scroll trigger */}
+        {(hasNextPage || isFetchingNextPage) && infiniteScrollTriggerRef && (
+          <div
+            ref={infiniteScrollTriggerRef}
+            className="h-4 mt-8"
+            data-testid="infinite-scroll-trigger"
+          />
         )}
       </div>
     </section>
