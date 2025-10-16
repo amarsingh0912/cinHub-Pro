@@ -131,7 +131,6 @@ export interface QuickFilterChip {
 
 // Preset category types
 export type MoviePresetCategory =
-  | "discover"
   | "trending"
   | "popular"
   | "upcoming"
@@ -598,7 +597,7 @@ export interface UseAdvancedFiltersWithURLReturn
 // Memoized default filter state to avoid reference comparison issues
 const DEFAULT_FILTERS: AdvancedFilterState = {
   contentType: "movie",
-  category: "discover",
+  category: "trending",
   sort_by: "popularity.desc",
   with_genres: [],
   without_genres: [],
@@ -684,15 +683,6 @@ function getDateOffset(days: number): string {
  * These define the default filters for each movie category/preset
  */
 export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
-  discover: {
-    category: "discover",
-    label: "Discover",
-    params: {
-      sort_by: "popularity.desc",
-      include_adult: false,
-      include_video: false,
-    },
-  },
   trending: {
     category: "trending",
     label: "Trending",
@@ -700,8 +690,8 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      vote_count: { min: 50 },
-      primary_release_date: { start: getDateOffset(-45) }, // Last 45 days
+      vote_count: { min: 100 },
+      primary_release_date: { start: getDateOffset(-100) }, // Last 100 days
     },
   },
   popular: {
@@ -711,7 +701,7 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      vote_count: { min: 50 },
+      vote_count: { min: 500 },
     },
   },
   upcoming: {
@@ -732,7 +722,7 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       include_adult: false,
       include_video: false,
       primary_release_date: {
-        start: getDateOffset(-30), // Last 30 days
+        start: getDateOffset(-45), // Last 45 days
         end: getTodayDate(),
       },
     },

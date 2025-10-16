@@ -19,7 +19,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   const { toggleDock, toggleLab } = useFilterContext();
 
   const setContentType = (type: 'movie' | 'tv') => {
-    const currentCategory = filters.category || 'discover';
+    const currentCategory = filters.category || (filters.contentType === 'movie' ? 'trending' : 'discover');
     
     const movieOnlyCategories = ['upcoming', 'now_playing'];
     const tvOnlyCategories = ['airing_today', 'on_the_air'];
@@ -29,7 +29,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
     if (type === 'tv' && movieOnlyCategories.includes(currentCategory)) {
       newCategory = 'discover';
     } else if (type === 'movie' && tvOnlyCategories.includes(currentCategory)) {
-      newCategory = 'discover';
+      newCategory = 'trending';
     }
     
     onFiltersChange({
@@ -54,7 +54,6 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   };
 
   const movieCategories = [
-    { value: 'discover', label: 'Discover', icon: Film },
     { value: 'trending', label: 'Trending', icon: TrendingUp },
     { value: 'popular', label: 'Popular', icon: Star },
     { value: 'upcoming', label: 'Upcoming', icon: Calendar },
@@ -90,7 +89,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   const resetFilters = () => {
     const defaultFilters: AdvancedFilterState = {
       contentType: filters.contentType,
-      category: 'discover',
+      category: filters.contentType === 'movie' ? 'trending' : 'discover',
       with_genres: [],
       without_genres: [],
       primary_release_date: {},
@@ -284,7 +283,8 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
           <div className="flex items-center gap-2 min-w-max">
             {categories.map((category) => {
               const Icon = category.icon;
-              const isActive = filters.category === category.value || (!filters.category && category.value === 'discover');
+              const defaultCategory = filters.contentType === 'movie' ? 'trending' : 'discover';
+              const isActive = filters.category === category.value || (!filters.category && category.value === defaultCategory);
               
               return (
                 <motion.button

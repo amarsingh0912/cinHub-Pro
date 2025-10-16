@@ -194,7 +194,7 @@ export function FilterLab({ filters, onFiltersChange, onSavePreset, className }:
   const resetFilters = () => {
     const defaultFilters: AdvancedFilterState = {
       contentType: filters.contentType,
-      category: 'discover',
+      category: filters.contentType === 'movie' ? 'trending' : 'discover',
       with_genres: [],
       without_genres: [],
       primary_release_date: {},
