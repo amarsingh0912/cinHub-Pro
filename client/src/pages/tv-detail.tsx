@@ -456,7 +456,13 @@ export default function TVDetail() {
                   {/* Cast */}
                   <div>
                     <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
-                    {tvShow.credits?.cast && tvShow.credits.cast.length > 0 ? (
+                    {tvLoading || !tvShow.credits ? (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-loading">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                          <CastCardSkeleton key={i} />
+                        ))}
+                      </div>
+                    ) : tvShow.credits.cast && tvShow.credits.cast.length > 0 ? (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-grid">
                         {tvShow.credits.cast.slice(0, 12).map((actor: any) => (
                           <Link key={actor.id} href={"/person/" + actor.id}>
@@ -482,10 +488,9 @@ export default function TVDetail() {
                         ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-loading">
-                        {Array.from({ length: 12 }).map((_, i) => (
-                          <CastCardSkeleton key={i} />
-                        ))}
+                      <div className="text-center py-8" data-testid="no-cast">
+                        <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No cast information available.</p>
                       </div>
                     )}
                   </div>
@@ -493,7 +498,13 @@ export default function TVDetail() {
                   {/* Crew */}
                   <div>
                     <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
-                    {tvShow.credits?.crew && tvShow.credits.crew.filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job)).length > 0 ? (
+                    {tvLoading || !tvShow.credits ? (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-loading">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <CastCardSkeleton key={i} />
+                        ))}
+                      </div>
+                    ) : tvShow.credits.crew && tvShow.credits.crew.filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job)).length > 0 ? (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-grid">
                         {tvShow.credits.crew
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Executive Producer', 'Creator'].includes(person.job))
@@ -522,10 +533,9 @@ export default function TVDetail() {
                           ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-loading">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                          <CastCardSkeleton key={i} />
-                        ))}
+                      <div className="text-center py-8" data-testid="no-crew">
+                        <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <p className="text-muted-foreground">No crew information available.</p>
                       </div>
                     )}
                   </div>
