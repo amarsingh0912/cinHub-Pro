@@ -158,10 +158,10 @@ export default function Movies() {
         isLoading={isLoading || isDebouncing}
       />
 
-      <main className="pt-4">
+      <main className="pt-6">
         {/* Modern Hero Section */}
         <section
-          className="relative overflow-hidden mb-8"
+          className="relative overflow-hidden mb-6"
           data-testid="movies-header"
         >
           {/* Gradient Background */}
@@ -170,7 +170,7 @@ export default function Movies() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
               <div className="flex-1 space-y-3">
                 <h1
