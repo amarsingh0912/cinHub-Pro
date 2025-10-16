@@ -10,6 +10,27 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### UI Redesign - Movies & TV Shows Pages (October 16, 2025)
+Redesigned the movies and TV shows pages with a modern, cleaner interface while maintaining all existing functionality.
+
+**Visual Design Changes:**
+- **Compact Hero Section**: Replaced large gradient header with streamlined design featuring icon badges and improved typography
+- **Modern Stats Cards**: Added glass-morphism effect stats cards with subtle gradient hover animations showing results count and active filter count
+- **Icon Badges**: Category icons now displayed in gradient-bordered cards next to page titles
+- **Improved Spacing**: Reduced vertical spacing between header and content for better content density
+- **Enhanced Layout**: Better responsive design with improved mobile and tablet layouts
+
+**Bug Fixes:**
+- Fixed nested button error in FilterChip component that was causing React hook violations
+- Changed remove button from `motion.button` to accessible `motion.span` with proper ARIA roles
+- Added keyboard support (Enter/Space) for filter chip removal for accessibility
+
+**Technical Details:**
+- All filtering, sorting, and infinite scroll functionality remains intact
+- No changes to data fetching or state management logic
+- Purely presentational layer updates
+- Improved accessibility with proper keyboard navigation
+
 ### Codebase Cleanup (October 2025)
 The following unused code and files were removed to improve maintainability and reduce bundle size:
 
