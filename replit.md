@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Comprehensive TMDB Filter Support**: Implementation of all available TMDB filters for complex movie and TV show searches, supporting both OR (`|`) and AND (`,`) logic.
 - **Dashboard Enhancements**: Clickable Quick Actions and interactive "Add to Favorites"/"Add to Watchlist" buttons on trending items.
 - **Activity Tracking**: Implemented activity history for favorite additions and watchlist updates.
+- **Infinite Scroll Skeleton Optimization** (October 2025): Fixed movie-grid skeleton rendering to fill incomplete rows during infinite scroll loading instead of starting new rows. Skeletons now calculate based on grid columns (responsive breakpoints: 2 on mobile, 3 on sm, 4 on md, 6 on lg) and render the correct number to complete the current row or show a full new row when the previous row is complete. All skeleton cards include proper accessibility attributes (role="status", aria-hidden="true").
 
 ## External Dependencies
 
