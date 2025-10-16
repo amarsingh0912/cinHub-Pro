@@ -22,6 +22,8 @@ import { getImageUrl, formatRuntime, formatCurrency } from "@/lib/tmdb";
 import { ExpandableText } from "@/components/ui/expandable-text";
 import { CacheStatus } from "@/components/ui/cache-status";
 import MovieCard from "@/components/movie/movie-card";
+import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
+import CastCardSkeleton from "@/components/movie/cast-card-skeleton";
 
 export default function MovieDetail() {
   const { id } = useParams();
@@ -504,9 +506,9 @@ export default function MovieDetail() {
               <TabsContent value="cast" className="mt-6" data-testid="content-cast">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Cast */}
-                  {movie.credits?.cast && (
-                    <div>
-                      <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-6" data-testid="cast-title">Cast</h3>
+                    {movie.credits?.cast && movie.credits.cast.length > 0 ? (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-grid">
                         {movie.credits.cast.slice(0, 12).map((actor: any) => (
                           <Link key={actor.id} href={"/person/" + actor.id}>
@@ -531,13 +533,19 @@ export default function MovieDetail() {
                           </Link>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="cast-loading">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                          <CastCardSkeleton key={i} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   {/* Crew */}
-                  {movie.credits?.crew && (
-                    <div>
-                      <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-6" data-testid="crew-title">Key Crew</h3>
+                    {movie.credits?.crew && movie.credits.crew.filter((person: any) => ['Director', 'Producer', 'Writer', 'Screenplay'].includes(person.job)).length > 0 ? (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-grid">
                         {movie.credits.crew
                           .filter((person: any) => ['Director', 'Producer', 'Writer', 'Screenplay'].includes(person.job))
@@ -565,8 +573,14 @@ export default function MovieDetail() {
                             </Link>
                           ))}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2" data-testid="crew-loading">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <CastCardSkeleton key={i} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </TabsContent>
 
@@ -848,10 +862,16 @@ export default function MovieDetail() {
                       <MovieCard key={rec.id} movie={rec} mediaType="movie" />
                     ))}
                   </div>
-                ) : (
+                ) : movie?.recommendations?.results ? (
                   <p className="text-muted-foreground text-center py-8" data-testid="no-recommended">
                     No recommended movies available.
                   </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="recommended-loading">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <MovieCardSkeleton key={i} />
+                    ))}
+                  </div>
                 )}
               </div>
             </TabsContent>
@@ -865,10 +885,16 @@ export default function MovieDetail() {
                       <MovieCard key={sim.id} movie={sim} mediaType="movie" />
                     ))}
                   </div>
-                ) : (
+                ) : movie?.similar?.results ? (
                   <p className="text-muted-foreground text-center py-8" data-testid="no-similar">
                     No similar movies available.
                   </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6" data-testid="similar-loading">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <MovieCardSkeleton key={i} />
+                    ))}
+                  </div>
                 )}
               </div>
             </TabsContent>
