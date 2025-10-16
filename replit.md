@@ -10,6 +10,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Dashboard Quick Actions & Trending Enhancements (October 16, 2025)
+Enhanced the dashboard page with clickable Quick Actions and functional trending item buttons for better user interaction.
+
+**Quick Actions - Insights Section:**
+- Fixed Quick Actions buttons to be properly clickable using the `asChild` pattern
+- "Browse Movies" button now correctly navigates to /movies page
+- "Browse TV" button now correctly navigates to /tv-shows page
+- Maintained consistent button styling while enabling proper navigation
+
+**Trending This Week - Interactive Buttons:**
+- Added "Add to Favorites" button on hover for trending movies and TV shows
+- Added "Add to Watchlist" button on hover for trending movies and TV shows
+- Implemented proper event handling with `stopPropagation()` to prevent card navigation conflicts
+- Created watchlist selection dialog for choosing which watchlist to add items to
+- Added activity history tracking for favorite additions and watchlist updates
+- Included proper error handling and success toast notifications
+
+**Technical Implementation:**
+- Added `addToFavoritesMutation` with full error handling and activity tracking
+- Added `addToWatchlistMutation` with watchlist selection flow
+- Created reusable watchlist selection dialog component
+- Implemented proper state management for trending item selection
+- All mutations follow the project's established patterns with proper cache invalidation
+
 ### UI Redesign - Movies & TV Shows Pages (October 16, 2025)
 Redesigned the movies and TV shows pages with a modern, cleaner interface while maintaining all existing functionality.
 
