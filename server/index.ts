@@ -8,6 +8,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeAdminUser } from "./auth";
+import { websocketService } from "./services/websocketService";
 
 const app = express();
 
@@ -104,7 +105,6 @@ app.use((req, res, next) => {
       log('HTTP server closed.');
       
       // Close WebSocket connections
-      const { websocketService } = require('./services/websocketService');
       websocketService.shutdown();
       
       // Close database connections if any
