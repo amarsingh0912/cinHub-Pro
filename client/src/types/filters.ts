@@ -718,7 +718,7 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     category: "now_playing",
     label: "Now Playing",
     params: {
-      sort_by: "primary_release_date.desc",
+      sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
       primary_release_date: {
