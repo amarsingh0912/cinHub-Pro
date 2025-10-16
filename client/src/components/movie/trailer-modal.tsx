@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Play, ChevronLeft, ChevronRight, Maximize2, Calendar, Film } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface Video {
   id: string;
@@ -134,9 +135,14 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent 
-        className="max-w-7xl w-full p-0 gap-0 bg-black/98 border-border/30 backdrop-blur-xl overflow-hidden"
+        className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/98 border-border/30 backdrop-blur-xl overflow-y-auto flex flex-col"
         data-testid="trailer-modal"
       >
+        <VisuallyHidden>
+          <DialogTitle>{currentVideo.name}</DialogTitle>
+          <DialogDescription>Watch {currentVideo.type} for {title}</DialogDescription>
+        </VisuallyHidden>
+        
         {/* Close Button */}
         <Button
           variant="ghost"
@@ -270,7 +276,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
             </div>
           </div>
 
-          {/* Video Thumbnails/List for Multiple Videos */}
+          {/* Video Icons/List for Multiple Videos */}
           {hasMultipleVideos && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -280,7 +286,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
                 </span>
               </div>
               <ScrollArea className="w-full">
-                <div className="flex gap-3 pb-3">
+                <div className="flex gap-4 pb-3">
                   {videos.map((video, index) => {
                     const isWatched = watchedVideos.has(index);
                     const isCurrent = index === currentVideoIndex;
@@ -291,62 +297,48 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
                         onClick={() => handleVideoSelect(index)}
                         aria-label={`Play ${video.name}`}
                         title={video.name}
-                        className={`relative flex-shrink-0 w-48 aspect-video rounded-xl overflow-hidden border-2 transition-all duration-300 group ${
-                          isCurrent
-                            ? "border-primary ring-2 ring-primary/50 shadow-lg shadow-primary/25"
-                            : "border-border/50 hover:border-primary/70 hover:shadow-md"
-                        }`}
+                        className="relative flex-shrink-0 flex flex-col items-center gap-2 w-24 group"
                         data-testid={`video-thumbnail-${index}`}
                       >
-                        <img
-                          src={`https://img.youtube.com/vi/${video.key}/mqdefault.jpg`}
-                          alt={video.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        
-                        {/* Overlay */}
-                        <div className={`absolute inset-0 transition-all duration-300 flex items-center justify-center ${
-                          isCurrent 
-                            ? 'bg-black/30' 
-                            : 'bg-black/50 group-hover:bg-black/30'
+                        {/* Video Icon */}
+                        <div className={`relative w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                          isCurrent
+                            ? "border-primary bg-primary/20 ring-2 ring-primary/50"
+                            : "border-border/50 bg-background/50 hover:border-primary/70 hover:bg-primary/10"
                         }`}>
-                          <div className={`rounded-full bg-white/90 p-2.5 transition-all duration-300 ${
+                          <Play className={`w-7 h-7 transition-all duration-300 ${
                             isCurrent 
-                              ? 'scale-90 opacity-0' 
-                              : 'scale-100 opacity-100 group-hover:scale-110 group-hover:bg-primary group-hover:text-white'
-                          }`}>
-                            <Play className="w-5 h-5 fill-current" />
-                          </div>
+                              ? "text-primary fill-primary" 
+                              : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
+                          }`} />
+                          
+                          {/* Current Indicator */}
+                          {isCurrent && (
+                            <div className="absolute -top-1 -right-1">
+                              <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
+                            </div>
+                          )}
+                          
+                          {/* Viewed Indicator */}
+                          {isWatched && !isCurrent && (
+                            <div className="absolute -top-1 -right-1">
+                              <div className="w-3 h-3 rounded-full bg-green-500 flex items-center justify-center">
+                                <span className="text-[8px] text-white">✓</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-
-                        {/* Video Info Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 p-2.5 bg-gradient-to-t from-black/90 via-black/70 to-transparent">
-                          <p className="text-xs text-white font-medium line-clamp-2 mb-1">
+                        
+                        {/* Video Title */}
+                        <div className="w-full text-center">
+                          <p className={`text-xs font-medium line-clamp-2 transition-colors duration-200 ${
+                            isCurrent 
+                              ? "text-primary" 
+                              : "text-muted-foreground group-hover:text-foreground"
+                          }`}>
                             {video.name}
                           </p>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-white/10 backdrop-blur-sm">
-                              {video.type}
-                            </span>
-                            {video.official && (
-                              <span className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-primary/20 backdrop-blur-sm">
-                                Official
-                              </span>
-                            )}
-                            {isWatched && !isCurrent && (
-                              <span className="text-[10px] text-white/80 px-1.5 py-0.5 rounded bg-green-500/20 backdrop-blur-sm">
-                                ✓ Viewed
-                              </span>
-                            )}
-                          </div>
                         </div>
-
-                        {/* Current Indicator */}
-                        {isCurrent && (
-                          <div className="absolute top-2 right-2">
-                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                          </div>
-                        )}
                       </button>
                     );
                   })}
