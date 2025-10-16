@@ -309,6 +309,21 @@ export default function MovieDetail() {
     );
   }
 
+  if (isMovieError) {
+    return (
+      <div className="min-h-screen bg-background text-foreground" data-testid="movie-error">
+        <Header />
+        <div className="pt-16 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md">
+            <p className="text-red-500 font-semibold mb-2">Error Loading Movie</p>
+            <p className="text-muted-foreground">{movieError instanceof Error ? movieError.message : 'Unknown error occurred'}</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!movie) {
     return (
       <div className="min-h-screen bg-background text-foreground" data-testid="movie-not-found">
