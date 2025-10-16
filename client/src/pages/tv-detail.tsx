@@ -21,6 +21,7 @@ import { Link } from "wouter";
 import MovieCard from "@/components/movie/movie-card";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import CastCardSkeleton from "@/components/movie/cast-card-skeleton";
+import TrailerModal from "@/components/movie/trailer-modal";
 
 export default function TVDetail() {
   const { id } = useParams();
@@ -260,7 +261,12 @@ export default function TVDetail() {
     return `${runtime[0]} min`;
   };
 
-  const trailerVideo = tvShow.videos?.results.find(video => video.type === "Trailer" && video.site === "YouTube");
+  // Get all trailers and videos for the modal
+  const trailers = tvShow.videos?.results?.filter((video: any) => 
+    video.site === "YouTube" && (video.type === "Trailer" || video.type === "Teaser")
+  ) || [];
+  
+  const hasTrailer = trailers.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground" data-testid="tv-detail-page">
@@ -360,7 +366,7 @@ export default function TVDetail() {
                 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4 justify-center lg:justify-start" data-testid="tv-actions">
-                  {trailerVideo && (
+                  {hasTrailer && (
                     <Button
                       size="lg"
                       className="min-w-[140px]"
@@ -880,30 +886,12 @@ export default function TVDetail() {
       </Dialog>
 
       {/* Trailer Modal */}
-      <Dialog open={isTrailerModalOpen} onOpenChange={setIsTrailerModalOpen}>
-        <DialogContent className="max-w-4xl w-full p-0" data-testid="trailer-modal">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle>Watch Trailer</DialogTitle>
-          </DialogHeader>
-          <div className="p-6 pt-4">
-            {trailerVideo && (
-              <div className="aspect-video w-full">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={`https://www.youtube.com/embed/${trailerVideo.key}?autoplay=1&rel=0`}
-                  title="TV Show Trailer"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-lg"
-                  data-testid="trailer-iframe"
-                />
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TrailerModal
+        isOpen={isTrailerModalOpen}
+        onClose={() => setIsTrailerModalOpen(false)}
+        videos={trailers}
+        title={tvShow?.name || ""}
+      />
       
       <Footer />
     </div>
