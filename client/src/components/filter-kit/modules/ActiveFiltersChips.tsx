@@ -188,7 +188,7 @@ export function ActiveFiltersChips({ filters, onFiltersChange, className }: Acti
     });
   }
 
-  // Air Date Range (for TV)
+  // First Air Date Range (for TV)
   if (filters.first_air_date?.start || filters.first_air_date?.end) {
     const start = filters.first_air_date.start;
     const end = filters.first_air_date.end;
@@ -198,12 +198,33 @@ export function ActiveFiltersChips({ filters, onFiltersChange, className }: Acti
       ? `Aired after ${start}` 
       : `Aired before ${end}`;
     activeChips.push({
-      id: 'air-date',
+      id: 'first-air-date',
       label,
       onRemove: () => {
         onFiltersChange({
           ...filters,
           first_air_date: {},
+        });
+      },
+    });
+  }
+
+  // Air Date Range (for TV - used by airing_today preset)
+  if (filters.air_date?.start || filters.air_date?.end) {
+    const start = filters.air_date.start;
+    const end = filters.air_date.end;
+    const label = start && end 
+      ? `Airing ${start} to ${end}` 
+      : start 
+      ? `Airing after ${start}` 
+      : `Airing before ${end}`;
+    activeChips.push({
+      id: 'air-date',
+      label,
+      onRemove: () => {
+        onFiltersChange({
+          ...filters,
+          air_date: {},
         });
       },
     });

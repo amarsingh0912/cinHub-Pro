@@ -82,6 +82,9 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
     (filters.vote_average?.min || filters.vote_average?.max) ? 1 : 0,
     (filters.with_runtime?.min || filters.with_runtime?.max) ? 1 : 0,
     filters.with_original_language ? 1 : 0,
+    (filters.primary_release_date?.start || filters.primary_release_date?.end) ? 1 : 0,
+    (filters.first_air_date?.start || filters.first_air_date?.end) ? 1 : 0,
+    (filters.air_date?.start || filters.air_date?.end) ? 1 : 0,
   ].reduce((sum, count) => sum + count, 0);
 
   const hasActiveFilters = activeFiltersCount > 0;

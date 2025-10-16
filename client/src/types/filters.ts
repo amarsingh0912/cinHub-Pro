@@ -397,6 +397,7 @@ export const DEFAULT_TV_FILTERS: AdvancedFilterState = {
   category: "trending",
   activePreset: "trending",
   sort_by: "popularity.desc",
+  search_type: "tv",
   first_air_date: { start: getDateOffset(-365) }, // Last year - from trending preset
 };
 
@@ -778,7 +779,7 @@ export const TV_PRESETS: Record<TVPresetCategory, PresetConfig> = {
       include_adult: false,
       air_date: {
         start: getTodayDate(),
-        end: getDateOffset(7), // Next 7 days
+        end: "2025-10-17",
       },
     },
   },
