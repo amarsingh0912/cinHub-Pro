@@ -16,7 +16,11 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:components": "vitest run tests/components",
-    "test:e2e": "vitest run tests/e2e"
+    "test:e2e": "vitest run tests/e2e",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:components && npm run test:e2e",
+    "test:ci": "vitest run --coverage --reporter=verbose",
+    "test:quick": "vitest run --changed",
+    "test:debug": "vitest --inspect-brk --inspect --logHeapUsage --threads=false"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

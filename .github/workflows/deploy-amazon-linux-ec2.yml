@@ -1,0 +1,422 @@
+name: Deploy to Amazon Linux EC2
+
+on:
+  push:
+    branches: [main, production]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run check
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm test
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          SESSION_SECRET: test-secret-key-for-ci
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          TMDB_ACCESS_TOKEN: ${{ secrets.TMDB_ACCESS_TOKEN }}
+          JWT_ACCESS_SECRET: test-jwt-access-secret
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret
+
+      - name: Upload test coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment
+          cp -r dist deployment/
+          cp package.json deployment/
+          cp package-lock.json deployment/
+          cp drizzle.config.ts deployment/
+          cp -r shared deployment/
+          
+          # Only copy service files if they exist
+          if [ -d "server/services" ]; then
+            mkdir -p deployment/server
+            cp -r server/services deployment/server/
+          fi
+          
+          if [ -d "server/utils" ]; then
+            mkdir -p deployment/server
+            cp -r server/utils deployment/server/
+          fi
+          
+          # Create tarball
+          tar -czf deploy.tar.gz -C deployment .
+          
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package-${{ github.sha }}
+          path: deploy.tar.gz
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Amazon Linux EC2
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}
+      url: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_URL || secrets.STAGING_URL }}
+    
+    env:
+      ENVIRONMENT: ${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}
+      EC2_HOST: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_EC2_HOST || secrets.STAGING_EC2_HOST }}
+      EC2_USER: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_EC2_USER || secrets.STAGING_EC2_USER }}
+      EC2_SSH_KEY: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_EC2_SSH_KEY || secrets.STAGING_EC2_SSH_KEY }}
+      APP_DIR: ${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_APP_DIR || secrets.STAGING_APP_DIR }}
+    
+    steps:
+      - name: Set deployment info
+        id: deployment-info
+        run: |
+          echo "environment=${{ env.ENVIRONMENT }}" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+          echo "commit_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
+          echo "deployer=${{ github.actor }}" >> $GITHUB_OUTPUT
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-package-${{ github.sha }}
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ env.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pre-deployment health check
+        run: |
+          echo "Checking current application status..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.EC2_HOST }}:5000/api/health || echo "000")
+          echo "Current health status: $RESPONSE"
+
+      - name: Transfer deployment package
+        run: |
+          echo "Transferring deployment package to Amazon Linux EC2..."
+          scp -i ~/.ssh/deploy_key deploy.tar.gz ${{ env.EC2_USER }}@${{ env.EC2_HOST }}:/tmp/deploy-${{ github.sha }}.tar.gz
+
+      - name: Deploy on Amazon Linux EC2
+        id: deploy
+        run: |
+          echo "Starting deployment to Amazon Linux EC2 (${{ env.ENVIRONMENT }})..."
+          ssh -i ~/.ssh/deploy_key ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
+            set -e
+            
+            # Configuration
+            APP_DIR="${{ env.APP_DIR }}"
+            DEPLOY_PACKAGE="/tmp/deploy-${{ github.sha }}.tar.gz"
+            ENVIRONMENT="${{ env.ENVIRONMENT }}"
+            
+            echo "==========================================="
+            echo "CineHub Pro Deployment to Amazon Linux"
+            echo "Environment: $ENVIRONMENT"
+            echo "Time: $(date)"
+            echo "Commit: ${{ github.sha }}"
+            echo "==========================================="
+            
+            # Ensure Node.js is available
+            if ! command -v node &> /dev/null; then
+              echo "Installing Node.js 20..."
+              curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+              sudo yum install -y nodejs
+            fi
+            
+            # Verify Node.js version
+            echo "Node.js version: $(node --version)"
+            echo "NPM version: $(npm --version)"
+            
+            # Create app directory if it doesn't exist
+            sudo mkdir -p $APP_DIR
+            sudo chown -R $USER:$USER $APP_DIR
+            
+            # Navigate to app directory
+            cd $APP_DIR || { echo "Failed to access app directory!"; exit 1; }
+            
+            # Create comprehensive backup
+            echo "Creating backup..."
+            BACKUP_DIR="backups/backup-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p $BACKUP_DIR
+            
+            if [ -d "dist" ]; then
+              cp -r dist $BACKUP_DIR/ 2>/dev/null || echo "No dist to backup"
+            fi
+            
+            if [ -f "package.json" ]; then
+              cp package.json $BACKUP_DIR/ 2>/dev/null || echo "No package.json to backup"
+            fi
+            
+            if [ -f ".env" ]; then
+              cp .env $BACKUP_DIR/ 2>/dev/null || echo "No .env to backup"
+            fi
+            
+            # Keep only last 5 backups
+            ls -dt backups/backup-* | tail -n +6 | xargs rm -rf 2>/dev/null || true
+            echo "Backup created at $BACKUP_DIR"
+            
+            # Extract new version
+            echo "Extracting deployment package..."
+            tar -xzf $DEPLOY_PACKAGE || { echo "Failed to extract package!"; exit 1; }
+            
+            # Install production dependencies
+            echo "Installing dependencies..."
+            npm ci --production --omit=dev 2>&1 | tee npm-install.log || {
+              echo "Failed to install dependencies!"
+              cat npm-install.log
+              exit 1
+            }
+            
+            # Check if PM2 is available
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              sudo npm install -g pm2@latest
+              
+              # Configure PM2 startup for Amazon Linux
+              sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
+            fi
+            
+            # Load environment variables from .env file if it exists
+            if [ -f ".env" ]; then
+              echo "Environment file exists"
+            else
+              echo "Warning: .env file not found. Make sure environment variables are configured."
+            fi
+            
+            # Run database migrations
+            echo "Running database migrations..."
+            npm run db:push 2>&1 | tee migration.log || {
+              echo "⚠️  Migration had warnings (check migration.log)"
+            }
+            
+            # Stop existing PM2 process if running
+            if pm2 describe cinehub-pro-$ENVIRONMENT > /dev/null 2>&1; then
+              echo "Stopping existing PM2 process..."
+              pm2 stop cinehub-pro-$ENVIRONMENT
+              pm2 delete cinehub-pro-$ENVIRONMENT
+            fi
+            
+            # Start application with PM2
+            echo "Starting application with PM2..."
+            pm2 start npm \
+              --name "cinehub-pro-$ENVIRONMENT" \
+              --interpreter none \
+              -- start \
+              --update-env
+            
+            # Save PM2 configuration
+            pm2 save
+            
+            # Ensure PM2 resurrects processes on reboot
+            sudo systemctl enable pm2-$USER || echo "PM2 systemd service already enabled"
+            
+            # Show PM2 status
+            pm2 list
+            pm2 info cinehub-pro-$ENVIRONMENT
+            
+            # Clean up deployment package
+            rm -f $DEPLOY_PACKAGE
+            
+            # Configure firewall for Amazon Linux (if firewalld is available)
+            if command -v firewall-cmd &> /dev/null; then
+              echo "Configuring firewall..."
+              sudo firewall-cmd --permanent --add-port=5000/tcp 2>/dev/null || echo "Port already open or firewalld not running"
+              sudo firewall-cmd --reload 2>/dev/null || echo "Firewall reload skipped"
+            fi
+            
+            echo "==========================================="
+            echo "✅ Deployment completed successfully!"
+            echo "==========================================="
+          ENDSSH
+
+      - name: Post-deployment health check
+        id: health-check
+        run: |
+          echo "Waiting for application to start..."
+          sleep 30
+          
+          MAX_RETRIES=10
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Health check attempt $((RETRY_COUNT + 1))/$MAX_RETRIES..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.EC2_HOST }}:5000/api/health || echo "000")
+            
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Health check passed - Application is running"
+              echo "status=success" >> $GITHUB_OUTPUT
+              
+              # Display application info
+              echo ""
+              echo "📦 Deployment Information:"
+              echo "  Environment: ${{ env.ENVIRONMENT }}"
+              echo "  Commit: ${{ github.sha }}"
+              echo "  Deployed by: ${{ github.actor }}"
+              echo "  URL: http://${{ env.EC2_HOST }}:5000"
+              exit 0
+            fi
+            
+            echo "⚠️  Health check returned: $RESPONSE"
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+          
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          echo "status=failed" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: Rollback on failure
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          echo "⚠️  Deployment failed, initiating rollback..."
+          ssh -i ~/.ssh/deploy_key ${{ env.EC2_USER }}@${{ env.EC2_HOST }} << 'ENDSSH'
+            APP_DIR="${{ env.APP_DIR }}"
+            cd $APP_DIR
+            
+            # Find most recent backup
+            LATEST_BACKUP=$(ls -dt backups/backup-* | head -1)
+            
+            if [ -d "$LATEST_BACKUP" ]; then
+              echo "Rolling back to $LATEST_BACKUP..."
+              
+              # Restore backup
+              if [ -d "$LATEST_BACKUP/dist" ]; then
+                rm -rf dist
+                cp -r $LATEST_BACKUP/dist .
+              fi
+              
+              if [ -f "$LATEST_BACKUP/package.json" ]; then
+                cp $LATEST_BACKUP/package.json .
+                npm ci --production --omit=dev
+              fi
+              
+              # Restart application
+              pm2 restart cinehub-pro-${{ env.ENVIRONMENT }} || \
+              pm2 start npm --name "cinehub-pro-${{ env.ENVIRONMENT }}" -- start
+              
+              echo "✅ Rollback completed"
+            else
+              echo "❌ No backup found for rollback!"
+              exit 1
+            fi
+          ENDSSH
+
+      - name: Verify rollback
+        if: failure() && steps.deploy.outcome == 'success'
+        run: |
+          echo "Verifying rollback..."
+          sleep 15
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.EC2_HOST }}:5000/api/health || echo "000")
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Rollback successful - Application restored"
+          else
+            echo "❌ Rollback verification failed - Manual intervention required"
+            echo "Please check PM2 logs: pm2 logs cinehub-pro-${{ env.ENVIRONMENT }}"
+            exit 1
+          fi
+
+      - name: Cleanup SSH
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
+
+  notify:
+    name: Send Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    
+    steps:
+      - name: Deployment notification
+        run: |
+          ENVIRONMENT="${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }}"
+          STATUS="${{ needs.deploy.result }}"
+          
+          if [ "$STATUS" = "success" ]; then
+            echo "🎉 Deployment to Amazon Linux EC2 ($ENVIRONMENT) successful!"
+            echo "📦 Version: ${{ github.sha }}"
+            echo "👤 Deployed by: ${{ github.actor }}"
+            echo "🔗 URL: http://${{ github.ref == 'refs/heads/production' && secrets.PRODUCTION_EC2_HOST || secrets.STAGING_EC2_HOST }}:5000"
+          else
+            echo "❌ Deployment to Amazon Linux EC2 ($ENVIRONMENT) failed!"
+            echo "📦 Version: ${{ github.sha }}"
+            echo "👤 Attempted by: ${{ github.actor }}"
+            echo "Please check the logs and try again."
+            exit 1
+          fi
+
+      # Optional: Slack/Discord/Email notification
+      # - name: Send Slack notification
+      #   if: always()
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ needs.deploy.result }}
+      #     text: |
+      #       Deployment to Amazon Linux EC2 (${{ github.ref == 'refs/heads/production' && 'production' || 'staging' }})
+      #       Status: ${{ needs.deploy.result }}
+      #       Commit: ${{ github.sha }}
+      #       Deployed by: ${{ github.actor }}
+      #     webhook_url: ${{ secrets.SLACK_WEBHOOK }}
