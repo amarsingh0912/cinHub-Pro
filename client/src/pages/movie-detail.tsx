@@ -31,7 +31,7 @@ export default function MovieDetail() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: movie, isLoading: movieLoading } = useQuery<MovieDetails>({
+  const { data: movie, isLoading: movieLoading, error: movieError, isError: isMovieError } = useQuery<MovieDetails>({
     queryKey: ["/api/movies", id],
     enabled: !!id,
   });
@@ -858,8 +858,8 @@ export default function MovieDetail() {
                 <h2 className="text-2xl font-bold" data-testid="heading-recommended">Recommended Movies</h2>
                 {movie?.recommendations?.results && movie.recommendations.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {movie.recommendations.results.slice(0, 12).map((rec: any) => (
-                      <MovieCard key={rec.id} movie={rec} mediaType="movie" />
+                    {movie.recommendations.results.slice(0, 12).map((rec: any, index: number) => (
+                      <MovieCard key={`recommended-${rec.id}-${index}`} movie={rec} mediaType="movie" />
                     ))}
                   </div>
                 ) : movie?.recommendations?.results ? (
@@ -881,8 +881,8 @@ export default function MovieDetail() {
                 <h2 className="text-2xl font-bold" data-testid="heading-similar">Similar Movies</h2>
                 {movie?.similar?.results && movie.similar.results.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {movie.similar.results.slice(0, 12).map((sim: any) => (
-                      <MovieCard key={sim.id} movie={sim} mediaType="movie" />
+                    {movie.similar.results.slice(0, 12).map((sim: any, index: number) => (
+                      <MovieCard key={`similar-${sim.id}-${index}`} movie={sim} mediaType="movie" />
                     ))}
                   </div>
                 ) : movie?.similar?.results ? (
