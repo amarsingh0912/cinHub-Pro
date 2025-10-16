@@ -708,7 +708,7 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
     category: "upcoming",
     label: "Upcoming",
     params: {
-      sort_by: "primary_release_date.asc",
+      sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
       primary_release_date: { start: getDateOffset(1) }, // Tomorrow onwards

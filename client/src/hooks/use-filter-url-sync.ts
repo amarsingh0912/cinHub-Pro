@@ -154,8 +154,8 @@ export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryP
     params.screened_theatrically = 'true';
   }
 
-  // Sorting - only include if different from default
-  if (filters.sort_by !== 'popularity.desc') {
+  // Sorting - always include
+  if (filters.sort_by) {
     params.sort_by = filters.sort_by;
   }
 
