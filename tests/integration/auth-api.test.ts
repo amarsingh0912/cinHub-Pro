@@ -1,7 +1,21 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+
+// Mock external services
+vi.mock('@sendgrid/mail', () => ({
+  setApiKey: vi.fn(),
+  send: vi.fn().mockResolvedValue([{ statusCode: 202 }])
+}));
+
+vi.mock('twilio', () => ({
+  default: vi.fn().mockReturnValue({
+    messages: {
+      create: vi.fn().mockResolvedValue({ sid: 'mock-sid' })
+    }
+  })
+}));
 
 describe('Authentication API', () => {
   let app: Express;

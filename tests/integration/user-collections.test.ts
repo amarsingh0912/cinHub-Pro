@@ -1,7 +1,13 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+
+// Mock external services
+vi.mock('@sendgrid/mail', () => ({
+  setApiKey: vi.fn(),
+  send: vi.fn().mockResolvedValue([{ statusCode: 202 }])
+}));
 
 describe('User Collections API', () => {
   let app: Express;

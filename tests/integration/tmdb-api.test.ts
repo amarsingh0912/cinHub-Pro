@@ -1,7 +1,24 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { mockMovieDetails, mockTVDetails, mockMoviesList } from '../__mocks__/tmdb-service';
+
+// Mock TMDB API responses
+vi.mock('../../server/services/tmdbCache', () => ({
+  TMDBCacheService: vi.fn().mockImplementation(() => ({
+    getMovieFromCache: vi.fn().mockResolvedValue(null),
+    getTvShowFromCache: vi.fn().mockResolvedValue(null),
+    cacheMovie: vi.fn().mockResolvedValue(mockMovieDetails),
+    cacheTvShow: vi.fn().mockResolvedValue(mockTVDetails),
+  })),
+  tmdbCacheService: {
+    getMovieFromCache: vi.fn().mockResolvedValue(null),
+    getTvShowFromCache: vi.fn().mockResolvedValue(null),
+    cacheMovie: vi.fn().mockResolvedValue(mockMovieDetails),
+    cacheTvShow: vi.fn().mockResolvedValue(mockTVDetails),
+  }
+}));
 
 describe('TMDB API Integration', () => {
   let app: Express;
@@ -10,6 +27,27 @@ describe('TMDB API Integration', () => {
   beforeAll(async () => {
     app = express();
     app.use(express.json());
+    
+    // Mock TMDB fetch calls
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/movie/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockMovieDetails)
+        });
+      }
+      if (url.includes('/tv/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockTVDetails)
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockMoviesList)
+      });
+    });
+    
     server = await registerRoutes(app);
   });
 
@@ -17,6 +55,7 @@ describe('TMDB API Integration', () => {
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    vi.clearAllMocks();
   });
 
   describe('Movies API', () => {
@@ -72,6 +111,13 @@ describe('TMDB API Integration', () => {
       });
 
       it('should return 404 for non-existent movie', async () => {
+        // Mock 404 response
+        global.fetch = vi.fn().mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          json: () => Promise.resolve({ status_message: 'Not found' })
+        });
+        
         await request(app)
           .get('/api/movies/999999999')
           .expect(404);
@@ -158,6 +204,13 @@ describe('TMDB API Integration', () => {
       });
 
       it('should return 404 for non-existent TV show', async () => {
+        // Mock 404 response
+        global.fetch = vi.fn().mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          json: () => Promise.resolve({ status_message: 'Not found' })
+        });
+        
         await request(app)
           .get('/api/tv/999999999')
           .expect(404);
