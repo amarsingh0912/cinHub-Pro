@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { DEFAULT_TV_FILTERS } from "@/types/filters";
+import { cn } from "@/lib/utils";
 
 export default function TVShows() {
   // Use the complete filter system with URL sync and debouncing
@@ -155,68 +156,71 @@ export default function TVShows() {
         isLoading={isLoading || isDebouncing}
       />
 
-      <main className="pt-6">
-        {/* Modern Hero Section */}
-        <section
-          className="relative overflow-hidden mb-6"
-          data-testid="tv-shows-header"
-        >
-          {/* Gradient Background */}
-          <div
-            className={`absolute inset-0 bg-gradient-to-br ${categoryInfo.gradient} dark:opacity-30 opacity-50`}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
-              <div className="flex-1 space-y-3">
-                <h1
-                  className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
-                  data-testid="content-title"
-                >
-                  {categoryInfo.title}
-                </h1>
+      <main className="pt-4">
+        {/* Redesigned Hero Section */}
+        <section className="relative mb-8" data-testid="tv-shows-header">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Header Content */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={cn(
+                    "p-2.5 rounded-xl",
+                    "bg-gradient-to-br from-primary/20 to-primary/5",
+                    "border border-primary/20"
+                  )}>
+                    <CategoryIcon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h1
+                      className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
+                      data-testid="content-title"
+                    >
+                      {categoryInfo.title}
+                    </h1>
+                  </div>
+                </div>
                 <p
-                  className="text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed"
+                  className="text-sm sm:text-base text-muted-foreground"
                   data-testid="content-description"
                 >
                   {categoryInfo.description}
                 </p>
               </div>
 
-              {/* Stats & Actions Card */}
-              <div className="flex flex-wrap gap-4 items-center">
-                {/* Results Count */}
+              {/* Stats Cards */}
+              <div className="flex items-center gap-3">
                 {!isLoading && totalResults > 0 && (
-                  <div className="px-4 py-2.5 rounded-xl bg-background/80 dark:bg-background/60 backdrop-blur-sm border border-border/50 shadow-lg">
-                    <div className="text-xs text-muted-foreground mb-0.5">
-                      Total Results
-                    </div>
-                    <div className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
-                      {totalResults.toLocaleString()}
+                  <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+                    <div className="relative px-5 py-3 bg-background/80 dark:bg-background/60 backdrop-blur-xl rounded-xl border border-border/50">
+                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                        Results
+                      </div>
+                      <div className="text-xl font-bold text-foreground">
+                        {totalResults.toLocaleString()}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Filter Badge */}
                 {appliedFiltersCount > 0 && (
-                  <div
-                    className="px-4 py-2.5 rounded-xl bg-primary/10 dark:bg-primary/20 backdrop-blur-sm border border-primary/30 shadow-lg"
-                    data-testid="filter-count-badge"
-                  >
-                    <div className="text-xs text-primary/70 mb-0.5">
-                      Active Filters
-                    </div>
-                    <div className="text-2xl font-bold text-primary">
-                      {appliedFiltersCount}
+                  <div className="relative group" data-testid="filter-count-badge">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-primary/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-500" />
+                    <div className="relative px-5 py-3 bg-primary/10 dark:bg-primary/20 backdrop-blur-xl rounded-xl border border-primary/30">
+                      <div className="text-xs font-medium text-primary/80 uppercase tracking-wide mb-1">
+                        Filters
+                      </div>
+                      <div className="text-xl font-bold text-primary">
+                        {appliedFiltersCount}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Debouncing Indicator */}
                 {isDebouncing && (
                   <div
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-background/80 dark:bg-background/60 backdrop-blur-sm border border-border/50 shadow-lg"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl bg-muted/50 border border-border/50"
                     data-testid="debouncing-indicator"
                   >
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
