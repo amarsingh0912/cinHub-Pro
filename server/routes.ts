@@ -1604,18 +1604,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         append_to_response: "credits,videos,similar,recommendations",
       });
 
-      // Cache the TV show data and process images before returning
-      await tmdbCacheService.cacheTVShow(data);
-
-      // Get the cached version and build response with Cloudinary URLs
-      const cachedTVShow = await tmdbCacheService.getTVShowFromCache(tvId);
-      if (cachedTVShow) {
-        const response = tmdbCacheService.buildTVShowResponse(cachedTVShow);
-        return res.json(response);
-      }
-
-      // Fallback to raw data if caching failed
+      // Return data immediately and cache in background for better performance
       res.json(data);
+
+      // Cache the TV show data and process images in the background (non-blocking)
+      tmdbCacheService.cacheTVShow(data).catch(error => {
+        console.error(`Background caching failed for TV show ${tvId}:`, error);
+      });
     } catch (error) {
       console.error("Error fetching TV show details:", error);
       res.status(500).json({ message: "Failed to fetch TV show details" });
@@ -1859,18 +1854,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         append_to_response: "credits,videos,similar,recommendations",
       });
 
-      // Cache the movie data and process images before returning
-      await tmdbCacheService.cacheMovie(data);
-
-      // Get the cached version and build response with Cloudinary URLs
-      const cachedMovie = await tmdbCacheService.getMovieFromCache(movieId);
-      if (cachedMovie) {
-        const response = tmdbCacheService.buildMovieResponse(cachedMovie);
-        return res.json(response);
-      }
-
-      // Fallback to raw data if caching failed
+      // Return data immediately and cache in background for better performance
       res.json(data);
+
+      // Cache the movie data and process images in the background (non-blocking)
+      tmdbCacheService.cacheMovie(data).catch(error => {
+        console.error(`Background caching failed for movie ${movieId}:`, error);
+      });
     } catch (error) {
       console.error("Error fetching movie details:", error);
       res.status(500).json({ message: "Failed to fetch movie details" });
