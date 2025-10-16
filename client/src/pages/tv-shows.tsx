@@ -42,18 +42,21 @@ export default function TVShows() {
       case 'airing_today': return 'Airing Today';
       case 'on_the_air': return 'On The Air';
       case 'top_rated': return 'Top Rated TV Shows';
-      default: return 'Discover TV Shows';
+      default: return 'Trending TV Shows';
     }
   };
 
   const getDescription = () => {
     const { category } = filters;
     
-    if (category === 'discover') {
-      return 'Browse and filter thousands of TV shows with advanced options';
+    switch (category) {
+      case 'trending': return 'Discover the hottest TV shows trending right now';
+      case 'popular': return 'Explore the most popular TV shows of all time';
+      case 'airing_today': return 'See what\'s airing on TV today';
+      case 'on_the_air': return 'Browse shows currently on the air';
+      case 'top_rated': return 'Watch the highest-rated TV shows';
+      default: return 'Browse and filter thousands of TV shows with advanced options';
     }
-    
-    return `Explore TV shows in the ${category} category`;
   };
 
   // Count applied filters for the badge

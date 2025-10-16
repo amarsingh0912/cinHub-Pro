@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Film, Tv, SlidersHorizontal, X, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
+import { SlidersHorizontal, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
 import { AdvancedFilterState, PresetCategory } from "@/types/filters";
 import { cn } from "@/lib/utils";
 import { FilterChip, MetricPill } from "../atoms";
@@ -20,7 +20,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   const { toggleDock, toggleLab } = useFilterContext();
 
   const setContentType = (type: 'movie' | 'tv') => {
-    const currentCategory = filters.category || (filters.contentType === 'movie' ? 'trending' : 'discover');
+    const currentCategory = filters.category || 'trending';
     
     const movieOnlyCategories = ['upcoming', 'now_playing'];
     const tvOnlyCategories = ['airing_today', 'on_the_air'];
@@ -28,7 +28,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
     let newCategory = currentCategory;
     
     if (type === 'tv' && movieOnlyCategories.includes(currentCategory)) {
-      newCategory = 'discover';
+      newCategory = 'trending';
     } else if (type === 'movie' && tvOnlyCategories.includes(currentCategory)) {
       newCategory = 'trending';
     }
@@ -63,7 +63,6 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   ];
 
   const tvCategories = [
-    { value: 'discover', label: 'Discover', icon: Tv },
     { value: 'trending', label: 'Trending', icon: TrendingUp },
     { value: 'popular', label: 'Popular', icon: Star },
     { value: 'airing_today', label: 'Airing Today', icon: Radio },
@@ -90,7 +89,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   const resetFilters = () => {
     const defaultFilters: AdvancedFilterState = {
       contentType: filters.contentType,
-      category: filters.contentType === 'movie' ? 'trending' : 'discover',
+      category: 'trending',
       with_genres: [],
       without_genres: [],
       primary_release_date: {},
@@ -121,62 +120,10 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
       data-testid="context-ribbon"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* First Row: Content Type and Actions */}
+        {/* First Row: Results and Actions */}
         <div className="flex items-center justify-between gap-4 py-3">
-          {/* Left: Content Type Tabs */}
+          {/* Left: Results count */}
           <div className="flex items-center gap-3">
-            {/* Tabs for Movies and TV Shows */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/30 border border-border/50">
-              <motion.button
-                onClick={() => setContentType('movie')}
-                className={cn(
-                  "relative flex items-center gap-2 px-4 py-1.5 rounded-md",
-                  "transition-all duration-300 font-medium text-sm",
-                  filters.contentType === 'movie'
-                    ? "bg-background text-foreground shadow-md"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                data-testid="tab-movies"
-              >
-                <Film className="h-4 w-4" />
-                <span>Movies</span>
-                {filters.contentType === 'movie' && (
-                  <motion.div
-                    className="absolute inset-0 rounded-md bg-gradient-to-r from-blue-500/10 to-blue-600/10"
-                    layoutId="activeTab"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </motion.button>
-
-              <motion.button
-                onClick={() => setContentType('tv')}
-                className={cn(
-                  "relative flex items-center gap-2 px-4 py-1.5 rounded-md",
-                  "transition-all duration-300 font-medium text-sm",
-                  filters.contentType === 'tv'
-                    ? "bg-background text-foreground shadow-md"
-                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                )}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                data-testid="tab-tv-shows"
-              >
-                <Tv className="h-4 w-4" />
-                <span>TV Shows</span>
-                {filters.contentType === 'tv' && (
-                  <motion.div
-                    className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/10 to-purple-600/10"
-                    layoutId="activeTab"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </motion.button>
-            </div>
-
-            {/* Results count */}
             {totalResults !== undefined && (
               <MetricPill
                 label="Results"
@@ -284,7 +231,7 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
           <div className="flex items-center gap-2 min-w-max">
             {categories.map((category) => {
               const Icon = category.icon;
-              const defaultCategory = filters.contentType === 'movie' ? 'trending' : 'discover';
+              const defaultCategory = 'trending';
               const isActive = filters.category === category.value || (!filters.category && category.value === defaultCategory);
               
               return (

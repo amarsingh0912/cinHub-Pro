@@ -37,40 +37,31 @@ export default function Movies() {
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
-  // Get the display title based on content type and category
+  // Get the display title based on category
   const getTitle = () => {
-    const { contentType, category } = filters;
+    const { category } = filters;
     
-    if (contentType === 'movie') {
-      switch (category) {
-        case 'trending': return 'Trending Movies';
-        case 'popular': return 'Popular Movies';
-        case 'upcoming': return 'Upcoming Movies';
-        case 'now_playing': return 'Now in Theaters';
-        case 'top_rated': return 'Top Rated Movies';
-        default: return 'Discover Movies';
-      }
-    } else {
-      switch (category) {
-        case 'trending': return 'Trending TV Shows';
-        case 'popular': return 'Popular TV Shows';
-        case 'airing_today': return 'Airing Today';
-        case 'on_the_air': return 'On The Air';
-        case 'top_rated': return 'Top Rated TV Shows';
-        default: return 'Discover TV Shows';
-      }
+    switch (category) {
+      case 'trending': return 'Trending Movies';
+      case 'popular': return 'Popular Movies';
+      case 'upcoming': return 'Upcoming Movies';
+      case 'now_playing': return 'Now in Theaters';
+      case 'top_rated': return 'Top Rated Movies';
+      default: return 'Trending Movies';
     }
   };
 
   const getDescription = () => {
-    const { contentType, category } = filters;
-    const contentName = contentType === 'movie' ? 'movies' : 'TV shows';
+    const { category } = filters;
     
-    if (category === 'discover') {
-      return `Browse and filter thousands of ${contentName} with advanced options`;
+    switch (category) {
+      case 'trending': return 'Discover the hottest movies trending right now';
+      case 'popular': return 'Explore the most popular movies of all time';
+      case 'upcoming': return 'Get ready for upcoming movie releases';
+      case 'now_playing': return 'See what\'s playing in theaters now';
+      case 'top_rated': return 'Browse the highest-rated movies';
+      default: return 'Browse and filter thousands of movies with advanced options';
     }
-    
-    return `Explore ${contentName} in the ${category} category`;
   };
 
   // Count applied filters for the badge

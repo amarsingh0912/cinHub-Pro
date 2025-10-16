@@ -363,7 +363,7 @@ export interface FilterQueryParams
 // Default filter states
 export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
   contentType: "movie",
-  category: "discover",
+  category: "trending",
   with_genres: [],
   without_genres: [],
   // Movie dates
