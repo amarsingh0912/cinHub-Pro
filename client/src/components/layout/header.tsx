@@ -134,35 +134,33 @@ export default function Header() {
           )}>
             {/* Enhanced Brand Section */}
             <div className="flex items-center gap-6">
-              <Link href="/" data-testid="link-home">
-                <a aria-label="CineHub Pro Home">
+              <Link href="/" data-testid="link-home" aria-label="CineHub Pro Home">
+                <motion.div 
+                  className="flex items-center gap-3 cursor-pointer group rounded-xl px-3 py-2 hover:bg-primary/10 transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <motion.div 
-                    className="flex items-center gap-3 cursor-pointer group rounded-xl px-3 py-2 hover:bg-primary/10 transition-all duration-300"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="relative w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/50 transition-shadow duration-300"
+                    whileHover={{ rotate: [0, -3, 3, -3, 0], scale: 1.1 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <motion.div 
-                      className="relative w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/50 transition-shadow duration-300"
-                      whileHover={{ rotate: [0, -3, 3, -3, 0], scale: 1.1 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <Film className="w-5 h-5 text-white" aria-hidden="true" />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-                    </motion.div>
-                    <div className="flex flex-col">
-                      <span className="text-lg font-display font-extrabold bg-gradient-to-r from-primary via-primary-300 to-secondary bg-clip-text text-transparent">
-                        CineHub Pro
-                      </span>
-                      <motion.span 
-                        className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider"
-                        initial={{ opacity: 0.6 }}
-                        whileHover={{ opacity: 1 }}
-                      >
-                        Movie Discovery
-                      </motion.span>
-                    </div>
+                    <Film className="w-5 h-5 text-white" aria-hidden="true" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
                   </motion.div>
-                </a>
+                  <div className="flex flex-col">
+                    <span className="text-lg font-display font-extrabold bg-gradient-to-r from-primary via-primary-300 to-secondary bg-clip-text text-transparent">
+                      CineHub Pro
+                    </span>
+                    <motion.span 
+                      className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider"
+                      initial={{ opacity: 0.6 }}
+                      whileHover={{ opacity: 1 }}
+                    >
+                      Movie Discovery
+                    </motion.span>
+                  </div>
+                </motion.div>
               </Link>
 
               {/* Enhanced Desktop Navigation */}
@@ -170,37 +168,35 @@ export default function Header() {
                 {navItems.map((item, index) => {
                   const isActive = location === item.href;
                   return (
-                    <Link key={item.href} href={item.href}>
-                      <a aria-current={isActive ? 'page' : undefined}>
-                        <motion.span
-                          className={cn(
-                            "relative px-5 py-2 rounded-lg text-sm font-medium cursor-pointer select-none transition-all duration-300",
-                            isActive
-                              ? "text-primary bg-primary/5 font-semibold"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent/20"
+                    <Link key={item.href} href={item.href} aria-current={isActive ? 'page' : undefined}>
+                      <motion.span
+                        className={cn(
+                          "relative inline-block px-5 py-2 rounded-lg text-sm font-medium cursor-pointer select-none transition-all duration-300",
+                          isActive
+                            ? "text-primary bg-primary/5 font-semibold"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent/20"
+                        )}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        {item.label}
+                        <AnimatePresence>
+                          {isActive && (
+                            <motion.span 
+                              className="absolute left-1/2 -bottom-[3px] w-10 h-[2px] bg-gradient-to-r from-primary to-secondary rounded-full"
+                              layoutId="activeNavIndicator"
+                              initial={{ opacity: 0, scaleX: 0 }}
+                              animate={{ opacity: 1, scaleX: 1, x: '-50%' }}
+                              exit={{ opacity: 0, scaleX: 0 }}
+                              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                              style={{ originX: 0.5 }}
+                            />
                           )}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          {item.label}
-                          <AnimatePresence>
-                            {isActive && (
-                              <motion.span 
-                                className="absolute left-1/2 -bottom-[3px] w-10 h-[2px] bg-gradient-to-r from-primary to-secondary rounded-full"
-                                layoutId="activeNavIndicator"
-                                initial={{ opacity: 0, scaleX: 0 }}
-                                animate={{ opacity: 1, scaleX: 1, x: '-50%' }}
-                                exit={{ opacity: 0, scaleX: 0 }}
-                                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                                style={{ originX: 0.5 }}
-                              />
-                            )}
-                          </AnimatePresence>
-                        </motion.span>
-                      </a>
+                        </AnimatePresence>
+                      </motion.span>
                     </Link>
                   );
                 })}
