@@ -623,7 +623,7 @@ const DEFAULT_FILTERS: AdvancedFilterState = {
   with_people: [],
   with_networks: [],
   include_adult: false,
-  certification_country: "US",
+  certification_country: undefined,
   certification: undefined,
   search_query: undefined,
   search_type: "movie",
