@@ -72,7 +72,7 @@ describe('Filter Preset E2E', () => {
     // Verify the URL contains all expected Upcoming preset parameters
     expect(requestUrl).toContain('/api/movies/discover');
     expect(requestUrl).toContain('primary_release_date.gte=');
-    expect(requestUrl).toContain('sort_by=primary_release_date.asc');
+    expect(requestUrl).toContain('sort_by=popularity.desc');
     expect(requestUrl).toContain('with_original_language=hi');
     expect(requestUrl).toContain('with_release_type=2%7C3');
     expect(requestUrl).toContain('region=IN');

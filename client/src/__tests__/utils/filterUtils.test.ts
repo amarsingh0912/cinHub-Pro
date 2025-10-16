@@ -15,7 +15,7 @@ describe('mergeFilters', () => {
     expect(result.activePreset).toBe('upcoming');
     expect(result.category).toBe('upcoming');
     expect(result.with_original_language).toBe('hi');
-    expect(result.sort_by).toBe('primary_release_date.asc');
+    expect(result.sort_by).toBe('popularity.desc');
     expect(result.primary_release_date?.start).toBeDefined();
     expect(result.with_release_type).toEqual([2|3]);
     expect(result.region).toBe('IN');
@@ -125,7 +125,7 @@ describe('buildQueryString', () => {
 
   it('should build complete query string for upcoming + Hindi', () => {
     const params = {
-      sort_by: 'primary_release_date.asc',
+      sort_by: 'popularity.desc',
       with_original_language: 'hi',
       region: 'IN',
       include_adult: false,
@@ -137,7 +137,7 @@ describe('buildQueryString', () => {
 
     const queryString = buildQueryString(params);
 
-    expect(queryString).toContain('sort_by=primary_release_date.asc');
+    expect(queryString).toContain('sort_by=popularity.desc');
     expect(queryString).toContain('with_original_language=hi');
     expect(queryString).toContain('region=IN');
     expect(queryString).toContain('include_adult=false');
@@ -173,7 +173,7 @@ describe('Integration: mergeFilters + buildQueryString', () => {
 
     // Verify all expected params are present
     expect(queryString).toContain('primary_release_date.gte=');
-    expect(queryString).toContain('sort_by=primary_release_date.asc');
+    expect(queryString).toContain('sort_by=popularity.desc');
     expect(queryString).toContain('with_original_language=hi');
     expect(queryString).toContain('with_release_type=2%7C3');
     expect(queryString).toContain('region=IN');

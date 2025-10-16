@@ -193,7 +193,7 @@ export function buildMovieDiscoverParams(
       return {
         ...baseParams,
         "primary_release_date.gte": tomorrow,
-        sort_by: "primary_release_date.asc",
+        sort_by: "popularity.desc",
       };
 
     case "now_playing":
