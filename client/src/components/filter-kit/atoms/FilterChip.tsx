@@ -78,19 +78,28 @@ export function FilterChip({
       <span>{label}</span>
       <AnimatePresence>
         {onRemove && selected && (
-          <motion.button
+          <motion.span
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
               onRemove();
             }}
-            className="flex-shrink-0 ml-0.5 p-0.5 rounded-full hover:bg-current/10 transition-colors"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemove();
+              }
+            }}
+            className="flex-shrink-0 ml-0.5 p-0.5 rounded-full hover:bg-current/10 transition-colors cursor-pointer"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 15, stiffness: 500 }}
           >
             <X className="h-3 w-3" />
-          </motion.button>
+          </motion.span>
         )}
       </AnimatePresence>
     </motion.button>
