@@ -69,6 +69,8 @@ export default function Dashboard() {
   const [isViewWatchlistOpen, setIsViewWatchlistOpen] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedTrendingItem, setSelectedTrendingItem] = useState<any>(null);
+  const [isWatchlistSelectionOpen, setIsWatchlistSelectionOpen] = useState(false);
 
   // Preferences and History state
   const [userPreferences, setUserPreferences] = useState<any>({});
@@ -429,6 +431,100 @@ export default function Dashboard() {
       toast({
         title: "Error",
         description: "Failed to remove from favorites.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addToFavoritesMutation = useMutation({
+    mutationFn: async (data: { mediaType: string; mediaId: number; mediaTitle: string; mediaPosterPath: string | null; mediaReleaseDate: string }) => {
+      await apiRequest("POST", "/api/favorites", data);
+    },
+    onSuccess: async (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "favorite_added",
+          entityType: variables.mediaType,
+          entityId: variables.mediaId.toString(),
+          entityTitle: variables.mediaTitle,
+          description: `Added "${variables.mediaTitle}" to favorites`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
+      toast({
+        title: "Added to Favorites",
+        description: `${variables.mediaTitle} has been added to your favorites.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to add to favorites.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addToWatchlistMutation = useMutation({
+    mutationFn: async (data: { watchlistId: string; mediaType: string; mediaId: number; mediaTitle: string; mediaPosterPath: string | null; mediaReleaseDate: string }) => {
+      await apiRequest("POST", `/api/watchlists/${data.watchlistId}/items`, {
+        mediaType: data.mediaType,
+        mediaId: data.mediaId,
+        mediaTitle: data.mediaTitle,
+        mediaPosterPath: data.mediaPosterPath,
+        mediaReleaseDate: data.mediaReleaseDate,
+      });
+    },
+    onSuccess: async (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/watchlists"] });
+      
+      try {
+        await apiRequest("POST", "/api/activity-history", {
+          activityType: "watchlist_item_added",
+          entityType: variables.mediaType,
+          entityId: variables.mediaId.toString(),
+          entityTitle: variables.mediaTitle,
+          description: `Added "${variables.mediaTitle}" to watchlist`
+        });
+      } catch (error) {
+        console.log("Failed to track activity history:", error);
+      }
+      
+      toast({
+        title: "Added to Watchlist",
+        description: `${variables.mediaTitle} has been added to your watchlist.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to add to watchlist.",
         variant: "destructive",
       });
     },
@@ -973,6 +1069,17 @@ export default function Dashboard() {
     setIsViewWatchlistOpen(true);
   };
 
+  const handleAddToWatchlist = (watchlistId: string) => {
+    if (selectedTrendingItem && watchlistId) {
+      addToWatchlistMutation.mutate({
+        watchlistId,
+        ...selectedTrendingItem
+      });
+      setIsWatchlistSelectionOpen(false);
+      setSelectedTrendingItem(null);
+    }
+  };
+
   const handleProfileSubmit = (data: z.infer<typeof profileFormSchema>) => {
     updateProfileMutation.mutate(data);
   };
@@ -1411,18 +1518,18 @@ export default function Dashboard() {
                         <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-2">
-                            <Link href="/movies">
-                              <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50">
+                            <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50" asChild>
+                              <Link href="/movies" data-testid="quick-action-browse-movies">
                                 <Film className="w-4 h-4 mr-2" />
                                 Browse Movies
-                              </Button>
-                            </Link>
-                            <Link href="/tv-shows">
-                              <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50">
+                              </Link>
+                            </Button>
+                            <Button variant="outline" size="sm" className="w-full justify-start hover:bg-accent/50" asChild>
+                              <Link href="/tv-shows" data-testid="quick-action-browse-tv">
                                 <Tv className="w-4 h-4 mr-2" />
                                 Browse TV
-                              </Button>
-                            </Link>
+                              </Link>
+                            </Button>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <Button
@@ -1509,11 +1616,42 @@ export default function Dashboard() {
                                 />
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                   <div className="flex gap-2">
-                                    <Button size="sm" variant="secondary" className="text-xs">
+                                    <Button 
+                                      size="sm" 
+                                      variant="secondary" 
+                                      className="text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToFavoritesMutation.mutate({
+                                          mediaType: 'movie',
+                                          mediaId: movie.id,
+                                          mediaTitle: movie.title,
+                                          mediaPosterPath: movie.poster_path,
+                                          mediaReleaseDate: movie.release_date || ''
+                                        });
+                                      }}
+                                      data-testid={`trending-movie-favorite-${movie.id}`}
+                                    >
                                       <Heart className="w-3 h-3 mr-1" />
                                       Add
                                     </Button>
-                                    <Button size="sm" variant="secondary" className="text-xs">
+                                    <Button 
+                                      size="sm" 
+                                      variant="secondary" 
+                                      className="text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedTrendingItem({
+                                          mediaType: 'movie',
+                                          mediaId: movie.id,
+                                          mediaTitle: movie.title,
+                                          mediaPosterPath: movie.poster_path,
+                                          mediaReleaseDate: movie.release_date || ''
+                                        });
+                                        setIsWatchlistSelectionOpen(true);
+                                      }}
+                                      data-testid={`trending-movie-watchlist-${movie.id}`}
+                                    >
                                       <Plus className="w-3 h-3 mr-1" />
                                       Watch
                                     </Button>
@@ -1558,11 +1696,42 @@ export default function Dashboard() {
                                 />
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                   <div className="flex gap-2">
-                                    <Button size="sm" variant="secondary" className="text-xs">
+                                    <Button 
+                                      size="sm" 
+                                      variant="secondary" 
+                                      className="text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToFavoritesMutation.mutate({
+                                          mediaType: 'tv',
+                                          mediaId: show.id,
+                                          mediaTitle: show.name,
+                                          mediaPosterPath: show.poster_path,
+                                          mediaReleaseDate: show.first_air_date || ''
+                                        });
+                                      }}
+                                      data-testid={`trending-tv-favorite-${show.id}`}
+                                    >
                                       <Heart className="w-3 h-3 mr-1" />
                                       Add
                                     </Button>
-                                    <Button size="sm" variant="secondary" className="text-xs">
+                                    <Button 
+                                      size="sm" 
+                                      variant="secondary" 
+                                      className="text-xs"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedTrendingItem({
+                                          mediaType: 'tv',
+                                          mediaId: show.id,
+                                          mediaTitle: show.name,
+                                          mediaPosterPath: show.poster_path,
+                                          mediaReleaseDate: show.first_air_date || ''
+                                        });
+                                        setIsWatchlistSelectionOpen(true);
+                                      }}
+                                      data-testid={`trending-tv-watchlist-${show.id}`}
+                                    >
                                       <Plus className="w-3 h-3 mr-1" />
                                       Watch
                                     </Button>
@@ -1955,6 +2124,58 @@ export default function Dashboard() {
                             Update Watchlist
                           </Button>
                         </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {/* Watchlist Selection Dialog */}
+                  <Dialog open={isWatchlistSelectionOpen} onOpenChange={setIsWatchlistSelectionOpen}>
+                    <DialogContent data-testid="watchlist-selection-dialog">
+                      <DialogHeader>
+                        <DialogTitle>Add to Watchlist</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        {watchlistsLoading ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                            <p className="text-sm text-muted-foreground">Loading watchlists...</p>
+                          </div>
+                        ) : watchlists && watchlists.length > 0 ? (
+                          <div className="space-y-2 max-h-96 overflow-y-auto">
+                            {watchlists.map((watchlist) => (
+                              <Button
+                                key={watchlist.id}
+                                variant="outline"
+                                className="w-full justify-start"
+                                onClick={() => handleAddToWatchlist(watchlist.id)}
+                                data-testid={`select-watchlist-${watchlist.id}`}
+                              >
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                <div className="flex-1 text-left">
+                                  <div className="font-medium">{watchlist.name}</div>
+                                  {watchlist.description && (
+                                    <div className="text-xs text-muted-foreground truncate">{watchlist.description}</div>
+                                  )}
+                                </div>
+                              </Button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                            <p className="text-sm text-muted-foreground mb-4">No watchlists yet</p>
+                            <Button
+                              onClick={() => {
+                                setIsWatchlistSelectionOpen(false);
+                                setIsCreateWatchlistOpen(true);
+                              }}
+                              data-testid="create-watchlist-from-selection"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Create Watchlist
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </DialogContent>
                   </Dialog>
