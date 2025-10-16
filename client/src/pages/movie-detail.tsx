@@ -354,30 +354,37 @@ export default function MovieDetail() {
       <Header />
       
       <main className="pt-16">
-        {/* Hero Section */}
-        <section className="relative min-h-[70vh] flex items-end" data-testid="movie-hero">
+        {/* Immersive Cinematic Hero Section */}
+        <section className="relative min-h-[75vh] md:min-h-[80vh] flex items-end overflow-hidden" data-testid="movie-hero">
+          {/* Enhanced Backdrop with Blur */}
           <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-background/20 backdrop-blur-3xl z-[1]" />
             <img
               src={getImageUrl(movie.backdrop_path, 'original')}
               alt={movie.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover scale-110 blur-sm"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+            {/* Multi-layer gradient overlay for depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40 z-[2]"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60 z-[3]"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-background to-transparent z-[4]"></div>
           </div>
           
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-end">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 md:pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12 items-end">
               <div className="lg:col-span-1">
-                <div className="relative">
+                <div className="relative group">
+                  {/* Enhanced glow effect */}
+                  <div className="absolute -inset-2 bg-gradient-to-r from-primary/40 via-primary/25 to-secondary/30 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 motion-reduce:hidden" />
                   <img
                     src={getImageUrl(movie.poster_path, 'w500')}
                     alt={movie.title}
-                    className="w-full max-w-sm mx-auto lg:mx-0 rounded-lg shadow-2xl"
+                    className="relative w-full max-w-sm mx-auto lg:mx-0 rounded-2xl shadow-2xl border border-border/30 group-hover:border-primary/50 transition-all duration-500 ring-1 ring-black/10 dark:ring-white/10"
                     data-testid="movie-poster"
                   />
                   
                   {/* Cache Status Indicator */}
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-4 left-4">
                     <CacheStatus
                       isOptimizing={cacheStatus.isOptimizing ?? false}
                       isCompleted={cacheStatus.isCompleted ?? false}
@@ -390,42 +397,44 @@ export default function MovieDetail() {
                 </div>
               </div>
               
-              <div className="lg:col-span-2 text-center lg:text-left">
-                <h1 className="text-4xl lg:text-6xl font-display font-bold mb-4" data-testid="movie-title">
-                  {movie.title}
-                </h1>
-                {movie.tagline && (
-                  <p className="text-xl text-muted-foreground mb-6" data-testid="movie-tagline">
-                    "{movie.tagline}"
-                  </p>
-                )}
+              <div className="lg:col-span-2 text-center lg:text-left space-y-6">
+                <div>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-extrabold mb-4 tracking-tight leading-none bg-gradient-to-r from-foreground via-foreground to-foreground/90 bg-clip-text drop-shadow-2xl" data-testid="movie-title">
+                    {movie.title}
+                  </h1>
+                  {movie.tagline && (
+                    <p className="text-xl sm:text-2xl text-muted-foreground/90 italic font-light tracking-wide" data-testid="movie-tagline">
+                      "{movie.tagline}"
+                    </p>
+                  )}
+                </div>
                 
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
-                  <div className="flex items-center gap-2" data-testid="movie-rating">
-                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="font-semibold">{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
-                    <span className="text-muted-foreground">({movie.vote_count ? movie.vote_count.toLocaleString() : '0'} votes)</span>
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 md:gap-6">
+                  <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 backdrop-blur-sm" data-testid="movie-rating">
+                    <Star className="w-6 h-6 text-yellow-500 fill-current drop-shadow-[0_2px_8px_rgba(234,179,8,0.5)]" />
+                    <span className="font-display font-bold text-lg">{movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
+                    <span className="text-muted-foreground/80 text-sm">({movie.vote_count ? movie.vote_count.toLocaleString() : '0'})</span>
                   </div>
                   
                   {movie.runtime && (
-                    <div className="flex items-center gap-2" data-testid="movie-runtime">
-                      <Clock className="w-5 h-5 text-muted-foreground" />
-                      <span>{formatRuntime(movie.runtime)}</span>
+                    <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-card/60 border border-border/40 backdrop-blur-sm" data-testid="movie-runtime">
+                      <Clock className="w-5 h-5 text-primary" />
+                      <span className="font-semibold">{formatRuntime(movie.runtime)}</span>
                     </div>
                   )}
                   
-                  <div className="flex items-center gap-2" data-testid="movie-release-date">
-                    <Calendar className="w-5 h-5 text-muted-foreground" />
-                    <span>{new Date(movie.release_date).getFullYear()}</span>
+                  <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-card/60 border border-border/40 backdrop-blur-sm" data-testid="movie-release-date">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <span className="font-semibold">{new Date(movie.release_date).getFullYear()}</span>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2 mb-6" data-testid="movie-genres">
+                <div className="flex flex-wrap gap-2.5" data-testid="movie-genres">
                   {movie.genres?.map((genre: any) => (
                     <Link key={genre.id} href={`/genre/${genre.id}`}>
                       <Badge 
                         variant="secondary" 
-                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        className="px-4 py-1.5 text-sm font-semibold rounded-xl cursor-pointer bg-card/60 border-border/50 hover:bg-primary hover:text-primary-foreground hover:border-primary/50 transition-all duration-300 backdrop-blur-sm"
                         data-testid={`genre-${genre.id}`}
                       >
                         {genre.name}
@@ -434,11 +443,11 @@ export default function MovieDetail() {
                   ))}
                 </div>
                 
-                <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-4">
+                <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-2">
                   {hasTrailer && (
                     <Button 
                       size="lg" 
-                      className="flex items-center gap-2" 
+                      className="flex items-center gap-2.5 px-8 py-6 text-base font-bold rounded-2xl shadow-lg hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary" 
                       onClick={() => setIsTrailerModalOpen(true)}
                       data-testid="button-watch-trailer"
                     >
@@ -454,22 +463,22 @@ export default function MovieDetail() {
                         size="lg"
                         onClick={() => isFavorite ? removeFromFavoritesMutation.mutate() : addToFavoritesMutation.mutate()}
                         disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2.5 px-6 py-6 text-base font-semibold rounded-2xl backdrop-blur-sm transition-all duration-300"
                         data-testid="button-favorite"
                       >
                         <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                        {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                        {isFavorite ? 'Remove' : 'Favorite'}
                       </Button>
                       
                       <Button 
                         variant="outline" 
                         size="lg" 
-                        className="flex items-center gap-2" 
+                        className="flex items-center gap-2.5 px-6 py-6 text-base font-semibold rounded-2xl backdrop-blur-sm transition-all duration-300" 
                         onClick={() => setIsWatchlistDialogOpen(true)}
                         data-testid="button-add-to-watchlist"
                       >
                         <Plus className="w-5 h-5" />
-                        Add to Watchlist
+                        Watchlist
                       </Button>
                     </>
                   )}
