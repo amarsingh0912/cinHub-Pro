@@ -104,6 +104,20 @@ export function ActiveFiltersChips({ filters, onFiltersChange, className }: Acti
     });
   }
 
+  // Vote Count (Minimum votes)
+  if (filters.vote_count?.min) {
+    activeChips.push({
+      id: 'vote-count',
+      label: `${filters.vote_count.min}+ votes`,
+      onRemove: () => {
+        onFiltersChange({
+          ...filters,
+          vote_count: {},
+        });
+      },
+    });
+  }
+
   // Runtime Range
   if (filters.with_runtime?.min || filters.with_runtime?.max) {
     const min = filters.with_runtime.min;

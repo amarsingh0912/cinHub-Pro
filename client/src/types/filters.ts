@@ -690,7 +690,6 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       sort_by: "popularity.desc",
       include_adult: false,
       include_video: false,
-      vote_count: { min: 100 },
       primary_release_date: { start: getDateOffset(-100) }, // Last 100 days
     },
   },
@@ -722,7 +721,7 @@ export const MOVIE_PRESETS: Record<MoviePresetCategory, PresetConfig> = {
       include_adult: false,
       include_video: false,
       primary_release_date: {
-        start: getDateOffset(-45), // Last 45 days
+        start: getDateOffset(-28), // Last 28 days
         end: getTodayDate(),
       },
     },
