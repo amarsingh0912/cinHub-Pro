@@ -808,6 +808,7 @@ export const TV_PRESETS: Record<TVPresetCategory, PresetConfig> = {
 /**
  * Merge preset defaults with user overrides
  * Always preserves user-selected filters while applying preset-specific parameters
+ * Clears conflicting date parameters when switching between presets
  */
 export function mergeFilters(
   presetCategory: PresetCategory,
@@ -830,9 +831,46 @@ export function mergeFilters(
   // Apply preset defaults
   const presetParams = preset.params;
 
-  // Deep merge preset params into base
+  // Determine which date parameters the preset uses
+  const presetUsesAirDate = 'air_date' in presetParams;
+  const presetUsesFirstAirDate = 'first_air_date' in presetParams;
+  const presetUsesPrimaryReleaseDate = 'primary_release_date' in presetParams;
+  const presetUsesReleaseDate = 'release_date' in presetParams;
+
+  // Clear conflicting date parameters from base filters
+  const clearedBase = { ...baseFilters };
+  
+  // If preset uses air_date, clear conflicting date filters from base
+  if (presetUsesAirDate) {
+    clearedBase.first_air_date = {};
+    clearedBase.primary_release_date = {};
+    clearedBase.release_date = {};
+  }
+  
+  // If preset uses first_air_date, clear conflicting date filters from base
+  if (presetUsesFirstAirDate) {
+    clearedBase.air_date = {};
+    clearedBase.primary_release_date = {};
+    clearedBase.release_date = {};
+  }
+  
+  // If preset uses primary_release_date, clear conflicting date filters from base
+  if (presetUsesPrimaryReleaseDate) {
+    clearedBase.air_date = {};
+    clearedBase.first_air_date = {};
+    clearedBase.release_date = {};
+  }
+  
+  // If preset uses release_date, clear conflicting date filters from base
+  if (presetUsesReleaseDate) {
+    clearedBase.air_date = {};
+    clearedBase.first_air_date = {};
+    clearedBase.primary_release_date = {};
+  }
+
+  // Deep merge preset params into cleared base
   const withPreset = {
-    ...baseFilters,
+    ...clearedBase,
     ...presetParams,
     contentType,
     category: preset.category,
