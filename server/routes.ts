@@ -81,8 +81,9 @@ async function fetchFromTMDB(
   });
 
   const searchParams = new URLSearchParams(filteredParams);
-  // TMDB API expects literal pipe characters for OR logic, not URL-encoded %7C or %2C (comma)
-  const queryString = searchParams.toString().replace(/%7C/g, '|').replace(/%2C/g, '|');
+  // TMDB API expects literal pipe characters for OR logic (genres, keywords), but commas for append_to_response
+  // Replace %7C with | for OR logic, and %2C with , (comma) for lists like append_to_response
+  const queryString = searchParams.toString().replace(/%7C/g, '|').replace(/%2C/g, ',');
   const url = `https://api.themoviedb.org/3${endpoint}?${queryString}`;
 
   // Debug URL construction - credentials redacted for security
