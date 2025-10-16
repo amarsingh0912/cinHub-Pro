@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { FilterChip, MetricPill } from "../atoms";
 import { filterMotion } from "../filter-motion";
 import { useFilterContext } from "@/contexts/FilterContext";
+import { ActiveFiltersChips } from "./ActiveFiltersChips";
 
 interface ContextRibbonProps {
   filters: AdvancedFilterState;
@@ -308,6 +309,13 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
             })}
           </div>
         </div>
+
+        {/* Third Row: Active Filters Chips */}
+        <ActiveFiltersChips 
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+          className="border-t border-border/30 py-2"
+        />
       </div>
     </div>
   );
