@@ -68,10 +68,10 @@ export default function MovieGrid({
 }: MovieGridProps) {
   const gridColumns = useGridColumns();
   
-  // Calculate skeletons needed to fill incomplete row on same line
+  // Calculate skeletons needed to fill incomplete row or show full new row
   const getSkeletonCount = () => {
     const remainder = movies.length % gridColumns;
-    return remainder > 0 ? gridColumns - remainder : 0;
+    return remainder === 0 ? gridColumns : gridColumns - remainder;
   };
 
   if (isLoading) {
@@ -137,7 +137,9 @@ export default function MovieGrid({
                 />
               ))}
               {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-                <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
+                <div key={`skeleton-${movies.length + index}`} role="status" aria-hidden="true">
+                  <MovieCardSkeleton />
+                </div>
               ))}
             </div>
           </RevealOnScroll>
@@ -155,7 +157,9 @@ export default function MovieGrid({
                 />
               ))}
               {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-                <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
+                <div key={`skeleton-${movies.length + index}`} role="status" aria-hidden="true">
+                  <MovieCardSkeleton />
+                </div>
               ))}
             </div>
           </RevealOnScroll>
@@ -172,7 +176,9 @@ export default function MovieGrid({
               />
             ))}
             {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-              <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
+              <div key={`skeleton-${movies.length + index}`} role="status" aria-hidden="true">
+                <MovieCardSkeleton />
+              </div>
             ))}
           </div>
         )}
