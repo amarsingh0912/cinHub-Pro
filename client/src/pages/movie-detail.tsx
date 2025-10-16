@@ -295,7 +295,7 @@ export default function MovieDetail() {
     }
   }, [movie]);
 
-  if (movieLoading) {
+  if (!id || movieLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground" data-testid="movie-detail-loading">
         <Header />

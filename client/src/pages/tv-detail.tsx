@@ -229,7 +229,7 @@ export default function TVDetail() {
     }
   }, [tvShow]);
 
-  if (tvLoading) {
+  if (!id || tvLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground" data-testid="tv-loading">
         <Header />
