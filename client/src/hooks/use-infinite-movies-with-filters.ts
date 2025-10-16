@@ -92,6 +92,14 @@ export function useInfiniteMoviesWithFilters(options: UseInfiniteMoviesWithFilte
     if (debouncedFilters.first_air_date?.end) {
       params['first_air_date.lte'] = debouncedFilters.first_air_date.end;
     }
+    
+    // Alternative TV air date filters
+    if (debouncedFilters.air_date?.start) {
+      params['air_date.gte'] = debouncedFilters.air_date.start;
+    }
+    if (debouncedFilters.air_date?.end) {
+      params['air_date.lte'] = debouncedFilters.air_date.end;
+    }
 
     // Runtime filters
     if (debouncedFilters.with_runtime?.min) params['with_runtime.gte'] = debouncedFilters.with_runtime.min;

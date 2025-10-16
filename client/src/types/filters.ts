@@ -394,7 +394,10 @@ export const DEFAULT_MOVIE_FILTERS: AdvancedFilterState = {
 export const DEFAULT_TV_FILTERS: AdvancedFilterState = {
   ...DEFAULT_MOVIE_FILTERS,
   contentType: "tv",
+  category: "trending",
+  activePreset: "trending",
   sort_by: "popularity.desc",
+  first_air_date: { start: getDateOffset(-365) }, // Last year - from trending preset
 };
 
 // Quick filter presets

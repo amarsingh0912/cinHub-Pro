@@ -14,6 +14,7 @@ export default function TVShows() {
     filters,
     setFilters,
     updateFilter,
+    setPreset,
     debouncedFilters,
     isDebouncing,
     data: shows,
@@ -91,6 +92,7 @@ export default function TVShows() {
       <ContextRibbon
         filters={filters}
         onFiltersChange={setFilters}
+        setPreset={setPreset}
         totalResults={totalResults}
         isLoading={isLoading || isDebouncing}
       />
