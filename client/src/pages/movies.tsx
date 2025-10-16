@@ -1,5 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
-import { useRoute, useLocation } from "wouter";
+import { useMemo, useState } from "react";
 import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -7,51 +6,10 @@ import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
 import { Loader2, Code, X } from "lucide-react";
-import { DEFAULT_MOVIE_FILTERS, urlSlugToCategory, categoryToUrlSlug, type PresetCategory } from "@/types/filters";
+import { DEFAULT_MOVIE_FILTERS } from "@/types/filters";
 
 export default function Movies() {
   const [showDebugPanel, setShowDebugPanel] = useState(false);
-  const [, params] = useRoute("/movies/:category");
-  const [location, setLocation] = useLocation();
-  
-  // Get category from URL params
-  const urlCategory = params?.category;
-  const validCategory = urlCategory ? urlSlugToCategory(urlCategory) : null;
-  const category: PresetCategory = validCategory || 'trending';
-  
-  // Handle legacy query-based URLs, invalid slugs, and default redirects
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const legacyCategory = searchParams.get('category');
-    
-    // If there's a legacy category in query params, redirect to new URL structure
-    if (legacyCategory) {
-      const validLegacyCategory = urlSlugToCategory(legacyCategory);
-      if (validLegacyCategory) {
-        // Remove category from query params
-        searchParams.delete('category');
-        const remainingQuery = searchParams.toString();
-        const newPath = `/movies/${categoryToUrlSlug(validLegacyCategory as PresetCategory)}${remainingQuery ? `?${remainingQuery}` : ''}`;
-        setLocation(newPath, { replace: true });
-        return;
-      }
-    }
-    
-    // If no category in URL, redirect to default (trending)
-    if (!urlCategory) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const queryString = searchParams.toString();
-      setLocation(`/movies/trending${queryString ? `?${queryString}` : ''}`, { replace: true });
-      return;
-    }
-    
-    // If category slug is invalid, redirect to default (trending) with filters preserved
-    if (urlCategory && !validCategory) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const queryString = searchParams.toString();
-      setLocation(`/movies/trending${queryString ? `?${queryString}` : ''}`, { replace: true });
-    }
-  }, [urlCategory, validCategory, setLocation]);
   
   // Use the complete filter system with URL sync and debouncing
   const {
@@ -71,11 +29,7 @@ export default function Movies() {
     queryString,
     endpoint,
   } = useInfiniteMoviesWithFilters({
-    initialFilters: {
-      ...DEFAULT_MOVIE_FILTERS,
-      category,
-      activePreset: category,
-    },
+    initialFilters: DEFAULT_MOVIE_FILTERS,
     debounceDelay: 250,
     syncToURL: true,
     pushState: false,

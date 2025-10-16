@@ -18,13 +18,13 @@ import { DEFAULT_MOVIE_FILTERS, DEFAULT_TV_FILTERS } from '@/types/filters';
 
 /**
  * Converts filter state to URL query parameters
- * Category is excluded as it's now part of the URL path
  */
 export function filtersToQueryParams(filters: AdvancedFilterState): FilterQueryParams {
   const params: FilterQueryParams = {};
 
-  // Core content type only (category is now in the URL path)
+  // Core content type and category
   if (filters.contentType) params.type = filters.contentType;
+  if (filters.category) params.category = filters.category;
 
   // Genres - multi-select arrays
   if (filters.with_genres.length > 0) {
@@ -189,7 +189,9 @@ export function queryParamsToFilters(params: URLSearchParams, contentType?: Cont
     contentType: type
   };
 
-  // Category is now derived from the URL path, not query params
+  // Parse category
+  const category = params.get('category');
+  if (category) filters.category = category;
 
   // Parse genres
   const withGenres = params.get('with_genres');
@@ -503,40 +505,11 @@ export function useFilterURLSync(initialFilters?: AdvancedFilterState): UseFilte
     }
   }, []);
 
-  /**
-   * Navigate to a new category path while preserving current query parameters
-   */
-  const navigateToCategory = useCallback((newPath: string, options: { pushState?: boolean } = {}) => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const queryString = searchParams.toString();
-    const newURL = queryString ? `${newPath}?${queryString}` : newPath;
-    
-    if (options.pushState) {
-      window.history.pushState(null, '', newURL);
-    } else {
-      window.history.replaceState(null, '', newURL);
-    }
-    
-    // Update local state
-    const params: FilterQueryParams = {};
-    searchParams.forEach((value, key) => {
-      params[key] = value;
-    });
-    setUrlParams(params);
-    
-    // Dispatch custom event
-    window.dispatchEvent(new Event('urlchange'));
-    
-    // Use wouter's navigate to update its internal state
-    navigate(newURL, { replace: !options.pushState });
-  }, [navigate]);
-
   return {
     syncToURL,
     syncFromURL,
     urlParams,
-    updateURL,
-    navigateToCategory
+    updateURL
   };
 }
 
