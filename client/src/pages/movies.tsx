@@ -4,7 +4,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
-import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
+import { ContextRibbon, FilterDock, FilterLab, FloatingFilterButton } from "@/components/filter-kit";
 import { Loader2, Code, X, Film, TrendingUp, Star, Calendar, PlayCircle, Sparkles } from "lucide-react";
 import { DEFAULT_MOVIE_FILTERS } from "@/types/filters";
 
@@ -316,10 +316,18 @@ export default function Movies() {
 
       <Footer />
 
+      {/* Floating Filter Button */}
+      <FloatingFilterButton
+        filters={filters}
+        onResetFilters={() => setFilters(DEFAULT_MOVIE_FILTERS)}
+        activeFiltersCount={appliedFiltersCount}
+      />
+
       {/* Filter Dock - Responsive drawer */}
       <FilterDock
         filters={filters}
         onFiltersChange={setFilters}
+        setPreset={setPreset}
       />
 
       {/* Filter Lab - Advanced modal */}

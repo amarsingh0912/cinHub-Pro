@@ -123,96 +123,11 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
       data-testid="context-ribbon"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Category Selector with Filter Actions */}
-        <div className="py-2 overflow-x-auto">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 min-w-max flex-1">
-              {categories.map((category) => {
-                const Icon = category.icon;
-                const defaultCategory = 'trending';
-                const isActive = filters.category === category.value || (!filters.category && category.value === defaultCategory);
-                
-                return (
-                  <motion.button
-                    key={category.value}
-                    onClick={() => setCategory(category.value)}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-lg",
-                      "transition-all duration-200 font-medium text-sm whitespace-nowrap",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    )}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    data-testid={`category-${category.value}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{category.label}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-
-            {/* Filter Actions */}
-            <div className="flex items-center gap-2">
-              {/* Mobile filter count */}
-              {hasActiveFilters && (
-                <motion.div
-                  className="md:hidden px-2 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  {activeFiltersCount}
-                </motion.div>
-              )}
-
-              {/* Reset button */}
-              {hasActiveFilters && (
-                <motion.button
-                  onClick={resetFilters}
-                  className="p-2 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  data-testid="reset-filters"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </motion.button>
-              )}
-
-              {/* Filter Dock toggle */}
-              <motion.button
-                onClick={toggleDock}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full",
-                  "border backdrop-blur-sm transition-all duration-300",
-                  "hover:scale-105 active:scale-95",
-                  hasActiveFilters
-                    ? "bg-primary/10 border-primary/30 text-primary"
-                    : "bg-muted/50 border-border/50 text-foreground hover:bg-muted"
-                )}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                data-testid="open-filter-dock"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                <span className="hidden sm:inline text-sm font-medium">Filters</span>
-                {hasActiveFilters && (
-                  <span className="px-1.5 py-0.5 text-xs font-bold rounded-full bg-primary text-primary-foreground">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
-        {/* Third Row: Active Filters Chips */}
+        {/* Active Filters Chips */}
         <ActiveFiltersChips 
           filters={filters}
           onFiltersChange={onFiltersChange}
-          className="border-t border-border/30 py-2"
+          className="py-2"
         />
       </div>
     </div>

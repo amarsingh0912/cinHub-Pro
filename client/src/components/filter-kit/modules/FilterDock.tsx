@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Tag, Calendar, Star, MonitorPlay, Users, Settings } from "lucide-react";
-import { AdvancedFilterState } from "@/types/filters";
+import { X, Tag, Calendar, Star, MonitorPlay, Users, Settings, Eye } from "lucide-react";
+import { AdvancedFilterState, PresetCategory } from "@/types/filters";
 import { cn } from "@/lib/utils";
 import { useFilterContext } from "@/contexts/FilterContext";
 import { filterMotion } from "../filter-motion";
 import { FacetHeader } from "../atoms";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ViewByFilters } from "./facets/ViewByFilters";
 import { GenreFilters } from "./facets/GenreFilters";
 import { DateFilters } from "./facets/DateFilters";
 import { RatingFilters } from "./facets/RatingFilters";
@@ -16,10 +17,12 @@ import { AdvancedFilters } from "./facets/AdvancedFilters";
 interface FilterDockProps {
   filters: AdvancedFilterState;
   onFiltersChange: (filters: AdvancedFilterState) => void;
+  setPreset?: (presetCategory: PresetCategory) => void;
   className?: string;
 }
 
 const DOCK_SECTIONS = [
+  { id: 'viewby', label: 'View By', icon: Eye, description: 'Browse categories' },
   { id: 'explore', label: 'Explore', icon: Tag, description: 'Genres & themes' },
   { id: 'release', label: 'Release', icon: Calendar, description: 'Dates & runtime' },
   { id: 'ratings', label: 'Ratings', icon: Star, description: 'Score & popularity' },
@@ -28,7 +31,7 @@ const DOCK_SECTIONS = [
   { id: 'advanced', label: 'Advanced', icon: Settings, description: 'More options' },
 ];
 
-export function FilterDock({ filters, onFiltersChange, className }: FilterDockProps) {
+export function FilterDock({ filters, onFiltersChange, setPreset, className }: FilterDockProps) {
   const { isDockOpen, setDockOpen, activeSection, setActiveSection } = useFilterContext();
   const isMobile = useIsMobile();
 
@@ -134,6 +137,9 @@ export function FilterDock({ filters, onFiltersChange, className }: FilterDockPr
                     description={currentSection.description}
                   />
 
+                  {activeSection === 'viewby' && (
+                    <ViewByFilters filters={filters} onFiltersChange={onFiltersChange} setPreset={setPreset} />
+                  )}
                   {activeSection === 'explore' && (
                     <GenreFilters filters={filters} onFiltersChange={onFiltersChange} />
                   )}
