@@ -159,25 +159,28 @@ export default function Movies() {
       />
 
       <main className="pt-20">
-        {/* Redesigned Hero Section */}
-        <section className="relative mb-8" data-testid="movies-header">
+        {/* Enhanced Cinematic Hero Section */}
+        <section className="relative mb-10 md:mb-12" data-testid="movies-header">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header Content */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
+            {/* Header Content with Glassmorphism */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mb-8">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-4 mb-4">
                   <div
                     className={cn(
-                      "p-2.5 rounded-xl",
-                      "bg-gradient-to-br from-primary/20 to-primary/5",
-                      "border border-primary/20",
+                      "relative p-3 rounded-2xl",
+                      "bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5",
+                      "border border-primary/30",
+                      "shadow-lg shadow-primary/10",
+                      "backdrop-blur-sm"
                     )}
                   >
-                    <CategoryIcon className="h-6 w-6 text-primary" />
+                    <CategoryIcon className="h-7 w-7 text-primary drop-shadow-[0_2px_8px_rgba(var(--primary),0.4)]" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent rounded-2xl opacity-50" />
                   </div>
                   <div>
                     <h1
-                      className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
+                      className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text"
                       data-testid="content-title"
                     >
                       {categoryInfo.title}
@@ -185,23 +188,23 @@ export default function Movies() {
                   </div>
                 </div>
                 <p
-                  className="text-sm sm:text-base text-muted-foreground"
+                  className="text-base sm:text-lg text-muted-foreground/90 font-medium max-w-2xl"
                   data-testid="content-description"
                 >
                   {categoryInfo.description}
                 </p>
               </div>
 
-              {/* Stats Cards */}
-              <div className="flex items-center gap-3">
+              {/* Enhanced Stats Cards with Glassmorphism */}
+              <div className="flex items-center gap-4">
                 {!isLoading && totalResults > 0 && (
                   <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-                    <div className="relative px-5 py-3 bg-background/80 dark:bg-background/60 backdrop-blur-xl rounded-xl border border-border/50">
-                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/25 via-primary/15 to-primary/10 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-all duration-500 motion-reduce:hidden" />
+                    <div className="relative px-6 py-3.5 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl rounded-2xl border border-border/60 shadow-lg group-hover:shadow-xl group-hover:border-primary/40 transition-all duration-300">
+                      <div className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-1.5">
                         Results
                       </div>
-                      <div className="text-xl font-bold text-foreground">
+                      <div className="text-2xl font-display font-extrabold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
                         {totalResults.toLocaleString()}
                       </div>
                     </div>
@@ -213,12 +216,12 @@ export default function Movies() {
                     className="relative group"
                     data-testid="filter-count-badge"
                   >
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-primary/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-500" />
-                    <div className="relative px-5 py-3 bg-primary/10 dark:bg-primary/20 backdrop-blur-xl rounded-xl border border-primary/30">
-                      <div className="text-xs font-medium text-primary/80 uppercase tracking-wide mb-1">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 via-primary/25 to-secondary/30 rounded-2xl blur-md opacity-60 group-hover:opacity-100 transition-all duration-500 motion-reduce:hidden" />
+                    <div className="relative px-6 py-3.5 bg-gradient-to-br from-primary/15 to-primary/10 backdrop-blur-xl rounded-2xl border border-primary/40 shadow-lg group-hover:shadow-xl group-hover:border-primary/60 transition-all duration-300">
+                      <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-1.5">
                         Filters
                       </div>
-                      <div className="text-xl font-bold text-primary">
+                      <div className="text-2xl font-display font-extrabold text-primary drop-shadow-[0_2px_8px_rgba(var(--primary),0.4)]">
                         {appliedFiltersCount}
                       </div>
                     </div>
@@ -227,11 +230,11 @@ export default function Movies() {
 
                 {isDebouncing && (
                   <div
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl bg-muted/50 border border-border/50"
+                    className="flex items-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/40 backdrop-blur-sm border border-border/60 shadow-md"
                     data-testid="debouncing-indicator"
                   >
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm font-medium">Updating...</span>
+                    <Loader2 className="h-4 w-4 animate-spin text-primary drop-shadow-[0_2px_4px_rgba(var(--primary),0.3)]" />
+                    <span className="text-sm font-semibold text-muted-foreground">Updating...</span>
                   </div>
                 )}
               </div>
@@ -239,11 +242,11 @@ export default function Movies() {
           </div>
         </section>
 
-        {/* Movies Grid Section */}
-        <section className="pb-16 md:pb-20" data-testid="movies-grid-section">
+        {/* Enhanced Movies Grid Section */}
+        <section className="pb-20 md:pb-24" data-testid="movies-grid-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 sm:gap-6 md:gap-7 lg:gap-8">
                 {Array.from({ length: 18 }).map((_, i) => (
                   <MovieCardSkeleton key={i} />
                 ))}
