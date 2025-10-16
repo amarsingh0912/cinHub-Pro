@@ -53,6 +53,10 @@ function Router() {
   return (
     <Switch>
       {/* Routes available to everyone */}
+      {/* Category-based routes */}
+      <Route path="/movies/:category" component={Movies} />
+      <Route path="/tv-shows/:category" component={TVShows} />
+      {/* Default routes - redirect to trending */}
       <Route path="/movies" component={Movies} />
       <Route path="/tv-shows" component={TVShows} />
       <Route path="/movie/:id" component={MovieDetail} />

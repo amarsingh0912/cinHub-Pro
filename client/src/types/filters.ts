@@ -569,6 +569,10 @@ export interface UseFilterURLSyncReturn {
     params: Partial<FilterQueryParams>,
     options?: { pushState?: boolean },
   ) => void;
+  navigateToCategory: (
+    newPath: string,
+    options?: { pushState?: boolean },
+  ) => void;
 }
 
 export interface UseDebouncedFiltersReturn {
@@ -878,4 +882,32 @@ export function buildQueryString(params: Record<string, any>): string {
   });
 
   return searchParams.toString();
+}
+
+/**
+ * Convert category from snake_case to kebab-case for URL
+ * Example: now_playing -> now-playing
+ */
+export function categoryToUrlSlug(category: PresetCategory): string {
+  return category.replace(/_/g, '-');
+}
+
+/**
+ * Convert category from kebab-case URL to snake_case
+ * Example: now-playing -> now_playing
+ */
+export function urlSlugToCategory(slug: string): PresetCategory | null {
+  const category = slug.replace(/-/g, '_');
+  
+  // Validate that it's a valid category
+  const allCategories = [
+    ...Object.keys(MOVIE_PRESETS),
+    ...Object.keys(TV_PRESETS)
+  ];
+  
+  if (allCategories.includes(category)) {
+    return category as PresetCategory;
+  }
+  
+  return null;
 }

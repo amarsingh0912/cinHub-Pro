@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Film, Tv, SlidersHorizontal, X, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
-import { AdvancedFilterState, PresetCategory } from "@/types/filters";
+import { AdvancedFilterState, PresetCategory, categoryToUrlSlug } from "@/types/filters";
 import { cn } from "@/lib/utils";
 import { FilterChip, MetricPill } from "../atoms";
 import { filterMotion } from "../filter-motion";
 import { useFilterContext } from "@/contexts/FilterContext";
+import { useLocation } from "wouter";
 
 interface ContextRibbonProps {
   filters: AdvancedFilterState;
@@ -17,6 +18,7 @@ interface ContextRibbonProps {
 
 export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResults, isLoading, className }: ContextRibbonProps) {
   const { toggleDock, toggleLab } = useFilterContext();
+  const [location, navigate] = useLocation();
 
   const setContentType = (type: 'movie' | 'tv') => {
     const currentCategory = filters.category || (filters.contentType === 'movie' ? 'trending' : 'discover');
@@ -32,24 +34,34 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
       newCategory = 'trending';
     }
     
-    onFiltersChange({
-      ...filters,
-      contentType: type,
-      category: newCategory
-    });
+    // Navigate to new content type path while preserving filters
+    const basePath = type === 'movie' ? '/movies' : '/tv-shows';
+    const categorySlug = categoryToUrlSlug(newCategory as PresetCategory);
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryString = searchParams.toString();
+    const newPath = `${basePath}/${categorySlug}${queryString ? `?${queryString}` : ''}`;
+    
+    navigate(newPath);
+    
+    // Also update filter state for setPreset to work correctly
+    if (setPreset) {
+      setPreset(newCategory as PresetCategory);
+    }
   };
 
   const setCategory = (category: string) => {
-    // Use setPreset if available to preserve user filters while switching presets
+    // Navigate to new category path while preserving query parameters
+    const basePath = filters.contentType === 'movie' ? '/movies' : '/tv-shows';
+    const categorySlug = categoryToUrlSlug(category as PresetCategory);
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryString = searchParams.toString();
+    const newPath = `${basePath}/${categorySlug}${queryString ? `?${queryString}` : ''}`;
+    
+    navigate(newPath);
+    
+    // Use setPreset to update filter state with preset defaults while preserving user filters
     if (setPreset) {
       setPreset(category as PresetCategory);
-    } else {
-      // Fallback: just update category without merging preset defaults
-      onFiltersChange({
-        ...filters,
-        category,
-        activePreset: category as PresetCategory,
-      });
     }
   };
 

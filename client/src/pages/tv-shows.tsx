@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useRoute, useLocation } from "wouter";
 import { useInfiniteMoviesWithFilters } from "@/hooks/use-infinite-movies-with-filters";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -6,14 +7,57 @@ import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import { ContextRibbon, FilterDock, FilterLab } from "@/components/filter-kit";
 import { Loader2 } from "lucide-react";
-import { DEFAULT_TV_FILTERS } from "@/types/filters";
+import { DEFAULT_TV_FILTERS, urlSlugToCategory, categoryToUrlSlug, type PresetCategory } from "@/types/filters";
 
 export default function TVShows() {
+  const [, params] = useRoute("/tv-shows/:category");
+  const [location, setLocation] = useLocation();
+  
+  // Get category from URL params
+  const urlCategory = params?.category;
+  const validCategory = urlCategory ? urlSlugToCategory(urlCategory) : null;
+  const category: PresetCategory = validCategory || 'trending';
+  
+  // Handle legacy query-based URLs, invalid slugs, and default redirects
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const legacyCategory = searchParams.get('category');
+    
+    // If there's a legacy category in query params, redirect to new URL structure
+    if (legacyCategory) {
+      const validLegacyCategory = urlSlugToCategory(legacyCategory);
+      if (validLegacyCategory) {
+        // Remove category from query params
+        searchParams.delete('category');
+        const remainingQuery = searchParams.toString();
+        const newPath = `/tv-shows/${categoryToUrlSlug(validLegacyCategory as PresetCategory)}${remainingQuery ? `?${remainingQuery}` : ''}`;
+        setLocation(newPath, { replace: true });
+        return;
+      }
+    }
+    
+    // If no category in URL, redirect to default (trending)
+    if (!urlCategory) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const queryString = searchParams.toString();
+      setLocation(`/tv-shows/trending${queryString ? `?${queryString}` : ''}`, { replace: true });
+      return;
+    }
+    
+    // If category slug is invalid, redirect to default (trending) with filters preserved
+    if (urlCategory && !validCategory) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const queryString = searchParams.toString();
+      setLocation(`/tv-shows/trending${queryString ? `?${queryString}` : ''}`, { replace: true });
+    }
+  }, [urlCategory, validCategory, setLocation]);
+  
   // Use the complete filter system with URL sync and debouncing
   const {
     filters,
     setFilters,
     updateFilter,
+    setPreset,
     debouncedFilters,
     isDebouncing,
     data: shows,
@@ -24,7 +68,11 @@ export default function TVShows() {
     triggerRef,
     hasActiveFilters,
   } = useInfiniteMoviesWithFilters({
-    initialFilters: DEFAULT_TV_FILTERS,
+    initialFilters: {
+      ...DEFAULT_TV_FILTERS,
+      category,
+      activePreset: category,
+    },
     debounceDelay: 250,
     syncToURL: true,
     pushState: false,
@@ -88,6 +136,7 @@ export default function TVShows() {
       <ContextRibbon
         filters={filters}
         onFiltersChange={setFilters}
+        setPreset={setPreset}
         totalResults={totalResults}
         isLoading={isLoading || isDebouncing}
       />
