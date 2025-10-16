@@ -68,7 +68,7 @@ export default function MovieGrid({
 }: MovieGridProps) {
   const gridColumns = useGridColumns();
   
-  // Calculate skeletons needed to fill incomplete row
+  // Calculate skeletons needed to fill incomplete row on same line
   const getSkeletonCount = () => {
     const remainder = movies.length % gridColumns;
     return remainder > 0 ? gridColumns - remainder : 0;
@@ -129,15 +129,15 @@ export default function MovieGrid({
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
               data-testid="movie-grid"
             >
-              {movies.map((movie) => (
+              {movies.map((movie, index) => (
                 <MovieCard
-                  key={`${mediaType}-${movie.id}`}
+                  key={`${mediaType}-${movie.id}-${index}`}
                   movie={movie}
                   mediaType={mediaType}
                 />
               ))}
               {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-                <MovieCardSkeleton key={`skeleton-${index}`} />
+                <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
               ))}
             </div>
           </RevealOnScroll>
@@ -147,15 +147,15 @@ export default function MovieGrid({
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
               data-testid="movie-grid"
             >
-              {movies.map((movie) => (
+              {movies.map((movie, index) => (
                 <MovieCard
-                  key={`${mediaType}-${movie.id}`}
+                  key={`${mediaType}-${movie.id}-${index}`}
                   movie={movie}
                   mediaType={mediaType}
                 />
               ))}
               {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-                <MovieCardSkeleton key={`skeleton-${index}`} />
+                <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
               ))}
             </div>
           </RevealOnScroll>
@@ -164,15 +164,15 @@ export default function MovieGrid({
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"
             data-testid="movie-grid"
           >
-            {movies.map((movie) => (
+            {movies.map((movie, index) => (
               <MovieCard
-                key={`${mediaType}-${movie.id}`}
+                key={`${mediaType}-${movie.id}-${index}`}
                 movie={movie}
                 mediaType={mediaType}
               />
             ))}
             {isFetchingNextPage && Array.from({ length: getSkeletonCount() }, (_, index) => (
-              <MovieCardSkeleton key={`skeleton-${index}`} />
+              <MovieCardSkeleton key={`skeleton-${movies.length + index}`} />
             ))}
           </div>
         )}

@@ -1606,21 +1606,24 @@ export default function Dashboard() {
                       ) : trendingMovies?.results ? (
                         <div className="flex space-x-4 overflow-x-auto pb-2">
                           {trendingMovies.results.slice(0, 6).map((movie) => (
-                            <div key={movie.id} className="min-w-[150px] group cursor-pointer">
+                            <div key={movie.id} className="min-w-[150px] group">
                               <div className="relative overflow-hidden rounded-lg mb-2 group-hover:scale-105 transition-transform duration-300">
-                                <img
-                                  src={movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '/placeholder-movie.jpg'}
-                                  alt={movie.title}
-                                  className="w-full h-48 object-cover"
-                                  data-testid={`trending-movie-${movie.id}`}
-                                />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                  <div className="flex gap-2">
+                                <Link href={`/movie/${movie.id}`}>
+                                  <img
+                                    src={movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : '/placeholder-movie.jpg'}
+                                    alt={movie.title}
+                                    className="w-full h-48 object-cover cursor-pointer"
+                                    data-testid={`trending-movie-${movie.id}`}
+                                  />
+                                </Link>
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                  <div className="flex gap-2 pointer-events-auto">
                                     <Button 
                                       size="sm" 
                                       variant="secondary" 
                                       className="text-xs"
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         addToFavoritesMutation.mutate({
                                           mediaType: 'movie',
@@ -1640,6 +1643,7 @@ export default function Dashboard() {
                                       variant="secondary" 
                                       className="text-xs"
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         setSelectedTrendingItem({
                                           mediaType: 'movie',
@@ -1658,7 +1662,9 @@ export default function Dashboard() {
                                   </div>
                                 </div>
                               </div>
-                              <h3 className="text-sm font-medium truncate" title={movie.title}>{movie.title}</h3>
+                              <Link href={`/movie/${movie.id}`}>
+                                <h3 className="text-sm font-medium truncate cursor-pointer hover:text-primary transition-colors" title={movie.title}>{movie.title}</h3>
+                              </Link>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Star className="w-3 h-3 fill-current text-yellow-500" />
                                 <span>{movie.vote_average.toFixed(1)}</span>
@@ -1686,21 +1692,24 @@ export default function Dashboard() {
                       ) : trendingTV?.results ? (
                         <div className="flex space-x-4 overflow-x-auto pb-2">
                           {trendingTV.results.slice(0, 6).map((show) => (
-                            <div key={show.id} className="min-w-[150px] group cursor-pointer">
+                            <div key={show.id} className="min-w-[150px] group">
                               <div className="relative overflow-hidden rounded-lg mb-2 group-hover:scale-105 transition-transform duration-300">
-                                <img
-                                  src={show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : '/placeholder-movie.jpg'}
-                                  alt={show.name}
-                                  className="w-full h-48 object-cover"
-                                  data-testid={`trending-tv-${show.id}`}
-                                />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                  <div className="flex gap-2">
+                                <Link href={`/tv/${show.id}`}>
+                                  <img
+                                    src={show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : '/placeholder-movie.jpg'}
+                                    alt={show.name}
+                                    className="w-full h-48 object-cover cursor-pointer"
+                                    data-testid={`trending-tv-${show.id}`}
+                                  />
+                                </Link>
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                                  <div className="flex gap-2 pointer-events-auto">
                                     <Button 
                                       size="sm" 
                                       variant="secondary" 
                                       className="text-xs"
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         addToFavoritesMutation.mutate({
                                           mediaType: 'tv',
@@ -1720,6 +1729,7 @@ export default function Dashboard() {
                                       variant="secondary" 
                                       className="text-xs"
                                       onClick={(e) => {
+                                        e.preventDefault();
                                         e.stopPropagation();
                                         setSelectedTrendingItem({
                                           mediaType: 'tv',
@@ -1738,7 +1748,9 @@ export default function Dashboard() {
                                   </div>
                                 </div>
                               </div>
-                              <h3 className="text-sm font-medium truncate" title={show.name}>{show.name}</h3>
+                              <Link href={`/tv/${show.id}`}>
+                                <h3 className="text-sm font-medium truncate cursor-pointer hover:text-primary transition-colors" title={show.name}>{show.name}</h3>
+                              </Link>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Star className="w-3 h-3 fill-current text-yellow-500" />
                                 <span>{show.vote_average.toFixed(1)}</span>
