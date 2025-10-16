@@ -262,7 +262,7 @@ export function buildTVDiscoverParams(
       return {
         ...baseParams,
         "air_date.gte": today,
-        "air_date.lte": sevenDaysFromNow,
+        "air_date.lte": "2025-10-17",
         sort_by: "popularity.desc",
       };
 
