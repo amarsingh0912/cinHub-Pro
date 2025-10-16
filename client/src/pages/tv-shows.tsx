@@ -247,26 +247,14 @@ export default function TVShows() {
                 ))}
               </div>
             ) : shows && shows.length > 0 ? (
-              <>
-                <MovieGrid movies={shows} mediaType={filters.contentType} />
-
-                {/* Infinite scroll trigger - hidden but functional */}
-                {hasNextPage && !isFetchingNextPage && (
-                  <div ref={triggerRef} className="h-1" />
-                )}
-
-                {/* Show skeleton while fetching next page */}
-                {isFetchingNextPage && (
-                  <div
-                    ref={triggerRef}
-                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8 mt-8"
-                  >
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <MovieCardSkeleton key={i} />
-                    ))}
-                  </div>
-                )}
-              </>
+              <MovieGrid
+                movies={shows}
+                mediaType={filters.contentType}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                infiniteScrollTriggerRef={triggerRef}
+                enableAnimations={false}
+              />
             ) : (
               <div
                 className="flex flex-col items-center justify-center py-20 md:py-32"
