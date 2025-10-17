@@ -281,11 +281,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         
         const uploadResponse = await fetch('/api/auth/upload-profile-photo', {
           method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest', // Required for CSRF protection
+          },
           body: formData,
+          credentials: 'include',
         });
         
         if (!uploadResponse.ok) {
-          throw new Error('Failed to upload profile photo');
+          const errorText = await uploadResponse.text();
+          throw new Error(errorText || 'Failed to upload profile photo');
         }
         
         const uploadResult = await uploadResponse.json();
