@@ -1093,7 +1093,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate that the URL is from our configured Cloudinary account and belongs to this user
-      if (!validateCloudinaryUrl(secure_url, userId)) {
+      const isValidUrl = validateCloudinaryUrl(secure_url, userId);
+      if (!isValidUrl) {
+        console.error('Cloudinary URL validation failed:', {
+          url: secure_url,
+          userId,
+          cloudName: process.env.CLOUDINARY_CLOUD_NAME
+        });
         return res
           .status(400)
           .json({ message: "Invalid image URL or unauthorized access" });
