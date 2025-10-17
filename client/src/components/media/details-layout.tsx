@@ -249,7 +249,7 @@ export default function DetailsLayout({
                   <Link key={genre.id} href={`/genre/${genre.id}`}>
                     <Badge 
                       variant="secondary" 
-                      className="px-4 py-1.5 text-sm font-semibold rounded-xl cursor-pointer bg-card/60 border-border/50 hover:bg-primary hover:text-primary-foreground hover:border-primary/50 transition-all duration-300 backdrop-blur-sm"
+                      className="px-4 py-1.5 text-sm font-semibold rounded-xl cursor-pointer bg-yellow-500/90 text-yellow-950 dark:text-yellow-950 border-yellow-600/50 hover:bg-red-500 hover:text-white dark:hover:text-white hover:border-red-600/50 transition-all duration-300 backdrop-blur-sm"
                       data-testid={`genre-${genre.id}`}
                     >
                       {genre.name}
@@ -327,7 +327,7 @@ export default function DetailsLayout({
 
           {/* Tabs */}
           <Tabs defaultValue="cast" className="w-full" data-testid={`${type}-tabs`}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="cast" className="flex items-center gap-2" data-testid="tab-cast">
                 <Users className="w-4 h-4" />
                 Cast & Crew
@@ -335,6 +335,10 @@ export default function DetailsLayout({
               <TabsTrigger value="reviews" className="flex items-center gap-2" data-testid="tab-reviews">
                 <MessageSquare className="w-4 h-4" />
                 Reviews
+              </TabsTrigger>
+              <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar">
+                <Film className="w-4 h-4" />
+                Similar & Recommended
               </TabsTrigger>
               <TabsTrigger value="details" className="flex items-center gap-2" data-testid="tab-details">
                 <Info className="w-4 h-4" />
@@ -436,33 +440,6 @@ export default function DetailsLayout({
                   )}
                 </div>
               </div>
-
-              {/* Similar & Recommendations */}
-              <div className="mt-12 space-y-8">
-                {/* Similar Content */}
-                {similarContent.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-semibold mb-6" data-testid="similar-title">Similar {type === 'movie' ? 'Movies' : 'TV Shows'}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
-                      {similarContent.slice(0, 6).map((item: any) => (
-                        <MovieCard key={item.id} movie={item} mediaType={type} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Recommendations */}
-                {recommendations.length > 0 && (
-                  <div>
-                    <h3 className="text-xl font-semibold mb-6" data-testid="recommendations-title">Recommended {type === 'movie' ? 'Movies' : 'TV Shows'}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
-                      {recommendations.slice(0, 6).map((item: any) => (
-                        <MovieCard key={item.id} movie={item} mediaType={type} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
             </TabsContent>
 
             {/* Reviews Tab */}
@@ -556,6 +533,45 @@ export default function DetailsLayout({
                   <div className="text-center py-8" data-testid="no-reviews">
                     <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">No reviews yet. Be the first to review!</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Similar & Recommended Tab */}
+            <TabsContent value="similar" className="mt-6" data-testid="content-similar">
+              <div className="space-y-8">
+                {/* Similar Content */}
+                {similarContent.length > 0 ? (
+                  <div>
+                    <h3 className="text-xl font-semibold mb-6" data-testid="similar-title">Similar {type === 'movie' ? 'Movies' : 'TV Shows'}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
+                      {similarContent.slice(0, 12).map((item: any) => (
+                        <MovieCard key={item.id} movie={item} mediaType={type} />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8" data-testid="no-similar">
+                    <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No similar {type === 'movie' ? 'movies' : 'TV shows'} available.</p>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {recommendations.length > 0 ? (
+                  <div>
+                    <h3 className="text-xl font-semibold mb-6" data-testid="recommendations-title">Recommended {type === 'movie' ? 'Movies' : 'TV Shows'}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
+                      {recommendations.slice(0, 12).map((item: any) => (
+                        <MovieCard key={item.id} movie={item} mediaType={type} />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8" data-testid="no-recommendations">
+                    <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No recommendations available.</p>
                   </div>
                 )}
               </div>
