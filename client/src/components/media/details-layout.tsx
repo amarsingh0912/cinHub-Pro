@@ -521,54 +521,6 @@ export default function DetailsLayout({
                   )}
                 </div>
               </div>
-
-              {/* Nested Tabs for Similar & Recommended below Cast & Crew */}
-              <div className="mt-12">
-                <Tabs defaultValue="similar" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 max-w-md">
-                    <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar-nested">
-                      <Film className="w-4 h-4" />
-                      Similar {type === 'movie' ? 'Movies' : 'TV Shows'}
-                    </TabsTrigger>
-                    <TabsTrigger value="recommended" className="flex items-center gap-2" data-testid="tab-recommended-nested">
-                      <Star className="w-4 h-4" />
-                      Recommended
-                    </TabsTrigger>
-                  </TabsList>
-
-                  {/* Similar Content Tab */}
-                  <TabsContent value="similar" className="mt-6" data-testid="content-similar-nested">
-                    {similarContent.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
-                        {similarContent.slice(0, 12).map((item: any) => (
-                          <MovieCard key={item.id} movie={item} mediaType={type} />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8" data-testid="no-similar">
-                        <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No similar {type === 'movie' ? 'movies' : 'TV shows'} available.</p>
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  {/* Recommended Content Tab */}
-                  <TabsContent value="recommended" className="mt-6" data-testid="content-recommended-nested">
-                    {recommendations.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
-                        {recommendations.slice(0, 12).map((item: any) => (
-                          <MovieCard key={item.id} movie={item} mediaType={type} />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8" data-testid="no-recommendations">
-                        <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No recommendations available.</p>
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
-              </div>
             </TabsContent>
 
             {/* Reviews Tab */}
@@ -652,45 +604,182 @@ export default function DetailsLayout({
 
             {/* Details Tab */}
             <TabsContent value="details" className="mt-6" data-testid="content-details">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Status</h4>
-                    <p className="text-lg" data-testid="detail-status">{data?.status || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Original Language</h4>
-                    <p className="text-lg" data-testid="detail-language">{data?.original_language?.toUpperCase() || 'N/A'}</p>
-                  </div>
-                  {type === 'movie' && (
-                    <>
-                      <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground mb-1">Budget</h4>
-                        <p className="text-lg" data-testid="detail-budget">
-                          {(data as MovieDetails).budget ? formatCurrency((data as MovieDetails).budget) : 'N/A'}
-                        </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Status Card */}
+                <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 group-hover:scale-110 transition-transform">
+                        <Info className="w-6 h-6 text-green-500" />
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground mb-1">Revenue</h4>
-                        <p className="text-lg" data-testid="detail-revenue">
-                          {(data as MovieDetails).revenue ? formatCurrency((data as MovieDetails).revenue) : 'N/A'}
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-muted-foreground mb-2">Status</h4>
+                        <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-status">
+                          {data?.status || 'N/A'}
                         </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  {data?.production_companies && data.production_companies.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-sm text-muted-foreground mb-3">Production Companies</h4>
-                      <div className="space-y-2" data-testid="production-companies">
-                        {data.production_companies.slice(0, 5).map((company: any) => (
-                          <p key={company.id} className="text-sm">{company.name}</p>
-                        ))}
                       </div>
                     </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
+
+                {/* Language Card */}
+                <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-muted-foreground mb-2">Original Language</h4>
+                        <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-language">
+                          {data?.original_language?.toUpperCase() || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Movie-specific cards */}
+                {type === 'movie' && (
+                  <>
+                    {/* Budget Card */}
+                    <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border border-yellow-500/30 group-hover:scale-110 transition-transform">
+                            <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-muted-foreground mb-2">Budget</h4>
+                            <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-budget">
+                              {(data as MovieDetails).budget ? formatCurrency((data as MovieDetails).budget) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Revenue Card */}
+                    <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 group-hover:scale-110 transition-transform">
+                            <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-muted-foreground mb-2">Revenue</h4>
+                            <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-revenue">
+                              {(data as MovieDetails).revenue ? formatCurrency((data as MovieDetails).revenue) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* TV-specific cards */}
+                {type === 'tv' && (
+                  <>
+                    {/* Number of Seasons Card */}
+                    <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 group-hover:scale-110 transition-transform">
+                            <Tv className="w-6 h-6 text-orange-500" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-muted-foreground mb-2">Seasons</h4>
+                            <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-seasons">
+                              {(data as TVShowDetails).number_of_seasons || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Number of Episodes Card */}
+                    <Card className="group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 group-hover:scale-110 transition-transform">
+                            <Film className="w-6 h-6 text-indigo-500" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-muted-foreground mb-2">Episodes</h4>
+                            <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="detail-episodes">
+                              {(data as TVShowDetails).number_of_episodes || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Production Companies Card - Full width */}
+                {data?.production_companies && data.production_companies.length > 0 && (
+                  <Card className="md:col-span-2 group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-500/20 border border-rose-500/30 group-hover:scale-110 transition-transform">
+                          <svg className="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm text-muted-foreground mb-3">Production Companies</h4>
+                          <div className="flex flex-wrap gap-2" data-testid="production-companies">
+                            {data.production_companies.slice(0, 6).map((company: any) => (
+                              <Badge 
+                                key={company.id} 
+                                variant="secondary"
+                                className="px-4 py-2 text-sm font-medium rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                              >
+                                {company.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Networks Card for TV Shows - Full width */}
+                {type === 'tv' && (data as TVShowDetails).networks && (data as TVShowDetails).networks.length > 0 && (
+                  <Card className="md:col-span-2 group hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 border-border/50 hover:border-primary/30">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-500/30 group-hover:scale-110 transition-transform">
+                          <svg className="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm text-muted-foreground mb-3">Networks</h4>
+                          <div className="flex flex-wrap gap-2" data-testid="tv-networks">
+                            {(data as TVShowDetails).networks.slice(0, 6).map((network: any) => (
+                              <Badge 
+                                key={network.id} 
+                                variant="secondary"
+                                className="px-4 py-2 text-sm font-medium rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                              >
+                                {network.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </TabsContent>
 
@@ -730,6 +819,57 @@ export default function DetailsLayout({
               )}
             </TabsContent>
           </Tabs>
+
+          {/* Always Visible Similar & Recommended Section */}
+          <div className="mt-16">
+            <Tabs defaultValue="similar" className="w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-display font-bold">More Like This</h2>
+                <TabsList className="grid grid-cols-2 w-fit">
+                  <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar">
+                    <Film className="w-4 h-4" />
+                    Similar
+                  </TabsTrigger>
+                  <TabsTrigger value="recommended" className="flex items-center gap-2" data-testid="tab-recommended">
+                    <Star className="w-4 h-4" />
+                    Recommended
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Similar Content Tab */}
+              <TabsContent value="similar" className="mt-0" data-testid="content-similar">
+                {similarContent.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
+                    {similarContent.slice(0, 12).map((item: any) => (
+                      <MovieCard key={item.id} movie={item} mediaType={type} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12" data-testid="no-similar">
+                    <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No similar {type === 'movie' ? 'movies' : 'TV shows'} available.</p>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Recommended Content Tab */}
+              <TabsContent value="recommended" className="mt-0" data-testid="content-recommended">
+                {recommendations.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
+                    {recommendations.slice(0, 12).map((item: any) => (
+                      <MovieCard key={item.id} movie={item} mediaType={type} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12" data-testid="no-recommendations">
+                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No recommendations available.</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </section>
 
