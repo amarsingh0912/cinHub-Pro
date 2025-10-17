@@ -19,7 +19,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [isRibbonVisible, setRibbonVisible] = useState(true);
   const [isDockOpen, setDockOpen] = useState(false);
   const [isLabOpen, setLabOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>('explore');
+  const [activeSection, setActiveSection] = useState<string | null>('viewby');
 
   const toggleDock = useCallback(() => {
     setDockOpen(prev => !prev);
