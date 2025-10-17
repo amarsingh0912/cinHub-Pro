@@ -58,17 +58,17 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Determine if scrolled past threshold
       setIsScrolled(currentScrollY > 20);
-      
+
       // Determine scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setScrollDirection('down');
       } else {
         setScrollDirection('up');
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -110,16 +110,16 @@ export default function Header() {
       {/* Enhanced Fixed Top Header with Scroll Behavior */}
       <motion.header
         initial={{ y: 0 }}
-        animate={{ 
+        animate={{
           y: scrollDirection === 'down' && lastScrollY > 200 ? -100 : 0,
         }}
-        transition={{ 
-          duration: 0.3, 
+        transition={{
+          duration: 0.3,
           ease: [0.25, 0.1, 0.25, 1],
         }}
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled 
+          isScrolled
             ? "border-b border-border/40 shadow-2xl backdrop-blur-xl bg-background/98 dark:bg-background/95"
             : "border-b border-border/20 shadow-lg backdrop-blur-lg bg-gradient-to-r from-background/90 via-card/85 to-background/90"
         )}
@@ -135,12 +135,12 @@ export default function Header() {
             {/* Enhanced Brand Section */}
             <div className="flex items-center gap-6">
               <Link href="/" data-testid="link-home" aria-label="CineHub Pro Home">
-                <motion.div 
+                <motion.div
                   className="flex items-center gap-3 cursor-pointer group rounded-xl px-3 py-2 hover:bg-primary/10 transition-all duration-300"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="relative w-10 h-10 primary-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-primary/50 transition-shadow duration-300"
                     whileHover={{ rotate: [0, -3, 3, -3, 0], scale: 1.1 }}
                     transition={{ duration: 0.5 }}
@@ -152,7 +152,7 @@ export default function Header() {
                     <span className="text-lg font-display font-extrabold bg-gradient-to-r from-primary via-primary-300 to-secondary bg-clip-text text-transparent">
                       CineHub Pro
                     </span>
-                    <motion.span 
+                    <motion.span
                       className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider"
                       initial={{ opacity: 0.6 }}
                       whileHover={{ opacity: 1 }}
@@ -170,8 +170,9 @@ export default function Header() {
                   return (
                     <Link key={item.href} href={item.href} aria-current={isActive ? 'page' : undefined}>
                       <motion.span
+                        // parent must be relative so the indicator can be absolutely positioned relative to this element
                         className={cn(
-                          "relative inline-block px-5 py-2 rounded-lg text-sm font-medium cursor-pointer select-none transition-all duration-300",
+                          "relative inline-block px-5 pb-3 pt-2 rounded-lg text-sm font-medium cursor-pointer select-none transition-all duration-300",
                           isActive
                             ? "text-primary bg-primary/5 font-semibold"
                             : "text-muted-foreground hover:text-foreground hover:bg-accent/20"
@@ -185,14 +186,14 @@ export default function Header() {
                         {item.label}
                         <AnimatePresence>
                           {isActive && (
-                            <motion.span 
-                              className="absolute left-1/2 bottom-[-12px] w-10 h-[2px] bg-gradient-to-r from-primary to-secondary rounded-full"
+                            <motion.span
+                              className="absolute left-1/2 -translate-x-1/2 bottom-0 w-10 h-1 rounded-full"
                               layoutId="activeNavIndicator"
                               initial={{ opacity: 0, scaleX: 0 }}
-                              animate={{ opacity: 1, scaleX: 1, x: '-50%' }}
+                              animate={{ opacity: 1, scaleX: 1 }}
                               exit={{ opacity: 0, scaleX: 0 }}
-                              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                              style={{ originX: 0.5 }}
+                              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                              style={{ transformOrigin: "center" }}
                             />
                           )}
                         </AnimatePresence>
@@ -255,9 +256,9 @@ export default function Header() {
               </motion.div>
 
               {/* Mobile Menu Toggle with Icon Animation */}
-              <motion.div 
+              <motion.div
                 className="nav:hidden"
-                whileHover={{ scale: 1.05 }} 
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button

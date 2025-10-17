@@ -1,4 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { persistQueryClient } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -71,17 +73,39 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Enhanced query client with caching strategy
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      refetchOnWindowFocus: true, // Enable background refetch on window focus
+      staleTime: 1000 * 60 * 5, // 5 minutes - data considered fresh
+      gcTime: 1000 * 60 * 30, // 30 minutes - garbage collection time (previously cacheTime)
+      retry: 1, // Retry failed requests once
     },
     mutations: {
       retry: false,
     },
   },
 });
+
+// Set up persistence with localStorage
+if (typeof window !== 'undefined') {
+  const localStoragePersister = createSyncStoragePersister({
+    storage: window.localStorage,
+    key: 'CINEHUB_QUERY_CACHE', // Custom key for the persisted cache
+  });
+
+  persistQueryClient({
+    queryClient,
+    persister: localStoragePersister,
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours - max age for persisted data
+    dehydrateOptions: {
+      // Only persist successful queries
+      shouldDehydrateQuery: (query) => {
+        return query.state.status === 'success';
+      },
+    },
+  });
+}
