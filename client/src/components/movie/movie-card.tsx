@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Star, Film, Play, Heart } from "lucide-react";
+import { Star, Film, Heart } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Movie, TVShow } from "@/types/movie";
@@ -99,40 +99,6 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
                     <span className="text-white font-bold text-sm tracking-tight" data-testid={`rating-${movie.id}`}>
                       {movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}
                     </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              
-              {/* Enhanced Hover Overlay with Play Icon */}
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent flex items-center justify-center z-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                  >
-                    <motion.div
-                      className="relative group/play"
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      exit={{ scale: 0, rotate: 180 }}
-                      transition={{ 
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 20
-                      }}
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {/* Glow effect behind play button */}
-                      <div className="absolute inset-0 bg-primary/40 rounded-full blur-2xl opacity-75 group-hover/play:opacity-100 transition-opacity" aria-hidden="true" />
-                      
-                      <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary via-primary to-primary/80 backdrop-blur-md flex items-center justify-center shadow-2xl shadow-primary/60 border border-white/20">
-                        <Play className="w-8 h-8 text-white fill-current ml-1 drop-shadow-lg" aria-hidden="true" />
-                      </div>
-                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
