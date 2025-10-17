@@ -734,18 +734,10 @@ export default function DetailsLayout({
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-muted-foreground mb-3">Production Companies</h4>
-                          <div className="flex flex-wrap gap-2" data-testid="production-companies">
-                            {data.production_companies.slice(0, 6).map((company: any) => (
-                              <Badge 
-                                key={company.id} 
-                                variant="secondary"
-                                className="px-4 py-2 text-sm font-medium rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                              >
-                                {company.name}
-                              </Badge>
-                            ))}
-                          </div>
+                          <h4 className="font-semibold text-sm text-muted-foreground mb-2">Production Companies</h4>
+                          <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="production-companies">
+                            {data.production_companies.slice(0, 6).map((company: any) => company.name).join(', ')}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -763,18 +755,10 @@ export default function DetailsLayout({
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-sm text-muted-foreground mb-3">Networks</h4>
-                          <div className="flex flex-wrap gap-2" data-testid="tv-networks">
-                            {(data as TVShowDetails).networks.slice(0, 6).map((network: any) => (
-                              <Badge 
-                                key={network.id} 
-                                variant="secondary"
-                                className="px-4 py-2 text-sm font-medium rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                              >
-                                {network.name}
-                              </Badge>
-                            ))}
-                          </div>
+                          <h4 className="font-semibold text-sm text-muted-foreground mb-2">Networks</h4>
+                          <p className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text" data-testid="tv-networks">
+                            {(data as TVShowDetails).networks.slice(0, 6).map((network: any) => network.name).join(', ')}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
