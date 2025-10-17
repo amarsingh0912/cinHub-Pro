@@ -808,7 +808,6 @@ export default function DetailsLayout({
           <div className="mt-16">
             <Tabs defaultValue="similar" className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-display font-bold">More Like This</h2>
                 <TabsList className="grid grid-cols-2 w-fit">
                   <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar">
                     <Film className="w-4 h-4" />
