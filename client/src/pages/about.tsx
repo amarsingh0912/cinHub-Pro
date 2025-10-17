@@ -255,7 +255,7 @@ export default function About() {
               
               <Card className="text-center p-4" data-testid="tech-auth">
                 <Badge variant="secondary" className="mb-2">Auth</Badge>
-                <div className="font-semibold">Replit Auth</div>
+                <div className="font-semibold">JWT Auth</div>
                 <div className="text-sm text-muted-foreground">Secure Login</div>
               </Card>
               

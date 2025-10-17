@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
       icon: Database,
       title: "Information We Collect",
       content: [
-        "Account Information: When you create an account, we collect your name, email address, and authentication information provided through Replit Auth.",
+        "Account Information: When you create an account, we collect your name, email address, and authentication information.",
         "Usage Data: We collect information about how you use CineHub Pro, including movies you view, rate, and add to your watchlists.",
         "Device Information: We may collect information about your device, including IP address, browser type, and operating system.",
         "Cookies: We use cookies and similar technologies to enhance your experience and remember your preferences."
@@ -44,7 +44,7 @@ export default function PrivacyPolicy() {
       content: [
         "Encryption: All data transmission is encrypted using industry-standard SSL/TLS protocols.",
         "Secure Storage: Your data is stored on secure servers with appropriate access controls.",
-        "Authentication: We use Replit's secure authentication system to protect your account.",
+        "Authentication: We use secure authentication systems to protect your account.",
         "Regular Audits: We regularly review our security practices and update them as needed."
       ]
     },

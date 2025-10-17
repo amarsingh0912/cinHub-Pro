@@ -106,7 +106,6 @@ Complete guide to all project documentation.
 ### Project Metadata
 - `package.json` - Dependencies and scripts
 - `tsconfig.json` - TypeScript configuration
-- `replit.md` - Replit-specific setup
 
 ## 📊 API Endpoints
 

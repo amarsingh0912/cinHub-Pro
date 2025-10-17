@@ -58,7 +58,7 @@ Environment variables are loaded using `dotenv` package:
 - **Type**: Number
 - **Description**: Port number for the Express server
 - **Example**: `PORT=5000`
-- **Note**: In production, Replit/cloud platforms may override this
+- **Note**: In production, cloud platforms may override this
 
 ---
 
