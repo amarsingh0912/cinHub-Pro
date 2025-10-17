@@ -3,14 +3,16 @@ import type { MovieDetails, TVShowDetails } from "@/types/movie";
 
 /**
  * Hook to fetch movie or TV show details with proper caching
- * Query key structure: ["/api/movies" or "/api/tv", id]
+ * Query key structure: ["/api/movies" or "/api/tv", id as string]
+ * Note: ID is always normalized to string for consistent query keys
  */
 export function useMediaDetails(type: 'movie' | 'tv', id: string | number | undefined) {
   const endpoint = type === 'movie' ? "/api/movies" : "/api/tv";
+  const normalizedId = id ? String(id) : undefined;
 
   return useQuery<MovieDetails | TVShowDetails>({
-    queryKey: [endpoint, id],
-    enabled: !!id,
+    queryKey: [endpoint, normalizedId],
+    enabled: !!normalizedId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
   });
@@ -70,13 +72,13 @@ export function usePrefetchMediaDetails() {
   return {
     prefetchMovie: (id: number) => {
       queryClient.prefetchQuery({
-        queryKey: ["/api/movies", id],
+        queryKey: ["/api/movies", String(id)],
         staleTime: 1000 * 60 * 5,
       });
     },
     prefetchTV: (id: number) => {
       queryClient.prefetchQuery({
-        queryKey: ["/api/tv", id],
+        queryKey: ["/api/tv", String(id)],
         staleTime: 1000 * 60 * 5,
       });
     },

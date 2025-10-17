@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCacheStatus } from "@/hooks/useCacheStatus";
+import { useOfflineDetection } from "@/hooks/useOfflineDetection";
 import type { MovieDetails, TVShowDetails } from "@/types/movie";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,7 @@ export default function DetailsLayout({
   submitReviewPending,
 }: DetailsLayoutProps) {
   const { isAuthenticated } = useAuth();
+  const { isOnline } = useOfflineDetection();
 
   // Error state - check first before loading
   if (error) {

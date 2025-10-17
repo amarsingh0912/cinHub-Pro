@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Movie, TVShow } from "@/types/movie";
 import { getImageUrl } from "@/lib/tmdb";
 import { useRevealAnimation } from "@/hooks/useRevealAnimation";
+import { usePrefetchMediaDetails } from "@/hooks/useMediaDetails";
 import { cn } from "@/lib/utils";
 
 interface MovieCardProps {
@@ -20,6 +21,19 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
   const releaseDate = isMovie ? (movie as Movie).release_date : (movie as TVShow).first_air_date;
   const href = isMovie ? `/movie/${movie.id}` : `/tv/${movie.id}`;
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Prefetch on hover for faster navigation
+  const { prefetchMovie, prefetchTV } = usePrefetchMediaDetails();
+  
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    // Prefetch media details when hovering over the card
+    if (isMovie) {
+      prefetchMovie(movie.id);
+    } else {
+      prefetchTV(movie.id);
+    }
+  };
   
   // Use reveal animation for each individual card
   const { ref, className } = useRevealAnimation({
@@ -44,7 +58,7 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
             "group cursor-pointer relative",
             size === 'compact' ? 'scale-95' : ''
           )}
-          onHoverStart={() => setIsHovered(true)}
+          onHoverStart={handleMouseEnter}
           onHoverEnd={() => setIsHovered(false)}
           whileHover={{ y: -12, scale: size === 'compact' ? 0.97 : 1.02 }}
           transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
