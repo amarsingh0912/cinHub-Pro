@@ -212,27 +212,34 @@ export async function verifyOTPWithVerify({
 }
 
 /**
- * Main function to send OTP via appropriate channel
- * Automatically determines if target is email or phone
+ * Main function to send OTP via email only
+ * Uses Twilio Verify service to send OTP codes to email addresses
  */
 export async function sendOTP(
   target: string,
   purpose: "signup" | "reset" | "login" = "signup",
-): Promise<{ success: boolean; error?: string }> {
-  // Determine if target is email or phone number
-  const isEmail = target.includes("@");
-  const isPhone = target.startsWith("+") && /^\+[1-9]\d{1,14}$/.test(target);
+): Promise<{ success: boolean; error?: string; message?: string }> {
+  // Validate that target is an email address
+  const isEmail = target.includes("@") && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target);
 
-  if (isEmail) {
-    return await sendOTPWithVerify({ to: target, channel: 'email', purpose });
-  } else if (isPhone) {
-    return await sendOTPWithVerify({ to: target, channel: 'sms', purpose });
-  } else {
+  if (!isEmail) {
     return {
       success: false,
-      error: "Invalid format - must be email or phone number in E.164 format (e.g., +15551234567)",
+      error: "Invalid email format. Please provide a valid email address.",
     };
   }
+
+  // Send OTP via email using Twilio Verify
+  const result = await sendOTPWithVerify({ to: target, channel: 'email', purpose });
+  
+  if (result.success) {
+    return {
+      success: true,
+      message: "Verification code sent to your email. Please check your inbox and spam folder.",
+    };
+  }
+  
+  return result;
 }
 
 /**

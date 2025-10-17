@@ -248,7 +248,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setOtpPurpose('signup');
         toast({
           title: "Account Verification Required",
-          description: error.body.message || "Please verify your account first.",
+          description: "Verification code sent to your email. Please check your inbox and spam folder.",
           variant: "default",
         });
       } else {
@@ -313,7 +313,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setOtpPurpose('signup');
       toast({
         title: "Verify Your Account",
-        description: data.message || "Please check your email or phone for the verification code.",
+        description: "Verification code sent to your email. Please check your inbox and spam folder.",
       });
     },
     onError: (error: Error) => {
@@ -336,7 +336,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       setOtpPurpose('reset');
       toast({
         title: "Reset Code Sent",
-        description: "Please check your email or phone for the password reset code.",
+        description: "Password reset code sent to your email. Please check your inbox and spam folder.",
       });
     },
     onError: (error: Error) => {
@@ -955,9 +955,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
                 <div className="space-y-4">
                   <FormLabel className="text-center block text-lg font-medium">Verification Code</FormLabel>
-                  <p className="text-center text-sm text-muted-foreground mb-6">
-                    Enter the 6-digit code we sent to your device
-                  </p>
+                  <div className="text-center space-y-2 mb-6">
+                    <p className="text-sm text-muted-foreground">
+                      Enter the 6-digit code we sent to your email
+                    </p>
+                    <p className="text-xs text-muted-foreground/80 flex items-center justify-center gap-1">
+                      <Mail className="w-3.5 h-3.5" />
+                      Please check your spam or junk folder if you don't see it
+                    </p>
+                  </div>
                   
                   {/* Individual OTP Digits */}
                   <div className="flex justify-center space-x-2 sm:space-x-3" onPaste={handleOtpPaste}>
