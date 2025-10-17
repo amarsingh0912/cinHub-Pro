@@ -309,7 +309,7 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="glass" className="flex items-center gap-2 h-10">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={user?.profileImageUrl || ""} />
+                          <AvatarImage src={user?.profileImageUrl || undefined} />
                           <AvatarFallback className="bg-primary text-white text-sm">
                             {(user?.firstName?.[0] || user?.displayName?.[0] || "U").toUpperCase()}
                           </AvatarFallback>

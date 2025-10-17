@@ -660,7 +660,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
                     <Avatar className="w-20 h-20 sm:w-24 sm:h-24">
-                      <AvatarImage src={profilePhotoPreview || ""} />
+                      <AvatarImage src={profilePhotoPreview || undefined} />
                       <AvatarFallback>
                         <Camera className="w-8 h-8 text-muted-foreground" />
                       </AvatarFallback>
