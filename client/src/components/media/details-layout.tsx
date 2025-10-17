@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +52,75 @@ interface DetailsLayoutProps {
   submitReviewPending?: boolean;
 }
 
+function ReviewItem({ 
+  review, 
+  isExpanded, 
+  onToggle 
+}: { 
+  review: Review; 
+  isExpanded: boolean; 
+  onToggle: () => void;
+}) {
+  const reviewRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    const checkTruncation = () => {
+      if (reviewRef.current && !isExpanded) {
+        const element = reviewRef.current;
+        setIsTruncated(element.scrollHeight > element.clientHeight);
+      }
+    };
+
+    checkTruncation();
+    window.addEventListener('resize', checkTruncation);
+    return () => window.removeEventListener('resize', checkTruncation);
+  }, [review.review, isExpanded]);
+
+  return (
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold" data-testid={`review-username-${review.id}`}>{review.username || 'Anonymous'}</span>
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                <span className="text-sm font-medium" data-testid={`review-rating-${review.id}`}>{review.rating}/10</span>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground" data-testid={`review-date-${review.id}`}>
+              {new Date(review.createdAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </p>
+          </div>
+        </div>
+        <div>
+          <p 
+            ref={reviewRef}
+            className={`text-muted-foreground leading-relaxed whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''}`}
+            data-testid={`review-text-${review.id}`}
+          >
+            {review.review}
+          </p>
+          {(isTruncated || isExpanded) && (
+            <button
+              onClick={onToggle}
+              className="text-primary hover:text-primary/80 text-sm font-medium mt-2 transition-colors"
+              data-testid={`review-toggle-${review.id}`}
+            >
+              {isExpanded ? 'View less' : 'View more'}
+            </button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DetailsLayout({
   type,
   data,
@@ -87,6 +156,9 @@ export default function DetailsLayout({
   
   // Trailer modal state - always initialize
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
+
+  // Review expansion state - track which reviews are expanded
+  const [expandedReviews, setExpandedReviews] = useState<Set<string | number>>(new Set());
 
   // Error state - check AFTER all hooks
   if (error) {
@@ -157,6 +229,18 @@ export default function DetailsLayout({
     onAddToWatchlist(selectedWatchlistId);
     setIsWatchlistDialogOpen(false);
     setSelectedWatchlistId("");
+  };
+
+  const toggleReviewExpansion = (reviewId: string | number) => {
+    setExpandedReviews(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reviewId)) {
+        newSet.delete(reviewId);
+      } else {
+        newSet.add(reviewId);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -549,29 +633,12 @@ export default function DetailsLayout({
                 ) : reviews.length > 0 ? (
                   <div className="space-y-4" data-testid="reviews-list">
                     {reviews.map((review: any) => (
-                      <Card key={review.id}>
-                        <CardContent className="pt-6">
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-semibold" data-testid={`review-username-${review.id}`}>{review.username || 'Anonymous'}</span>
-                                <div className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                  <span className="text-sm font-medium" data-testid={`review-rating-${review.id}`}>{review.rating}/10</span>
-                                </div>
-                              </div>
-                              <p className="text-xs text-muted-foreground" data-testid={`review-date-${review.id}`}>
-                                {new Date(review.createdAt).toLocaleDateString('en-US', { 
-                                  year: 'numeric', 
-                                  month: 'long', 
-                                  day: 'numeric' 
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-muted-foreground leading-relaxed" data-testid={`review-text-${review.id}`}>{review.review}</p>
-                        </CardContent>
-                      </Card>
+                      <ReviewItem
+                        key={review.id}
+                        review={review}
+                        isExpanded={expandedReviews.has(review.id)}
+                        onToggle={() => toggleReviewExpansion(review.id)}
+                      />
                     ))}
                   </div>
                 ) : (

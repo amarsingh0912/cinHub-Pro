@@ -1611,8 +1611,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tmdbCacheService.cacheTVShow(data).catch(error => {
         console.error(`Background caching failed for TV show ${tvId}:`, error);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching TV show details:", error);
+      
+      // Check if it's a 404 error from TMDB
+      if (error.message && error.message.includes("404")) {
+        return res.status(404).json({ message: "TV show not found" });
+      }
+      
       res.status(500).json({ message: "Failed to fetch TV show details" });
     }
   });
@@ -1861,8 +1867,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       tmdbCacheService.cacheMovie(data).catch(error => {
         console.error(`Background caching failed for movie ${movieId}:`, error);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching movie details:", error);
+      
+      // Check if it's a 404 error from TMDB
+      if (error.message && error.message.includes("404")) {
+        return res.status(404).json({ message: "Movie not found" });
+      }
+      
       res.status(500).json({ message: "Failed to fetch movie details" });
     }
   });
