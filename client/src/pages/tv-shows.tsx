@@ -10,6 +10,7 @@ import {
   FilterLab,
   FloatingFilterButton,
 } from "@/components/filter-kit";
+import { ActiveFiltersChips } from "@/components/filter-kit/modules/ActiveFiltersChips";
 import {
   Loader2,
   Tv,
@@ -237,6 +238,16 @@ export default function TVShows() {
                 )}
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Active Filters Chips */}
+        <section className="mb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ActiveFiltersChips 
+              filters={filters}
+              onFiltersChange={setFilters}
+            />
           </div>
         </section>
 
