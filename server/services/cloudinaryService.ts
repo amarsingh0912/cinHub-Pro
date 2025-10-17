@@ -119,3 +119,44 @@ export function isCloudinaryConfigured(): boolean {
     process.env.CLOUDINARY_API_SECRET
   );
 }
+
+/**
+ * Upload a file buffer to Cloudinary
+ * @param fileBuffer - The file buffer to upload
+ * @param userId - Optional user ID to include in the filename
+ * @param folder - Optional folder name (default: 'profile_pictures')
+ * @returns Promise with the upload result
+ */
+export async function uploadToCloudinary(
+  fileBuffer: Buffer,
+  userId?: string,
+  folder: string = 'profile_pictures'
+): Promise<any> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary is not configured');
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: folder,
+        public_id: userId ? `${userId}_${Date.now()}` : undefined,
+        transformation: [
+          { width: 400, height: 400, crop: 'fill' },
+          { quality: 'auto' },
+          { fetch_format: 'auto' }
+        ],
+        resource_type: 'image',
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+
+    uploadStream.end(fileBuffer);
+  });
+}

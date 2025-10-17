@@ -38,6 +38,7 @@ import {
   generateUploadSignature,
   validateCloudinaryUrl,
   isCloudinaryConfigured,
+  uploadToCloudinary,
 } from "./services/cloudinaryService";
 import { tmdbCacheService } from "./services/tmdbCache.js";
 import { websocketService } from "./services/websocketService.js";
@@ -195,24 +196,9 @@ async function fetchFromTMDB(
   }
 }
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), "uploads", "profiles");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
 // Multer configuration for profile photo uploads
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename: timestamp + original extension
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `profile-${uniqueSuffix}${ext}`);
-  },
-});
+// Using memoryStorage to keep files in memory before uploading to Cloudinary
+const multerStorage = multer.memoryStorage();
 
 // Safe file extensions and MIME types
 const allowedImageTypes = {
@@ -985,8 +971,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "No file uploaded" });
         }
 
-        // Generate the URL for the uploaded file
-        const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+        // Check if Cloudinary is configured
+        if (!isCloudinaryConfigured()) {
+          return res.status(503).json({
+            message: "Image upload service not configured. Please contact support.",
+          });
+        }
+
+        // Upload to Cloudinary
+        const result = await uploadToCloudinary(req.file.buffer);
+        const profileImageUrl = result.secure_url;
 
         res.json({
           message: "Profile photo uploaded successfully",
@@ -1017,8 +1011,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(401).json({ message: "No user ID found" });
         }
 
-        // Generate the URL for the uploaded file
-        const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+        // Check if Cloudinary is configured
+        if (!isCloudinaryConfigured()) {
+          return res.status(503).json({
+            message: "Image upload service not configured. Please contact support.",
+          });
+        }
+
+        // Upload to Cloudinary with userId for organization
+        const result = await uploadToCloudinary(req.file.buffer, userId);
+        const profileImageUrl = result.secure_url;
 
         // Update user's profile image in database
         await storage.updateUser(userId, { profileImageUrl });

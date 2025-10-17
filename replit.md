@@ -4,6 +4,17 @@
 
 CineHub Pro is a modern, full-stack movie and TV show discovery platform built with React, Express, and PostgreSQL. The application provides users with comprehensive movie browsing, personalized collections, social features like reviews and ratings, and real-time updates. It integrates with The Movie Database (TMDB) API for content data and uses Cloudinary for optimized image delivery.
 
+## Recent Changes
+
+**October 17, 2025:**
+- Updated OTP service to use email-only delivery via Twilio Verify (removed SMS support)
+- Added user reminders to check spam/junk folders for OTP emails in UI and notifications
+- Migrated profile photo uploads from local storage to Cloudinary
+  - Profile photos are now stored in Cloudinary's `profile_pictures` folder
+  - Images are automatically optimized (400x400, quality auto, format auto)
+  - Changed multer configuration from diskStorage to memoryStorage
+  - Updated both `/api/auth/upload-profile-photo` and `/api/auth/update-profile-photo` endpoints
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
