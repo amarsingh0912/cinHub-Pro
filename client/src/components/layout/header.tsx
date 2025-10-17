@@ -186,7 +186,7 @@ export default function Header() {
                         <AnimatePresence>
                           {isActive && (
                             <motion.span 
-                              className="absolute left-1/2 -bottom-[3px] w-10 h-[2px] bg-gradient-to-r from-primary to-secondary rounded-full"
+                              className="absolute left-1/2 bottom-[-12px] w-10 h-[2px] bg-gradient-to-r from-primary to-secondary rounded-full"
                               layoutId="activeNavIndicator"
                               initial={{ opacity: 0, scaleX: 0 }}
                               animate={{ opacity: 1, scaleX: 1, x: '-50%' }}
