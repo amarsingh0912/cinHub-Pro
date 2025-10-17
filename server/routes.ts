@@ -33,7 +33,7 @@ import {
   signInSchema,
   signUpSchema,
 } from "@shared/schema";
-import { sendOTP } from "./services/otpService";
+import { sendOTP, verifyOTP } from "./services/otpService";
 import {
   generateUploadSignature,
   validateCloudinaryUrl,
@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = signUpSchema.parse(req.body);
       const user = await signUp(userData);
 
-      // Generate OTP for verification (email or phone)
+      // Get verification target (email or phone)
       const verificationTarget = userData.email || userData.phoneNumber;
       if (!verificationTarget) {
         return res.status(400).json({
@@ -417,26 +417,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Generate 6-digit OTP
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-      await storage.createOtp({
-        target: verificationTarget,
-        purpose: "signup",
-        code: otpCode,
-        expiresAt,
-      });
-
-      // Send OTP via email or SMS
-      const otpResult = await sendOTP(verificationTarget, otpCode, "signup");
+      // Send OTP via Twilio Verify Service (automatically generates and sends OTP)
+      const otpResult = await sendOTP(verificationTarget, "signup");
       if (!otpResult.success) {
         console.error(
           `Failed to send signup OTP to ${verificationTarget}:`,
           otpResult.error,
         );
-        // Delete the created OTP since we couldn't send it
-        await storage.deleteOtp(verificationTarget, "signup");
         return res.status(500).json({
           message:
             "Account created but failed to send verification code. Please try signing in to resend the verification code.",
@@ -471,34 +458,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user is verified - block unverified users
       if (!user.isVerified) {
-        // Generate new OTP for verification
+        // Send OTP for verification
         const verificationTarget = user.email || user.phoneNumber;
         if (verificationTarget) {
-          const otpCode = Math.floor(
-            100000 + Math.random() * 900000,
-          ).toString();
-          const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-          await storage.createOtp({
-            target: verificationTarget,
-            purpose: "signup",
-            code: otpCode,
-            expiresAt,
-          });
-
-          // Send OTP via email or SMS
-          const otpResult = await sendOTP(
-            verificationTarget,
-            otpCode,
-            "signup",
-          );
+          // Send OTP via Twilio Verify Service
+          const otpResult = await sendOTP(verificationTarget, "signup");
           if (!otpResult.success) {
             console.error(
               `Failed to send signin verification OTP to ${verificationTarget}:`,
               otpResult.error,
             );
-            // Delete the created OTP since we couldn't send it
-            await storage.deleteOtp(verificationTarget, "signup");
             return res.status(500).json({
               message:
                 "Failed to send verification code. Please try again later.",
@@ -633,26 +602,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Generate 6-digit OTP
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-      const otp = await storage.createOtp({
-        target: otpTarget,
-        purpose: "reset",
-        code: otpCode,
-        expiresAt,
-      });
-
-      // Send OTP via email or SMS
-      const otpResult = await sendOTP(otpTarget, otpCode, "reset");
+      // Send OTP via Twilio Verify Service
+      const otpResult = await sendOTP(otpTarget, "reset");
       if (!otpResult.success) {
         console.error(
           `Failed to send password reset OTP to ${otpTarget}:`,
           otpResult.error,
         );
-        // Delete the created OTP since we couldn't send it
-        await storage.deleteOtp(otpTarget, "reset");
         return res.status(500).json({
           message:
             "Failed to send password reset code. Please try again later.",
@@ -679,11 +635,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "OTP, identifier, and purpose are required" });
       }
 
-      // Verify OTP for the specified purpose
-      const isValid = await storage.verifyOtp(identifier, otp, purpose);
+      // Verify OTP using Twilio Verify Service
+      const verifyResult = await verifyOTP(identifier, otp);
 
-      if (!isValid) {
-        return res.status(401).json({ message: "Invalid or expired OTP" });
+      if (!verifyResult.success) {
+        return res.status(401).json({ 
+          message: verifyResult.error || "Invalid or expired OTP" 
+        });
       }
 
       // If this is signup verification, log the user in and mark as verified
@@ -695,9 +653,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Mark user as verified
         await storage.updateUser(user.id, { isVerified: true });
-
-        // Delete the OTP to prevent replay attacks
-        await storage.deleteOtp(identifier, "signup");
 
         // Set session to log user in
         req.session.userId = user.id;
@@ -712,7 +667,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "signup",
         });
       } else {
-        // For reset verification, just confirm verification (don't delete OTP yet - needed for password reset)
+        // For reset verification, just confirm verification
         res.json({
           message: "OTP verified successfully",
           type: purpose,
@@ -763,19 +718,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Verify OTP against the actual target (not the identifier)
-      const isValidOtp = await storage.verifyOtp(otpTarget, otpCode, "reset");
-      if (!isValidOtp) {
-        return res.status(400).json({ message: "Invalid or expired OTP code" });
+      // Verify OTP using Twilio Verify Service
+      const verifyResult = await verifyOTP(otpTarget, otpCode);
+      if (!verifyResult.success) {
+        return res.status(400).json({ 
+          message: verifyResult.error || "Invalid or expired OTP code" 
+        });
       }
 
       // Hash new password and update
       const hashedPassword = await hashPassword(newPassword);
 
       await storage.updateUser(user.id, { password: hashedPassword });
-
-      // Invalidate the OTP after successful password reset
-      await storage.deleteOtp(otpTarget, "reset");
 
       res.json({ message: "Password reset successfully" });
     } catch (error) {
@@ -794,25 +748,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user is verified - block unverified users
       if (!user.isVerified) {
-        // Generate new OTP for verification
+        // Send OTP for verification
         const verificationTarget = user.email || user.phoneNumber;
         if (verificationTarget) {
-          const otpCode = Math.floor(
-            100000 + Math.random() * 900000,
-          ).toString();
-          const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-          await storage.createOtp({
-            target: verificationTarget,
-            purpose: "signup",
-            code: otpCode,
-            expiresAt,
-          });
-
-          // Send OTP via email or SMS
+          // Send OTP via Twilio Verify Service
           const otpResult = await sendOTP(
             verificationTarget,
-            otpCode,
             "signup",
           );
           if (!otpResult.success) {
@@ -820,8 +761,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               `Failed to send signin verification OTP to ${verificationTarget}:`,
               otpResult.error,
             );
-            // Delete the created OTP since we couldn't send it
-            await storage.deleteOtp(verificationTarget, "signup");
             return res.status(500).json({
               message:
                 "Failed to send verification code. Please try again later.",
