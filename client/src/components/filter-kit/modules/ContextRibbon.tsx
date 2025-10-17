@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, RotateCcw, TrendingUp, Star, Calendar, Clock, PlayCircle, Radio } from "lucide-react";
 import { AdvancedFilterState, PresetCategory } from "@/types/filters";
@@ -18,6 +19,27 @@ interface ContextRibbonProps {
 
 export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResults, isLoading, className }: ContextRibbonProps) {
   const { toggleDock, toggleLab } = useFilterContext();
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Track scroll direction to hide/show ribbon with navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Determine scroll direction
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setScrollDirection('down');
+      } else {
+        setScrollDirection('up');
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const setContentType = (type: 'movie' | 'tv') => {
     const currentCategory = filters.category || 'trending';
@@ -115,7 +137,15 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ y: 0 }}
+      animate={{
+        y: scrollDirection === 'down' && lastScrollY > 200 ? -100 : 0,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
       className={cn(
         "sticky top-16 z-40 backdrop-blur-xl bg-background/95 border-b-2 border-border shadow-lg",
         className
@@ -130,6 +160,6 @@ export function ContextRibbon({ filters, onFiltersChange, setPreset, totalResult
           className="py-2"
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
