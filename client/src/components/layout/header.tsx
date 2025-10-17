@@ -93,6 +93,9 @@ export default function Header() {
       // Clear all cached data including user auth state
       queryClient.clear();
       
+      // Clear the persisted query cache from localStorage
+      localStorage.removeItem('CINEHUB_QUERY_CACHE');
+      
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
