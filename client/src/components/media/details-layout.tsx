@@ -70,10 +70,25 @@ export default function DetailsLayout({
   addToWatchlistPending,
   submitReviewPending,
 }: DetailsLayoutProps) {
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
   const { isAuthenticated } = useAuth();
   const { isOnline } = useOfflineDetection();
+  
+  // Cache status for image optimization - always call this hook
+  const cacheStatus = useCacheStatus(type, data?.id || 0);
 
-  // Error state - check first before loading
+  // Review form state - always initialize
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState<string>("");
+
+  // Watchlist dialog state - always initialize
+  const [isWatchlistDialogOpen, setIsWatchlistDialogOpen] = useState(false);
+  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string>("");
+  
+  // Trailer modal state - always initialize
+  const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
+
+  // Error state - check AFTER all hooks
   if (error) {
     return (
       <div className="min-h-screen" data-testid={`${type}-detail-error`}>
@@ -111,20 +126,6 @@ export default function DetailsLayout({
   const runtime = type === 'movie' 
     ? (data as MovieDetails).runtime 
     : (data as TVShowDetails).episode_run_time?.[0];
-
-  // Cache status for image optimization
-  const cacheStatus = useCacheStatus(type, data.id);
-
-  // Review form state
-  const [reviewText, setReviewText] = useState("");
-  const [reviewRating, setReviewRating] = useState<string>("");
-
-  // Watchlist dialog state
-  const [isWatchlistDialogOpen, setIsWatchlistDialogOpen] = useState(false);
-  const [selectedWatchlistId, setSelectedWatchlistId] = useState<string>("");
-  
-  // Trailer modal state
-  const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
   const isFavorite = favoriteStatus?.isFavorite;
   
