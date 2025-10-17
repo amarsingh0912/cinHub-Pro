@@ -539,15 +539,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ message: "Logout failed" });
+  app.post("/api/auth/logout", async (req, res) => {
+    let jwtRevoked = true;
+    let sessionDestroyed = true;
+
+    // Clear JWT refresh token if present
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      try {
+        await logoutWithToken(refreshToken);
+      } catch (error) {
+        console.error("JWT logout error - refresh token revocation failed:", error);
+        jwtRevoked = false;
       }
-      res.clearCookie("connect.sid");
-      res.json({ message: "Logged out successfully" });
+    }
+
+    // Clear JWT refresh token cookie (always clear even if revocation failed)
+    res.clearCookie("refreshToken", {
+      path: "/api/auth",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
+
+    // Destroy session (only if session exists)
+    if (req.session) {
+      await new Promise<void>((resolve) => {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+            sessionDestroyed = false;
+          }
+          // Always resolve - we check sessionDestroyed flag later
+          resolve();
+        });
+      });
+    } else {
+      // No session exists (e.g., JWT-only authentication) - this is not an error
+      sessionDestroyed = true;
+    }
+
+    // Clear session cookie (always clear even if destroy failed)
+    res.clearCookie("connect.sid");
+
+    // Return appropriate status based on what succeeded
+    if (!jwtRevoked && refreshToken) {
+      // JWT revocation failed - this is a security issue
+      console.error("CRITICAL: Logout failed to revoke JWT refresh token");
+      return res.status(500).json({ 
+        message: "Logout failed - please try again or contact support if the issue persists" 
+      });
+    }
+
+    if (!sessionDestroyed) {
+      console.error("WARNING: Logout failed to destroy session");
+      return res.status(500).json({ 
+        message: "Logout failed - please try again" 
+      });
+    }
+
+    res.json({ message: "Logged out successfully" });
   });
 
   app.post("/api/auth/forgot-password", async (req, res) => {

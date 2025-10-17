@@ -38,7 +38,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
 export default function Header() {
@@ -89,6 +89,10 @@ export default function Header() {
   const handleLogoutConfirm = async () => {
     try {
       await apiRequest("POST", "/api/auth/logout", {});
+      
+      // Clear all cached data including user auth state
+      queryClient.clear();
+      
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
