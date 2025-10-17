@@ -384,10 +384,22 @@ export class DatabaseStorage implements IStorage {
       .orderBy(sql`${reviews.createdAt} DESC`);
   }
 
-  async getMediaReviews(mediaType: string, mediaId: number): Promise<Review[]> {
+  async getMediaReviews(mediaType: string, mediaId: number): Promise<any[]> {
     return await db
-      .select()
+      .select({
+        id: reviews.id,
+        userId: reviews.userId,
+        username: users.username,
+        mediaType: reviews.mediaType,
+        mediaId: reviews.mediaId,
+        rating: reviews.rating,
+        review: reviews.review,
+        isPublic: reviews.isPublic,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+      })
       .from(reviews)
+      .leftJoin(users, eq(reviews.userId, users.id))
       .where(
         and(
           eq(reviews.mediaType, mediaType),

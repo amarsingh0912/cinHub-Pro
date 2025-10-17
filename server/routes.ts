@@ -1601,7 +1601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch from TMDB if not cached
       console.log(`Fetching TV show from TMDB: ${tvId}`);
       const data = await fetchFromTMDB(`/tv/${tvId}`, {
-        append_to_response: "credits,videos,similar,recommendations",
+        append_to_response: "credits,videos,images,similar,recommendations",
       });
 
       // Return data immediately and cache in background for better performance
@@ -1851,7 +1851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch from TMDB if not cached
       console.log(`Fetching movie from TMDB: ${movieId}`);
       const data = await fetchFromTMDB(`/movie/${movieId}`, {
-        append_to_response: "credits,videos,similar,recommendations",
+        append_to_response: "credits,videos,images,similar,recommendations",
       });
 
       // Return data immediately and cache in background for better performance
@@ -2475,10 +2475,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userReviews = await storage.getMediaReviews(mediaType, mediaId);
       const formattedUserReviews = userReviews.map((review: any) => ({
         id: review.id,
-        author_name: "User Review", // We could get actual usernames if we join with users table
+        username: review.username || "Anonymous",
         rating: review.rating,
-        content: review.review,
-        created_at: review.createdAt,
+        review: review.review,
+        createdAt: review.createdAt,
         source: "user",
       }));
 
@@ -2510,12 +2510,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             tmdbReviews =
               data.results?.map((review: any) => ({
                 id: `tmdb-${review.id}`,
-                author_name: review.author,
+                username: review.author,
                 rating: review.author_details?.rating
                   ? Math.round(review.author_details.rating)
                   : null,
-                content: review.content,
-                created_at: review.created_at,
+                review: review.content,
+                createdAt: review.created_at,
                 source: "tmdb",
               })) || [];
           } else {
@@ -2540,7 +2540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine and sort reviews by creation date (newest first)
       const allReviews = [...formattedUserReviews, ...tmdbReviews].sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
       res.json(allReviews);

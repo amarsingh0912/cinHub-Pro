@@ -29,6 +29,7 @@ export interface MovieDetails extends Movie {
   spoken_languages: SpokenLanguage[];
   credits?: Credits;
   videos?: Videos;
+  images?: Images;
   similar?: MovieResponse;
   recommendations?: MovieResponse;
 }
@@ -89,6 +90,22 @@ export interface Video {
   type: string;
   official: boolean;
   published_at: string;
+}
+
+export interface ImageItem {
+  aspect_ratio: number;
+  file_path: string;
+  height: number;
+  iso_639_1: string | null;
+  vote_average: number;
+  vote_count: number;
+  width: number;
+}
+
+export interface Images {
+  backdrops: ImageItem[];
+  logos: ImageItem[];
+  posters: ImageItem[];
 }
 
 export interface MovieResponse {
@@ -154,6 +171,7 @@ export interface TVShowDetails extends TVShow {
   }>;
   credits?: Credits;
   videos?: Videos;
+  images?: Images;
   similar?: TVResponse;
   recommendations?: TVResponse;
 }

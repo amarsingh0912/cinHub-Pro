@@ -627,12 +627,40 @@ export default function DetailsLayout({
               </div>
             </TabsContent>
 
-            {/* Stills Tab - Placeholder */}
+            {/* Stills Tab */}
             <TabsContent value="stills" className="mt-6" data-testid="content-stills">
-              <div className="text-center py-12">
-                <Images className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Stills and images coming soon.</p>
-              </div>
+              {data?.images?.backdrops && data.images.backdrops.length > 0 ? (
+                <div>
+                  <h3 className="text-xl font-semibold mb-6" data-testid="stills-title">
+                    {type === 'movie' ? 'Movie' : 'TV'} Stills ({data.images.backdrops.length})
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="stills-grid">
+                    {data.images.backdrops.slice(0, 12).map((image, index) => (
+                      <div key={index} className="relative group overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                        <img
+                          src={getImageUrl(image.file_path, 'w780')}
+                          alt={`${title} still ${index + 1}`}
+                          className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
+                          data-testid={`still-image-${index}`}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                          <div className="text-white text-sm">
+                            <p className="font-semibold">{image.width} × {image.height}</p>
+                            {image.vote_average > 0 && (
+                              <p className="text-xs opacity-90">Rating: {image.vote_average.toFixed(1)}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12" data-testid="no-stills">
+                  <Images className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No stills available for this {type === 'movie' ? 'movie' : 'TV show'}.</p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

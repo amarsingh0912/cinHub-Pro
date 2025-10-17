@@ -252,7 +252,7 @@ export class CacheQueueService extends EventEmitter {
     if (job.mediaType === 'movie') {
       this.updateJobStatus(job.id, 'active', 'Fetching movie data from TMDB...');
       const movieData = await this.fetchFromTMDB(`/movie/${job.mediaId}`, { 
-        append_to_response: 'credits,videos,similar,recommendations' 
+        append_to_response: 'credits,videos,images,similar,recommendations' 
       });
       
       this.updateJobStatus(job.id, 'active', 'Processing and caching images...');
@@ -261,7 +261,7 @@ export class CacheQueueService extends EventEmitter {
     } else if (job.mediaType === 'tv') {
       this.updateJobStatus(job.id, 'active', 'Fetching TV show data from TMDB...');
       const tvData = await this.fetchFromTMDB(`/tv/${job.mediaId}`, { 
-        append_to_response: 'credits,videos,similar,recommendations' 
+        append_to_response: 'credits,videos,images,similar,recommendations' 
       });
       
       this.updateJobStatus(job.id, 'active', 'Processing and caching images...');
