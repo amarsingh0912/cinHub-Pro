@@ -1,0 +1,156 @@
+Nice — here's a single, ready-to-paste prompt you can give to a developer, contractor, or an AI code generator to **make the Movie Details and TV Details pages share the exact same UI/UX** and to **add robust caching**. I included (1) a short version you can paste quickly and (2) an expanded, actionable spec (components, behavior, caching strategy, acceptance criteria, small code snippet) so implementers know exactly what to build.
+
+# Short prompt (one-paragraph)
+
+Design and implement a unified Details page UI that is identical for Movie and TV entities (same layout, components, interactions, and animations) while still showing media-specific fields where relevant (e.g., seasons for TV). Improve UX by adding a responsive hero/header with poster, title, metadata, primary actions (Play Trailer, Add to Watchlist), a sticky tabbed content area (Overview, Cast & Crew, Episodes/Seasons or Similar, Recommendations, Reviews), optimised image loading and skeleton states, accessible modals, keyboard navigation, and persistent client-side caching. Use a modern state-fetching library (react-query / TanStack Query or SWR) with stale-while-revalidate semantics, prefetching of related data (cast, similar, recommendations) and persistence to IndexedDB for faster navigation and offline resilience. Deliver components, hooks, unit tests, storybook stories, and a short QA checklist verifying parity and caching behavior.
+
+# Expanded, actionable spec (use this if you want to hand it to a dev or AI generator)
+
+## Goal
+
+Make Movie Details and TV Details visually and functionally identical (single reusable layout) while preserving data differences. Improve usability, performance, accessibility and caching so navigating between items is instant and resilient.
+
+## High-level UX decisions
+
+* **Single reusable DetailsLayout** component that accepts a `type` prop (`'movie'|'tv'`) and a data object. The layout and CSS must be identical for both pages.
+* **Hero/header:** big poster/backdrop on left (or top on mobile), title, meta (release/air date, runtime/episode runtime, genres), rating badge, primary CTAs: Play Trailer, Add to Watchlist, Share.
+* **Sticky Tab Bar:** Overview, Cast & Crew, Seasons/Episodes (TV only) or Similar (Movie only), Recommendations, Reviews. Tabs visually identical; hide/disable the Seasons tab on movies but keep the same space/layout so UI matches.
+* **Secondary area:** Right column (or below on mobile) with Details panel (crew highlights, production companies, languages), key facts, and quick actions.
+* **Content blocks:** Each tab uses the same card components and spacing system; cast & crew shows horizontally scrollable cast cards; similar/recommended uses the same movie-card design used across the app.
+* **Skeletons & loading states:** Use the same skeleton component for both pages and every data subresource (cast, recommendations, reviews).
+* **Animations:** subtle fade+slide on content tab switch; micro-interactions on buttons; no heavy animation that blocks rendering.
+* **Accessibility:** keyboard focus states, skip links to tab content, ARIA roles for tabs and modals, alt text for images, color contrast compliant.
+
+## Visual / UI parity rules
+
+* Use the same responsive breakpoints, grid columns, gaps and typography scale for both pages.
+* Every interactive control (watchlist button, trailer modal, share) must match pixel-for-pixel (or visually identical) between movie and tv pages.
+* Keep identical header height and sticky behavior across both pages even when some tabs are hidden.
+
+## Data & API contract (example shapes)
+
+* `GET /api/movie/:id` or `/api/tv/:id` returns:
+
+  ```json
+  {
+    "id": 123,
+    "title": "Name",
+    "original_title": "Original title",
+    "overview": "...",
+    "poster_path": "/...",
+    "backdrop_path": "/...",
+    "genres": [{ "id":1, "name":"Action" }],
+    "release_date": "2023-12-01",      // or first_air_date for tv
+    "runtime": 125,                     // or episode_run_time for tv
+    "seasons": [ /* tv-only */ ],
+    "cast": [ /* truncated first-n */ ],
+    "crew": [],
+    "recommendations": [],
+    "similar": [],
+    "videos": [ { type: "Trailer", key: "youtube-key" } ],
+    "vote_average": 7.9
+  }
+  ```
+* Small differences allowed but the UI code should map both shapes into a unified `DetailsViewModel`.
+
+## Caching strategy (explicit)
+
+1. **Client-side fetcher:** Use **TanStack Query (react-query)** or **SWR**.
+
+   * Query keys: `["details", type, id]` and subkeys for parts: `["details", type, id, "cast"]`, `["details", type, id, "recommendations"]`.
+2. **Stale / Cache timing** (recommended defaults):
+
+   * `staleTime: 5 * 60 * 1000` (5 minutes) — data considered fresh for 5m.
+   * `cacheTime: 30 * 60 * 1000` (30 minutes) — garbage collected after 30m.
+   * Background refetch on window focus with `refetchOnWindowFocus: true`.
+   * For fast navigation: `initialData` via prefetch when hovering or navigating from list pages.
+3. **Persist query cache** to IndexedDB (via `@tanstack/query-persist-client` or `react-query/persistQueryClient`) so subsequent loads across reloads are near-instant; fallback LRU in-memory if persistence disabled.
+4. **Image caching:** Serve posters/backdrops via CDN with proper caching headers; use `loading="lazy"` for off-screen images and `<Image/>` optimizations where available.
+5. **HTTP-level caching:** Respect server `ETag`/`Last-Modified`; use conditional GETs so revalidation is cheap.
+6. **Prefetching:** Prefetch cast and recommendations when user hovers or opens the details page (low-priority background fetch).
+7. **Offline fallback:** If cached data exists and network unreachable, show cached content with a “You’re viewing offline content” toast.
+8. **Invalidation rules:** When user performs mutations (add to watchlist, submit rating), optimistically update UI and invalidate relevant query keys.
+
+## Performance & UX optimizations
+
+* **Skeletons** for every async block; avoid layout shift by reserving image/space.
+* **Code-splitting:** load heavy modules (video player, review editor) only when user opens them.
+* **Critical render**: load hero data first, then progressively load cast, similar, reviews.
+* **Image formats & sizes:** request appropriately sized images based on viewport.
+* **Preconnect to CDN** and use resource hints for video thumbnails.
+
+## Interaction specifics
+
+* **Trailer:** open in accessible modal with ESC to close; preload video poster but not the player until play pressed.
+* **Add to Watchlist:** instant optimistic toggle with loader state; record analytics event.
+* **Share:** copy link + social share options; include fallback for older browsers.
+* **Error states:** show inline error for each block with a retry button; top-level error shows full-screen retry when hero fails.
+* **Keyboard & screen reader:** tabs should be keyboard navigable with `role="tablist"`, `role="tab"`, `aria-selected`, `aria-controls`.
+
+## Developer deliverables
+
+* `DetailsLayout.tsx` (single reusable component)
+* `MovieDetailsPage.tsx` and `TvDetailsPage.tsx` which only wrap `DetailsLayout` with type and data fetching hook
+* Hooks: `useDetails(type, id)`, `useCast(type, id)`, `useRecommendations(type,id)`
+* Query client config `queryClient.ts` with persistence and recommended options
+* `Skeleton`, `Poster`, `Backdrop`, `Tabs`, `CastCarousel`, `MediaGrid` components
+* Storybook stories for both pages and all subcomponents
+* Unit tests for hooks and core components (Jest + React Testing Library)
+* E2E tests that confirm UI parity (e.g., both pages show same DOM layout for the same components)
+* Accessibility audit report (axe-core) and fixes
+
+## Acceptance criteria / QA checklist
+
+* [ ] Movie Details and TV Details pages render the **exact same** header/hero, tabs, and spacing across desktop/tablet/mobile.
+* [ ] The TV page displays season/episode information in the same tabbed layout as movies (tab exists but disabled when irrelevant).
+* [ ] Switching between Movie and TV pages (same layout) shows no re-layout jump; skeleton placeholders match.
+* [ ] All major API data (details, cast, recommendations, similar, reviews) are cached client-side and served from cache on quick navigations.
+* [ ] When returning to a previously visited details page within 5 minutes, data loads instantly (no spinner) from cache and background revalidation occurs.
+* [ ] Prefetching occurs when user hovers a card on lists and on navigation intent.
+* [ ] Adding to Watchlist updates UI optimistically and invalidates / updates cache appropriately.
+* [ ] Offline: view previously cached detail pages with a small "offline" notice.
+* [ ] Accessibility: tabs keyboard operable, ARIA attributes present, color contrast passes WCAG AA.
+* [ ] Performance: Time-to-interactive for details page under budget (project-specific), hero poster loads quickly, LCP acceptable.
+
+## Small example: react-query config snippet
+
+```ts
+// queryClient.ts
+import { QueryClient } from "@tanstack/react-query";
+import { persistQueryClient } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+
+// configure once
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,       // 5 min
+      cacheTime: 1000 * 60 * 30,      // 30 min
+      refetchOnWindowFocus: true,
+      retry: 1,
+      keepPreviousData: true,
+    },
+  },
+});
+
+// optional: persistence to indexedDB/localStorage
+persistQueryClient({
+  queryClient,
+  persister: createSyncStoragePersister({ storage: window.localStorage }),
+});
+```
+
+## Small UX copy & analytics suggestions
+
+* Button copy: `Play Trailer`, `Add to Watchlist`, `Share`.
+* Microcopy when offline: “You’re viewing cached content — connect to the internet to refresh.”
+* Track events: `details_view`, `trailer_played`, `added_to_watchlist`, `prefetch_triggered`.
+
+---
+
+If you want, I can now:
+
+* Turn this into a single **developer-ready GitHub issue** with checklist + acceptance tests, or
+* Generate the **React component skeletons and hooks** (Typescript + react-query) that implement the query keys and caching config above.
+
+Which one do you want me to produce next?
