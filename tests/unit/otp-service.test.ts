@@ -1,29 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { sendEmailOTP, sendSMSOTP, sendOTP } from '../../server/services/otpService';
 
+// Define mock functions that will be imported
+let mockSend: ReturnType<typeof vi.fn>;
+let mockSetApiKey: ReturnType<typeof vi.fn>;
+let mockCreate: ReturnType<typeof vi.fn>;
+
 // Mock SendGrid - match actual implementation
-const mockSend = vi.fn();
-const mockSetApiKey = vi.fn();
-
-const mockMailService = {
-  setApiKey: mockSetApiKey,
-  send: mockSend,
-};
-
-vi.mock('@sendgrid/mail', () => ({
-  MailService: vi.fn(() => mockMailService),
-  default: mockMailService,
-}));
+vi.mock('@sendgrid/mail', () => {
+  mockSend = vi.fn();
+  mockSetApiKey = vi.fn();
+  
+  const mockMailService = {
+    setApiKey: mockSetApiKey,
+    send: mockSend,
+  };
+  
+  return {
+    MailService: vi.fn(() => mockMailService),
+    default: mockMailService,
+  };
+});
 
 // Mock Twilio
-const mockCreate = vi.fn();
-vi.mock('twilio', () => ({
-  default: vi.fn(() => ({
-    messages: {
-      create: mockCreate,
-    },
-  })),
-}));
+vi.mock('twilio', () => {
+  mockCreate = vi.fn();
+  
+  return {
+    default: vi.fn(() => ({
+      messages: {
+        create: mockCreate,
+      },
+    })),
+  };
+});
 
 describe('OTP Service', () => {
   beforeEach(() => {
