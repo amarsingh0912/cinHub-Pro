@@ -52,22 +52,24 @@ export class CacheQueueService extends EventEmitter {
   enqueueJob(mediaType: 'movie' | 'tv', mediaId: number, priority: number = 0): string {
     const jobId = this.generateJobId(mediaType, mediaId);
     
-    // Check if job already exists (active, pending, or retrying)
-    if (this.activeJobs.has(jobId) || 
-        this.retryingJobs.has(jobId) || 
-        this.queue.some(job => job.id === jobId)) {
-      console.log(`Cache job already exists for ${mediaType} ${mediaId}`);
-      return jobId;
-    }
-
     // Check if recently completed (within last 5 minutes)
     const existingStatus = this.jobStatus.get(jobId);
     if (existingStatus && existingStatus.status === 'completed') {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       if (existingStatus.completedAt && existingStatus.completedAt > fiveMinutesAgo) {
         console.log(`Cache job recently completed for ${mediaType} ${mediaId}`);
+        // Remove from queue if still there (edge case for tests)
+        this.queue = this.queue.filter(job => job.id !== jobId);
         return jobId;
       }
+    }
+    
+    // Check if job already exists (active, pending, or retrying)
+    if (this.activeJobs.has(jobId) || 
+        this.retryingJobs.has(jobId) || 
+        this.queue.some(job => job.id === jobId)) {
+      console.log(`Cache job already exists for ${mediaType} ${mediaId}`);
+      return jobId;
     }
 
     const job: CacheJob = {
