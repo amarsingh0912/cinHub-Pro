@@ -1878,28 +1878,42 @@ export default function Dashboard() {
                       ) : userReviews && userReviews.length > 0 ? (
                         <div className="space-y-4 max-h-60 overflow-y-auto">
                           {userReviews.slice(0, 3).map((review) => (
-                            <div key={review.id} className="flex gap-3 p-3 rounded-lg bg-accent/30">
-                              <div className="w-12 h-16 bg-accent rounded flex-shrink-0">
-                                {/* Movie poster would go here */}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm truncate">{review.mediaType} #{review.mediaId}</h4>
-                                <div className="flex items-center gap-1 mt-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-3 h-3 ${
-                                        i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
-                                      }`}
+                            <Link key={review.id} href={`/${review.mediaType}/${review.mediaId}`}>
+                              <div className="flex gap-3 p-3 rounded-lg bg-accent/30 hover:bg-accent/50 transition-colors cursor-pointer">
+                                <div className="w-12 h-16 bg-accent rounded flex-shrink-0 overflow-hidden">
+                                  {review.mediaPosterPath ? (
+                                    <img
+                                      src={getImageUrl(review.mediaPosterPath)}
+                                      alt={review.mediaTitle || `${review.mediaType} #${review.mediaId}`}
+                                      className="w-full h-full object-cover"
                                     />
-                                  ))}
-                                  <span className="text-xs text-muted-foreground ml-1">{review.rating}/10</span>
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                      <Film className="w-6 h-6 text-muted-foreground" />
+                                    </div>
+                                  )}
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {new Date(review.createdAt).toLocaleDateString()}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-sm truncate">
+                                    {review.mediaTitle || `${review.mediaType === 'movie' ? 'Movie' : 'TV Show'} #${review.mediaId}`}
+                                  </h4>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-3 h-3 ${
+                                          i < review.rating / 2 ? "text-yellow-500 fill-current" : "text-muted-foreground"
+                                        }`}
+                                      />
+                                    ))}
+                                    <span className="text-xs text-muted-foreground ml-1">{review.rating}/10</span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {new Date(review.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       ) : (
