@@ -438,10 +438,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 z-50 bg-gradient-to-br from-purple-900/40 via-teal-900/40 to-blue-900/40 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogContent 
-          className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] border-0 bg-transparent p-0 shadow-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] focus-visible:outline-none" 
+          className="fixed left-[50%] top-[50%] z-50 w-full max-w-md max-h-[90vh] translate-x-[-50%] translate-y-[-50%] border-0 bg-transparent p-0 shadow-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] focus-visible:outline-none overflow-y-auto" 
           data-testid="auth-modal"
         >
-          <div className="relative mx-4 rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-8 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 sm:p-10">
+          <div className="relative mx-4 my-4 rounded-3xl border border-white/20 bg-white/10 dark:bg-black/10 p-8 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 sm:p-10">
             
             <div className="mb-8 text-center">
               <h1 className="mb-2 text-4xl font-bold text-white dark:text-white">cineHub</h1>
