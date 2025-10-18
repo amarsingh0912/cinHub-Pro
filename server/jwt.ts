@@ -103,5 +103,6 @@ export function extractBearerToken(authHeader: string | undefined): string | nul
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
-  return authHeader.substring(7);
+  const token = authHeader.substring(7);
+  return token.length > 0 ? token : null;
 }
