@@ -45,7 +45,9 @@ export default function TVDetail() {
         mediaId: tvShow.id,
         rating,
         review: text.trim(),
-        isPublic: true
+        isPublic: true,
+        mediaTitle: (tvShow as TVShowDetails)?.name,
+        mediaPosterPath: (tvShow as TVShowDetails)?.poster_path
       });
     },
     onSuccess: async () => {

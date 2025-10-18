@@ -45,7 +45,9 @@ export default function MovieDetail() {
         mediaId: movie.id,
         rating,
         review: text.trim(),
-        isPublic: true
+        isPublic: true,
+        mediaTitle: (movie as MovieDetails)?.title,
+        mediaPosterPath: (movie as MovieDetails)?.poster_path
       });
     },
     onSuccess: async () => {

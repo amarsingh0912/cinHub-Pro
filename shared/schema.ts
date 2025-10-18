@@ -134,6 +134,8 @@ export const reviews = pgTable("reviews", {
   rating: integer("rating").notNull(), // 1-10 scale
   review: text("review"),
   isPublic: boolean("is_public").default(true),
+  mediaTitle: varchar("media_title"),
+  mediaPosterPath: varchar("media_poster_path"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

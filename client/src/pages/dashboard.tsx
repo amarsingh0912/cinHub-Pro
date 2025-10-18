@@ -2391,11 +2391,22 @@ export default function Dashboard() {
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
                             <CardContent className="pt-6">
                               <div className="flex items-start gap-4">
+                                {review.mediaPosterPath && (
+                                  <Link href={`/movie/${review.mediaId}`}>
+                                    <img 
+                                      src={review.mediaPosterPath} 
+                                      alt={review.mediaTitle || `Movie ${review.mediaId}`}
+                                      className="w-20 h-28 object-cover rounded-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
+                                    />
+                                  </Link>
+                                )}
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-semibold" data-testid={`review-media-${review.id}`}>
-                                      Movie #{review.mediaId}
-                                    </h3>
+                                    <Link href={`/movie/${review.mediaId}`}>
+                                      <h3 className="font-semibold hover:text-primary transition-colors cursor-pointer" data-testid={`review-media-${review.id}`}>
+                                        {review.mediaTitle || `Movie #${review.mediaId}`}
+                                      </h3>
+                                    </Link>
                                     <div className="flex items-center gap-1">
                                       {[...Array(5)].map((_, i) => (
                                         <Star
@@ -2464,11 +2475,22 @@ export default function Dashboard() {
                           <Card key={review.id} data-testid={`review-card-${review.id}`}>
                             <CardContent className="pt-6">
                               <div className="flex items-start gap-4">
+                                {review.mediaPosterPath && (
+                                  <Link href={`/tv/${review.mediaId}`}>
+                                    <img 
+                                      src={review.mediaPosterPath} 
+                                      alt={review.mediaTitle || `TV Show ${review.mediaId}`}
+                                      className="w-20 h-28 object-cover rounded-lg shadow-md hover:scale-105 transition-transform cursor-pointer"
+                                    />
+                                  </Link>
+                                )}
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <h3 className="font-semibold" data-testid={`review-media-${review.id}`}>
-                                      TV Show #{review.mediaId}
-                                    </h3>
+                                    <Link href={`/tv/${review.mediaId}`}>
+                                      <h3 className="font-semibold hover:text-primary transition-colors cursor-pointer" data-testid={`review-media-${review.id}`}>
+                                        {review.mediaTitle || `TV Show #${review.mediaId}`}
+                                      </h3>
+                                    </Link>
                                     <div className="flex items-center gap-1">
                                       {[...Array(5)].map((_, i) => (
                                         <Star
@@ -2558,7 +2580,7 @@ export default function Dashboard() {
                                 onDelete={async () => {
                                   await deleteAvatarMutation.mutateAsync();
                                 }}
-                                userName={user?.displayName || user?.username || user?.firstName}
+                                userName={user?.displayName || user?.username || user?.firstName || undefined}
                                 isUploading={isUploadingAvatar}
                                 uploadProgress={uploadProgress}
                               />
