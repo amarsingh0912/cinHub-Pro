@@ -3,6 +3,18 @@ import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import { server } from './mocks/server';
 
+// Set up test environment variables
+process.env.NODE_ENV = 'test';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-testing-purposes-only';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-testing-purposes-only';
+process.env.SENDGRID_API_KEY = 'test-sendgrid-key';
+process.env.TWILIO_ACCOUNT_SID = 'test-twilio-sid';
+process.env.TWILIO_AUTH_TOKEN = 'test-twilio-token';
+process.env.TWILIO_PHONE_NUMBER = '+15551234567';
+process.env.CLOUDINARY_CLOUD_NAME = 'test-cloudinary';
+process.env.CLOUDINARY_API_KEY = 'test-cloudinary-key';
+process.env.CLOUDINARY_API_SECRET = 'test-cloudinary-secret';
+
 // Extend Vitest's expect method with testing-library matchers
 expect.extend(matchers);
 
