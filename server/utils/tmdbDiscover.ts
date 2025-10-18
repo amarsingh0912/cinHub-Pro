@@ -166,23 +166,41 @@ function getOneYearAgo(): string {
 }
 
 /**
+ * Remove null and undefined values from an object
+ */
+function cleanFilters(filters: Record<string, any>): Record<string, any> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== null && value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned;
+}
+
+/**
  * Transform filter parameter names for TMDB API compatibility
  */
 function transformMovieFilters(filters: Record<string, any>): Record<string, any> {
   const transformed: Record<string, any> = { ...filters };
   
   // Transform parameter names
-  if (filters.genres !== undefined) {
+  if (filters.genres !== undefined && filters.genres !== null) {
     transformed.with_genres = filters.genres;
+    delete transformed.genres;
+  } else {
     delete transformed.genres;
   }
   
-  if (filters.year !== undefined) {
+  if (filters.year !== undefined && filters.year !== null) {
     transformed.primary_release_year = filters.year;
+    delete transformed.year;
+  } else {
     delete transformed.year;
   }
   
-  return transformed;
+  // Clean null and undefined values
+  return cleanFilters(transformed);
 }
 
 /**
@@ -273,12 +291,15 @@ function transformTVFilters(filters: Record<string, any>): Record<string, any> {
   const transformed: Record<string, any> = { ...filters };
   
   // Transform parameter names
-  if (filters.genres !== undefined) {
+  if (filters.genres !== undefined && filters.genres !== null) {
     transformed.with_genres = filters.genres;
+    delete transformed.genres;
+  } else {
     delete transformed.genres;
   }
   
-  return transformed;
+  // Clean null and undefined values
+  return cleanFilters(transformed);
 }
 
 /**
