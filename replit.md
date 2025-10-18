@@ -6,6 +6,17 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 18, 2025:**
+- Redesigned authentication modal with modern glassmorphism aesthetic
+  - Implemented gradient backdrop overlay (purple/teal/blue) for visual depth
+  - Added frosted glass effect with backdrop-blur and semi-transparent white/black panels
+  - Simplified UI with clean typography and modern rounded corners
+  - Maintained all existing authentication flows (signin, signup, OTP, password reset)
+  - Preserved social auth integration (Google, Facebook, Twitter, GitHub)
+  - Kept profile photo upload functionality for signup
+  - Updated form styling with translucent inputs and improved visual hierarchy
+  - Enhanced mobile responsiveness with touch-friendly button sizes
+
 **October 17, 2025:**
 - Updated OTP service to use email-only delivery via Twilio Verify (removed SMS support)
 - Added user reminders to check spam/junk folders for OTP emails in UI and notifications
