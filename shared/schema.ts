@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   phoneNumber: varchar("phone_number").unique(),
   profileImageUrl: varchar("profile_image_url"),
+  avatarPublicId: varchar("avatar_public_id"), // Cloudinary public ID for avatar deletion
   displayName: varchar("display_name"), // Full display name
   providers: text("providers").array().default(sql`'{}'`), // Array of auth providers used
   isAdmin: boolean("is_admin").default(false),

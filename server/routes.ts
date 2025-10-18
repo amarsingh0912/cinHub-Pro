@@ -39,6 +39,7 @@ import {
   validateCloudinaryUrl,
   isCloudinaryConfigured,
   uploadToCloudinary,
+  deleteFromCloudinary,
 } from "./services/cloudinaryService";
 import { tmdbCacheService } from "./services/tmdbCache.js";
 import { websocketService } from "./services/websocketService.js";
@@ -1084,12 +1085,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "No user ID found" });
       }
 
-      const { secure_url } = req.body;
+      const { secure_url, public_id } = req.body;
 
       if (!secure_url || typeof secure_url !== "string") {
         return res
           .status(400)
           .json({ message: "Valid secure_url is required" });
+      }
+
+      if (!public_id || typeof public_id !== "string") {
+        return res
+          .status(400)
+          .json({ message: "Valid public_id is required" });
       }
 
       // Validate that the URL is from our configured Cloudinary account and belongs to this user
@@ -1105,8 +1112,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .json({ message: "Invalid image URL or unauthorized access" });
       }
 
-      // Update user's profile image in database
-      await storage.updateUser(userId, { profileImageUrl: secure_url });
+      // SECURITY: Validate that public_id follows the expected pattern for user avatars
+      // Must be in the format: profile_pictures/<userId>_<something>
+      const expectedPrefix = `profile_pictures/${userId}_`;
+      if (!public_id.startsWith(expectedPrefix)) {
+        console.error('Public ID validation failed:', {
+          publicId: public_id,
+          userId,
+          expectedPrefix
+        });
+        return res
+          .status(400)
+          .json({ message: "Invalid public_id - must belong to current user" });
+      }
+
+      // Get current user to check for existing avatar
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Delete old avatar from Cloudinary if it exists
+      if (currentUser.avatarPublicId && isCloudinaryConfigured()) {
+        try {
+          await deleteFromCloudinary(currentUser.avatarPublicId);
+          console.log(`Deleted old avatar: ${currentUser.avatarPublicId}`);
+        } catch (error) {
+          console.error('Failed to delete old avatar from Cloudinary:', error);
+          // Continue with update even if deletion fails
+        }
+      }
+
+      // Update user's profile image and public_id in database
+      await storage.updateUser(userId, { 
+        profileImageUrl: secure_url,
+        avatarPublicId: public_id
+      });
 
       // Get updated user to return
       const updatedUser = await storage.getUser(userId);
@@ -1122,6 +1163,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Profile picture update error:", error);
       res.status(500).json({ message: "Failed to update profile picture" });
+    }
+  });
+
+  // Delete profile avatar
+  app.delete("/api/profile/avatar", isAuthenticated, async (req: any, res) => {
+    try {
+      // Support both JWT (req.user) and session-based auth (req.session.userId)
+      const userId = req.user?.id || req.session?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+
+      // Get current user to check for existing avatar
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Delete avatar from Cloudinary if it exists
+      if (currentUser.avatarPublicId && isCloudinaryConfigured()) {
+        try {
+          await deleteFromCloudinary(currentUser.avatarPublicId);
+          console.log(`Deleted avatar: ${currentUser.avatarPublicId}`);
+        } catch (error) {
+          console.error('Failed to delete avatar from Cloudinary:', error);
+          // Continue with database update even if Cloudinary deletion fails
+        }
+      }
+
+      // Remove profile image URLs from database
+      await storage.updateUser(userId, { 
+        profileImageUrl: null,
+        avatarPublicId: null
+      });
+
+      // Get updated user to return
+      const updatedUser = await storage.getUser(userId);
+
+      res.json({
+        message: "Profile picture deleted successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.error("Profile picture deletion error:", error);
+      res.status(500).json({ message: "Failed to delete profile picture" });
     }
   });
 

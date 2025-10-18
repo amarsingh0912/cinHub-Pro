@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { 
   generateUploadSignature, 
   validateCloudinaryUrl, 
-  isCloudinaryConfigured 
+  isCloudinaryConfigured,
+  deleteFromCloudinary
 } from '../../server/services/cloudinaryService';
 
 describe('CloudinaryService', () => {
@@ -118,6 +119,17 @@ describe('CloudinaryService', () => {
     it('validates URL with transformations and version', () => {
       const transformedUrl = 'https://res.cloudinary.com/test-cloud/image/upload/c_fill,w_400,h_400/v1234567890/profile_pictures/user123_photo.jpg';
       expect(validateCloudinaryUrl(transformedUrl, 'user123')).toBe(true);
+    });
+  });
+
+  describe('deleteFromCloudinary', () => {
+    it('throws error when Cloudinary is not configured', async () => {
+      delete process.env.CLOUDINARY_CLOUD_NAME;
+      await expect(deleteFromCloudinary('test_public_id')).rejects.toThrow('Cloudinary is not configured');
+    });
+
+    it('throws error when public_id is missing', async () => {
+      await expect(deleteFromCloudinary('')).rejects.toThrow('Public ID is required for deletion');
     });
   });
 });

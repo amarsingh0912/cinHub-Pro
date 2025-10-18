@@ -160,3 +160,26 @@ export async function uploadToCloudinary(
     uploadStream.end(fileBuffer);
   });
 }
+
+/**
+ * Delete an image from Cloudinary
+ * @param publicId - The public ID of the image to delete
+ * @returns Promise with the deletion result
+ */
+export async function deleteFromCloudinary(publicId: string): Promise<any> {
+  if (!isCloudinaryConfigured()) {
+    throw new Error('Cloudinary is not configured');
+  }
+
+  if (!publicId) {
+    throw new Error('Public ID is required for deletion');
+  }
+
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error('Cloudinary deletion error:', error);
+    throw error;
+  }
+}

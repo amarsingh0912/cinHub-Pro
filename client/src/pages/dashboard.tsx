@@ -20,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Heart, Plus, Star, Trash2, Edit, Eye, EyeOff, Play, Save, Upload, User, History, Activity, Search, Settings, TrendingUp, Calendar, Clock, Award, Target, BarChart3, Users, Film, Tv, BookOpen, Zap, Coffee, Trophy } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { getImageUrl } from "@/lib/tmdb";
 import { Link } from "wouter";
 import { ExpandableText } from "@/components/ui/expandable-text";
@@ -798,7 +799,7 @@ export default function Dashboard() {
   });
 
   const updateAvatarMutation = useMutation({
-    mutationFn: async (data: { secure_url: string }) => {
+    mutationFn: async (data: { secure_url: string; public_id: string }) => {
       const result = await apiRequest("PATCH", "/api/profile/avatar", data);
       return result;
     },
@@ -815,6 +816,28 @@ export default function Dashboard() {
       setIsUploadingAvatar(false);
       setUploadProgress(0);
       const errorMessage = error?.message || "Failed to update profile picture.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteAvatarMutation = useMutation({
+    mutationFn: async () => {
+      const result = await apiRequest("DELETE", "/api/profile/avatar", {});
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Profile Picture Removed",
+        description: "Your profile picture has been removed successfully.",
+      });
+    },
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to remove profile picture.";
       toast({
         title: "Error",
         description: errorMessage,
@@ -901,12 +924,15 @@ export default function Dashboard() {
       });
 
       // Validate upload response
-      if (!uploadResponse || !uploadResponse.secure_url) {
-        throw new Error('Upload failed: No secure URL returned from Cloudinary');
+      if (!uploadResponse || !uploadResponse.secure_url || !uploadResponse.public_id) {
+        throw new Error('Upload failed: No secure URL or public_id returned from Cloudinary');
       }
 
-      // Update profile picture URL in backend
-      await updateAvatarMutation.mutateAsync({ secure_url: uploadResponse.secure_url });
+      // Update profile picture URL and public_id in backend
+      await updateAvatarMutation.mutateAsync({ 
+        secure_url: uploadResponse.secure_url,
+        public_id: uploadResponse.public_id
+      });
 
     } catch (error: any) {
       setIsUploadingAvatar(false);
@@ -2525,66 +2551,17 @@ export default function Dashboard() {
                         <Form {...profileForm}>
                           <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
                             {/* Profile Picture Section */}
-                            <div className="flex flex-col items-center space-y-4 pb-6 border-b">
-                              <div className="relative">
-                                <Avatar className="w-24 h-24">
-                                  <AvatarImage 
-                                    src={user?.profileImageUrl || undefined} 
-                                    alt={user?.displayName || user?.username || "Profile picture"}
-                                    data-testid="profile-avatar-image"
-                                  />
-                                  <AvatarFallback className="text-lg" data-testid="profile-avatar-fallback">
-                                    <User className="w-8 h-8" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                {isUploadingAvatar && (
-                                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                                    <div className="text-white text-sm font-medium">
-                                      {uploadProgress}%
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="text-center">
-                                <h3 className="font-medium text-sm">Profile Picture</h3>
-                                <p className="text-xs text-muted-foreground">
-                                  Upload a picture to personalize your profile
-                                </p>
-                              </div>
-
-                              {isEditingProfile && (
-                                <div className="flex flex-col items-center space-y-2">
-                                  <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleAvatarUpload(file);
-                                      }
-                                    }}
-                                    disabled={isUploadingAvatar}
-                                    className="hidden"
-                                    id="avatar-upload"
-                                    data-testid="input-avatar-upload"
-                                  />
-                                  <label
-                                    htmlFor="avatar-upload"
-                                    className={`
-                                      inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer
-                                      ${isUploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}
-                                    `}
-                                    data-testid="button-upload-avatar"
-                                  >
-                                    <Upload className="w-4 h-4 mr-2" />
-                                    {isUploadingAvatar ? 'Uploading...' : 'Change Picture'}
-                                  </label>
-                                  <p className="text-xs text-muted-foreground">
-                                    JPEG, PNG, or WebP. Max 5MB.
-                                  </p>
-                                </div>
-                              )}
+                            <div className="flex flex-col items-center pb-6 border-b">
+                              <ProfileAvatar
+                                currentImageUrl={user?.profileImageUrl}
+                                onUpload={handleAvatarUpload}
+                                onDelete={async () => {
+                                  await deleteAvatarMutation.mutateAsync();
+                                }}
+                                userName={user?.displayName || user?.username || user?.firstName}
+                                isUploading={isUploadingAvatar}
+                                uploadProgress={uploadProgress}
+                              />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -162,27 +162,53 @@ DATABASE_URL=postgresql://username:password@host.region.provider.com:5432/databa
 - **Example**: `TMDB_ACCESS_TOKEN=eyJhbGciOiJIUzI1NiJ9...`
 - **Usage**: Alternative to API key, used for v4 API endpoints
 
-### Cloudinary (Image Hosting)
+### Cloudinary (Image Hosting & Avatar Uploads)
+
+Cloudinary provides secure image hosting and transformation capabilities. Used for:
+- **User Profile Pictures**: Secure avatar uploads with automatic resizing
+- **TMDB Image Caching**: Optimized movie/TV show posters and backdrops
+- **Automatic Transformations**: Images are automatically optimized and cropped
 
 #### CLOUDINARY_CLOUD_NAME
-- **Required**: For image uploads
+- **Required**: Yes (for image uploads and avatar feature)
 - **Type**: String
 - **Description**: Your Cloudinary cloud name
 - **Obtain**: [https://cloudinary.com/console](https://cloudinary.com/console)
 - **Example**: `CLOUDINARY_CLOUD_NAME=your-cloud-name`
+- **Usage**: Required for all Cloudinary operations
 
 #### CLOUDINARY_API_KEY
-- **Required**: For image uploads
+- **Required**: Yes (for image uploads and avatar feature)
 - **Type**: String
 - **Description**: Cloudinary API key
 - **Example**: `CLOUDINARY_API_KEY=123456789012345`
+- **Obtain**: From Cloudinary console dashboard
+- **Usage**: Used for authenticated API requests
 
 #### CLOUDINARY_API_SECRET
-- **Required**: For image uploads
+- **Required**: Yes (for image uploads and avatar feature)
 - **Type**: String
 - **Description**: Cloudinary API secret
 - **Example**: `CLOUDINARY_API_SECRET=your-cloudinary-secret`
-- **Security**: Keep this secret, used for signed uploads
+- **Security**: 
+  - Keep this secret secure - used for signed uploads
+  - Required for generating upload signatures
+  - Enables secure client-side direct uploads
+  - Used for deleting old avatars when users update profile pictures
+
+#### Avatar Upload Feature
+When all three Cloudinary variables are configured, users can:
+- Upload profile pictures with drag & drop
+- Crop and preview images before upload
+- Automatically resize images to 400×400px
+- Replace old avatars (automatically deletes previous image from Cloudinary)
+- Images are stored in `profile_pictures/` folder with user-specific naming
+
+**Upload Limits**:
+- Max file size: 5MB
+- Allowed formats: JPEG, PNG, WebP
+- Minimum dimensions: 200×200px (before automatic resize)
+- Images are automatically cropped to square and optimized
 
 ---
 
