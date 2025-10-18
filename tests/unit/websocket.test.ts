@@ -4,10 +4,8 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { EventEmitter } from 'events';
 
 // Mock cache queue service
-let mockCacheQueue: EventEmitter;
-
 vi.mock('../../server/services/cacheQueue', () => {
-  mockCacheQueue = new EventEmitter();
+  const mockCacheQueue = new EventEmitter();
   Object.assign(mockCacheQueue, {
     getQueueStats: vi.fn(() => ({
       pending: 0,
@@ -25,9 +23,15 @@ vi.mock('../../server/services/cacheQueue', () => {
 describe('WebSocketService', () => {
   let service: WebSocketService;
   let mockServer: any;
+  let mockCacheQueue: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    
+    // Get reference to mockCacheQueue
+    const cacheQueueModule = await import('../../server/services/cacheQueue');
+    mockCacheQueue = cacheQueueModule.cacheQueueService;
+    
     service = new WebSocketService();
     
     mockServer = {

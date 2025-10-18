@@ -2,14 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ImageCacheService } from '../../server/services/imageCache';
 
 // Mock Cloudinary
-const mockUpload = vi.fn();
-const mockDestroy = vi.fn();
-
 vi.mock('cloudinary', () => ({
   v2: {
     uploader: {
-      upload: mockUpload,
-      destroy: mockDestroy,
+      upload: vi.fn(),
+      destroy: vi.fn(),
     },
   },
 }));
@@ -37,9 +34,14 @@ vi.mock('../../server/db', () => ({
 
 describe('ImageCacheService', () => {
   let service: ImageCacheService;
+  let mockUpload: any;
+  let mockDestroy: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const cloudinary = await import('cloudinary');
+    mockUpload = vi.mocked(cloudinary.v2.uploader.upload);
+    mockDestroy = vi.mocked(cloudinary.v2.uploader.destroy);
     service = new ImageCacheService();
   });
 
