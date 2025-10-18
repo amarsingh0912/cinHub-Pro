@@ -50,6 +50,7 @@ export default function TVDetail() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", "tv", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews/user"] });
       
       try {
         await apiRequest("POST", "/api/activity-history", {

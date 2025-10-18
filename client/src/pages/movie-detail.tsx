@@ -50,6 +50,7 @@ export default function MovieDetail() {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", "movie", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews/user"] });
       
       try {
         await apiRequest("POST", "/api/activity-history", {
