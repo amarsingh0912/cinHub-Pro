@@ -284,16 +284,17 @@ export default function Dashboard() {
         return reviewDate >= dayDate && reviewDate < nextDay;
       }).length || 0;
 
-      const dayActivity = activityHistory?.filter(activity => {
+      const dayWatchlistAdditions = activityHistory?.filter(activity => {
         const activityDate = new Date(activity.createdAt);
-        return activityDate >= dayDate && activityDate < nextDay;
+        return activityDate >= dayDate && activityDate < nextDay && 
+               (activity.activityType === 'watchlist_item_added' || activity.activityType === 'watchlist_created');
       }).length || 0;
 
       return {
         name: day,
         favorites: dayFavorites,
         reviews: dayReviews,
-        watchlists: dayActivity // Actual activity count without normalization
+        watchlists: dayWatchlistAdditions
       };
     });
   }, [favorites, userReviews, watchlists, activityHistory]);
@@ -332,14 +333,6 @@ export default function Dashboard() {
       count
     }));
   }, [userReviews]);
-
-  // Memoized watch time trends based on viewing history (requires duration metadata)
-  const watchTimeTrends = useMemo(() => {
-    // Note: Current data structure doesn't include duration metadata from TMDB
-    // In a real implementation, this would aggregate watch durations from viewing history
-    // Return empty array to indicate no real duration data is available
-    return [];
-  }, [viewingHistory]);
 
   // Memoized top genres based on favorites (requires genre metadata from TMDB)
   const topGenres = useMemo((): Array<{ name: string; count: number; color: string }> => {
@@ -986,13 +979,35 @@ export default function Dashboard() {
 
   // Utility function to format relative time
   const formatRelativeTime = (date: string) => {
+    if (!date) return 'Unknown';
+    
     const now = new Date();
     const then = new Date(date);
+    
+    // Check if date is valid
+    if (isNaN(then.getTime())) {
+      return 'Unknown';
+    }
+    
     const diffInMs = now.getTime() - then.getTime();
+    
+    // Handle negative values (future dates)
+    if (diffInMs < 0) {
+      return 'Just now';
+    }
+    
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
     
     if (diffInDays === 0) {
-      return 'Today';
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      if (diffInHours === 0) {
+        const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+        if (diffInMinutes === 0) {
+          return 'Just now';
+        }
+        return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+      }
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     } else if (diffInDays === 1) {
       return 'Yesterday';
     } else if (diffInDays < 7) {
@@ -1144,7 +1159,7 @@ export default function Dashboard() {
             </div>
 
             {/* Enhanced Dashboard Stats with Interactive Elements */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 animate-stagger-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 animate-stagger-in">
               <Card className="glassmorphism-card border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-glow group cursor-pointer" data-testid="stat-card-favorites">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -1228,35 +1243,6 @@ export default function Dashboard() {
                   </div>
                   <div className="mt-3 h-1 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-warning to-warning/60 rounded-full transition-all duration-1000" style={{ width: `${Math.min((dashboardStats?.averageRating || 0) / 10 * 100, 100)}%` }} />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="glassmorphism-card border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-lg group cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Hours Watched</p>
-                      <p className="text-3xl font-bold text-muted-foreground" data-testid="stats-hours">
-                        N/A
-                      </p>
-                    </div>
-                    <div className="p-3 rounded-full bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                      <Clock className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-muted-foreground">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      <span>{statsLoading ? "--" : (dashboardStats?.daysActive || 0)} days active</span>
-                    </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <Clock className="w-3 h-3 mr-1" />
-                      <span>Data unavailable</span>
-                    </div>
-                  </div>
-                  <div className="mt-3 text-xs text-muted-foreground text-center">
-                    Watch time requires duration metadata
                   </div>
                 </CardContent>
               </Card>
@@ -1374,29 +1360,6 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Watch Time Trends */}
-              <Card className="glassmorphism-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-success" />
-                    Watch Time Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center">
-                        <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                        <h3 className="text-lg font-semibold mb-2">Watch Time Data Unavailable</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Watch time tracking requires duration metadata from media sources
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </section>
@@ -1406,28 +1369,35 @@ export default function Dashboard() {
         <section className="py-8" data-testid="dashboard-content">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto glassmorphism border border-border/20">
-                <TabsTrigger value="overview" data-testid="dashboard-tab-overview" className="data-[state=active]:bg-primary/20">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="favorites" data-testid="dashboard-tab-favorites" className="data-[state=active]:bg-primary/20">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Favorites
-                </TabsTrigger>
-                <TabsTrigger value="watchlists" data-testid="dashboard-tab-watchlists" className="data-[state=active]:bg-secondary/20">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Watchlists
-                </TabsTrigger>
-                <TabsTrigger value="reviews" data-testid="dashboard-tab-reviews" className="data-[state=active]:bg-warning/20">
-                  <Star className="w-4 h-4 mr-2" />
-                  Reviews
-                </TabsTrigger>
-                <TabsTrigger value="profile" data-testid="dashboard-tab-profile" className="data-[state=active]:bg-accent/20">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile & Settings
-                </TabsTrigger>
-              </TabsList>
+              <div className="w-full overflow-x-auto scrollbar-hide">
+                <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:grid-cols-5 max-w-3xl mx-auto glassmorphism border border-border/20">
+                  <TabsTrigger value="overview" data-testid="dashboard-tab-overview" className="data-[state=active]:bg-primary/20 whitespace-nowrap">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Overview</span>
+                    <span className="sm:hidden">Overview</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="favorites" data-testid="dashboard-tab-favorites" className="data-[state=active]:bg-primary/20 whitespace-nowrap">
+                    <Heart className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Favorites</span>
+                    <span className="sm:hidden">Favs</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="watchlists" data-testid="dashboard-tab-watchlists" className="data-[state=active]:bg-secondary/20 whitespace-nowrap">
+                    <Plus className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Watchlists</span>
+                    <span className="sm:hidden">Lists</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="reviews" data-testid="dashboard-tab-reviews" className="data-[state=active]:bg-warning/20 whitespace-nowrap">
+                    <Star className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Reviews</span>
+                    <span className="sm:hidden">Reviews</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="profile" data-testid="dashboard-tab-profile" className="data-[state=active]:bg-accent/20 whitespace-nowrap">
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Profile & Settings</span>
+                    <span className="sm:hidden">Profile</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-8 mt-8">
