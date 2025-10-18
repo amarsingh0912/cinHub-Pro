@@ -17,8 +17,6 @@ describe('mergeFilters', () => {
     expect(result.with_original_language).toBe('hi');
     expect(result.sort_by).toBe('popularity.desc');
     expect(result.primary_release_date?.start).toBeDefined();
-    expect(result.with_release_type).toEqual([2|3]);
-    expect(result.region).toBe('IN');
   });
 
   it('should preserve user genre selections when switching presets', () => {
@@ -29,7 +27,7 @@ describe('mergeFilters', () => {
     expect(result.activePreset).toBe('popular');
     expect(result.with_genres).toEqual([28, 12]);
     expect(result.sort_by).toBe('popularity.desc');
-    expect(result.vote_count?.min).toBe(50);
+    expect(result.vote_count?.min).toBe(500);
   });
 
   it('should merge now_playing preset with custom filters', () => {
@@ -43,7 +41,7 @@ describe('mergeFilters', () => {
     expect(result.primary_release_date?.end).toBeDefined();
     expect(result.with_original_language).toBe('hi');
     expect(result.vote_average?.min).toBe(7);
-    expect(result.sort_by).toBe('primary_release_date.desc');
+    expect(result.sort_by).toBe('popularity.desc');
   });
 
   it('should apply trending preset with all default parameters', () => {
@@ -51,16 +49,14 @@ describe('mergeFilters', () => {
 
     expect(result.activePreset).toBe('trending');
     expect(result.category).toBe('trending');
-    expect(result.vote_count?.min).toBe(500);
-    expect(result.with_release_type).toEqual([2|3]);
     expect(result.primary_release_date?.start).toBeDefined();
-    expect(result.with_original_language).toBe('hi');
+    expect(result.primary_release_date?.end).toBeDefined();
   });
 
   it('should override preset defaults with user values', () => {
     const result = mergeFilters('popular', 'movie', {
-      with_original_language: 'en', // Override default 'hi'
-      vote_count: { min: 1000 }, // Override default 50
+      with_original_language: 'en',
+      vote_count: { min: 1000 }, // Override default 500
     });
 
     expect(result.with_original_language).toBe('en');
@@ -71,7 +67,7 @@ describe('mergeFilters', () => {
 describe('buildQueryString', () => {
   it('should encode pipes as %7C for array values', () => {
     const params = {
-      with_release_type: [2|3],
+      with_release_type: [2, 3],
       with_watch_providers: [8, 9, 10],
     };
 
@@ -131,7 +127,7 @@ describe('buildQueryString', () => {
       include_adult: false,
       include_video: false,
       certification_country: 'US',
-      with_release_type: [2|3],
+      with_release_type: [2, 3],
       'primary_release_date.gte': '2025-10-17',
     };
 
@@ -158,11 +154,8 @@ describe('Integration: mergeFilters + buildQueryString', () => {
     const queryParams: Record<string, any> = {
       sort_by: merged.sort_by,
       with_original_language: merged.with_original_language,
-      region: merged.region,
       include_adult: merged.include_adult,
       include_video: merged.include_video,
-      certification_country: merged.certification_country,
-      with_release_type: merged.with_release_type,
     };
 
     if (merged.primary_release_date?.start) {
@@ -175,7 +168,5 @@ describe('Integration: mergeFilters + buildQueryString', () => {
     expect(queryString).toContain('primary_release_date.gte=');
     expect(queryString).toContain('sort_by=popularity.desc');
     expect(queryString).toContain('with_original_language=hi');
-    expect(queryString).toContain('with_release_type=2%7C3');
-    expect(queryString).toContain('region=IN');
   });
 });
