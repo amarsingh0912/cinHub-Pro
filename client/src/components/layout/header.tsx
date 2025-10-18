@@ -389,6 +389,117 @@ export default function Header() {
                       </motion.a>
                     </Link>
                   ))}
+
+                  {/* Mobile Auth Section */}
+                  <div className="pt-2 border-t border-border/30 mt-2">
+                    {isAuthenticated ? (
+                      <>
+                        <motion.div
+                          className="px-5 py-3"
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: navItems.length * 0.05 }}
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={user?.profileImageUrl || undefined} />
+                              <AvatarFallback className="bg-primary text-white">
+                                {(user?.firstName?.[0] || user?.displayName?.[0] || "U").toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">
+                                {user?.displayName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim()}
+                              </p>
+                              <p className="text-xs text-muted-foreground">{user?.email}</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: (navItems.length + 1) * 0.05 }}
+                        >
+                          <button
+                            onClick={() => {
+                              setIsMobileMenuOpen(false);
+                              setLocation("/dashboard");
+                            }}
+                            className="w-full text-left px-5 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-all duration-300 flex items-center gap-2"
+                          >
+                            <User className="w-4 h-4" /> Profile & Dashboard
+                          </button>
+                        </motion.div>
+                        {user?.isAdmin && (
+                          <motion.div
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: (navItems.length + 2) * 0.05 }}
+                          >
+                            <button
+                              onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                setLocation("/admin");
+                              }}
+                              className="w-full text-left px-5 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-all duration-300 flex items-center gap-2"
+                            >
+                              <Shield className="w-4 h-4" /> Admin Panel
+                            </button>
+                          </motion.div>
+                        )}
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: (navItems.length + 3) * 0.05 }}
+                        >
+                          <button
+                            onClick={() => {
+                              setIsMobileMenuOpen(false);
+                              setLocation("/settings");
+                            }}
+                            className="w-full text-left px-5 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-all duration-300 flex items-center gap-2"
+                          >
+                            <Settings className="w-4 h-4" /> Settings
+                          </button>
+                        </motion.div>
+                        <motion.div
+                          initial={{ x: -20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: (navItems.length + 4) * 0.05 }}
+                        >
+                          <button
+                            onClick={() => {
+                              setIsMobileMenuOpen(false);
+                              handleLogoutClick();
+                            }}
+                            className="w-full text-left px-5 py-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/20 transition-all duration-300 flex items-center gap-2"
+                            data-testid="button-logout-mobile"
+                          >
+                            <LogOut className="w-4 h-4" /> Sign Out
+                          </button>
+                        </motion.div>
+                      </>
+                    ) : (
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: navItems.length * 0.05 }}
+                        className="px-5"
+                      >
+                        <Button
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            setIsSignInOpen(true);
+                          }}
+                          className="w-full"
+                          variant="gradient"
+                          data-testid="button-signin-mobile"
+                        >
+                          Sign In
+                        </Button>
+                      </motion.div>
+                    )}
+                  </div>
                 </nav>
               </motion.div>
             )}
