@@ -261,13 +261,12 @@ export default function Footer() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="text-center md:text-left">
                 <p className="text-muted-foreground text-sm">
-                  &copy; 2024 CineHub Pro. All rights reserved.
+                  &copy; {new Date().getFullYear()} CineHub Pro. All rights reserved.
                 </p>
                 <p className="text-muted-foreground/70 text-xs mt-1">
                   Movie data provided by <span className="font-medium">The Movie Database (TMDB)</span>
                 </p>
-              </div>
-              
+              </div>              
               <div className="flex items-center gap-6 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Heart className="w-3 h-3 text-red-400 fill-current" />

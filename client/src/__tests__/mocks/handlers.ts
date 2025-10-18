@@ -12,6 +12,7 @@ const mockMovies = [
     release_date: '1999-10-15',
     genre_ids: [18, 53],
     popularity: 85.123,
+    media_type: 'movie',
   },
   {
     id: 13,
@@ -23,6 +24,7 @@ const mockMovies = [
     release_date: '1994-07-06',
     genre_ids: [35, 18, 10749],
     popularity: 92.456,
+    media_type: 'movie',
   },
 ];
 
@@ -37,6 +39,7 @@ const mockTVShows = [
     first_air_date: '2008-01-20',
     genre_ids: [18, 80],
     popularity: 99.789,
+    media_type: 'tv',
   },
 ];
 
@@ -45,9 +48,17 @@ const mockUser = {
   email: 'test@example.com',
   username: 'testuser',
   displayName: 'Test User',
+  firstName: 'Test',
+  lastName: 'User',
   isAdmin: false,
+  isVerified: true,
+  providers: ['local'],
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
+
+const mockAccessToken = 'mock-access-token-12345';
+const mockRefreshToken = 'mock-refresh-token-67890';
 
 export const handlers = [
   // Auth endpoints
@@ -55,16 +66,70 @@ export const handlers = [
     return HttpResponse.json(mockUser);
   }),
 
-  http.post('/api/auth/login', async ({ request }) => {
-    const body = await request.json();
+  http.post('/api/auth/signup', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      user: { ...mockUser, ...body },
+      accessToken: mockAccessToken,
+      refreshToken: mockRefreshToken,
+    }, { status: 201 });
+  }),
+
+  http.post('/api/auth/signin', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
     return HttpResponse.json({
       user: mockUser,
-      accessToken: 'mock-access-token',
+      accessToken: mockAccessToken,
+      refreshToken: mockRefreshToken,
+    });
+  }),
+
+  http.post('/api/auth/signin-jwt', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      user: mockUser,
+      accessToken: mockAccessToken,
+      refreshToken: mockRefreshToken,
+    });
+  }),
+
+  http.post('/api/auth/login', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      user: mockUser,
+      accessToken: mockAccessToken,
     });
   }),
 
   http.post('/api/auth/logout', () => {
     return HttpResponse.json({ success: true });
+  }),
+
+  http.post('/api/auth/refresh', () => {
+    return HttpResponse.json({
+      accessToken: mockAccessToken,
+    });
+  }),
+
+  http.post('/api/auth/send-otp', async ({ request }) => {
+    return HttpResponse.json({ success: true, message: 'OTP sent successfully' });
+  }),
+
+  http.post('/api/auth/verify-otp', async ({ request }) => {
+    return HttpResponse.json({ success: true, verified: true });
+  }),
+
+  http.post('/api/auth/verify-signup-otp', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      user: mockUser,
+      accessToken: mockAccessToken,
+      refreshToken: mockRefreshToken,
+    });
+  }),
+
+  http.post('/api/auth/reset-password', async ({ request }) => {
+    return HttpResponse.json({ success: true, message: 'Password reset successfully' });
   }),
 
   // Movies endpoints
@@ -177,7 +242,7 @@ export const handlers = [
   }),
 
   http.post('/api/favorites', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, any>;
     return HttpResponse.json({
       id: 'favorite-123',
       ...body,
@@ -208,7 +273,7 @@ export const handlers = [
   }),
 
   http.post('/api/watchlists', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, any>;
     return HttpResponse.json({
       id: 'watchlist-new',
       userId: mockUser.id,
@@ -223,7 +288,7 @@ export const handlers = [
   }),
 
   http.post('/api/reviews', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, any>;
     return HttpResponse.json({
       id: 'review-123',
       userId: mockUser.id,
@@ -244,5 +309,383 @@ export const handlers = [
   // Activity history
   http.post('/api/activity-history', async ({ request }) => {
     return HttpResponse.json({ success: true }, { status: 201 });
+  }),
+
+  http.get('/api/activity-history', () => {
+    return HttpResponse.json([]);
+  }),
+
+  // Watchlist items
+  http.get('/api/watchlists/:id', ({ params }) => {
+    return HttpResponse.json({
+      id: params.id,
+      userId: mockUser.id,
+      name: 'Test Watchlist',
+      description: 'Test description',
+      isPublic: false,
+      items: [],
+      createdAt: new Date().toISOString(),
+    });
+  }),
+
+  http.patch('/api/watchlists/:id', async ({ params, request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      id: params.id,
+      userId: mockUser.id,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.delete('/api/watchlists/:id', () => {
+    return HttpResponse.json({ success: true });
+  }),
+
+  http.post('/api/watchlists/:id/items', async ({ params, request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      id: 'item-123',
+      watchlistId: params.id,
+      ...body,
+      createdAt: new Date().toISOString(),
+    }, { status: 201 });
+  }),
+
+  http.delete('/api/watchlists/:watchlistId/items/:itemId', () => {
+    return HttpResponse.json({ success: true });
+  }),
+
+  http.get('/api/watchlists/:id/items', () => {
+    return HttpResponse.json([]);
+  }),
+
+  // Reviews CRUD
+  http.get('/api/reviews/user', () => {
+    return HttpResponse.json([]);
+  }),
+
+  http.patch('/api/reviews/:id', async ({ params, request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      id: params.id,
+      userId: mockUser.id,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.delete('/api/reviews/:id', () => {
+    return HttpResponse.json({ success: true });
+  }),
+
+  // User preferences
+  http.get('/api/users/preferences', () => {
+    return HttpResponse.json({
+      theme: 'dark',
+      language: 'en',
+    });
+  }),
+
+  http.put('/api/users/preferences', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  // User profile
+  http.patch('/api/users/profile', async ({ request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      ...mockUser,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.post('/api/users/avatar', async ({ request }) => {
+    return HttpResponse.json({
+      profileImageUrl: 'https://res.cloudinary.com/test/image/upload/v123/avatar.jpg',
+      success: true,
+    });
+  }),
+
+  http.delete('/api/users/avatar', () => {
+    return HttpResponse.json({ success: true });
+  }),
+
+  // Admin endpoints
+  http.get('/api/admin/users', () => {
+    return HttpResponse.json({
+      users: [mockUser],
+      total: 1,
+      page: 1,
+      totalPages: 1,
+    });
+  }),
+
+  http.get('/api/admin/users/:id', ({ params }) => {
+    return HttpResponse.json(mockUser);
+  }),
+
+  http.patch('/api/admin/users/:id', async ({ params, request }) => {
+    const body = (await request.json()) as Record<string, any>;
+    return HttpResponse.json({
+      ...mockUser,
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.delete('/api/admin/users/:id', () => {
+    return HttpResponse.json({ success: true });
+  }),
+
+  http.get('/api/admin/stats', () => {
+    return HttpResponse.json({
+      totalUsers: 100,
+      totalMovies: 500,
+      totalReviews: 250,
+      activeUsers: 75,
+    });
+  }),
+
+  // Discover endpoints
+  http.get('/api/discover/movie', ({ request }) => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockMovies,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/discover/tv', ({ request }) => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  // Genre endpoints
+  http.get('/api/genre/movie/list', () => {
+    return HttpResponse.json({
+      genres: [
+        { id: 28, name: 'Action' },
+        { id: 12, name: 'Adventure' },
+        { id: 18, name: 'Drama' },
+      ],
+    });
+  }),
+
+  http.get('/api/genre/tv/list', () => {
+    return HttpResponse.json({
+      genres: [
+        { id: 10759, name: 'Action & Adventure' },
+        { id: 18, name: 'Drama' },
+        { id: 10765, name: 'Sci-Fi & Fantasy' },
+      ],
+    });
+  }),
+
+  // Person endpoints
+  http.get('/api/person/:id', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      name: 'Brad Pitt',
+      biography: 'An American actor and film producer...',
+      birthday: '1963-12-18',
+      place_of_birth: 'Shawnee, Oklahoma, USA',
+      profile_path: '/path/to/brad.jpg',
+      known_for_department: 'Acting',
+    });
+  }),
+
+  http.get('/api/person/:id/combined_credits', ({ params }) => {
+    return HttpResponse.json({
+      cast: mockMovies,
+      crew: [],
+    });
+  }),
+
+  // Collection endpoints
+  http.get('/api/collection/:id', ({ params }) => {
+    return HttpResponse.json({
+      id: Number(params.id),
+      name: 'The Matrix Collection',
+      overview: 'The complete Matrix saga...',
+      poster_path: '/path/to/collection.jpg',
+      backdrop_path: '/path/to/collection_backdrop.jpg',
+      parts: mockMovies,
+    });
+  }),
+
+  // More TV endpoints
+  http.get('/api/tv/popular', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/tv/top-rated', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/tv/on-the-air', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/tv/airing_today', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  // More movie endpoints
+  http.get('/api/movies/now-playing', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockMovies,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/movies/upcoming', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockMovies,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  http.get('/api/movies/top-rated', () => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockMovies,
+      total_pages: 10,
+      total_results: 200,
+    });
+  }),
+
+  // Cache status endpoints
+  http.get('/api/cache/status', () => {
+    return HttpResponse.json({
+      queue: {
+        pending: 0,
+        active: 0,
+        completed: 10,
+      },
+      cacheHitRate: 0.85,
+      totalCached: 150,
+    });
+  }),
+
+  http.get('/api/cache/stats', () => {
+    return HttpResponse.json({
+      movies: 75,
+      tvShows: 50,
+      images: 200,
+      lastUpdated: new Date().toISOString(),
+    });
+  }),
+
+  // WebSocket endpoints (for non-WS clients)
+  http.get('/ws/cache-status', () => {
+    return HttpResponse.json({ message: 'WebSocket endpoint' });
+  }),
+
+  // Admin analytics
+  http.get('/api/admin/analytics', () => {
+    return HttpResponse.json({
+      userGrowth: [
+        { date: '2025-01-01', count: 50 },
+        { date: '2025-01-02', count: 65 },
+      ],
+      popularMovies: mockMovies,
+      activeUsers: 75,
+      newReviews: 25,
+    });
+  }),
+
+  http.get('/api/admin/logs', () => {
+    return HttpResponse.json({
+      logs: [
+        { id: '1', level: 'info', message: 'User logged in', timestamp: new Date().toISOString() },
+      ],
+      total: 1,
+      page: 1,
+    });
+  }),
+
+  // TMDB external API mocks for integration tests
+  http.get('https://api.themoviedb.org/3/search/multi', ({ request }) => {
+    const url = new URL(request.url);
+    const query = url.searchParams.get('query');
+    
+    return HttpResponse.json({
+      page: 1,
+      results: query === 'inception' ? mockMovies : [],
+      total_pages: 1,
+      total_results: query === 'inception' ? mockMovies.length : 0,
+    });
+  }),
+
+  http.get('https://api.themoviedb.org/3/discover/movie', ({ request }) => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockMovies,
+      total_pages: 100,
+      total_results: 2000,
+    });
+  }),
+
+  http.get('https://api.themoviedb.org/3/discover/tv', ({ request }) => {
+    return HttpResponse.json({
+      page: 1,
+      results: mockTVShows,
+      total_pages: 50,
+      total_results: 1000,
+    });
+  }),
+
+  http.get('https://api.themoviedb.org/3/movie/:id', ({ params }) => {
+    return HttpResponse.json({
+      ...mockMovies[0],
+      id: Number(params.id),
+      runtime: 139,
+      budget: 63000000,
+      revenue: 100853753,
+    });
+  }),
+
+  http.get('https://api.themoviedb.org/3/tv/:id', ({ params }) => {
+    return HttpResponse.json({
+      ...mockTVShows[0],
+      id: Number(params.id),
+      number_of_seasons: 5,
+      number_of_episodes: 62,
+    });
   }),
 ];

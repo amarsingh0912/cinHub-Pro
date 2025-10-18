@@ -36,10 +36,6 @@ export default defineConfig({
         'server/**/*.{ts,tsx}',
       ],
       all: true,
-      lines: 90,
-      functions: 90,
-      branches: 90,
-      statements: 90,
       thresholds: {
         lines: 90,
         functions: 90,

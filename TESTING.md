@@ -330,6 +330,39 @@ The CI pipeline will **fail** if coverage falls below 90% for any metric.
 2. Add tests for uncovered branches and functions
 3. Exclude generated or config files from coverage
 
+### Updating Snapshots
+
+If component snapshots need to be updated:
+
+```bash
+# Update all snapshots
+npm run test -- -u
+
+# Update snapshots for a specific file
+npm run test path/to/test.test.tsx -- -u
+
+# Review snapshot changes before committing
+git diff -- '*.snap'
+```
+
+### Interpreting Coverage Reports
+
+When viewing the HTML coverage report (`coverage/index.html`):
+
+- **Green**: Well-tested code (>90% coverage)
+- **Yellow**: Partially tested code (50-90% coverage)
+- **Red**: Untested code (<50% coverage)
+
+Click on any file to see:
+- Line-by-line coverage
+- Uncovered branches (if statements, ternaries)
+- Uncovered functions
+
+**Common issues:**
+- **Uncovered branches**: Add tests for both `true` and `false` cases
+- **Uncovered functions**: Ensure functions are called in tests
+- **Uncovered lines**: Add tests that execute those lines
+
 ### Cypress Issues
 
 1. Clear Cypress cache: `npx cypress cache clear`
