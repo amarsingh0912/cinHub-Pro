@@ -1,17 +1,22 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 
 describe('useInfiniteScroll hook', () => {
   let mockIntersectionObserver: any;
+  let mockObserve: any;
+  let mockDisconnect: any;
 
   beforeEach(() => {
-    mockIntersectionObserver = vi.fn();
-    mockIntersectionObserver.mockReturnValue({
-      observe: vi.fn(),
+    mockObserve = vi.fn();
+    mockDisconnect = vi.fn();
+    
+    mockIntersectionObserver = vi.fn().mockImplementation((callback) => ({
+      observe: mockObserve,
       unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    });
+      disconnect: mockDisconnect,
+    }));
+    
     window.IntersectionObserver = mockIntersectionObserver;
   });
 
@@ -19,56 +24,92 @@ describe('useInfiniteScroll hook', () => {
     vi.clearAllMocks();
   });
 
-  it('should initialize with null ref', () => {
+  it('should return a ref', () => {
+    const fetchNextPage = vi.fn();
+    
     const { result } = renderHook(() => useInfiniteScroll({
-      onLoadMore: vi.fn(),
-      hasMore: true,
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
     }));
 
-    expect(result.current.ref).toBeDefined();
+    expect(result.current).toBeDefined();
+    expect(result.current.current).toBeNull(); // Ref initially null
   });
 
-  it('should call onLoadMore when element is visible', async () => {
-    const onLoadMore = vi.fn();
+  it('should create IntersectionObserver when ref is attached', () => {
+    const fetchNextPage = vi.fn();
     
     renderHook(() => useInfiniteScroll({
-      onLoadMore,
-      hasMore: true,
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
     }));
 
-    // IntersectionObserver should be created
+    // Observer should be created
     expect(mockIntersectionObserver).toHaveBeenCalled();
   });
 
-  it('should not call onLoadMore when hasMore is false', () => {
-    const onLoadMore = vi.fn();
+  it('should not fetch when hasNextPage is false', () => {
+    const fetchNextPage = vi.fn();
     
     renderHook(() => useInfiniteScroll({
-      onLoadMore,
-      hasMore: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage,
     }));
 
-    expect(onLoadMore).not.toHaveBeenCalled();
+    expect(fetchNextPage).not.toHaveBeenCalled();
   });
 
-  it('should not call onLoadMore when isLoading is true', () => {
-    const onLoadMore = vi.fn();
+  it('should not fetch when isFetchingNextPage is true', () => {
+    const fetchNextPage = vi.fn();
     
     renderHook(() => useInfiniteScroll({
-      onLoadMore,
-      hasMore: true,
-      isLoading: true,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+      fetchNextPage,
     }));
 
-    expect(onLoadMore).not.toHaveBeenCalled();
+    expect(fetchNextPage).not.toHaveBeenCalled();
   });
 
-  it('should respect custom threshold', () => {
-    const onLoadMore = vi.fn();
+  it('should not fetch when disabled is true', () => {
+    const fetchNextPage = vi.fn();
     
     renderHook(() => useInfiniteScroll({
-      onLoadMore,
-      hasMore: true,
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
+      disabled: true,
+    }));
+
+    expect(fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it('should use custom rootMargin', () => {
+    const fetchNextPage = vi.fn();
+    
+    renderHook(() => useInfiniteScroll({
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
+      rootMargin: '200px',
+    }));
+
+    expect(mockIntersectionObserver).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ rootMargin: '200px' })
+    );
+  });
+
+  it('should use custom threshold', () => {
+    const fetchNextPage = vi.fn();
+    
+    renderHook(() => useInfiniteScroll({
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
       threshold: 0.5,
     }));
 
@@ -78,23 +119,17 @@ describe('useInfiniteScroll hook', () => {
     );
   });
 
-  it('should cleanup observer on unmount', () => {
-    const onLoadMore = vi.fn();
-    const disconnectMock = vi.fn();
+  it('should disconnect observer on unmount', () => {
+    const fetchNextPage = vi.fn();
     
-    mockIntersectionObserver.mockReturnValue({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: disconnectMock,
-    });
-
     const { unmount } = renderHook(() => useInfiniteScroll({
-      onLoadMore,
-      hasMore: true,
+      hasNextPage: true,
+      isFetchingNextPage: false,
+      fetchNextPage,
     }));
 
     unmount();
 
-    expect(disconnectMock).toHaveBeenCalled();
+    expect(mockDisconnect).toHaveBeenCalled();
   });
 });

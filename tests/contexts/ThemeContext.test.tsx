@@ -11,27 +11,48 @@ function createWrapper() {
 describe('ThemeContext', () => {
   beforeEach(() => {
     localStorage.clear();
+    document.documentElement.className = '';
   });
 
-  it('should provide default theme', () => {
+  it('should provide theme state', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
     expect(result.current.theme).toBeDefined();
-    expect(['light', 'dark', 'system']).toContain(result.current.theme);
+    expect(['light', 'dark']).toContain(result.current.theme);
   });
 
-  it('should provide setTheme function', () => {
+  it('should provide toggleTheme function', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
-    expect(result.current.setTheme).toBeDefined();
-    expect(typeof result.current.setTheme).toBe('function');
+    expect(result.current.toggleTheme).toBeDefined();
+    expect(typeof result.current.toggleTheme).toBe('function');
   });
 
-  it('should update theme when setTheme is called', () => {
+  it('should default to dark theme', () => {
+    const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
+
+    expect(result.current.theme).toBe('dark');
+  });
+
+  it('should toggle theme from dark to light', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
     act(() => {
-      result.current.setTheme('dark');
+      result.current.toggleTheme();
+    });
+
+    expect(result.current.theme).toBe('light');
+  });
+
+  it('should toggle theme from light to dark', () => {
+    localStorage.setItem('theme', 'light');
+    
+    const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
+
+    expect(result.current.theme).toBe('light');
+
+    act(() => {
+      result.current.toggleTheme();
     });
 
     expect(result.current.theme).toBe('dark');
@@ -41,53 +62,41 @@ describe('ThemeContext', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
     act(() => {
-      result.current.setTheme('dark');
+      result.current.toggleTheme();
     });
 
     const storedTheme = localStorage.getItem('theme');
-    expect(storedTheme).toBe('dark');
+    expect(storedTheme).toBe('light');
   });
 
   it('should load theme from localStorage on mount', () => {
-    localStorage.setItem('theme', 'dark');
+    localStorage.setItem('theme', 'light');
 
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
-    expect(result.current.theme).toBe('dark');
-  });
-
-  it('should toggle between light and dark themes', () => {
-    const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
-
-    act(() => {
-      result.current.setTheme('light');
-    });
-    expect(result.current.theme).toBe('light');
-
-    act(() => {
-      result.current.setTheme('dark');
-    });
-    expect(result.current.theme).toBe('dark');
-
-    act(() => {
-      result.current.setTheme('light');
-    });
     expect(result.current.theme).toBe('light');
   });
 
-  it('should support system theme', () => {
+  it('should apply theme class to document element', () => {
     const { result } = renderHook(() => useTheme(), { wrapper: createWrapper() });
 
+    // Dark theme should be applied by default
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+
     act(() => {
-      result.current.setTheme('system');
+      result.current.toggleTheme();
     });
 
-    expect(result.current.theme).toBe('system');
+    // Light theme should be applied
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 
-  it('should throw error when used outside provider', () => {
-    expect(() => {
-      renderHook(() => useTheme());
-    }).toThrow();
+  it('should return default values when used outside provider', () => {
+    const { result } = renderHook(() => useTheme());
+
+    expect(result.current.theme).toBe('dark');
+    expect(result.current.toggleTheme).toBeDefined();
+    expect(typeof result.current.toggleTheme).toBe('function');
   });
 });

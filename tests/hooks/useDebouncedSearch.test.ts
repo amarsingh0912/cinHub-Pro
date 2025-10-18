@@ -11,32 +11,32 @@ describe('useDebouncedSearch hook', () => {
     vi.restoreAllMocks();
   });
 
-  it('should initialize with empty search term', () => {
+  it('should initialize with empty search query', () => {
     const { result } = renderHook(() => useDebouncedSearch());
 
-    expect(result.current.searchTerm).toBe('');
-    expect(result.current.debouncedSearchTerm).toBe('');
+    expect(result.current.searchQuery).toBe('');
+    expect(result.current.debouncedQuery).toBe('');
   });
 
-  it('should update search term immediately', () => {
+  it('should update search query immediately', () => {
     const { result } = renderHook(() => useDebouncedSearch());
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
-    expect(result.current.searchTerm).toBe('test');
+    expect(result.current.searchQuery).toBe('test');
   });
 
-  it('should debounce search term updates', async () => {
-    const { result } = renderHook(() => useDebouncedSearch({ delay: 500 }));
+  it('should debounce query updates', async () => {
+    const { result } = renderHook(() => useDebouncedSearch(500));
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
     // Debounced value should not update immediately
-    expect(result.current.debouncedSearchTerm).toBe('');
+    expect(result.current.debouncedQuery).toBe('');
 
     // Fast-forward time
     act(() => {
@@ -44,15 +44,15 @@ describe('useDebouncedSearch hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.debouncedSearchTerm).toBe('test');
+      expect(result.current.debouncedQuery).toBe('test');
     });
   });
 
   it('should cancel previous debounce on new input', async () => {
-    const { result } = renderHook(() => useDebouncedSearch({ delay: 500 }));
+    const { result } = renderHook(() => useDebouncedSearch(500));
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
     act(() => {
@@ -60,7 +60,7 @@ describe('useDebouncedSearch hook', () => {
     });
 
     act(() => {
-      result.current.setSearchTerm('testing');
+      result.current.updateQuery('testing');
     });
 
     act(() => {
@@ -68,52 +68,71 @@ describe('useDebouncedSearch hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.debouncedSearchTerm).toBe('testing');
+      expect(result.current.debouncedQuery).toBe('testing');
     });
   });
 
   it('should use custom delay', async () => {
     const customDelay = 1000;
-    const { result } = renderHook(() => useDebouncedSearch({ delay: customDelay }));
+    const { result } = renderHook(() => useDebouncedSearch(customDelay));
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(result.current.debouncedSearchTerm).toBe('');
+    expect(result.current.debouncedQuery).toBe('');
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
     await waitFor(() => {
-      expect(result.current.debouncedSearchTerm).toBe('test');
+      expect(result.current.debouncedQuery).toBe('test');
     });
   });
 
-  it('should clear search term', () => {
+  it('should clear search query', () => {
     const { result } = renderHook(() => useDebouncedSearch());
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
     act(() => {
-      result.current.clearSearchTerm();
+      result.current.clearQuery();
     });
 
-    expect(result.current.searchTerm).toBe('');
+    expect(result.current.searchQuery).toBe('');
+    expect(result.current.debouncedQuery).toBe('');
+  });
+
+  it('should indicate when debouncing', async () => {
+    const { result } = renderHook(() => useDebouncedSearch(300));
+
+    act(() => {
+      result.current.updateQuery('test');
+    });
+
+    expect(result.current.isDebouncing).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isDebouncing).toBe(false);
+    });
   });
 
   it('should handle empty strings correctly', async () => {
-    const { result } = renderHook(() => useDebouncedSearch({ delay: 300 }));
+    const { result } = renderHook(() => useDebouncedSearch(300));
 
     act(() => {
-      result.current.setSearchTerm('test');
+      result.current.updateQuery('test');
     });
 
     act(() => {
@@ -121,7 +140,7 @@ describe('useDebouncedSearch hook', () => {
     });
 
     act(() => {
-      result.current.setSearchTerm('');
+      result.current.updateQuery('');
     });
 
     act(() => {
@@ -129,7 +148,7 @@ describe('useDebouncedSearch hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.debouncedSearchTerm).toBe('');
+      expect(result.current.debouncedQuery).toBe('');
     });
   });
 });
