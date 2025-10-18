@@ -247,6 +247,8 @@ export async function signUp(userData: SignUpData) {
     password: hashedPassword,
     firstName: userData.firstName,
     lastName: userData.lastName,
+    profileImageUrl: userData.profileImageUrl,
+    avatarPublicId: userData.avatarPublicId,
   });
 
   // Return user without password

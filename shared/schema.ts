@@ -302,6 +302,8 @@ export const baseSignUpSchema = z.object({
   firstName: z.string().min(1, "First name is required").optional(),
   lastName: z.string().min(1, "Last name is required").optional(),
   displayName: z.string().min(1, "Display name is required").optional(),
+  profileImageUrl: z.string().url().optional(),
+  avatarPublicId: z.string().optional(),
 });
 
 // Validated schema with cross-field validation for backend
