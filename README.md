@@ -249,6 +249,15 @@ See [API.md](./docs/API.md) for complete documentation.
 
 ## 🧪 Testing
 
+### Test Stack
+
+- **Vitest**: Fast unit test framework with native ESM support
+- **React Testing Library**: Component testing focused on user behavior
+- **Cypress**: E2E testing for complete user flows
+- **MSW**: API mocking with Mock Service Worker
+- **axe-core**: Automated accessibility testing
+- **Coverage**: 90% minimum threshold enforced
+
 ### Run Tests
 
 ```bash
@@ -258,39 +267,140 @@ npm test
 # Run tests in watch mode
 npm run test:watch
 
-# Run tests with UI
+# Run tests with UI dashboard
 npm run test:ui
 
-# Run tests with coverage
+# Run tests with coverage (90% threshold)
 npm run test:coverage
+
+# Run specific test suites
+npm run test:unit              # Unit tests only
+npm run test:integration       # Integration tests only
+npm run test:components        # Component tests only
+
+# Run E2E tests
+npm run cypress                # Open Cypress Test Runner
+npm run cypress:headless       # Run Cypress headlessly
+npm run e2e                    # Run E2E with server
+
+# Run CI tests
+npm run test:ci                # All tests with coverage for CI
 ```
 
 ### Test Structure
 
 ```
+client/src/__tests__/          # Test utilities and setup
+├── fixtures/                  # Test data fixtures and factories
+├── mocks/                     # MSW handlers for API mocking
+├── utils/                     # Custom test utilities
+└── setup.ts                   # Global test configuration
+
 tests/
-├── unit/           # Unit tests for utilities and services
-├── integration/    # API integration tests
-├── components/     # Component tests
-└── e2e/           # End-to-end tests
+├── unit/                      # Unit tests for utilities and services
+├── integration/               # API integration tests
+├── components/                # Component tests
+├── hooks/                     # Custom hook tests
+├── pages/                     # Page component tests
+└── e2e/                       # End-to-end tests (legacy)
+
+cypress/
+├── e2e/                       # Cypress E2E test specs
+│   ├── auth-flow.cy.ts
+│   ├── movie-details.cy.ts
+│   ├── search-and-filters.cy.ts
+│   └── infinite-scroll.cy.ts
+├── support/                   # Cypress support files
+│   ├── commands.ts            # Custom commands
+│   └── e2e.ts                 # E2E setup
+└── fixtures/                  # Cypress test fixtures
 ```
+
+### Coverage Requirements
+
+The project enforces **90% code coverage** minimum for all metrics:
+- Statements: 90%
+- Branches: 90%
+- Functions: 90%
+- Lines: 90%
+
+Coverage reports are generated in:
+- Terminal (text summary)
+- HTML (`coverage/index.html`)
+- JSON (`coverage/coverage-final.json`)
+- LCOV (`coverage/lcov.info`)
 
 ### Writing Tests
 
-Example test:
+#### Component Tests
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import MovieCard from '@/components/movie/movie-card';
+import { render, screen } from '@/__tests__/utils/test-utils';
+import { MovieCard } from '@/components/movie/movie-card';
+import { createMovie } from '@/__tests__/fixtures/factories';
 
 describe('MovieCard', () => {
   it('renders movie title', () => {
-    const movie = { id: 1, title: 'Test Movie' };
+    const movie = createMovie({ title: 'Test Movie' });
     render(<MovieCard movie={movie} />);
     expect(screen.getByText('Test Movie')).toBeInTheDocument();
   });
+  
+  it('is keyboard accessible', () => {
+    const movie = createMovie();
+    render(<MovieCard movie={movie} />);
+    
+    const card = screen.getByTestId(`card-movie-${movie.id}`);
+    card.focus();
+    expect(document.activeElement).toBe(card);
+  });
 });
 ```
+
+#### Hook Tests
+```typescript
+import { renderHook, waitFor } from '@testing-library/react';
+import { useAuth } from '@/hooks/useAuth';
+
+describe('useAuth', () => {
+  it('returns user when authenticated', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isAuthenticated).toBe(true);
+    });
+  });
+});
+```
+
+#### E2E Tests (Cypress)
+```typescript
+describe('Movie Details Flow', () => {
+  it('displays movie details and allows adding to favorites', () => {
+    cy.visit('/movie/550');
+    cy.waitForPageLoad();
+    
+    cy.get('[data-testid="text-movie-title"]').should('be.visible');
+    cy.get('[data-testid="button-favorite"]').click();
+    cy.get('[data-testid="toast-success"]').should('be.visible');
+  });
+});
+```
+
+### CI/CD Testing
+
+Tests run automatically on:
+- **Push** to `main` or `develop` branches
+- **Pull Requests** targeting `main` or `develop`
+
+The CI pipeline:
+1. Runs type checking
+2. Runs all unit and integration tests with coverage
+3. Runs E2E tests in headless mode
+4. Runs accessibility tests
+5. Fails if coverage is below 90%
+
+See [TESTING.md](./TESTING.md) for comprehensive testing documentation.
 
 ## 🚢 Deployment
 
