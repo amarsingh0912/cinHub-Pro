@@ -1,0 +1,767 @@
+~/workspace$ npm run test:unit 
+
+> rest-express@1.0.0 test:unit
+> vitest run tests/unit
+
+
+ RUN  v3.2.4 /home/runner/workspace
+
+stdout | tests/unit/cache-queue.test.ts
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > enqueues a new cache job
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > enqueues a new cache job
+Enqueued cache job: movie-123 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > prevents duplicate jobs from being enqueued
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > prevents duplicate jobs from being enqueued
+Enqueued cache job: movie-123 (priority: 0)
+Cache job already exists for movie 123
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > prioritizes jobs correctly
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > prioritizes jobs correctly
+Enqueued cache job: movie-1 (priority: 1)
+Enqueued cache job: movie-2 (priority: 5)
+Enqueued cache job: movie-3 (priority: 3)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > generates unique job IDs for different media
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > generates unique job IDs for different media
+Enqueued cache job: movie-123 (priority: 0)
+Enqueued cache job: tv-123 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > emits job-enqueued event
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > emits job-enqueued event
+Enqueued cache job: movie-456 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > does not re-enqueue recently completed jobs
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > does not re-enqueue recently completed jobs
+Enqueued cache job: movie-789 (priority: 0)
+Cache job already exists for movie 789
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatus > returns job status for existing job
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatus > returns job status for existing job
+Enqueued cache job: tv-999 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatus > returns null for non-existent job
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatusByMedia > retrieves job status by media type and ID
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatusByMedia > retrieves job status by media type and ID
+Enqueued cache job: movie-555 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getJobStatusByMedia > returns null when no job exists for media
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getQueueStats > returns correct queue statistics
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getQueueStats > returns correct queue statistics
+Enqueued cache job: movie-1 (priority: 0)
+Enqueued cache job: movie-2 (priority: 0)
+Enqueued cache job: tv-3 (priority: 0)
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > getQueueStats > returns zero stats for empty queue
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > job ID generation > generates consistent IDs for same media
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > job ID generation > generates different IDs for different media types
+Cache queue worker started
+
+stdout | tests/unit/cache-queue.test.ts > CacheQueueService > job ID generation > generates different IDs for different media IDs
+Cache queue worker started
+
+ ❯ tests/unit/cache-queue.test.ts (15 tests | 1 failed) 29ms
+   ✓ CacheQueueService > enqueueJob > enqueues a new cache job 3ms
+   ✓ CacheQueueService > enqueueJob > prevents duplicate jobs from being enqueued 1ms
+   ✓ CacheQueueService > enqueueJob > prioritizes jobs correctly 1ms
+   ✓ CacheQueueService > enqueueJob > generates unique job IDs for different media 3ms
+   ✓ CacheQueueService > enqueueJob > emits job-enqueued event 3ms
+   × CacheQueueService > enqueueJob > does not re-enqueue recently completed jobs 6ms
+     → expected 1 to be +0 // Object.is equality
+   ✓ CacheQueueService > getJobStatus > returns job status for existing job 1ms
+   ✓ CacheQueueService > getJobStatus > returns null for non-existent job 1ms
+   ✓ CacheQueueService > getJobStatusByMedia > retrieves job status by media type and ID 1ms
+   ✓ CacheQueueService > getJobStatusByMedia > returns null when no job exists for media 1ms
+   ✓ CacheQueueService > getQueueStats > returns correct queue statistics 1ms
+   ✓ CacheQueueService > getQueueStats > returns zero stats for empty queue 0ms
+   ✓ CacheQueueService > job ID generation > generates consistent IDs for same media 0ms
+   ✓ CacheQueueService > job ID generation > generates different IDs for different media types 1ms
+   ✓ CacheQueueService > job ID generation > generates different IDs for different media IDs 1ms
+ ❯ tests/unit/tmdb-discover.test.ts (44 tests | 25 failed) 46ms
+   ✓ TMDB Discover Utils > buildMovieDiscoverParams > should build params for popular movies 2ms
+   ✓ TMDB Discover Utils > buildMovieDiscoverParams > should build params for top rated movies 0ms
+   × TMDB Discover Utils > buildMovieDiscoverParams > should build params for upcoming movies 4ms
+     → expected { page: {}, language: 'en-US', …(4) } to have property "primary_release_date.lte"
+   ✓ TMDB Discover Utils > buildMovieDiscoverParams > should build params for now playing movies 0ms
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include genre filter 2ms
+     → expected undefined to be '28,12' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include year filter 1ms
+     → expected undefined to be '2024' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include vote average filter 1ms
+     → expected undefined to be '7' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include runtime filter 1ms
+     → expected undefined to be '90' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include people filter 1ms
+     → expected undefined to be '1,2,3' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include cast filter 1ms
+     → expected undefined to be '500' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include crew filter 1ms
+     → expected undefined to be '1000' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include companies filter 1ms
+     → expected undefined to be '1,2' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include keywords filter 1ms
+     → expected undefined to be '9715,9717' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include watch providers filter 1ms
+     → expected undefined to be '8|9' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include certification filter 1ms
+     → expected undefined to be 'US' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include language filter 1ms
+     → expected undefined to be 'en' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should include sort_by parameter 3ms
+     → expected 'popularity.desc' to be 'release_date.desc' // Object.is equality
+   × TMDB Discover Utils > buildMovieDiscoverParams > should handle multiple filters together 1ms
+     → expected undefined to be '28' // Object.is equality
+   ✓ TMDB Discover Utils > buildTVDiscoverParams > should build params for popular TV shows 0ms
+   ✓ TMDB Discover Utils > buildTVDiscoverParams > should build params for top rated TV shows 0ms
+   ✓ TMDB Discover Utils > buildTVDiscoverParams > should build params for airing today 0ms
+   ✓ TMDB Discover Utils > buildTVDiscoverParams > should build params for on the air 0ms
+   × TMDB Discover Utils > buildTVDiscoverParams > should include genre filter 1ms
+     → expected undefined to be '18,10765' // Object.is equality
+   × TMDB Discover Utils > buildTVDiscoverParams > should include first air date filter 1ms
+     → expected undefined to be '2024' // Object.is equality
+   × TMDB Discover Utils > buildTVDiscoverParams > should include networks filter 1ms
+     → expected undefined to be '213' // Object.is equality
+   × TMDB Discover Utils > buildTVDiscoverParams > should include vote average filter 1ms
+     → expected undefined to be '8' // Object.is equality
+   × TMDB Discover Utils > buildTVDiscoverParams > should include runtime filter 10ms
+     → expected undefined to be '30' // Object.is equality
+   × TMDB Discover Utils > buildTVDiscoverParams > should include watch providers filter 1ms
+     → expected undefined to be '8' // Object.is equality
+   ✓ TMDB Discover Utils > shouldUseTrendingEndpoint > should return true for trending category 0ms
+   ✓ TMDB Discover Utils > shouldUseTrendingEndpoint > should return false for popular category 0ms
+   ✓ TMDB Discover Utils > shouldUseTrendingEndpoint > should return false for top_rated category 0ms
+   ✓ TMDB Discover Utils > shouldUseTrendingEndpoint > should return false for upcoming category 0ms
+   ✓ TMDB Discover Utils > shouldUseTrendingEndpoint > should return false for now_playing category 0ms
+   ✓ TMDB Discover Utils > Edge Cases > should handle empty filters object 0ms
+   ✓ TMDB Discover Utils > Edge Cases > should handle undefined filters 0ms
+   ✓ TMDB Discover Utils > Edge Cases > should handle null values in filters 0ms
+   ✓ TMDB Discover Utils > Edge Cases > should handle invalid category gracefully 0ms
+   × TMDB Discover Utils > Edge Cases > should filter out undefined filter values 1ms
+     → expected undefined to be '28' // Object.is equality
+   × TMDB Discover Utils > Date Handling > should generate proper date range for upcoming movies 1ms
+     → expected undefined to be truthy
+   ✓ TMDB Discover Utils > Date Handling > should generate proper date range for now playing movies 0ms
+   ✓ TMDB Discover Utils > Date Handling > should generate proper date range for airing today TV shows 0ms
+   ✓ TMDB Discover Utils > Date Handling > should use ISO date format 0ms
+   × TMDB Discover Utils > Parameter Precedence > should override default sort_by with custom value 1ms
+     → expected 'popularity.desc' to be 'release_date.desc' // Object.is equality
+   × TMDB Discover Utils > Parameter Precedence > should preserve category-specific parameters 1ms
+     → expected undefined to be '8' // Object.is equality
+ ❯ tests/unit/auth.test.ts (20 tests | 1 failed) 1749ms
+   ✓ Password Hashing > should hash a password 264ms
+   ✓ Password Hashing > should verify correct password  462ms
+   ✓ Password Hashing > should reject incorrect password  529ms
+   ✓ Password Hashing > should produce different hashes for the same password  470ms
+   ✓ JWT Access Token > should sign and verify access token 4ms
+   ✓ JWT Access Token > should include admin flag in token 1ms
+   ✓ JWT Access Token > should throw on invalid token 1ms
+   ✓ JWT Access Token > should throw on expired token 1ms
+   ✓ JWT Refresh Token > should sign and verify refresh token 1ms
+   ✓ JWT Refresh Token > should throw on invalid refresh token 1ms
+   ✓ Refresh Token Hashing > should hash refresh token 1ms
+   ✓ Refresh Token Hashing > should verify refresh token hash 0ms
+   ✓ Refresh Token Hashing > should reject incorrect refresh token 0ms
+   ✓ Session ID Generation > should generate unique session IDs 1ms
+   ✓ Session ID Generation > should generate valid format session ID 0ms
+   ✓ Bearer Token Extraction > should extract token from Bearer authorization header 0ms
+   ✓ Bearer Token Extraction > should return null for missing authorization header 0ms
+   ✓ Bearer Token Extraction > should return null for invalid authorization format 0ms
+   × Bearer Token Extraction > should return null for Bearer without token 5ms
+     → expected '' to be null
+   ✓ Bearer Token Extraction > should handle case-sensitive Bearer keyword 0ms
+stdout | tests/unit/cloudinary-service.test.ts
+Cloudinary configured successfully
+
+ ✓ tests/unit/cloudinary-service.test.ts (20 tests) 28ms
+stdout | tests/unit/tmdb-cache.test.ts > TMDBCacheService > getMovieFromCache > should return null when cache is expired
+Movie cache expired for ID 123
+
+stdout | tests/unit/tmdb-cache.test.ts > TMDBCacheService > cacheMovie > should cache movie data with Cloudinary URLs
+Cached movie: Fight Club (ID: 550)
+
+stdout | tests/unit/tmdb-cache.test.ts > TMDBCacheService > cacheMovie > should handle movies without images
+Cached movie: Test Movie (ID: 551)
+
+ ✓ tests/unit/tmdb-cache.test.ts (5 tests) 10ms
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/image-cache.test.ts [ tests/unit/image-cache.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ server/services/imageCache.ts:1:1
+      1| import { v2 as cloudinary } from 'cloudinary';
+       | ^
+      2| import { db } from '../db.js';
+      3| import { imagesCache, type InsertImageCache } from '../../shared/schema.js';
+
+Caused by: ReferenceError: Cannot access 'mockUpload' before initialization
+ ❯ tests/unit/image-cache.test.ts:11:15
+ ❯ server/services/imageCache.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/30]⎯
+
+ FAIL  tests/unit/otp-service.test.ts [ tests/unit/otp-service.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ server/services/otpService.ts:1:1
+      1| import { MailService } from "@sendgrid/mail";
+       | ^
+      2| import twilio from "twilio";
+      3| 
+
+Caused by: ReferenceError: Cannot access 'mockCreate' before initialization
+ ❯ tests/unit/otp-service.test.ts:27:3
+ ❯ server/services/otpService.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/30]⎯
+
+ FAIL  tests/unit/websocket.test.ts [ tests/unit/websocket.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ server/services/websocketService.ts:2:31
+      1| import { WebSocketServer, WebSocket } from 'ws';
+      2| import type { Server } from 'http';
+       |                               ^
+      3| import { cacheQueueService, type CacheJobStatus } from './cacheQueue.js';
+      4| 
+
+Caused by: ReferenceError: Cannot access '__vi_import_1__' before initialization
+ ❯ tests/unit/websocket.test.ts:10:3
+ ❯ server/services/websocketService.ts:2:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/30]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 27 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/auth.test.ts > Bearer Token Extraction > should return null for Bearer without token
+AssertionError: expected '' to be null
+
+- Expected: 
+null
+
++ Received: 
+""
+
+ ❯ tests/unit/auth.test.ts:170:23
+    168|   it('should return null for Bearer without token', () => {
+    169|     const extracted = extractBearerToken('Bearer ');
+    170|     expect(extracted).toBeNull();
+       |                       ^
+    171|   });
+    172| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/30]⎯
+
+ FAIL  tests/unit/cache-queue.test.ts > CacheQueueService > enqueueJob > does not re-enqueue recently completed jobs
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/unit/cache-queue.test.ts:90:29
+     88|       expect(newJobId).toBe(jobId);
+     89|       const stats = queueService.getQueueStats();
+     90|       expect(stats.pending).toBe(0);
+       |                             ^
+     91|     });
+     92|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should build params for upcoming movies
+AssertionError: expected { page: {}, language: 'en-US', …(4) } to have property "primary_release_date.lte"
+ ❯ tests/unit/tmdb-discover.test.ts:29:22
+     27|       
+     28|       expect(params).toHaveProperty('primary_release_date.gte');
+     29|       expect(params).toHaveProperty('primary_release_date.lte');
+       |                      ^
+     30|     });
+     31| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include genre filter
+AssertionError: expected undefined to be '28,12' // Object.is equality
+
+- Expected: 
+"28,12"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:44:34
+     42|       });
+     43|       
+     44|       expect(params.with_genres).toBe('28,12');
+       |                                  ^
+     45|     });
+     46| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include year filter
+AssertionError: expected undefined to be '2024' // Object.is equality
+
+- Expected: 
+"2024"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:52:43
+     50|       });
+     51|       
+     52|       expect(params.primary_release_year).toBe('2024');
+       |                                           ^
+     53|     });
+     54| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include vote average filter
+AssertionError: expected undefined to be '7' // Object.is equality
+
+- Expected: 
+"7"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:61:42
+     59|       });
+     60|       
+     61|       expect(params['vote_average.gte']).toBe('7');
+       |                                          ^
+     62|       expect(params['vote_average.lte']).toBe('9');
+     63|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include runtime filter
+AssertionError: expected undefined to be '90' // Object.is equality
+
+- Expected: 
+"90"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:71:42
+     69|       });
+     70|       
+     71|       expect(params['with_runtime.gte']).toBe('90');
+       |                                          ^
+     72|       expect(params['with_runtime.lte']).toBe('180');
+     73|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include people filter
+AssertionError: expected undefined to be '1,2,3' // Object.is equality
+
+- Expected: 
+"1,2,3"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:80:34
+     78|       });
+     79|       
+     80|       expect(params.with_people).toBe('1,2,3');
+       |                                  ^
+     81|     });
+     82| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include cast filter
+AssertionError: expected undefined to be '500' // Object.is equality
+
+- Expected: 
+"500"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:88:32
+     86|       });
+     87|       
+     88|       expect(params.with_cast).toBe('500');
+       |                                ^
+     89|     });
+     90| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include crew filter
+AssertionError: expected undefined to be '1000' // Object.is equality
+
+- Expected: 
+"1000"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:96:32
+     94|       });
+     95|       
+     96|       expect(params.with_crew).toBe('1000');
+       |                                ^
+     97|     });
+     98| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include companies filter
+AssertionError: expected undefined to be '1,2' // Object.is equality
+
+- Expected: 
+"1,2"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:104:37
+    102|       });
+    103|       
+    104|       expect(params.with_companies).toBe('1,2');
+       |                                     ^
+    105|     });
+    106| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include keywords filter
+AssertionError: expected undefined to be '9715,9717' // Object.is equality
+
+- Expected: 
+"9715,9717"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:112:36
+    110|       });
+    111|       
+    112|       expect(params.with_keywords).toBe('9715,9717');
+       |                                    ^
+    113|     });
+    114| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include watch providers filter
+AssertionError: expected undefined to be '8|9' // Object.is equality
+
+- Expected: 
+"8|9"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:121:43
+    119|       });
+    120|       
+    121|       expect(params.with_watch_providers).toBe('8|9');
+       |                                           ^
+    122|       expect(params.watch_region).toBe('US');
+    123|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include certification filter
+AssertionError: expected undefined to be 'US' // Object.is equality
+
+- Expected: 
+"US"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:131:44
+    129|       });
+    130|       
+    131|       expect(params.certification_country).toBe('US');
+       |                                            ^
+    132|       expect(params.certification).toBe('R');
+    133|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include language filter
+AssertionError: expected undefined to be 'en' // Object.is equality
+
+- Expected: 
+"en"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:140:45
+    138|       });
+    139|       
+    140|       expect(params.with_original_language).toBe('en');
+       |                                             ^
+    141|     });
+    142| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should include sort_by parameter
+AssertionError: expected 'popularity.desc' to be 'release_date.desc' // Object.is equality
+
+Expected: "release_date.desc"
+Received: "popularity.desc"
+
+ ❯ tests/unit/tmdb-discover.test.ts:148:30
+    146|       });
+    147|       
+    148|       expect(params.sort_by).toBe('release_date.desc');
+       |                              ^
+    149|     });
+    150| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildMovieDiscoverParams > should handle multiple filters together
+AssertionError: expected undefined to be '28' // Object.is equality
+
+- Expected: 
+"28"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:160:34
+    158|       });
+    159|       
+    160|       expect(params.with_genres).toBe('28');
+       |                                  ^
+    161|       expect(params.primary_release_year).toBe('2024');
+    162|       expect(params['vote_average.gte']).toBe('7');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include genre filter
+AssertionError: expected undefined to be '18,10765' // Object.is equality
+
+- Expected: 
+"18,10765"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:199:34
+    197|       });
+    198|       
+    199|       expect(params.with_genres).toBe('18,10765');
+       |                                  ^
+    200|     });
+    201| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include first air date filter
+AssertionError: expected undefined to be '2024' // Object.is equality
+
+- Expected: 
+"2024"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:207:42
+    205|       });
+    206|       
+    207|       expect(params.first_air_date_year).toBe('2024');
+       |                                          ^
+    208|     });
+    209| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include networks filter
+AssertionError: expected undefined to be '213' // Object.is equality
+
+- Expected: 
+"213"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:215:36
+    213|       });
+    214|       
+    215|       expect(params.with_networks).toBe('213');
+       |                                    ^
+    216|     });
+    217| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include vote average filter
+AssertionError: expected undefined to be '8' // Object.is equality
+
+- Expected: 
+"8"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:223:42
+    221|       });
+    222|       
+    223|       expect(params['vote_average.gte']).toBe('8');
+       |                                          ^
+    224|     });
+    225| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include runtime filter
+AssertionError: expected undefined to be '30' // Object.is equality
+
+- Expected: 
+"30"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:232:42
+    230|       });
+    231|       
+    232|       expect(params['with_runtime.gte']).toBe('30');
+       |                                          ^
+    233|       expect(params['with_runtime.lte']).toBe('60');
+    234|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > buildTVDiscoverParams > should include watch providers filter
+AssertionError: expected undefined to be '8' // Object.is equality
+
+- Expected: 
+"8"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:242:43
+    240|       });
+    241|       
+    242|       expect(params.with_watch_providers).toBe('8');
+       |                                           ^
+    243|       expect(params.watch_region).toBe('US');
+    244|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > Edge Cases > should filter out undefined filter values
+AssertionError: expected undefined to be '28' // Object.is equality
+
+- Expected: 
+"28"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:305:34
+    303|       });
+    304|       
+    305|       expect(params.with_genres).toBe('28');
+       |                                  ^
+    306|       expect(params.year).toBeUndefined();
+    307|       expect(params.with_cast).toBeUndefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > Date Handling > should generate proper date range for upcoming movies
+AssertionError: expected undefined to be truthy
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:317:50
+    315|       const today = new Date();
+    316|       expect(params['primary_release_date.gte']).toBeTruthy();
+    317|       expect(params['primary_release_date.lte']).toBeTruthy();
+       |                                                  ^
+    318|     });
+    319| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > Parameter Precedence > should override default sort_by with custom value
+AssertionError: expected 'popularity.desc' to be 'release_date.desc' // Object.is equality
+
+Expected: "release_date.desc"
+Received: "popularity.desc"
+
+ ❯ tests/unit/tmdb-discover.test.ts:350:30
+    348|       });
+    349|       
+    350|       expect(params.sort_by).toBe('release_date.desc');
+       |                              ^
+    351|     });
+    352| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/30]⎯
+
+ FAIL  tests/unit/tmdb-discover.test.ts > TMDB Discover Utils > Parameter Precedence > should preserve category-specific parameters
+AssertionError: expected undefined to be '8' // Object.is equality
+
+- Expected: 
+"8"
+
++ Received: 
+undefined
+
+ ❯ tests/unit/tmdb-discover.test.ts:359:42
+    357|       
+    358|       expect(params.sort_by).toContain('vote_average');
+    359|       expect(params['vote_average.gte']).toBe('8');
+       |                                          ^
+    360|     });
+    361|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/30]⎯
+
+
+ Test Files  6 failed | 2 passed (8)
+      Tests  27 failed | 77 passed (104)
+   Start at  22:07:51
+   Duration  6.53s (transform 592ms, setup 5.46s, collect 984ms, tests 1.86s, environment 7.51s, prepare 754ms)
