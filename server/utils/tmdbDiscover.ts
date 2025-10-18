@@ -166,73 +166,119 @@ function getOneYearAgo(): string {
 }
 
 /**
+ * Transform filter parameter names for TMDB API compatibility
+ */
+function transformMovieFilters(filters: Record<string, any>): Record<string, any> {
+  const transformed: Record<string, any> = { ...filters };
+  
+  // Transform parameter names
+  if (filters.genres !== undefined) {
+    transformed.with_genres = filters.genres;
+    delete transformed.genres;
+  }
+  
+  if (filters.year !== undefined) {
+    transformed.primary_release_year = filters.year;
+    delete transformed.year;
+  }
+  
+  return transformed;
+}
+
+/**
  * Build discover parameters for movies based on category or custom filters
  * Supports all TMDB Discover API filters for movies
  */
 export function buildMovieDiscoverParams(
   category: MovieCategory,
-  page: number = 1,
-  additionalParams: Record<string, any> = {},
+  filters: Record<string, any> = {},
 ): MovieDiscoverParams {
   const today = getTodayDate();
   const tomorrow = getDateOffset(1);
   const thirtyDaysAgo = getDateOffset(-30);
   const fortyFiveDaysAgo = getDateOffset(-100);
 
+  // Transform filter parameter names
+  const transformedFilters = transformMovieFilters(filters);
+  
+  const page = transformedFilters.page || 1;
+  
   const baseParams: MovieDiscoverParams = {
     page,
     language: "en-US",
     include_adult: false,
     include_video: false,
-    ...additionalParams,
+    ...transformedFilters,
   };
 
+  // Category-specific defaults (can be overridden by filters)
+  let categoryDefaults: Partial<MovieDiscoverParams> = {};
+  
   switch (category) {
     case "upcoming":
       // Upcoming movies: released after today
-      return {
-        ...baseParams,
+      categoryDefaults = {
         "primary_release_date.gte": tomorrow,
+        "primary_release_date.lte": getDateOffset(90), // Next 90 days
         sort_by: "popularity.desc",
       };
+      break;
 
     case "now_playing":
       // Now Playing: released in the last 30 days
-      return {
-        ...baseParams,
+      categoryDefaults = {
         "primary_release_date.lte": today,
         "primary_release_date.gte": thirtyDaysAgo,
         sort_by: "primary_release_date.desc",
       };
+      break;
 
     case "popular":
       // Popular movies: sorted by popularity with minimum votes to reduce noise
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "popularity.desc",
         "vote_count.gte": 50,
       };
+      break;
 
     case "trending":
       // Trending: recent releases (last ~45 days) with high popularity and engagement
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "popularity.desc",
         "vote_count.gte": 50,
         "primary_release_date.gte": fortyFiveDaysAgo,
       };
+      break;
 
     case "top_rated":
       // Top Rated: highest rated with minimum vote count
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "vote_average.desc",
         "vote_count.gte": 500,
       };
-
-    default:
-      return baseParams;
+      break;
   }
+
+  // Merge: category defaults first, then user filters override
+  return {
+    ...categoryDefaults,
+    ...baseParams,
+  };
+}
+
+/**
+ * Transform filter parameter names for TV TMDB API compatibility
+ */
+function transformTVFilters(filters: Record<string, any>): Record<string, any> {
+  const transformed: Record<string, any> = { ...filters };
+  
+  // Transform parameter names
+  if (filters.genres !== undefined) {
+    transformed.with_genres = filters.genres;
+    delete transformed.genres;
+  }
+  
+  return transformed;
 }
 
 /**
@@ -241,66 +287,76 @@ export function buildMovieDiscoverParams(
  */
 export function buildTVDiscoverParams(
   category: TVCategory,
-  page: number = 1,
-  additionalParams: Record<string, any> = {},
+  filters: Record<string, any> = {},
 ): TVDiscoverParams {
   const today = getTodayDate();
   const sevenDaysFromNow = getDateOffset(7);
   const oneYearAgo = getOneYearAgo();
+
+  // Transform filter parameter names
+  const transformedFilters = transformTVFilters(filters);
+  
+  const page = transformedFilters.page || 1;
 
   const baseParams: TVDiscoverParams = {
     page,
     language: "en-US",
     include_adult: false,
     include_null_first_air_dates: false,
-    ...additionalParams,
+    ...transformedFilters,
   };
+
+  // Category-specific defaults (can be overridden by filters)
+  let categoryDefaults: Partial<TVDiscoverParams> = {};
 
   switch (category) {
     case "airing_today":
       // Airing Today / On Air: currently airing shows (next 7 days)
-      return {
-        ...baseParams,
-        "air_date.gte": today,
-        "air_date.lte": "2025-10-17",
-        sort_by: "popularity.desc",
-      };
-
-    case "on_the_air":
-      // On the Air: same as airing today
-      return {
-        ...baseParams,
+      categoryDefaults = {
         "air_date.gte": today,
         "air_date.lte": sevenDaysFromNow,
         sort_by: "popularity.desc",
       };
+      break;
+
+    case "on_the_air":
+      // On the Air: same as airing today
+      categoryDefaults = {
+        "air_date.gte": today,
+        "air_date.lte": sevenDaysFromNow,
+        sort_by: "popularity.desc",
+      };
+      break;
 
     case "popular":
       // Popular TV shows: sorted by popularity
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "popularity.desc",
       };
+      break;
 
     case "top_rated":
       // Top Rated: highest rated with minimum vote count
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "vote_average.desc",
         "vote_count.gte": 200,
       };
+      break;
 
     case "trending":
       // Trending: high popularity, recent shows
-      return {
-        ...baseParams,
+      categoryDefaults = {
         sort_by: "popularity.desc",
         "first_air_date.gte": oneYearAgo,
       };
-
-    default:
-      return baseParams;
+      break;
   }
+
+  // Merge: category defaults first, then user filters override
+  return {
+    ...categoryDefaults,
+    ...baseParams,
+  };
 }
 
 /**

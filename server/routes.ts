@@ -1300,7 +1300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/popular", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('popular', page);
+      const params = buildTVDiscoverParams('popular', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1312,7 +1312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/top-rated", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('top_rated', page);
+      const params = buildTVDiscoverParams('top_rated', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1324,7 +1324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/on-the-air", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('on_the_air', page);
+      const params = buildTVDiscoverParams('on_the_air', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1337,7 +1337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/on_the_air", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('on_the_air', page);
+      const params = buildTVDiscoverParams('on_the_air', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1350,7 +1350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/airing_today", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('airing_today', page);
+      const params = buildTVDiscoverParams('airing_today', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1364,7 +1364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tv/airing-today", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildTVDiscoverParams('airing_today', page);
+      const params = buildTVDiscoverParams('airing_today', { page });
       const data = await fetchFromTMDB("/discover/tv", params);
       res.json(data);
     } catch (error) {
@@ -1711,7 +1711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/movies/popular", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildMovieDiscoverParams('popular', page);
+      const params = buildMovieDiscoverParams('popular', { page });
       const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
@@ -1723,7 +1723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/movies/top-rated", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildMovieDiscoverParams('top_rated', page);
+      const params = buildMovieDiscoverParams('top_rated', { page });
       const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
@@ -1735,7 +1735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/movies/upcoming", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildMovieDiscoverParams('upcoming', page);
+      const params = buildMovieDiscoverParams('upcoming', { page });
       const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
@@ -1748,7 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/movies/now_playing", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildMovieDiscoverParams('now_playing', page);
+      const params = buildMovieDiscoverParams('now_playing', { page });
       const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
@@ -1760,7 +1760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/movies/now-playing", async (req, res) => {
     try {
       const page = Number(req.query.page) || 1;
-      const params = buildMovieDiscoverParams('now_playing', page);
+      const params = buildMovieDiscoverParams('now_playing', { page });
       const data = await fetchFromTMDB("/discover/movie", params);
       res.json(data);
     } catch (error) {
