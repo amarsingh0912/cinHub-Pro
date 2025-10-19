@@ -277,7 +277,10 @@ const requireCSRFHeader = (req: any, res: any, next: any) => {
   next();
 };
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(
+  app: Express,
+  options: { serveTestFrontend?: boolean } = {}
+): Promise<Server> {
   // Security headers - stricter CSP for production
   const isProduction = process.env.NODE_ENV === "production";
   app.use(
@@ -3016,6 +3019,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Initialize WebSocket service for real-time cache status updates
   websocketService.initialize(httpServer);
+
+  // Test-only frontend serving (used in integration tests)
+  if (options.serveTestFrontend) {
+    // Serve static test assets
+    const testAssetsPath = path.join(import.meta.dirname, "..", "tests", "fixtures", "static");
+    app.use("/assets", express.static(testAssetsPath));
+
+    // Serve index.html for all non-API, non-asset routes
+    app.use("*", async (req, res, next) => {
+      // Skip serving HTML for asset requests
+      if (req.originalUrl.startsWith("/assets/")) {
+        return next();
+      }
+
+      try {
+        const indexPath = path.join(import.meta.dirname, "..", "client", "index.html");
+        const html = await fs.promises.readFile(indexPath, "utf-8");
+        
+        // Set cache-control header for HTML
+        res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.status(200).set({ "Content-Type": "text/html" }).send(html);
+      } catch (error) {
+        res.status(500).send("Error loading HTML");
+      }
+    });
+  }
 
   return httpServer;
 }

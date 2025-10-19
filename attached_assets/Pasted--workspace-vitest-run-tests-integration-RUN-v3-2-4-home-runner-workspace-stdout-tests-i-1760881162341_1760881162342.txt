@@ -1,0 +1,1801 @@
+~/workspace$ vitest run tests/integration
+
+ RUN  v3.2.4 /home/runner/workspace
+
+stdout | tests/integration/search-page.test.ts > Search Page Integration
+SendGrid configured successfully
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration
+API key does not start with "SG.".
+
+stdout | tests/integration/search-page.test.ts > Search Page Integration
+Cloudinary configured successfully
+
+stdout | tests/integration/search-page.test.ts > Search Page Integration
+Cache queue worker started
+
+stdout | tests/integration/search-page.test.ts > Search Page Integration
+WebSocket server initialized on /ws/cache-status
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should return search results for valid query
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:44189/api/search?query=inception
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should handle empty query
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:36999/api/search?query=
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should handle missing query parameter
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:42523/api/search
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should support pagination
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:35129/api/search?query=star&page=2
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should support media type filter
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:36441/api/search?query=inception&media_type=movie
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should return results with proper structure
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34303/api/search?query=avatar
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Filtering > should filter by movies only
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:38557/api/search?query=batman&media_type=movie
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Filtering > should filter by TV shows only
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:42217/api/search?query=breaking&media_type=tv
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/landing-page.test.ts > Landing Page Integration
+SendGrid configured successfully
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration
+API key does not start with "SG.".
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Filtering > should filter by people only
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40619/api/search?query=leonardo&media_type=person
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/landing-page.test.ts > Landing Page Integration
+Cloudinary configured successfully
+
+stdout | tests/integration/landing-page.test.ts > Landing Page Integration
+Cache queue worker started
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Filtering > should return all types without filter
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40793/api/search?query=star
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/landing-page.test.ts > Landing Page Integration
+WebSocket server initialized on /ws/cache-status
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should return 200 status code
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:33837/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Sorting > should support sorting by popularity
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:36755/api/search?query=action&sort_by=popularity.desc
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should serve HTML content
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:39291/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should include app meta tags
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:35589/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Sorting > should support sorting by vote average
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:41869/api/search?query=drama&sort_by=vote_average.desc
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should include app scripts
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:45595/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should have proper charset
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:35345/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Validation > should handle very long queries
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:44589/api/search?query=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have title tag
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:45661/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have meta description
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34725/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have Open Graph tags
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:41961/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have viewport meta tag
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40347/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Validation > should handle special characters in query
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:36515/api/search?query=test%21%40%23%24%25%5E%26%2A%28%29
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > Security Headers > should set X-Content-Type-Options header
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34195/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > Security Headers > should set X-Frame-Options header
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34693/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Validation > should handle unicode characters
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40437/api/search?query=%E7%94%B5%E5%BD%B1
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > Security Headers > should set Content-Security-Policy
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:38549/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Validation > should validate page number
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:43031/api/search?query=test&page=-1
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > Caching > should not cache HTML pages
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:37895/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/landing-page.test.ts > Landing Page Integration > Compression > should support gzip compression
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40071/
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ❯ tests/integration/landing-page.test.ts (19 tests | 12 failed) 2370ms
+   × Landing Page Integration > GET / > should return 200 status code 208ms
+     → expected 200 "OK", got 404 "Not Found"
+   ✓ Landing Page Integration > GET / > should serve HTML content 87ms
+   × Landing Page Integration > GET / > should include app meta tags 114ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'CineHub Pro'
+   × Landing Page Integration > GET / > should include app scripts 86ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain '<script'
+   × Landing Page Integration > GET / > should have proper charset 66ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'charset="UTF-8"'
+   × Landing Page Integration > Static Assets > should serve JavaScript bundles 55ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Landing Page Integration > Static Assets > should serve CSS files 139ms
+     → expected 200 "OK", got 404 "Not Found"
+   ✓ Landing Page Integration > Static Assets > should return 404 for non-existent assets 115ms
+   × Landing Page Integration > SEO > should have title tag 98ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to match /<title>.*CineHub Pro.*<\/title>/title>
+   × Landing Page Integration > SEO > should have meta description 74ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'name="description"'
+   × Landing Page Integration > SEO > should have Open Graph tags 73ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'og:title'
+   × Landing Page Integration > SEO > should have viewport meta tag 52ms
+     → expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'name="viewport"'
+   ✓ Landing Page Integration > Security Headers > should set X-Content-Type-Options header 101ms
+   ✓ Landing Page Integration > Security Headers > should set X-Frame-Options header 41ms
+   ✓ Landing Page Integration > Security Headers > should set Strict-Transport-Security in production 0ms
+   ✓ Landing Page Integration > Security Headers > should set Content-Security-Policy 42ms
+   × Landing Page Integration > Caching > should set cache headers for static assets 56ms
+     → expected undefined to be truthy
+   × Landing Page Integration > Caching > should not cache HTML pages 82ms
+     → .toMatch() expects to receive a string, but got undefined
+   ✓ Landing Page Integration > Compression > should support gzip compression 31ms
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Validation > should validate media type
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:39815/api/search?query=test&media_type=invalid
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Performance > should respond within acceptable time
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:41165/api/search?query=marvel
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Performance > should handle concurrent searches
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40127/api/search?query=test0
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34789/api/search?query=test1
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:41329/api/search?query=test2
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:37979/api/search?query=test3
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:35293/api/search?query=test4
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/movies-api.test.ts
+SendGrid configured successfully
+
+stderr | tests/integration/movies-api.test.ts
+API key does not start with "SG.".
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Error Handling > should handle TMDB API errors gracefully
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34089/api/search?query=test&page=9999
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/movies-api.test.ts
+Cloudinary configured successfully
+
+stdout | tests/integration/movies-api.test.ts
+Cache queue worker started
+
+stdout | tests/integration/movies-api.test.ts > Movies API Integration Tests
+WebSocket server initialized on /ws/cache-status
+
+stderr | tests/integration/search-page.test.ts > Search Page Integration > Search Error Handling > should return proper error format
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40509/api/search?query=&page=0
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ❯ tests/integration/search-page.test.ts (21 tests | 2 failed) 5973ms
+   ✓ Search Page Integration > Search Endpoint > should return search results for valid query  519ms
+   ✓ Search Page Integration > Search Endpoint > should handle empty query 92ms
+   ✓ Search Page Integration > Search Endpoint > should handle missing query parameter 169ms
+   × Search Page Integration > Search Endpoint > should support pagination 200ms
+     → expected 1 to be 2 // Object.is equality
+   ✓ Search Page Integration > Search Endpoint > should support media type filter 123ms
+   ✓ Search Page Integration > Search Endpoint > should return results with proper structure 85ms
+   ✓ Search Page Integration > Search Filtering > should filter by movies only 129ms
+   ✓ Search Page Integration > Search Filtering > should filter by TV shows only 188ms
+   ✓ Search Page Integration > Search Filtering > should filter by people only 242ms
+   × Search Page Integration > Search Filtering > should return all types without filter 244ms
+     → expected 0 to be greater than or equal to 1
+   ✓ Search Page Integration > Search Sorting > should support sorting by popularity 183ms
+   ✓ Search Page Integration > Search Sorting > should support sorting by vote average 149ms
+   ✓ Search Page Integration > Search Validation > should handle very long queries  623ms
+   ✓ Search Page Integration > Search Validation > should handle special characters in query 202ms
+   ✓ Search Page Integration > Search Validation > should handle unicode characters 112ms
+   ✓ Search Page Integration > Search Validation > should validate page number 120ms
+   ✓ Search Page Integration > Search Validation > should validate media type 118ms
+   ✓ Search Page Integration > Search Performance > should respond within acceptable time 124ms
+   ✓ Search Page Integration > Search Performance > should handle concurrent searches  776ms
+   ✓ Search Page Integration > Search Error Handling > should handle TMDB API errors gracefully 84ms
+   ✓ Search Page Integration > Search Error Handling > should return proper error format 35ms
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/:id > should return movie details for valid ID
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:43235/api/tmdb/movie/550
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/:id > should return 404 for non-existent movie
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:46429/api/tmdb/movie/9999999
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/:id > should cache movie data
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40267/api/tmdb/movie/551
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return trending movies
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34865/api/tmdb/movie/category/trending
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return popular movies
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:44613/api/tmdb/movie/category/popular
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should support pagination
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:34233/api/tmdb/movie/category/popular?page=2
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/discover/movie > should discover movies with filters
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:33231/api/tmdb/discover/movie?with_genres=28&vote_average.gte=7
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/discover/movie > should support multiple genres
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:37317/api/tmdb/discover/movie?with_genres=28%2C12
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/search/movie > should search movies by query
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:46069/api/tmdb/search/movie?query=fight%20club
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/search/movie > should return empty results for non-existent movies
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:42045/api/tmdb/search/movie?query=xyznonexistent123
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > Error Handling > should handle invalid movie ID format
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:37947/api/tmdb/movie/invalid
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/reviews-api.test.ts
+SendGrid configured successfully
+
+stderr | tests/integration/reviews-api.test.ts
+API key does not start with "SG.".
+
+stderr | tests/integration/movies-api.test.ts > Movies API Integration Tests > Error Handling > should require search query parameter
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:42661/api/tmdb/search/movie
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ❯ tests/integration/movies-api.test.ts (12 tests | 11 failed) 1570ms
+   × Movies API Integration Tests > GET /api/tmdb/movie/:id > should return movie details for valid ID 218ms
+     → expected 200 "OK", got 404 "Not Found"
+   ✓ Movies API Integration Tests > GET /api/tmdb/movie/:id > should return 404 for non-existent movie 203ms
+   × Movies API Integration Tests > GET /api/tmdb/movie/:id > should cache movie data 175ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return trending movies 146ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return popular movies 127ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should support pagination 98ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/discover/movie > should discover movies with filters 89ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/discover/movie > should support multiple genres 73ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/search/movie > should search movies by query 105ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > GET /api/tmdb/search/movie > should return empty results for non-existent movies 154ms
+     → expected 200 "OK", got 404 "Not Found"
+   × Movies API Integration Tests > Error Handling > should handle invalid movie ID format 82ms
+     → expected 400 "Bad Request", got 404 "Not Found"
+   × Movies API Integration Tests > Error Handling > should require search query parameter 73ms
+     → expected 400 "Bad Request", got 404 "Not Found"
+stdout | tests/integration/reviews-api.test.ts
+Cloudinary configured successfully
+
+stdout | tests/integration/reviews-api.test.ts
+Cache queue worker started
+
+stdout | tests/integration/reviews-api.test.ts > Reviews API Integration Tests
+WebSocket server initialized on /ws/cache-status
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:44921/api/auth/signup
+
+  • Request body: {"email":"reviewer-1760881063488@test.com","username":"reviewer1760881063488","password":"TestPass123!","firstName":"Test","lastName":"Reviewer"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:43707/api/auth/signin
+
+  • Request body: {"identifier":"reviewer-1760881063806@test.com","password":"TestPass123!"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should create a review when authenticated
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:39091/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":550,"rating":9,"content":"Amazing movie with great plot twist!"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should reject unauthenticated requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:41241/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":550,"rating":8,"content":"Test review"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should validate rating range
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:42423/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":551,"rating":11,"content":"Test"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should require content
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:40313/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":552,"rating":8}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > GET /api/reviews/:type/:id > should get reviews for a movie
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:46521/api/reviews/movie/550
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > GET /api/reviews/:type/:id > should get reviews for a movie
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET https://ep-ancient-wind-afio3cwr.c-2.us-west-2.aws.neon.tech/v2
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/tmdb-api.test.ts
+SendGrid configured successfully
+
+stderr | tests/integration/tmdb-api.test.ts
+API key does not start with "SG.".
+
+stdout | tests/integration/tmdb-api.test.ts
+Cloudinary configured successfully
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > GET /api/reviews/:type/:id > should get reviews for a movie
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET https://api.themoviedb.org/3/movie/550/reviews?api_key=53e2b31981a0dfd6b6642eb6cdcd92bc
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > GET /api/reviews/:type/:id > should return empty array for media with no reviews
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:40153/api/reviews/movie/999999
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/watchlists-api.test.ts
+SendGrid configured successfully
+
+stderr | tests/integration/watchlists-api.test.ts
+API key does not start with "SG.".
+
+stdout | tests/integration/watchlists-api.test.ts
+Cloudinary configured successfully
+
+stdout | tests/integration/watchlists-api.test.ts
+Cache queue worker started
+
+stdout | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests
+WebSocket server initialized on /ws/cache-status
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > GET /api/reviews/:type/:id > should return empty array for media with no reviews
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET https://api.themoviedb.org/3/movie/999999/reviews?api_key=53e2b31981a0dfd6b6642eb6cdcd92bc
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:39801/api/auth/signup
+
+  • Request body: {"email":"watchlist-1760881066938@test.com","username":"watchlist1760881066938","password":"TestPass123!","firstName":"Watch","lastName":"List"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > PUT /api/reviews/:id > should update own review
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:34825/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":600,"rating":8,"content":"Original content"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:35657/api/auth/signin
+
+  • Request body: {"identifier":"watchlist-1760881067220@test.com","password":"TestPass123!"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > PUT /api/reviews/:id > should update own review
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • PUT http://127.0.0.1:44481/api/reviews/undefined
+
+  • Request body: {"rating":9,"content":"Updated content"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should create a watchlist when authenticated
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:43225/api/watchlists
+
+  • Request body: {"name":"Summer Movies","description":"Movies to watch this summer","isPublic":true}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > DELETE /api/reviews/:id > should delete own review
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:42793/api/reviews
+
+  • Request body: {"mediaType":"movie","mediaId":700,"rating":7,"content":"To be deleted"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should reject unauthenticated requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:39577/api/watchlists
+
+  • Request body: {"name":"Test Watchlist"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should validate required fields
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:46717/api/watchlists
+
+  • Request body: {"description":"Missing name"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/reviews-api.test.ts > Reviews API Integration Tests > DELETE /api/reviews/:id > should delete own review
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • DELETE http://127.0.0.1:39735/api/reviews/undefined
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ❯ tests/integration/reviews-api.test.ts (8 tests | 6 failed) 4106ms
+   × Reviews API Integration Tests > POST /api/reviews > should create a review when authenticated 44ms
+     → expected 201 "Created", got 403 "Forbidden"
+   × Reviews API Integration Tests > POST /api/reviews > should reject unauthenticated requests 68ms
+     → expected 401 "Unauthorized", got 403 "Forbidden"
+   × Reviews API Integration Tests > POST /api/reviews > should validate rating range 44ms
+     → expected 400 "Bad Request", got 403 "Forbidden"
+   × Reviews API Integration Tests > POST /api/reviews > should require content 67ms
+     → expected 400 "Bad Request", got 403 "Forbidden"
+   ✓ Reviews API Integration Tests > GET /api/reviews/:type/:id > should get reviews for a movie  2395ms
+   ✓ Reviews API Integration Tests > GET /api/reviews/:type/:id > should return empty array for media with no reviews  728ms
+   × Reviews API Integration Tests > PUT /api/reviews/:id > should update own review 116ms
+     → expected 200 "OK", got 403 "Forbidden"
+   × Reviews API Integration Tests > DELETE /api/reviews/:id > should delete own review 202ms
+     → expected 204 "No Content", got 403 "Forbidden"
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists > should get user watchlists when authenticated
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:36059/api/watchlists
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stdout | tests/integration/avatar-upload.test.ts
+Cloudinary configured successfully
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists > should reject unauthenticated requests
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:43177/api/watchlists
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ✓ tests/integration/avatar-upload.test.ts (8 tests) 27ms
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists/:id > should get watchlist by ID
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:34059/api/watchlists
+
+  • Request body: {"name":"Test Watchlist"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists/:id > should get watchlist by ID
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:35849/api/watchlists/undefined
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists/:id > should return 404 for non-existent watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • GET http://127.0.0.1:41949/api/watchlists/nonexistent-id
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add movie to watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:36953/api/watchlists
+
+  • Request body: {"name":"Test Watchlist"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add movie to watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:35487/api/watchlists/undefined/items
+
+  • Request body: {"mediaType":"movie","mediaId":550,"notes":"Must watch this classic!"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add TV show to watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:44893/api/watchlists/undefined/items
+
+  • Request body: {"mediaType":"tv","mediaId":1396}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should validate media type
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:35583/api/watchlists/undefined/items
+
+  • Request body: {"mediaType":"invalid","mediaId":550}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id/items > should remove item from watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:36119/api/watchlists/undefined/items
+
+  • Request body: {"mediaType":"movie","mediaId":600}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id/items > should remove item from watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • DELETE http://127.0.0.1:39419/api/watchlists/undefined/items?mediaType=movie&mediaId=600
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id > should delete watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • POST http://127.0.0.1:40005/api/watchlists
+
+  • Request body: {"name":"Watchlist to Delete"}
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+stderr | tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id > should delete watchlist
+[MSW] Warning: intercepted a request without a matching request handler:
+
+  • DELETE http://127.0.0.1:45533/api/watchlists/undefined
+
+If you still wish to intercept this unhandled request, please create a request handler for it.
+Read more: https://mswjs.io/docs/http/intercepting-requests
+
+ ❯ tests/integration/watchlists-api.test.ts (12 tests | 10 failed) 1732ms
+   × Watchlists API Integration Tests > POST /api/watchlists > should create a watchlist when authenticated 73ms
+     → expected 201 "Created", got 403 "Forbidden"
+   × Watchlists API Integration Tests > POST /api/watchlists > should reject unauthenticated requests 67ms
+     → expected 401 "Unauthorized", got 403 "Forbidden"
+   × Watchlists API Integration Tests > POST /api/watchlists > should validate required fields 73ms
+     → expected 400 "Bad Request", got 403 "Forbidden"
+   × Watchlists API Integration Tests > GET /api/watchlists > should get user watchlists when authenticated 118ms
+     → expected 200 "OK", got 401 "Unauthorized"
+   ✓ Watchlists API Integration Tests > GET /api/watchlists > should reject unauthenticated requests 43ms
+   × Watchlists API Integration Tests > GET /api/watchlists/:id > should get watchlist by ID 113ms
+     → expected 200 "OK", got 404 "Not Found"
+   ✓ Watchlists API Integration Tests > GET /api/watchlists/:id > should return 404 for non-existent watchlist 120ms
+   × Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add movie to watchlist 209ms
+     → expected 201 "Created", got 403 "Forbidden"
+   × Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add TV show to watchlist 99ms
+     → expected 201 "Created", got 403 "Forbidden"
+   × Watchlists API Integration Tests > POST /api/watchlists/:id/items > should validate media type 122ms
+     → expected 400 "Bad Request", got 403 "Forbidden"
+   × Watchlists API Integration Tests > DELETE /api/watchlists/:id/items > should remove item from watchlist 161ms
+     → expected 204 "No Content", got 403 "Forbidden"
+   × Watchlists API Integration Tests > DELETE /api/watchlists/:id > should delete watchlist 105ms
+     → expected 204 "No Content", got 403 "Forbidden"
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Suites 8 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/activity-history-api.test.ts [ tests/integration/activity-history-api.test.ts ]
+ FAIL  tests/integration/admin-api.test.ts [ tests/integration/admin-api.test.ts ]
+ FAIL  tests/integration/auth-api.test.ts [ tests/integration/auth-api.test.ts ]
+ FAIL  tests/integration/cloudinary-service.test.ts [ tests/integration/cloudinary-service.test.ts ]
+ FAIL  tests/integration/preferences-api.test.ts [ tests/integration/preferences-api.test.ts ]
+ FAIL  tests/integration/websocket-integration.test.ts [ tests/integration/websocket-integration.test.ts ]
+Error: [vitest] No "default" export is defined on the "@sendgrid/mail" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@sendgrid/mail"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ server/services/otpService.ts:6:3
+      4| // Initialize SendGrid
+      5| if (process.env.SENDGRID_API_KEY) {
+      6|   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+       |   ^
+      7|   console.log("SendGrid configured successfully");
+      8| } else {
+ ❯ server/routes.ts:14:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/49]⎯
+
+ FAIL  tests/integration/tmdb-api.test.ts [ tests/integration/tmdb-api.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ server/routes.ts:16:32
+     16|   signUp,
+     17|   signIn,
+     18|   signInWithTokens,
+       |            ^
+     19|   refreshAccessToken,
+     20|   logoutWithToken,
+
+Caused by: ReferenceError: Cannot access '__vi_import_3__' before initialization
+ ❯ tests/integration/tmdb-api.test.ts:18:43
+ ❯ server/routes.ts:16:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/49]⎯
+
+ FAIL  tests/integration/user-collections.test.ts [ tests/integration/user-collections.test.ts ]
+Error: [vitest] No "default" export is defined on the "@sendgrid/mail" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@sendgrid/mail"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ server/services/otpService.ts:6:3
+      4| // Initialize SendGrid
+      5| if (process.env.SENDGRID_API_KEY) {
+      6|   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+       |   ^
+      7|   console.log("SendGrid configured successfully");
+      8| } else {
+ ❯ server/routes.ts:14:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/49]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 41 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should return 200 status code
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/landing-page.test.ts:27:10
+     25|       const response = await request(app)
+     26|         .get('/')
+     27|         .expect(200);
+       |          ^
+     28|     });
+     29| 
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should include app meta tags
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'CineHub Pro'
+
+- Expected
++ Received
+
+- CineHub Pro
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:41:29
+     39|       
+     40|       expect(response.text).toContain('<meta');
+     41|       expect(response.text).toContain('CineHub Pro');
+       |                             ^
+     42|     });
+     43| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should include app scripts
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain '<script'
+
+- Expected
++ Received
+
+- <script
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:48:29
+     46|         .get('/');
+     47|       
+     48|       expect(response.text).toContain('<script');
+       |                             ^
+     49|     });
+     50| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > GET / > should have proper charset
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'charset="UTF-8"'
+
+- Expected
++ Received
+
+- charset="UTF-8"
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:55:29
+     53|         .get('/');
+     54|       
+     55|       expect(response.text).toContain('charset="UTF-8"') || 
+       |                             ^
+     56|       expect(response.text).toContain('charset=utf-8');
+     57|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > Static Assets > should serve JavaScript bundles
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/landing-page.test.ts:64:10
+     62|       await request(app)
+     63|         .get('/assets/index.js')
+     64|         .expect(200)
+       |          ^
+     65|         .expect('Content-Type', /javascript/);
+     66|     });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > Static Assets > should serve CSS files
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/landing-page.test.ts:71:10
+     69|       await request(app)
+     70|         .get('/assets/index.css')
+     71|         .expect(200)
+       |          ^
+     72|         .expect('Content-Type', /css/);
+     73|     });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have title tag
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to match /<title>.*CineHub Pro.*<\/title>/title>
+
+- Expected: 
+/<title>.*CineHub Pro.*<\/title>/i
+
++ Received: 
+"<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+<meta charset=\"utf-8\">
+<title>Error</title>
+</head>
+<body>
+<pre>Cannot GET /</pre>
+</body>
+</html>
+"
+
+ ❯ tests/integration/landing-page.test.ts:87:29
+     85|         .get('/');
+     86|       
+     87|       expect(response.text).toMatch(/<title>.*CineHub Pro.*<\/title>/i);
+       |                             ^
+     88|     });
+     89| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have meta description
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'name="description"'
+
+- Expected
++ Received
+
+- name="description"
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:94:29
+     92|         .get('/');
+     93|       
+     94|       expect(response.text).toContain('name="description"');
+       |                             ^
+     95|     });
+     96| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have Open Graph tags
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'og:title'
+
+- Expected
++ Received
+
+- og:title
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:101:29
+     99|         .get('/');
+    100|       
+    101|       expect(response.text).toContain('og:title') ||
+       |                             ^
+    102|       expect(response.text).toContain('property="og:');
+    103|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > SEO > should have viewport meta tag
+AssertionError: expected '<!DOCTYPE html>\n<html lang="en">\n<h…' to contain 'name="viewport"'
+
+- Expected
++ Received
+
+- name="viewport"
++ <!DOCTYPE html>
++ <html lang="en">
++ <head>
++ <meta charset="utf-8">
++ <title>Error</title>
++ </head>
++ <body>
++ <pre>Cannot GET /</pre>
++ </body>
++ </html>
++
+
+ ❯ tests/integration/landing-page.test.ts:109:29
+    107|         .get('/');
+    108|       
+    109|       expect(response.text).toContain('name="viewport"');
+       |                             ^
+    110|     });
+    111|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > Caching > should set cache headers for static assets
+AssertionError: expected undefined to be truthy
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ tests/integration/landing-page.test.ts:152:49
+    150|         .get('/assets/index.js');
+    151|       
+    152|       expect(response.headers['cache-control']).toBeTruthy();
+       |                                                 ^
+    153|     });
+    154| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/49]⎯
+
+ FAIL  tests/integration/landing-page.test.ts > Landing Page Integration > Caching > should not cache HTML pages
+TypeError: .toMatch() expects to receive a string, but got undefined
+ ❯ tests/integration/landing-page.test.ts:159:49
+    157|         .get('/');
+    158|       
+    159|       expect(response.headers['cache-control']).toMatch(/no-cache|no-store/i);
+       |                                                 ^
+    160|     });
+    161|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/:id > should return movie details for valid ID
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:35:10
+     33|       const response = await request(app)
+     34|         .get('/api/tmdb/movie/550') // Fight Club
+     35|         .expect(200);
+       |          ^
+     36| 
+     37|       expect(response.body).toHaveProperty('id', 550);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/:id > should cache movie data
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:51:10
+     49|       const response1 = await request(app)
+     50|         .get('/api/tmdb/movie/551')
+     51|         .expect(200);
+       |          ^
+     52| 
+     53|       const response2 = await request(app)
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return trending movies
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:65:10
+     63|       const response = await request(app)
+     64|         .get('/api/tmdb/movie/category/trending')
+     65|         .expect(200);
+       |          ^
+     66| 
+     67|       expect(response.body).toHaveProperty('results');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should return popular movies
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:74:10
+     72|       const response = await request(app)
+     73|         .get('/api/tmdb/movie/category/popular')
+     74|         .expect(200);
+       |          ^
+     75| 
+     76|       expect(response.body).toHaveProperty('results');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/movie/category/:category > should support pagination
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:84:10
+     82|         .get('/api/tmdb/movie/category/popular')
+     83|         .query({ page: 2 })
+     84|         .expect(200);
+       |          ^
+     85| 
+     86|       expect(response.body).toHaveProperty('page', 2);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/discover/movie > should discover movies with filters
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:98:10
+     96|           'vote_average.gte': 7,
+     97|         })
+     98|         .expect(200);
+       |          ^
+     99| 
+    100|       expect(response.body).toHaveProperty('results');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/discover/movie > should support multiple genres
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:109:10
+    107|           with_genres: '28,12', // Action, Adventure
+    108|         })
+    109|         .expect(200);
+       |          ^
+    110| 
+    111|       expect(response.body.results).toBeDefined();
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/search/movie > should search movies by query
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:120:10
+    118|         .get('/api/tmdb/search/movie')
+    119|         .query({ query: 'fight club' })
+    120|         .expect(200);
+       |          ^
+    121| 
+    122|       expect(response.body).toHaveProperty('results');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > GET /api/tmdb/search/movie > should return empty results for non-existent movies
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:132:10
+    130|         .get('/api/tmdb/search/movie')
+    131|         .query({ query: 'xyznonexistent123' })
+    132|         .expect(200);
+       |          ^
+    133| 
+    134|       expect(response.body.results).toEqual([]);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > Error Handling > should handle invalid movie ID format
+Error: expected 400 "Bad Request", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:142:10
+    140|       await request(app)
+    141|         .get('/api/tmdb/movie/invalid')
+    142|         .expect(400);
+       |          ^
+    143|     });
+    144| 
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/49]⎯
+
+ FAIL  tests/integration/movies-api.test.ts > Movies API Integration Tests > Error Handling > should require search query parameter
+Error: expected 400 "Bad Request", got 404 "Not Found"
+ ❯ tests/integration/movies-api.test.ts:148:10
+    146|       await request(app)
+    147|         .get('/api/tmdb/search/movie')
+    148|         .expect(400);
+       |          ^
+    149|     });
+    150|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should create a review when authenticated
+Error: expected 201 "Created", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:59:10
+     57|           content: 'Amazing movie with great plot twist!',
+     58|         })
+     59|         .expect(201);
+       |          ^
+     60| 
+     61|       expect(response.body).toHaveProperty('id');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should reject unauthenticated requests
+Error: expected 401 "Unauthorized", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:76:10
+     74|           content: 'Test review',
+     75|         })
+     76|         .expect(401);
+       |          ^
+     77|     });
+     78| 
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should validate rating range
+Error: expected 400 "Bad Request", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:89:10
+     87|           content: 'Test',
+     88|         })
+     89|         .expect(400);
+       |          ^
+     90|     });
+     91| 
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > POST /api/reviews > should require content
+Error: expected 400 "Bad Request", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:101:10
+     99|           rating: 8,
+    100|         })
+    101|         .expect(400);
+       |          ^
+    102|     });
+    103|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > PUT /api/reviews/:id > should update own review
+Error: expected 200 "OK", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:146:10
+    144|           content: 'Updated content',
+    145|         })
+    146|         .expect(200);
+       |          ^
+    147| 
+    148|       expect(response.body.rating).toBe(9);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/49]⎯
+
+ FAIL  tests/integration/reviews-api.test.ts > Reviews API Integration Tests > DELETE /api/reviews/:id > should delete own review
+Error: expected 204 "No Content", got 403 "Forbidden"
+ ❯ tests/integration/reviews-api.test.ts:171:10
+    169|         .delete(`/api/reviews/${deleteReviewId}`)
+    170|         .set('Authorization', `Bearer ${authToken}`)
+    171|         .expect(204);
+       |          ^
+    172|     });
+    173|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/49]⎯
+
+ FAIL  tests/integration/search-page.test.ts > Search Page Integration > Search Endpoint > should support pagination
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ tests/integration/search-page.test.ts:56:34
+     54| 
+     55|       expect(response.body).toHaveProperty('page');
+     56|       expect(response.body.page).toBe(2);
+       |                                  ^
+     57|     });
+     58| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/49]⎯
+
+ FAIL  tests/integration/search-page.test.ts > Search Page Integration > Search Filtering > should return all types without filter
+AssertionError: expected 0 to be greater than or equal to 1
+ ❯ tests/integration/search-page.test.ts:127:31
+    125|       );
+    126|       
+    127|       expect(mediaTypes.size).toBeGreaterThanOrEqual(1);
+       |                               ^
+    128|     });
+    129|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should create a watchlist when authenticated
+Error: expected 201 "Created", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:57:10
+     55|           isPublic: true,
+     56|         })
+     57|         .expect(201);
+       |          ^
+     58| 
+     59|       expect(response.body).toHaveProperty('id');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should reject unauthenticated requests
+Error: expected 401 "Unauthorized", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:71:10
+     69|           name: 'Test Watchlist',
+     70|         })
+     71|         .expect(401);
+       |          ^
+     72|     });
+     73| 
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists > should validate required fields
+Error: expected 400 "Bad Request", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:81:10
+     79|           description: 'Missing name',
+     80|         })
+     81|         .expect(400);
+       |          ^
+     82|     });
+     83|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists > should get user watchlists when authenticated
+Error: expected 200 "OK", got 401 "Unauthorized"
+ ❯ tests/integration/watchlists-api.test.ts:90:10
+     88|         .get('/api/watchlists')
+     89|         .set('Authorization', `Bearer ${authToken}`)
+     90|         .expect(200);
+       |          ^
+     91| 
+     92|       expect(Array.isArray(response.body)).toBe(true);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > GET /api/watchlists/:id > should get watchlist by ID
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/watchlists-api.test.ts:118:10
+    116|         .get(`/api/watchlists/${watchlistId}`)
+    117|         .set('Authorization', `Bearer ${authToken}`)
+    118|         .expect(200);
+       |          ^
+    119| 
+    120|       expect(response.body).toHaveProperty('id', watchlistId);
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add movie to watchlist
+Error: expected 201 "Created", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:151:10
+    149|           notes: 'Must watch this classic!',
+    150|         })
+    151|         .expect(201);
+       |          ^
+    152| 
+    153|       expect(response.body).toHaveProperty('mediaType', 'movie');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should add TV show to watchlist
+Error: expected 201 "Created", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:165:10
+    163|           mediaId: 1396,
+    164|         })
+    165|         .expect(201);
+       |          ^
+    166| 
+    167|       expect(response.body.mediaType).toBe('tv');
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > POST /api/watchlists/:id/items > should validate media type
+Error: expected 400 "Bad Request", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:178:10
+    176|           mediaId: 550,
+    177|         })
+    178|         .expect(400);
+       |          ^
+    179|     });
+    180|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id/items > should remove item from watchlist
+Error: expected 204 "No Content", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:198:10
+    196|         .set('Authorization', `Bearer ${authToken}`)
+    197|         .query({ mediaType: 'movie', mediaId: 600 })
+    198|         .expect(204);
+       |          ^
+    199|     });
+    200|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/49]⎯
+
+ FAIL  tests/integration/watchlists-api.test.ts > Watchlists API Integration Tests > DELETE /api/watchlists/:id > should delete watchlist
+Error: expected 204 "No Content", got 403 "Forbidden"
+ ❯ tests/integration/watchlists-api.test.ts:217:10
+    215|         .delete(`/api/watchlists/${deleteId}`)
+    216|         .set('Authorization', `Bearer ${authToken}`)
+    217|         .expect(204);
+       |          ^
+    218|     });
+    219|   });
+ ❯ Test._assertStatus node_modules/supertest/lib/test.js:309:14
+ ❯ node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/49]⎯
+
+
+ Test Files  13 failed | 1 passed (14)
+      Tests  41 failed | 39 passed (80)
+   Start at  13:37:28
+   Duration  19.76s (transform 1.26s, setup 7.19s, collect 3.12s, tests 15.78s, environment 13.23s, prepare 2.23s)
+
+~/workspace$ 

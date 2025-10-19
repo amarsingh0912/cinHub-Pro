@@ -11,7 +11,7 @@ describe('Landing Page Integration', () => {
     const { registerRoutes } = await import('../../server/routes');
     
     app = express();
-    server = await registerRoutes(app);
+    server = await registerRoutes(app, { serveTestFrontend: true });
   });
 
   afterAll(() => {
