@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 
 // Mock external services
 vi.mock('@sendgrid/mail', () => {
@@ -50,7 +51,11 @@ describe('Admin API', () => {
         lastName: 'User'
       });
 
-    // Sign in as admin to get JWT token
+    // Manually set user as admin and verified in database
+    const adminUserId = adminSignup.body.userId;
+    await storage.updateUser(adminUserId, { isAdmin: true, isVerified: true });
+
+    // Sign in as admin to get JWT token (with admin privileges)
     const adminSignin = await request(app)
       .post('/api/auth/signin-jwt')
       .set('X-CSRF-Token', 'test')
@@ -74,6 +79,9 @@ describe('Admin API', () => {
       });
 
     testUserId = regularSignup.body.userId;
+
+    // Mark regular user as verified
+    await storage.updateUser(testUserId, { isVerified: true });
 
     // Sign in as regular user
     const regularSignin = await request(app)

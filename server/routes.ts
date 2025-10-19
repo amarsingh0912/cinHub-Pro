@@ -627,6 +627,44 @@ export async function registerRoutes(
     }
   });
 
+  // Request OTP endpoint - for general OTP requests
+  app.post("/api/auth/request-otp", async (req, res) => {
+    try {
+      const { target, purpose } = req.body;
+
+      if (!target || !purpose) {
+        return res.status(400).json({ 
+          message: "Target (email or phone) and purpose are required" 
+        });
+      }
+
+      // Validate purpose
+      if (!['signup', 'reset', 'login'].includes(purpose)) {
+        return res.status(400).json({ 
+          message: "Invalid purpose. Must be 'signup', 'reset', or 'login'" 
+        });
+      }
+
+      // Send OTP via Twilio Verify Service
+      const otpResult = await sendOTP(target, purpose as 'signup' | 'reset' | 'login');
+      
+      if (!otpResult.success) {
+        console.error(`Failed to send ${purpose} OTP to ${target}:`, otpResult.error);
+        return res.status(500).json({
+          message: "Failed to send OTP. Please try again later.",
+          error: `OTP delivery failed: ${otpResult.error}`,
+        });
+      }
+
+      res.json({
+        message: `OTP sent successfully to ${target}`,
+      });
+    } catch (error) {
+      console.error("Request OTP error:", error);
+      res.status(500).json({ message: "Failed to send OTP" });
+    }
+  });
+
   app.post("/api/auth/verify-otp", async (req, res) => {
     try {
       const { otp, identifier, purpose } = req.body;
@@ -794,6 +832,7 @@ export async function registerRoutes(
       res.json({
         user: result.user,
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken, // Include refresh token in response for client-side storage
         message: "Signed in successfully",
       });
     } catch (error) {

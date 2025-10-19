@@ -1,6 +1,8 @@
-import { expect, beforeAll, afterEach, afterAll } from 'vitest';
+import { expect, beforeAll, afterEach, afterAll, beforeEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { tmdbHandlers } from './mocks/tmdb-handlers';
+import { sql } from 'drizzle-orm';
+import { db } from '../../server/db';
 
 // Set up test environment variables
 process.env.NODE_ENV = 'test';
@@ -25,11 +27,41 @@ process.env.TMDB_ACCESS_TOKEN = 'test-tmdb-token';
 // Set up MSW server for external API mocking
 const server = setupServer(...tmdbHandlers);
 
+// Database cleanup function
+async function cleanDatabase() {
+  try {
+    // Delete in order to respect foreign key constraints
+    // Order matters: delete child tables before parent tables
+    await db.execute(sql`TRUNCATE TABLE search_history CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE activity_history CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE viewing_history CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE tmdb_reviews_cache CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE media_credits CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE images_cache CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE people_cache CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE tv_shows_cache CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE movies_cache CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE reviews CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE watchlist_items CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE watchlists CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE favorites CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE otp_verifications CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE auth_sessions CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE social_accounts CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE users CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE sessions CASCADE`);
+  } catch (error) {
+    console.error('Error cleaning database:', error);
+  }
+}
+
 // Start server before all tests
-beforeAll(() => {
+beforeAll(async () => {
   server.listen({
     onUnhandledRequest: 'bypass',
   });
+  // Clean database before all tests to ensure clean state
+  await cleanDatabase();
 });
 
 // Reset handlers after each test
