@@ -4,10 +4,19 @@ import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
 
 // Mock external services
-vi.mock('@sendgrid/mail', () => ({
-  setApiKey: vi.fn(),
-  send: vi.fn().mockResolvedValue([{ statusCode: 202 }])
-}));
+vi.mock('@sendgrid/mail', () => {
+  const mockSend = vi.fn().mockResolvedValue([{ statusCode: 202 }]);
+  const mockSetApiKey = vi.fn();
+  
+  return {
+    default: {
+      setApiKey: mockSetApiKey,
+      send: mockSend
+    },
+    setApiKey: mockSetApiKey,
+    send: mockSend
+  };
+});
 
 vi.mock('twilio', () => ({
   default: vi.fn().mockReturnValue({

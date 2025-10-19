@@ -230,13 +230,14 @@ const upload = multer({
   },
 });
 
-// Create rate limiters
+// Create rate limiters - skip in test environment
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Limit each IP to 1000 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 const apiLimiter = rateLimit({
@@ -245,6 +246,7 @@ const apiLimiter = rateLimit({
   message: "Too many API requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 const authLimiter = rateLimit({
@@ -253,6 +255,7 @@ const authLimiter = rateLimit({
   message: "Too many authentication attempts, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 // CSRF protection middleware - require X-Requested-With header for all state-changing requests
