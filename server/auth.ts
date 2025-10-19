@@ -90,6 +90,10 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     next();
   } catch (error) {
     // Invalid JWT - don't set user but continue for dual-mode fallback
+    if (process.env.NODE_ENV === 'test') {
+      console.error('[TEST DEBUG] JWT verification failed:', error);
+      console.error('[TEST DEBUG] Token present:', !!token);
+    }
     next();
   }
 };

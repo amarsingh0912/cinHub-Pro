@@ -4,6 +4,10 @@ import { tmdbHandlers } from './mocks/tmdb-handlers';
 
 // Set up test environment variables
 process.env.NODE_ENV = 'test';
+// Use DATABASE_URL if it exists, otherwise tests will fail if database operations are needed
+if (!process.env.DATABASE_URL) {
+  console.warn('DATABASE_URL not set for integration tests - database operations will fail');
+}
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-for-testing-purposes-only';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-for-testing-purposes-only';
 process.env.SESSION_SECRET = 'test-session-secret-for-testing-purposes-only';
