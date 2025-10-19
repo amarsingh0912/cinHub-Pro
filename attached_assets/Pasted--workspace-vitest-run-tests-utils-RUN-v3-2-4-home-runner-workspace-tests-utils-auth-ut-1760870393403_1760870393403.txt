@@ -1,0 +1,49 @@
+~/workspace$ vitest run tests/utils
+
+ RUN  v3.2.4 /home/runner/workspace
+
+ ✓ tests/utils/auth-utils.test.ts (7 tests) 8ms
+ ✓ tests/utils/cn-utils.test.ts (7 tests) 17ms
+ ❯ tests/utils/tmdb.test.ts (17 tests | 1 failed) 40ms
+   ✓ TMDB Utilities > getImageUrl > should construct correct TMDB image URL with default size 2ms
+   ✓ TMDB Utilities > getImageUrl > should construct correct TMDB image URL with custom size 1ms
+   ✓ TMDB Utilities > getImageUrl > should return placeholder for null path 1ms
+   ✓ TMDB Utilities > getImageUrl > should return full URL as-is for Cloudinary images 0ms
+   ✓ TMDB Utilities > getImageUrl > should handle all size options 1ms
+   ✓ TMDB Utilities > formatRating > should convert 10-point scale to 5-point scale 1ms
+   ✓ TMDB Utilities > formatRating > should return one decimal place 1ms
+   ✓ TMDB Utilities > formatRating > should handle edge cases 0ms
+   ✓ TMDB Utilities > formatRuntime > should format minutes to hours and minutes 0ms
+   ✓ TMDB Utilities > formatRuntime > should handle zero minutes 0ms
+   ✓ TMDB Utilities > formatRuntime > should handle values less than 60 minutes 0ms
+   ✓ TMDB Utilities > formatRuntime > should handle very long runtimes 0ms
+   ✓ TMDB Utilities > formatCurrency > should format currency with USD symbol 23ms
+   ✓ TMDB Utilities > formatCurrency > should handle zero 1ms
+   ✓ TMDB Utilities > formatCurrency > should format large numbers with commas 0ms
+   × TMDB Utilities > formatCurrency > should not include cents 4ms
+     → expected '$1,234.56' not to contain '.56'
+   ✓ TMDB Utilities > formatCurrency > should handle negative numbers 0ms
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/utils/tmdb.test.ts > TMDB Utilities > formatCurrency > should not include cents
+AssertionError: expected '$1,234.56' not to contain '.56'
+
+Expected: ".56"
+Received: "$1,234.56"
+
+ ❯ tests/utils/tmdb.test.ts:105:26
+    103|     it('should not include cents', () => {
+    104|       const result = formatCurrency(1234.56);
+    105|       expect(result).not.toContain('.56');
+       |                          ^
+    106|       expect(result).toContain('1,235'); // Rounded
+    107|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 30 passed (31)
+   Start at  10:39:23
+   Duration  2.37s (transform 254ms, setup 1.58s, collect 121ms, tests 65ms, environment 3.21s, prepare 573ms)

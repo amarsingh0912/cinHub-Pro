@@ -6,6 +6,12 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 19, 2025:**
+- Fixed formatCurrency utility function to properly exclude cents
+  - Added maximumFractionDigits: 0 to Intl.NumberFormat options
+  - Currency values now display as whole dollars (e.g., $1,235 instead of $1,234.56)
+  - All 31 utility tests now passing
+
 **October 18, 2025:**
 - Redesigned authentication modal with modern glassmorphism aesthetic
   - Implemented gradient backdrop overlay (purple/teal/blue) for visual depth
