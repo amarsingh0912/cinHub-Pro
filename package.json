@@ -14,7 +14,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:components": "vitest run tests/components",
     "test:e2e": "vitest run tests/e2e",
     "test:all": "npm run test:unit && npm run test:integration && npm run test:components && npm run test:e2e",
