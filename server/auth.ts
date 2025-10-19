@@ -19,13 +19,24 @@ const SALT_ROUNDS = 12;
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  
+  // Use in-memory store for tests to avoid database dependency
+  let sessionStore;
+  if (process.env.NODE_ENV === 'test') {
+    const MemoryStore = require('memorystore')(session);
+    sessionStore = new MemoryStore({
+      checkPeriod: sessionTtl,
+    });
+  } else {
+    const pgStore = connectPg(session);
+    sessionStore = new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: false,
+      ttl: sessionTtl,
+      tableName: "sessions",
+    });
+  }
+  
   // Fail fast in production if SESSION_SECRET is missing
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret && process.env.NODE_ENV === 'production') {
@@ -90,10 +101,6 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     next();
   } catch (error) {
     // Invalid JWT - don't set user but continue for dual-mode fallback
-    if (process.env.NODE_ENV === 'test') {
-      console.error('[TEST DEBUG] JWT verification failed:', error);
-      console.error('[TEST DEBUG] Token present:', !!token);
-    }
     next();
   }
 };
