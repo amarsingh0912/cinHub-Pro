@@ -34,7 +34,7 @@ describe('User Collections API', () => {
     userId = signupResponse.body.userId;
 
     const signinResponse = await request(app)
-      .post('/api/auth/signin')
+      .post('/api/auth/signin-jwt')
       .send({
         identifier: 'collectionsuser',
         password: 'TestPassword123!'

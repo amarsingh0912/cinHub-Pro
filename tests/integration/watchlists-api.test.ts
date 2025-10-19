@@ -29,7 +29,7 @@ describe('Watchlists API Integration Tests', () => {
     userId = signupResponse.body.user?.id || signupResponse.body.userId;
 
     const signinResponse = await request(app)
-      .post('/api/auth/signin')
+      .post('/api/auth/signin-jwt')
       .send({
         identifier: signupResponse.body.user?.email || `watchlist-${Date.now()}@test.com`,
         password: 'TestPass123!',

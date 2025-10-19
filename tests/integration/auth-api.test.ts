@@ -87,7 +87,7 @@ describe('Authentication API', () => {
     });
   });
 
-  describe('POST /api/auth/signin', () => {
+  describe('POST /api/auth/signin-jwt', () => {
     const credentials = {
       identifier: 'testuser',
       password: 'TestPassword123!'
@@ -95,7 +95,7 @@ describe('Authentication API', () => {
 
     it('should sign in with valid credentials', async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send(credentials)
         .expect(200);
 
@@ -107,7 +107,7 @@ describe('Authentication API', () => {
 
     it('should sign in with email instead of username', async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'test@example.com', password: 'TestPassword123!' })
         .expect(200);
 
@@ -116,7 +116,7 @@ describe('Authentication API', () => {
 
     it('should reject invalid credentials', async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'wrongpassword' })
         .expect(401);
 
@@ -125,7 +125,7 @@ describe('Authentication API', () => {
 
     it('should reject non-existent user', async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'nonexistent', password: 'password123' })
         .expect(401);
 
@@ -138,7 +138,7 @@ describe('Authentication API', () => {
 
     beforeEach(async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
       
       refreshToken = response.body.refreshToken;
@@ -178,7 +178,7 @@ describe('Authentication API', () => {
 
     beforeEach(async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
       
       accessToken = response.body.accessToken;
@@ -216,7 +216,7 @@ describe('Authentication API', () => {
 
     beforeEach(async () => {
       const response = await request(app)
-        .post('/api/auth/signin')
+        .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
       
       accessToken = response.body.accessToken;

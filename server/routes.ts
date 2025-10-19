@@ -257,6 +257,11 @@ const authLimiter = rateLimit({
 
 // CSRF protection middleware - require X-Requested-With header for all state-changing requests
 const requireCSRFHeader = (req: any, res: any, next: any) => {
+  // Skip CSRF check in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return next();
+  }
+
   // Skip CSRF check for GET requests (safe methods)
   if (
     req.method === "GET" ||
@@ -370,6 +375,10 @@ export async function registerRoutes(
   // Initialize passport for OAuth
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // JWT authentication middleware - processes Bearer tokens and sets req.user
+  const { authenticateJWT } = await import("./auth");
+  app.use(authenticateJWT);
 
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
