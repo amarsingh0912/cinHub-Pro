@@ -71,6 +71,17 @@ describe('ImageCacheService', () => {
     });
 
     it('should process and cache new image', async () => {
+      const mockDb = await import('../../server/db');
+      
+      // Mock database to return empty array (image not cached)
+      vi.mocked(mockDb.db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve([])),
+          })),
+        })),
+      } as any);
+
       mockUpload.mockResolvedValue({
         secure_url: 'https://cloudinary.com/new.jpg',
         public_id: 'cinehub/posters/test',
@@ -113,6 +124,17 @@ describe('ImageCacheService', () => {
 
   describe('error handling', () => {
     it('should return TMDB URL on Cloudinary error', async () => {
+      const mockDb = await import('../../server/db');
+      
+      // Mock database to return empty array (image not cached)
+      vi.mocked(mockDb.db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve([])),
+          })),
+        })),
+      } as any);
+
       mockUpload.mockRejectedValue(new Error('Cloudinary error'));
 
       const result = await service.getCachedImageUrl('/fallback.jpg', 'poster');

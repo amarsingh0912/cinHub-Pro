@@ -19,12 +19,15 @@ vi.mock('@sendgrid/mail', () => {
 
 // Mock Twilio
 vi.mock('twilio', () => {
+  const mockMessagesCreate = vi.fn();
+  const mockTwilioClient = {
+    messages: {
+      create: mockMessagesCreate,
+    },
+  };
+  
   return {
-    default: vi.fn(() => ({
-      messages: {
-        create: vi.fn(),
-      },
-    })),
+    default: vi.fn(() => mockTwilioClient),
   };
 });
 

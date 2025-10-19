@@ -5,6 +5,8 @@ import { EventEmitter } from 'events';
 
 // Mock cache queue service
 vi.mock('../../server/services/cacheQueue', () => {
+  // Use inline import to avoid hoisting issues
+  const { EventEmitter } = require('events');
   const mockCacheQueue = new EventEmitter();
   Object.assign(mockCacheQueue, {
     getQueueStats: vi.fn(() => ({
@@ -37,6 +39,8 @@ describe('WebSocketService', () => {
     mockServer = {
       on: vi.fn(),
       listen: vi.fn(),
+      removeListener: vi.fn(),
+      removeAllListeners: vi.fn(),
     };
   });
 
