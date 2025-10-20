@@ -6,6 +6,16 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 20, 2025:**
+- Major integration test infrastructure improvements
+  - Fixed database cleanup to run before each test with TRUNCATE CASCADE
+  - Moved user creation from beforeAll to beforeEach across all integration test files
+  - Fixed auth-api.test.ts to use cookies for refresh tokens instead of request body
+  - Updated signup route to return 409 (Conflict) for duplicate users instead of 400
+  - Configured Vitest to run integration tests serially (fileParallelism: false) to prevent race conditions
+  - Auth tests improved from 17 failures to 20/21 passing
+  - Fixed 9 integration test files: auth-api, admin-api, preferences-api, user-collections, activity-history-api, watchlists-api, reviews-api, cloudinary-service, and setup
+
 **October 19, 2025:**
 - Fixed formatCurrency utility function to properly exclude cents
   - Added maximumFractionDigits: 0 to Intl.NumberFormat options
