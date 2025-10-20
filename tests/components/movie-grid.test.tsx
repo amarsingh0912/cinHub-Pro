@@ -67,7 +67,7 @@ describe('MovieGrid Component', () => {
       { wrapper: createWrapper() }
     );
     
-    const movieCards = screen.getAllByTestId(/^card-movie-/);
+    const movieCards = screen.getAllByTestId(/^movie-card-/);
     expect(movieCards).toHaveLength(mockMovies.length);
   });
 
