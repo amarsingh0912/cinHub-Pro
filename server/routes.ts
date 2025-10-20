@@ -437,6 +437,7 @@ export async function registerRoutes(
       res.status(201).json({
         message:
           "Account created successfully. Please verify your account with the OTP sent to your email or phone.",
+        userId: user.id,
         verificationTarget,
         requiresVerification: true,
       });
