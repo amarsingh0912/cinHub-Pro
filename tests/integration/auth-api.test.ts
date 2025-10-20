@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 
 // Mock external services
 vi.mock('@sendgrid/mail', () => {
@@ -102,6 +103,14 @@ describe('Authentication API', () => {
       password: 'TestPassword123!'
     };
 
+    beforeEach(async () => {
+      // Verify the test user so they can sign in
+      const user = await storage.getUserByEmail('test@example.com');
+      if (user && !user.isVerified) {
+        await storage.updateUser(user.id, { isVerified: true });
+      }
+    });
+
     it('should sign in with valid credentials', async () => {
       const response = await request(app)
         .post('/api/auth/signin-jwt')
@@ -146,6 +155,12 @@ describe('Authentication API', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
+      // Verify the test user so they can sign in
+      const user = await storage.getUserByEmail('test@example.com');
+      if (user && !user.isVerified) {
+        await storage.updateUser(user.id, { isVerified: true });
+      }
+
       const response = await request(app)
         .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
@@ -186,6 +201,12 @@ describe('Authentication API', () => {
     let accessToken: string;
 
     beforeEach(async () => {
+      // Verify the test user so they can sign in
+      const user = await storage.getUserByEmail('test@example.com');
+      if (user && !user.isVerified) {
+        await storage.updateUser(user.id, { isVerified: true });
+      }
+
       const response = await request(app)
         .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
@@ -224,6 +245,12 @@ describe('Authentication API', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
+      // Verify the test user so they can sign in
+      const user = await storage.getUserByEmail('test@example.com');
+      if (user && !user.isVerified) {
+        await storage.updateUser(user.id, { isVerified: true });
+      }
+
       const response = await request(app)
         .post('/api/auth/signin-jwt')
         .send({ identifier: 'testuser', password: 'TestPassword123!' });
