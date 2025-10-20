@@ -70,6 +70,7 @@ export default function MovieGrid({
   
   // Calculate skeletons needed to fill incomplete row or show full new row
   const getSkeletonCount = () => {
+    if (!movies || !movies.length) return gridColumns;
     const remainder = movies.length % gridColumns;
     return remainder === 0 ? gridColumns : gridColumns - remainder;
   };
@@ -84,7 +85,7 @@ export default function MovieGrid({
     );
   }
 
-  if (!movies.length) {
+  if (!movies || !movies.length) {
     return (
       <div className="text-center py-12" data-testid="empty-movies">
         <p className="text-muted-foreground">No movies found.</p>
