@@ -58,7 +58,7 @@ describe('MovieGrid Component', () => {
       <MovieGrid movies={[]} />,
       { wrapper: createWrapper() }
     );
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-movies')).toBeInTheDocument();
   });
 
   it('renders correct number of movie cards', () => {
@@ -67,7 +67,7 @@ describe('MovieGrid Component', () => {
       { wrapper: createWrapper() }
     );
     
-    const movieCards = screen.getAllByTestId(/^movie-card-/);
+    const movieCards = screen.getAllByTestId(/^card-movie-/);
     expect(movieCards).toHaveLength(mockMovies.length);
   });
 
@@ -86,6 +86,6 @@ describe('MovieGrid Component', () => {
       <MovieGrid movies={undefined as any} />,
       { wrapper: createWrapper() }
     );
-    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-movies')).toBeInTheDocument();
   });
 });
