@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 
 // Mock external services
 vi.mock('@sendgrid/mail', () => {
@@ -41,6 +42,9 @@ describe('User Collections API', () => {
       });
 
     userId = signupResponse.body.userId;
+
+    // Mark user as verified
+    await storage.updateUser(userId, { isVerified: true });
 
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')

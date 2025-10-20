@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 
 // Mock external services
 vi.mock('@sendgrid/mail', () => {
@@ -50,6 +51,9 @@ describe('Preferences API', () => {
       });
 
     userId = signupResponse.body.userId;
+
+    // Mark user as verified
+    await storage.updateUser(userId, { isVerified: true });
 
     // Sign in to get JWT token
     const signinResponse = await request(app)

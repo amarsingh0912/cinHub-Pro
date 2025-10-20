@@ -2323,7 +2323,8 @@ export async function registerRoutes(
   // Watchlist endpoints
   app.get("/api/watchlists", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      // Support both JWT and session auth
+      const userId = req.user?.id || req.session.userId;
       const watchlists = await storage.getUserWatchlists(userId);
       res.json(watchlists);
     } catch (error) {
@@ -2334,10 +2335,11 @@ export async function registerRoutes(
 
   app.post("/api/watchlists", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      // Support both JWT and session auth
+      const userId = req.user?.id || req.session.userId;
       const data = insertWatchlistSchema.parse({ ...req.body, userId });
       const watchlist = await storage.createWatchlist(data);
-      res.json(watchlist);
+      res.status(201).json(watchlist);
     } catch (error) {
       console.error("Error creating watchlist:", error);
       res.status(500).json({ message: "Failed to create watchlist" });
@@ -2347,7 +2349,8 @@ export async function registerRoutes(
   app.put("/api/watchlists/:id", isAuthenticated, async (req: any, res) => {
     try {
       const watchlistId = req.params.id;
-      const userId = req.session.userId;
+      // Support both JWT and session auth
+      const userId = req.user?.id || req.session.userId;
 
       // First, get the existing watchlist to verify ownership
       const existingWatchlist = await storage.getWatchlistById(watchlistId);
@@ -2381,7 +2384,8 @@ export async function registerRoutes(
   app.delete("/api/watchlists/:id", isAuthenticated, async (req: any, res) => {
     try {
       const watchlistId = req.params.id;
-      const userId = req.session.userId;
+      // Support both JWT and session auth
+      const userId = req.user?.id || req.session.userId;
 
       // First, get the existing watchlist to verify ownership
       const existingWatchlist = await storage.getWatchlistById(watchlistId);
@@ -2415,10 +2419,11 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/watchlists/:id/items", isAuthenticated, async (req, res) => {
+  app.post("/api/watchlists/:id/items", isAuthenticated, async (req: any, res) => {
     try {
       const watchlistId = req.params.id;
-      const userId = req.session.userId;
+      // Support both JWT and session auth
+      const userId = req.user?.id || req.session.userId;
 
       // Verify user owns the watchlist before adding items
       const watchlist = await storage.getWatchlistById(watchlistId);
@@ -2451,7 +2456,7 @@ export async function registerRoutes(
     async (req, res) => {
       try {
         const watchlistId = req.params.id;
-        const userId = req.session.userId;
+        const userId = req.user?.id || req.session.userId;
         const mediaType = req.params.mediaType;
         const mediaId = parseInt(req.params.mediaId);
 
@@ -2480,7 +2485,7 @@ export async function registerRoutes(
   // Favorites endpoints
   app.get("/api/favorites", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const favorites = await storage.getUserFavorites(userId);
       res.json(favorites);
     } catch (error) {
@@ -2491,7 +2496,7 @@ export async function registerRoutes(
 
   app.post("/api/favorites", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const data = insertFavoriteSchema.parse({ ...req.body, userId });
       const favorite = await storage.addFavorite(data);
       res.json(favorite);
@@ -2506,7 +2511,7 @@ export async function registerRoutes(
     isAuthenticated,
     async (req: any, res) => {
       try {
-        const userId = req.session.userId;
+        const userId = req.user?.id || req.session.userId;
         const mediaType = req.params.mediaType;
         const mediaId = parseInt(req.params.mediaId);
         await storage.removeFavorite(userId, mediaType, mediaId);
@@ -2523,7 +2528,7 @@ export async function registerRoutes(
     isAuthenticated,
     async (req: any, res) => {
       try {
-        const userId = req.session.userId;
+        const userId = req.user?.id || req.session.userId;
         const mediaType = req.params.mediaType;
         const mediaId = parseInt(req.params.mediaId);
         const isFavorite = await storage.isFavorite(userId, mediaType, mediaId);
@@ -2538,7 +2543,7 @@ export async function registerRoutes(
   // Reviews endpoints
   app.get("/api/reviews/user", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const reviews = await storage.getUserReviews(userId);
       res.json(reviews);
     } catch (error) {
@@ -2703,7 +2708,7 @@ export async function registerRoutes(
 
   app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const data = insertReviewSchema.parse({ ...req.body, userId });
       const review = await storage.createReview(data);
       res.json(review);
@@ -2716,7 +2721,7 @@ export async function registerRoutes(
   // User Preferences endpoints
   app.get("/api/preferences", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const preferences = await storage.getUserPreferences(userId);
       res.json(preferences);
     } catch (error) {
@@ -2727,7 +2732,7 @@ export async function registerRoutes(
 
   app.put("/api/preferences", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const preferences = req.body;
 
       // Validate preferences object structure - updated to match frontend expectations
@@ -2790,7 +2795,7 @@ export async function registerRoutes(
   // Viewing History endpoints
   app.get("/api/viewing-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const viewingHistory = await storage.getUserViewingHistory(userId, limit);
       res.json(viewingHistory);
@@ -2802,7 +2807,7 @@ export async function registerRoutes(
 
   app.post("/api/viewing-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const data = insertViewingHistorySchema.parse({ ...req.body, userId });
       const viewingEntry = await storage.addViewingHistory(data);
       res.json(viewingEntry);
@@ -2817,7 +2822,7 @@ export async function registerRoutes(
     isAuthenticated,
     async (req: any, res) => {
       try {
-        const userId = req.session.userId;
+        const userId = req.user?.id || req.session.userId;
         const mediaType = req.params.mediaType;
         const mediaId = parseInt(req.params.mediaId);
         await storage.removeViewingHistory(userId, mediaType, mediaId);
@@ -2831,7 +2836,7 @@ export async function registerRoutes(
 
   app.delete("/api/viewing-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       await storage.clearUserViewingHistory(userId);
       res.json({ success: true });
     } catch (error) {
@@ -2843,7 +2848,7 @@ export async function registerRoutes(
   // Activity History endpoints
   app.get("/api/activity-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
       const activityHistory = await storage.getUserActivityHistory(
         userId,
@@ -2858,7 +2863,7 @@ export async function registerRoutes(
 
   app.post("/api/activity-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const data = insertActivityHistorySchema.parse({ ...req.body, userId });
       const activity = await storage.addActivityHistory(data);
       res.json(activity);
@@ -2873,7 +2878,7 @@ export async function registerRoutes(
     isAuthenticated,
     async (req: any, res) => {
       try {
-        const userId = req.session.userId;
+        const userId = req.user?.id || req.session.userId;
         await storage.clearUserActivityHistory(userId);
         res.json({ success: true });
       } catch (error) {
@@ -2886,7 +2891,7 @@ export async function registerRoutes(
   // Search History endpoints
   app.get("/api/search-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const searchHistory = await storage.getUserSearchHistory(userId, limit);
       res.json(searchHistory);
@@ -2898,7 +2903,7 @@ export async function registerRoutes(
 
   app.post("/api/search-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       const data = insertSearchHistorySchema.parse({ ...req.body, userId });
       const search = await storage.addSearchHistory(data);
       res.json(search);
@@ -2910,7 +2915,7 @@ export async function registerRoutes(
 
   app.delete("/api/search-history", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.id || req.session.userId;
       await storage.clearUserSearchHistory(userId);
       res.json({ success: true });
     } catch (error) {

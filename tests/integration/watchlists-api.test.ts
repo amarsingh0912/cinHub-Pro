@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import express, { type Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 
 describe('Watchlists API Integration Tests', () => {
   let app: Express;
@@ -27,6 +28,9 @@ describe('Watchlists API Integration Tests', () => {
       });
 
     userId = signupResponse.body.user?.id || signupResponse.body.userId;
+
+    // Mark user as verified
+    await storage.updateUser(userId, { isVerified: true });
 
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')

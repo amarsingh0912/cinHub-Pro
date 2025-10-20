@@ -29,6 +29,9 @@ describe('Reviews API Integration Tests', () => {
 
     userId = signupResponse.body.user?.id || signupResponse.body.userId;
     
+    // Mark user as verified
+    await storage.updateUser(userId, { isVerified: true });
+
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')
       .send({

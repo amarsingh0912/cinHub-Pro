@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
+import { storage } from '../../server/storage';
 import * as cloudinary from 'cloudinary';
 
 // Mock external services
@@ -66,10 +67,14 @@ describe('Cloudinary Service Integration Tests', () => {
     server = await registerRoutes(app);
 
     // Create and authenticate user
-    await request(app)
+    const signupResponse = await request(app)
       .post('/api/auth/signup')
       .set('X-CSRF-Token', 'test')
       .send(testUser);
+
+    // Mark user as verified
+    const userId = signupResponse.body.userId;
+    await storage.updateUser(userId, { isVerified: true });
 
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')
