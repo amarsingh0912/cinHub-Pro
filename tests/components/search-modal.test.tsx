@@ -22,17 +22,17 @@ describe('SearchModal Component', () => {
 
   describe('Modal Rendering', () => {
     it('should render when open', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
     it('should not render when closed', () => {
-      render(<SearchModal open={false} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={false} onClose={mockOnClose} />, { wrapper });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
 
     it('should focus search input when opened', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       expect(searchInput).toHaveFocus();
     });
@@ -40,12 +40,12 @@ describe('SearchModal Component', () => {
 
   describe('Search Input', () => {
     it('should have search input field', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       expect(screen.getByPlaceholderText(/search/i)).toBeInTheDocument();
     });
 
     it('should trigger search on input change', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -56,7 +56,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should debounce search queries', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'i' } });
@@ -70,7 +70,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should clear search input when clear button clicked', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i) as HTMLInputElement;
       
       fireEvent.change(searchInput, { target: { value: 'test' } });
@@ -85,7 +85,7 @@ describe('SearchModal Component', () => {
 
   describe('Search Results', () => {
     it('should display loading state while searching', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -94,7 +94,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should display search results', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -105,7 +105,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should display no results message', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'xyznonexistent123' } });
@@ -116,7 +116,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should categorize results by type', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -131,7 +131,7 @@ describe('SearchModal Component', () => {
 
   describe('Search Filters', () => {
     it('should have media type filters', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       expect(screen.getByText(/all/i)).toBeInTheDocument();
       expect(screen.getByText(/movies/i)).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should filter results by media type', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -155,7 +155,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should have sort options', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       expect(screen.getByText(/relevance/i) || screen.getByText(/popularity/i)).toBeInTheDocument();
     });
@@ -163,13 +163,13 @@ describe('SearchModal Component', () => {
 
   describe('Search History', () => {
     it('should display recent searches', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       expect(screen.getByText(/recent/i) || screen.getByText(/history/i)).toBeInTheDocument();
     });
 
     it('should save search to history', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -179,7 +179,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should clear search history', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       const clearHistoryButton = screen.queryByText(/clear history/i);
       if (clearHistoryButton) {
@@ -188,7 +188,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should click recent search to re-search', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       const recentSearches = screen.queryAllByRole('button', { name: /inception/i });
       if (recentSearches.length > 0) {
@@ -199,7 +199,7 @@ describe('SearchModal Component', () => {
 
   describe('Keyboard Navigation', () => {
     it('should close modal on Escape key', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
       
@@ -207,7 +207,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should navigate results with arrow keys', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -221,7 +221,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should select result on Enter key', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -239,7 +239,7 @@ describe('SearchModal Component', () => {
 
   describe('Result Click Handling', () => {
     it('should close modal when result clicked', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -257,7 +257,7 @@ describe('SearchModal Component', () => {
       const setLocation = vi.fn();
       vi.mocked(require('wouter').useLocation).mockReturnValue(['/', setLocation]);
       
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -274,7 +274,7 @@ describe('SearchModal Component', () => {
 
   describe('Accessibility', () => {
     it('should have proper ARIA attributes', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       const dialog = screen.getByRole('dialog');
       expect(dialog).toHaveAttribute('aria-modal', 'true');
@@ -282,14 +282,14 @@ describe('SearchModal Component', () => {
     });
 
     it('should have searchbox role on input', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       
       const searchInput = screen.getByRole('searchbox');
       expect(searchInput).toBeInTheDocument();
     });
 
     it('should announce search results to screen readers', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -301,7 +301,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should have accessible result items', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
@@ -317,7 +317,7 @@ describe('SearchModal Component', () => {
 
   describe('Error Handling', () => {
     it('should display error message on search failure', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       // Mock network error
@@ -329,7 +329,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should allow retry on error', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'error' } });
@@ -345,7 +345,7 @@ describe('SearchModal Component', () => {
 
   describe('Performance', () => {
     it('should not search for queries less than 2 characters', () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'a' } });
@@ -354,7 +354,7 @@ describe('SearchModal Component', () => {
     });
 
     it('should use cached results for duplicate queries', async () => {
-      render(<SearchModal open={true} onClose={mockOnClose} />, { wrapper });
+      render(<SearchModal isOpen={true} onClose={mockOnClose} />, { wrapper });
       const searchInput = screen.getByPlaceholderText(/search/i);
       
       fireEvent.change(searchInput, { target: { value: 'inception' } });
