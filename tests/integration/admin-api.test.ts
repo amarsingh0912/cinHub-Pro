@@ -38,7 +38,9 @@ describe('Admin API', () => {
     app = express();
     app.use(express.json());
     server = await registerRoutes(app);
+  });
 
+  beforeEach(async () => {
     // Create admin user and get token
     const adminSignup = await request(app)
       .post('/api/auth/signup')

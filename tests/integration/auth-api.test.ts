@@ -31,6 +31,21 @@ describe('Authentication API', () => {
   let app: Express;
   let server: any;
 
+  const testUser = {
+    email: 'test@example.com',
+    username: 'testuser',
+    password: 'TestPassword123!',
+    firstName: 'Test',
+    lastName: 'User'
+  };
+
+  // Helper function to create a test user
+  async function createTestUser() {
+    await request(app)
+      .post('/api/auth/signup')
+      .send(testUser);
+  }
+
   beforeAll(async () => {
     app = express();
     app.use(express.json());
@@ -44,14 +59,6 @@ describe('Authentication API', () => {
   });
 
   describe('POST /api/auth/signup', () => {
-    const testUser = {
-      email: 'test@example.com',
-      username: 'testuser',
-      password: 'TestPassword123!',
-      firstName: 'Test',
-      lastName: 'User'
-    };
-
     it('should create a new user successfully', async () => {
       const response = await request(app)
         .post('/api/auth/signup')
@@ -63,6 +70,10 @@ describe('Authentication API', () => {
     });
 
     it('should reject duplicate email', async () => {
+      // Create user first
+      await createTestUser();
+      
+      // Try to create again
       await request(app)
         .post('/api/auth/signup')
         .send(testUser)
@@ -104,7 +115,8 @@ describe('Authentication API', () => {
     };
 
     beforeEach(async () => {
-      // Verify the test user so they can sign in
+      // Create and verify the test user so they can sign in
+      await createTestUser();
       const user = await storage.getUserByEmail('test@example.com');
       if (user && !user.isVerified) {
         await storage.updateUser(user.id, { isVerified: true });
@@ -155,7 +167,8 @@ describe('Authentication API', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
-      // Verify the test user so they can sign in
+      // Create and verify the test user so they can sign in
+      await createTestUser();
       const user = await storage.getUserByEmail('test@example.com');
       if (user && !user.isVerified) {
         await storage.updateUser(user.id, { isVerified: true });
@@ -171,7 +184,7 @@ describe('Authentication API', () => {
     it('should refresh access token with valid refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/refresh')
-        .send({ refreshToken })
+        .set('Cookie', `refreshToken=${refreshToken}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('accessToken');
@@ -181,7 +194,7 @@ describe('Authentication API', () => {
     it('should reject invalid refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/refresh')
-        .send({ refreshToken: 'invalid-token' })
+        .set('Cookie', 'refreshToken=invalid-token')
         .expect(401);
 
       expect(response.body).toHaveProperty('message');
@@ -190,8 +203,7 @@ describe('Authentication API', () => {
     it('should reject missing refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/refresh')
-        .send({})
-        .expect(400);
+        .expect(401);
 
       expect(response.body).toHaveProperty('message');
     });
@@ -201,7 +213,8 @@ describe('Authentication API', () => {
     let accessToken: string;
 
     beforeEach(async () => {
-      // Verify the test user so they can sign in
+      // Create and verify the test user so they can sign in
+      await createTestUser();
       const user = await storage.getUserByEmail('test@example.com');
       if (user && !user.isVerified) {
         await storage.updateUser(user.id, { isVerified: true });
@@ -245,7 +258,8 @@ describe('Authentication API', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
-      // Verify the test user so they can sign in
+      // Create and verify the test user so they can sign in
+      await createTestUser();
       const user = await storage.getUserByEmail('test@example.com');
       if (user && !user.isVerified) {
         await storage.updateUser(user.id, { isVerified: true });
@@ -263,7 +277,7 @@ describe('Authentication API', () => {
       const response = await request(app)
         .post('/api/auth/logout')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ refreshToken })
+        .set('Cookie', `refreshToken=${refreshToken}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('message');
@@ -273,17 +287,22 @@ describe('Authentication API', () => {
       await request(app)
         .post('/api/auth/logout')
         .set('Authorization', `Bearer ${accessToken}`)
-        .send({ refreshToken });
+        .set('Cookie', `refreshToken=${refreshToken}`);
 
       // Try to use the refresh token
       await request(app)
         .post('/api/auth/refresh')
-        .send({ refreshToken })
+        .set('Cookie', `refreshToken=${refreshToken}`)
         .expect(401);
     });
   });
 
   describe('OTP Verification', () => {
+    beforeEach(async () => {
+      // Create test user for OTP tests
+      await createTestUser();
+    });
+
     describe('POST /api/auth/request-otp', () => {
       it('should send OTP to valid email', async () => {
         const response = await request(app)

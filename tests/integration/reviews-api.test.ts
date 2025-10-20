@@ -15,13 +15,15 @@ describe('Reviews API Integration Tests', () => {
     app = express();
     app.use(express.json());
     server = await registerRoutes(app);
+  });
 
+  beforeEach(async () => {
     // Create test user and get auth token
     const signupResponse = await request(app)
       .post('/api/auth/signup')
       .send({
-        email: `reviewer-${Date.now()}@test.com`,
-        username: `reviewer${Date.now()}`,
+        email: 'reviewer@test.com',
+        username: 'revieweruser',
         password: 'TestPass123!',
         firstName: 'Test',
         lastName: 'Reviewer',
@@ -35,7 +37,7 @@ describe('Reviews API Integration Tests', () => {
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')
       .send({
-        identifier: signupResponse.body.user?.email || `reviewer-${Date.now()}@test.com`,
+        identifier: 'reviewer@test.com',
         password: 'TestPass123!',
       });
 

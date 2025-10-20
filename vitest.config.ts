@@ -10,6 +10,8 @@ export default defineConfig({
     setupFiles: ['./client/src/__tests__/setup.ts'],
     include: ['tests/**/*.test.{ts,tsx}', 'client/src/**/*.test.{ts,tsx}'],
     exclude: ['node_modules', 'dist', '.idea', '.git', '.cache'],
+    // Run integration tests serially to avoid database race conditions
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov', 'json-summary'],

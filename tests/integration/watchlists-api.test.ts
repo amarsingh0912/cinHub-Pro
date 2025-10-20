@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import express, { type Express } from 'express';
 import { registerRoutes } from '../../server/routes';
@@ -15,13 +15,15 @@ describe('Watchlists API Integration Tests', () => {
     app = express();
     app.use(express.json());
     server = await registerRoutes(app);
+  });
 
+  beforeEach(async () => {
     // Create test user and get auth token
     const signupResponse = await request(app)
       .post('/api/auth/signup')
       .send({
-        email: `watchlist-${Date.now()}@test.com`,
-        username: `watchlist${Date.now()}`,
+        email: 'watchlist@test.com',
+        username: 'watchlistuser',
         password: 'TestPass123!',
         firstName: 'Watch',
         lastName: 'List',
@@ -35,7 +37,7 @@ describe('Watchlists API Integration Tests', () => {
     const signinResponse = await request(app)
       .post('/api/auth/signin-jwt')
       .send({
-        identifier: signupResponse.body.user?.email || `watchlist-${Date.now()}@test.com`,
+        identifier: 'watchlist@test.com',
         password: 'TestPass123!',
       });
 

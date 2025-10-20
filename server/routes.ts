@@ -471,8 +471,15 @@ export async function registerRoutes(
           .status(400)
           .json({ message: "Invalid input", errors: error.errors });
       }
+      
+      // Check for duplicate user errors
+      const errorMessage = error instanceof Error ? error.message : "Signup failed";
+      if (errorMessage.includes("already exists") || errorMessage.includes("already taken")) {
+        return res.status(409).json({ message: errorMessage });
+      }
+      
       res.status(400).json({
-        message: error instanceof Error ? error.message : "Signup failed",
+        message: errorMessage,
       });
     }
   });

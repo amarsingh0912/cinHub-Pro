@@ -29,7 +29,9 @@ describe('User Collections API', () => {
     app = express();
     app.use(express.json());
     server = await registerRoutes(app);
+  });
 
+  beforeEach(async () => {
     // Create test user and get token
     const signupResponse = await request(app)
       .post('/api/auth/signup')

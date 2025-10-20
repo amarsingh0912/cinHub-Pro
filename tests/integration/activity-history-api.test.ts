@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
 import { registerRoutes } from '../../server/routes';
@@ -35,7 +35,9 @@ describe('Activity & History API', () => {
     app = express();
     app.use(express.json());
     server = await registerRoutes(app);
+  });
 
+  beforeEach(async () => {
     // Create and sign in user
     await request(app)
       .post('/api/auth/signup')

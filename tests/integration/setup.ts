@@ -32,6 +32,7 @@ async function cleanDatabase() {
   try {
     // Delete in order to respect foreign key constraints
     // Order matters: delete child tables before parent tables
+    // CASCADE handles foreign key constraints automatically
     await db.execute(sql`TRUNCATE TABLE search_history CASCADE`);
     await db.execute(sql`TRUNCATE TABLE activity_history CASCADE`);
     await db.execute(sql`TRUNCATE TABLE viewing_history CASCADE`);
@@ -52,6 +53,7 @@ async function cleanDatabase() {
     await db.execute(sql`TRUNCATE TABLE sessions CASCADE`);
   } catch (error) {
     console.error('Error cleaning database:', error);
+    throw error; // Re-throw to ensure test failures are visible
   }
 }
 
@@ -61,6 +63,11 @@ beforeAll(async () => {
     onUnhandledRequest: 'bypass',
   });
   // Clean database before all tests to ensure clean state
+  await cleanDatabase();
+});
+
+// Clean database before each test to ensure fresh state
+beforeEach(async () => {
   await cleanDatabase();
 });
 
