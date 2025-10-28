@@ -135,7 +135,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent 
-        className="max-w-7xl w-full h-[90vh] p-0 gap-0 bg-black/98 border-border/30 backdrop-blur-xl overflow-y-auto flex flex-col"
+        className="max-w-7xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] h-[95vh] sm:h-[90vh] p-0 gap-0 bg-black/98 border-border/30 backdrop-blur-xl overflow-y-auto flex flex-col"
         data-testid="trailer-modal"
       >
         <VisuallyHidden>
@@ -147,7 +147,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-4 top-4 z-50 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+          className="absolute right-2 top-2 sm:right-4 sm:top-4 z-50 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center"
           onClick={onClose}
           aria-label="Close trailer modal"
           title="Close trailer modal"
@@ -160,13 +160,13 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-16 top-4 z-50 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+          className="absolute right-16 top-2 sm:right-16 sm:top-4 z-50 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center"
           onClick={handleFullscreen}
           aria-label="Enter fullscreen mode"
           title="Enter fullscreen mode"
           data-testid="button-fullscreen"
         >
-          <Maximize2 className="h-4 w-4" />
+          <Maximize2 className="h-5 w-5" />
         </Button>
 
         {/* Video Player */}
@@ -204,7 +204,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center"
                 onClick={goToPrevious}
                 aria-label="Previous video"
                 title="Previous video"
@@ -215,7 +215,7 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center"
                 onClick={goToNext}
                 aria-label="Next video"
                 title="Next video"
@@ -228,17 +228,17 @@ export default function TrailerModal({ isOpen, onClose, videos, title }: Trailer
 
           {/* Video Counter Overlay */}
           {hasMultipleVideos && (
-            <div className="absolute bottom-4 right-4 z-10 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-sm font-medium">
+            <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs sm:text-sm font-medium">
               {currentVideoIndex + 1} / {videos.length}
             </div>
           )}
         </div>
 
         {/* Video Info */}
-        <div className="bg-gradient-to-b from-background/98 to-background/95 backdrop-blur-md p-6 space-y-5 border-t border-border/50">
+        <div className="bg-gradient-to-b from-background/98 to-background/95 backdrop-blur-md p-4 sm:p-6 space-y-4 sm:space-y-5 border-t border-border/50">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h3 className="text-2xl font-bold text-foreground mb-3 line-clamp-2" data-testid="trailer-title">
+              <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2 sm:mb-3 line-clamp-2" data-testid="trailer-title">
                 {currentVideo.name}
               </h3>
               <div className="flex flex-wrap items-center gap-2 mb-2">

@@ -62,10 +62,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl" data-testid="search-modal">
+      <DialogContent className="max-w-2xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)]" data-testid="search-modal">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg pr-8">
+            <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             Search Movies
           </DialogTitle>
         </DialogHeader>
@@ -77,8 +77,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
               placeholder="Search for movies..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10 h-11 text-base"
               data-testid="input-search"
+              autoFocus
             />
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           </div>
@@ -90,33 +91,33 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           )}
           
           {searchResults?.results?.length > 0 && (
-            <div className="max-h-96 overflow-y-auto space-y-2" data-testid="search-results">
+            <div className="max-h-[50vh] sm:max-h-96 overflow-y-auto space-y-2" data-testid="search-results">
               {searchResults.results.slice(0, 8).map((movie: Movie) => (
                 <Link key={movie.id} href={`/movie/${movie.id}`} data-testid={`search-result-${movie.id}`}>
                   <div
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer active:bg-accent/80 min-h-[72px]"
                     onClick={handleClose}
                   >
                     {movie.poster_path ? (
                       <img
                         src={getImageUrl(movie.poster_path, 'w200')}
                         alt={movie.title}
-                        className="w-12 h-18 object-cover rounded"
+                        className="w-12 h-18 object-cover rounded flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-12 h-18 bg-muted rounded flex items-center justify-center">
+                      <div className="w-12 h-18 bg-muted rounded flex items-center justify-center flex-shrink-0">
                         <Film className="w-6 h-6 text-muted-foreground" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium truncate" data-testid={`search-title-${movie.id}`}>
+                      <h4 className="font-medium truncate text-sm sm:text-base" data-testid={`search-title-${movie.id}`}>
                         {movie.title}
                       </h4>
-                      <p className="text-sm text-muted-foreground" data-testid={`search-year-${movie.id}`}>
+                      <p className="text-xs sm:text-sm text-muted-foreground" data-testid={`search-year-${movie.id}`}>
                         {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
                       </p>
                     </div>
-                    <div className="text-sm text-muted-foreground" data-testid={`search-rating-${movie.id}`}>
+                    <div className="text-xs sm:text-sm text-muted-foreground flex-shrink-0" data-testid={`search-rating-${movie.id}`}>
                       ⭐ {movie.vote_average.toFixed(1)}
                     </div>
                   </div>
