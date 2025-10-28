@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { MovieDetails } from "@/types/movie";
 import { useToast } from "@/hooks/use-toast";
@@ -10,12 +10,14 @@ import { useMediaDetails } from "@/hooks/useMediaDetails";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import DetailsLayout from "@/components/media/details-layout";
+import RecommendationCarousel from "@/components/RecommendationCarousel";
 
 export default function MovieDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
 
   const { data: movie, isLoading: movieLoading, error: movieError, isError: isMovieError } = useMediaDetails('movie', id);
 
@@ -253,6 +255,20 @@ export default function MovieDetail() {
         addToWatchlistPending={addToWatchlistMutation.isPending}
         submitReviewPending={submitReviewMutation.isPending}
       />
+      
+      {/* Similar Movies Recommendations */}
+      {id && !movieLoading && (
+        <section className="py-12 bg-muted/20" data-testid="similar-movies-section">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RecommendationCarousel 
+              title="Similar Movies" 
+              endpoint={`/api/recs/similar/${id}`}
+              onMovieClick={(movie) => navigate(`/movie/${movie.id}`)}
+            />
+          </div>
+        </section>
+      )}
+      
       <Footer />
     </div>
   );

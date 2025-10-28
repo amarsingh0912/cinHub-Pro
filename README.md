@@ -9,6 +9,7 @@ A modern, full-stack movie and TV show discovery platform with advanced filterin
 - [Quick Start](#quick-start)
 - [Environment Setup](#environment-setup)
 - [Database Setup](#database-setup)
+- [Recommendations Service](#recommendations-service)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
 - [Deployment](#deployment)
@@ -37,6 +38,16 @@ A modern, full-stack movie and TV show discovery platform with advanced filterin
 - **User Management** - View and manage users
 - **Platform Analytics** - Track platform statistics
 - **Content Moderation** - Review and moderate user-generated content
+
+### Recommendations Engine
+- **Zero-Cost Recommendations** - Local SQLite-based recommendation system with no external API costs
+- **Trending Movies** - Algorithm-based trending scores using views, likes, and time decay
+- **Similar Movies** - Genre-based similarity recommendations for personalized discovery
+- **Personalized Suggestions** - User viewing history-based movie recommendations
+- **Precomputed Caching** - Optional performance optimization for faster response times
+- **Seamless Integration** - Fully integrated with React carousel component and API endpoints
+
+For detailed information about the recommendations system, see [RECOMMENDATIONS_README.md](./RECOMMENDATIONS_README.md)
 
 ### Technical Features
 - **Real-time Updates** - WebSocket notifications for cache job status
@@ -210,6 +221,59 @@ npm run db:push
 ```
 
 This will create all necessary tables and initial data.
+
+## 🎯 Recommendations Service
+
+CineHub includes a zero-cost, rule-based movie recommendations microservice that runs locally using SQLite. This service provides intelligent movie recommendations without requiring external APIs or services.
+
+### Features
+
+- **Trending Movies**: Algorithm-based scoring using views, likes, and time decay
+- **Similar Movies**: Genre-based similarity recommendations
+- **Personalized Recommendations**: User viewing history-based suggestions
+- **Zero External Costs**: All computation done locally with SQLite
+- **Precomputed Caching**: Optional performance optimization
+
+### Quick Setup
+
+1. **Seed the database** with sample movies and interactions:
+```bash
+cd server
+node seed.cjs
+```
+
+2. **(Optional) Precompute recommendations** for faster response times:
+```bash
+node precompute.cjs
+```
+
+3. **Start the server** - The recommendations API will be available at `/api/recs/*`
+
+### API Endpoints
+
+- `GET /api/recs/trending` - Get top 20 trending movies
+- `GET /api/recs/similar/:movieId` - Get similar movies by genre
+- `GET /api/recs/because/:userId` - Get personalized recommendations for a user
+- `GET /api/recs/health` - Check service status
+
+### Frontend Integration
+
+The `RecommendationCarousel` component is already integrated into:
+- **Home Page**: Shows trending movies from the local database
+- **Movie Detail Pages**: Shows similar movies based on genre
+
+Example usage:
+```jsx
+import RecommendationCarousel from '@/components/RecommendationCarousel';
+
+<RecommendationCarousel 
+  title="Trending Now" 
+  endpoint="/api/recs/trending"
+  onMovieClick={(movie) => navigate(`/movie/${movie.id}`)}
+/>
+```
+
+For complete documentation including customization, performance tuning, and advanced features, see [RECOMMENDATIONS_README.md](./RECOMMENDATIONS_README.md)
 
 ## 📚 API Documentation
 

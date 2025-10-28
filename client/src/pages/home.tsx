@@ -7,13 +7,15 @@ import Footer from "@/components/layout/footer";
 import MovieGrid from "@/components/movie/movie-grid";
 import MovieCardSkeleton from "@/components/movie/movie-card-skeleton";
 import MovieCard from "@/components/movie/movie-card";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Plus, Heart, Clock, Film, Star, TrendingUp, Users, Play, ArrowRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import RecommendationCarousel from "@/components/RecommendationCarousel";
 
 export default function Home() {
   const { user } = useAuth();
+  const [, navigate] = useLocation();
   
   const { data: trendingMovies, isLoading: trendingMoviesLoading } = useQuery<MovieResponse>({
     queryKey: ["/api/movies/trending"],
@@ -230,6 +232,35 @@ export default function Home() {
                   </RevealOnScroll>
                 </TabsContent>
               </Tabs>
+            </RevealOnScroll>
+          </div>
+        </section>
+
+        {/* Recommendations Section */}
+        <section className="py-20 bg-muted/30" data-testid="recommendations-section">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <RevealOnScroll options={REVEAL_PRESETS.sectionHeader}>
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 bg-purple-500/10 rounded-full px-4 py-2 mb-6">
+                  <Star className="w-5 h-5 text-purple-500" />
+                  <span className="text-sm font-medium text-purple-500">Personalized For You</span>
+                </div>
+                
+                <h2 className="text-4xl md:text-5xl font-display font-bold mb-6" data-testid="recommendations-title">
+                  Recommended Movies
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Discover movies curated just for you based on viewing patterns and popularity
+                </p>
+              </div>
+            </RevealOnScroll>
+            
+            <RevealOnScroll options={{...REVEAL_PRESETS.sectionContent, threshold: 0.1}}>
+              <RecommendationCarousel 
+                title="Trending Now" 
+                endpoint="/api/recs/trending"
+                onMovieClick={(movie) => navigate(`/movie/${movie.id}`)}
+              />
             </RevealOnScroll>
           </div>
         </section>
