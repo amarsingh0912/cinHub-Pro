@@ -6,6 +6,15 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 28, 2025:**
+- Integrated zero-cost movie recommendations microservice into CineHub frontend
+  - Added RecommendationCarousel component to home page showing trending movies from local database
+  - Added similar movies carousel to movie detail pages using genre-based recommendations
+  - Updated main README.md with comprehensive recommendations service documentation
+  - Fixed navigation to use Wouter's SPA routing (replaced window.location.href with navigate())
+  - All three recommendation endpoints verified working (trending, similar, personalized)
+  - Service uses SQLite for zero-cost local storage with better-sqlite3
+
 **October 20, 2025:**
 - Major integration test infrastructure improvements
   - Fixed database cleanup to run before each test with TRUNCATE CASCADE
