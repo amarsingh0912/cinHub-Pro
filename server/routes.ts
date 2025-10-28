@@ -383,6 +383,10 @@ export async function registerRoutes(
   const { authenticateJWT } = await import("./auth");
   app.use(authenticateJWT);
 
+  // Mount recommendations API (read-only, no CSRF required)
+  const recsRouter = (await import("./recs-api.cjs")).default;
+  app.use("/api/recs", recsRouter);
+
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
