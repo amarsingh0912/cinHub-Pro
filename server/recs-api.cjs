@@ -9,6 +9,134 @@ const fs = require('fs');
 
 const router = express.Router();
 
+// ==================== TMDB FALLBACK & BACKGROUND SYNC ====================
+
+/**
+ * Add a movie to the local database in the background
+ */
+function syncMovieToDatabase(movie) {
+  try {
+    // Check if movie already exists
+    const existing = db.prepare('SELECT id FROM movies WHERE id = ?').get(movie.id);
+    if (existing) {
+      return; // Already in database
+    }
+
+    // Insert movie into local database
+    const stmt = db.prepare(`
+      INSERT INTO movies (id, title, year, genres, description, poster_url, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+    `);
+    
+    stmt.run(
+      movie.id,
+      movie.title,
+      movie.year,
+      movie.genres,
+      movie.description,
+      movie.poster_url
+    );
+
+    console.log(`✓ Synced movie to local DB: ${movie.title} (${movie.id})`);
+  } catch (error) {
+    console.error('Error syncing movie to database:', error);
+  }
+}
+
+/**
+ * Fetch movie details from TMDB and sync to local database
+ */
+async function fetchAndSyncMovieFromTMDB(movieId) {
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=en-US`
+    );
+    
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    
+    const movie = {
+      id: data.id,
+      title: data.title,
+      poster_url: data.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
+        : null,
+      year: data.release_date ? new Date(data.release_date).getFullYear() : null,
+      genres: (data.genres || []).map(g => g.name).join(','),
+      description: data.overview || '',
+      views: 0,
+      likes: 0,
+      avg_rating: data.vote_average || null
+    };
+
+    // Sync to database in background (non-blocking)
+    setImmediate(() => syncMovieToDatabase(movie));
+
+    return movie;
+  } catch (error) {
+    console.error('Error fetching movie from TMDB:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch similar movies from TMDB API as fallback
+ */
+async function fetchSimilarFromTMDB(movieId) {
+  const apiKey = process.env.TMDB_API_KEY;
+  if (!apiKey) {
+    return [];
+  }
+
+  try {
+    // First, sync the source movie to database
+    await fetchAndSyncMovieFromTMDB(movieId);
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/similar?api_key=${apiKey}&language=en-US&page=1`
+    );
+    
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json();
+    
+    // Transform TMDB results to match our format
+    const movies = (data.results || []).slice(0, 12).map(movie => ({
+      id: movie.id,
+      title: movie.title,
+      poster_url: movie.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+        : null,
+      year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+      genres: movie.genre_ids ? movie.genre_ids.join(',') : '',
+      description: movie.overview || '',
+      views: 0,
+      likes: 0,
+      avg_rating: movie.vote_average || null
+    }));
+
+    // Sync similar movies to database in background (non-blocking)
+    setImmediate(() => {
+      movies.forEach(movie => syncMovieToDatabase(movie));
+    });
+
+    return movies;
+  } catch (error) {
+    console.error('Error fetching from TMDB:', error);
+    return [];
+  }
+}
+
 // Initialize SQLite database
 const dbPath = path.join(__dirname, 'cinehub.db');
 const db = new Database(dbPath);
@@ -144,8 +272,9 @@ router.get('/trending', (req, res) => {
  * GET /api/recs/similar/:movieId
  * Returns top 12 movies with overlapping genres
  * Excludes the source movie, ordered by popularity (likes + views)
+ * Falls back to TMDB if movie not found in local database
  */
-router.get('/similar/:movieId', (req, res) => {
+router.get('/similar/:movieId', async (req, res) => {
   try {
     const movieId = parseInt(req.params.movieId);
     
@@ -170,12 +299,16 @@ router.get('/similar/:movieId', (req, res) => {
     // Compute similar on-the-fly
     const sourceMovie = getMovieDetails(movieId);
     
+    // If movie not in local database, use TMDB fallback
     if (!sourceMovie) {
-      return res.status(404).json({ error: 'Movie not found' });
+      const tmdbSimilar = await fetchSimilarFromTMDB(movieId);
+      return res.json(tmdbSimilar);
     }
     
     if (!sourceMovie.genres) {
-      return res.json([]);
+      // Still try TMDB fallback if no genres in local DB
+      const tmdbSimilar = await fetchSimilarFromTMDB(movieId);
+      return res.json(tmdbSimilar);
     }
     
     // Find movies with overlapping genres using LIKE
@@ -197,6 +330,12 @@ router.get('/similar/:movieId', (req, res) => {
       .sort((a, b) => b.popularity_score - a.popularity_score)
       .slice(0, 12)
       .map(formatMovie);
+    
+    // If no similar movies found in local DB, use TMDB fallback
+    if (similar.length === 0) {
+      const tmdbSimilar = await fetchSimilarFromTMDB(movieId);
+      return res.json(tmdbSimilar);
+    }
     
     res.json(similar);
     
