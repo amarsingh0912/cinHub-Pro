@@ -1,0 +1,117 @@
+Pasted-Goal-Add-a-zero-cost-rule-based-recommendations-microservice-frontend-integration-into-the-exist-1761673098910_1761673098910.txt
+Goal: Add a zero-cost, rule-based recommendations microservice + frontend integration into the existing cineHub repo running on Replit. It must use SQLite (local), an Express API that exposes three endpoints (/api/recs/trending, /api/recs/similar/:movieId, /api/recs/because/:userId), and a React carousel component that calls these endpoints. Precompute a small movie_popularity table and include a seed script with 10 sample movies and a few interactions so the endpoints return meaningful data. Use the project's default Tailwind-based CSS theme for styling (if available) and keep code modular and ready to integrate into the existing cineHub codebase.
+
+Deliverables (files to create / update):
+
+server/package.json (start script)
+
+server/recs-api.js (Express + better-sqlite3 API)
+
+server/schema.sql (schema for movies, interactions, movie_popularity, precomputed_recs)
+
+server/seed.js (seed 10 movies, populate popularity & interactions)
+
+server/precompute.js (optional script to compute and store precomputed_recs)
+
+client/src/components/RecommendationCarousel.jsx (React component)
+
+README.md (how to run locally on Replit + example curl commands)
+
+Requirements & details:
+
+DB & schema
+
+Use better-sqlite3 (sync, simple) and DB file cinehub.db in server/.
+
+movies table: id, title, year, genres, directors, cast, description, poster_url, created_at.
+
+interactions table: id, user_id, movie_id, event_type, rating, created_at.
+
+movie_popularity table: movie_id, views, likes, last_updated.
+
+precomputed_recs table (key, movie_ids, last_updated) — optional but preferred for performance.
+
+API endpoints
+
+GET /api/recs/trending — return top 20 by trending_score (score formula: (likes*2 + views) / (age_hours + 2)).
+
+GET /api/recs/similar/:movieId — return top 12 movies with overlapping genres (simple LIKE on CSV genres) excluding the movieId; order by popularity.
+
+GET /api/recs/because/:userId — find user's last-viewed movie (most recent view) and return similar to that movie; exclude movies the user already watched.
+
+All endpoints must return JSON arrays of movie objects with at least id, title, poster_url, year, genres.
+
+Seed data
+
+seed.js should create 10 movies (cover 3–4 genres), add ~20 interactions across 3 sample user_ids, and populate movie_popularity derived from interactions.
+
+Precompute
+
+precompute.js should compute precomputed_recs for each movie using the similar logic and store movie_ids as comma-separated string (this file should be runnable manually and also used by the API if precomputed_recs exists).
+
+Server
+
+Expose server on PORT environment var or default 4000. Provide a start script in package.json.
+
+Add CORS to allow requests from the frontend.
+
+React component
+
+RecommendationCarousel.jsx:
+
+Props: title, endpoint.
+
+Fetch data from endpoint on mount, show horizontal scrollable poster cards (image + title).
+
+Use the project's Tailwind CSS classes or fall back to a clean inline style if Tailwind is unavailable.
+
+Provide a small loading skeleton while fetching and an empty-state fallback.
+
+Run / test instructions
+
+README should include:
+
+cd server && npm install && node seed.js && node precompute.js && npm start
+
+Example curl tests:
+
+curl http://localhost:4000/api/recs/trending
+
+curl http://localhost:4000/api/recs/similar/1
+
+curl http://localhost:4000/api/recs/because/user123
+
+Integration notes
+
+Show how to import and use RecommendationCarousel inside an example movie page:
+
+<RecommendationCarousel title="Because you watched" endpoint={`http://localhost:4000/api/recs/because/${userId}`} />
+<RecommendationCarousel title="Similar" endpoint={`http://localhost:4000/api/recs/similar/${movieId}`} />
+<RecommendationCarousel title="Trending now" endpoint="http://localhost:4000/api/recs/trending" />
+
+
+Suggest caching (in-memory or use precomputed_recs) for production.
+
+Security & privacy
+
+Seed user IDs should be non-sensitive sample values (e.g., user_1, user_2). Log minimal data and show where to add retention rules.
+
+Quality checks / tests
+
+Add a simple test.sh script (or bash commands in README) that runs the three curl commands and ensures non-empty JSON arrays are returned (exit non-zero if empty — simple smoke test).
+
+Implementation notes for the developer / Replit runner:
+
+Keep all server files under server/ and client changes under client/ or client/src/components/.
+
+Use plain JavaScript (no TypeScript) to keep the setup quick.
+
+Avoid external paid APIs or services. Use only npm packages: express, better-sqlite3, cors, nodemon (dev), and for client: React + Tailwind (if existing).
+
+Make sure the server gracefully falls back to computing similar on the fly if precomputed_recs is empty.
+
+Add comments in each file explaining the logic and where to change scoring weights later (likes vs views vs age).
+
+End of prompt.
+
+If you finish, please commit with message: "feat(recs): add rule-based recommendations microservice + react carousel (seeded sample data)" and provide the README with run/test instructions.
