@@ -275,9 +275,16 @@ import RecommendationCarousel from '@/components/RecommendationCarousel';
 
 For complete documentation including customization, performance tuning, and advanced features, see [RECOMMENDATIONS_README.md](./RECOMMENDATIONS_README.md)
 
-## 📚 API Documentation
+## 📚 Documentation
 
-Comprehensive API documentation is available in [API.md](./docs/API.md)
+Comprehensive documentation is available in the [`/docs`](./docs) folder:
+
+- **[Complete Documentation Index](./docs/README.md)** - Start here for all documentation
+- **[API Reference](./docs/API.md)** - Complete API documentation
+- **[Architecture Guide](./docs/ARCHITECTURE.md)** - System design and architecture
+- **[Database Schema](./docs/DATABASE_SCHEMA.md)** - Database documentation with ERD diagrams
+- **[Folder Structure](./docs/FOLDER_STRUCTURE.md)** - Project organization guide
+- **[Future Enhancements](./docs/FUTURE_ENHANCEMENTS.md)** - Roadmap and planned features
 
 ### Key Endpoints
 

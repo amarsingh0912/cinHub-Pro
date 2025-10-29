@@ -12,7 +12,9 @@ Complete guide to all project documentation.
 
 - **[Architecture](ARCHITECTURE.md)** - System architecture, data flow, and design patterns
 - **[API Documentation](API.md)** - Complete REST API reference with examples
-- **[Database Schema](../shared/schema.ts)** - Database models and relationships
+- **[Database Schema](DATABASE_SCHEMA.md)** - Complete database documentation with ERD diagrams
+- **[Folder Structure](FOLDER_STRUCTURE.md)** - Project organization and file structure guide
+- **[Shared Schema](../shared/schema.ts)** - Database models and TypeScript types
 
 ## 🧪 Testing
 
@@ -258,9 +260,10 @@ npm start            # Start production server
 - **Discord**: [Join our community](https://discord.gg/cinehubpro)
 - **Email**: support@cinehubpro.com
 
-## 📝 Change Log
+## 📝 Change Log & Roadmap
 
-See [CHANGELOG.md](../CHANGELOG.md) for version history and release notes.
+- **[Changelog](../CHANGELOG.md)** - Version history and release notes
+- **[Future Enhancements](FUTURE_ENHANCEMENTS.md)** - Roadmap and planned features
 
 ## 📄 License
 
