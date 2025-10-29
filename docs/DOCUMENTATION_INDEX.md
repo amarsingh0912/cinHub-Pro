@@ -11,6 +11,7 @@ Complete guide to all project documentation.
 ## 🏗️ Architecture & Design
 
 - **[Architecture](ARCHITECTURE.md)** - System architecture, data flow, and design patterns
+- **[Application Flow](APPLICATION_FLOW.md)** - Complete execution flow diagrams (Mermaid) ⭐ NEW
 - **[API Documentation](API.md)** - Complete REST API reference with examples
 - **[Database Schema](DATABASE_SCHEMA.md)** - Complete database documentation with ERD diagrams
 - **[Folder Structure](FOLDER_STRUCTURE.md)** - Project organization and file structure guide

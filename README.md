@@ -280,6 +280,7 @@ For complete documentation including customization, performance tuning, and adva
 Comprehensive documentation is available in the [`/docs`](./docs) folder:
 
 - **[Complete Documentation Index](./docs/README.md)** - Start here for all documentation
+- **[Application Flow Diagrams](./docs/APPLICATION_FLOW.md)** - Visual execution flow with Mermaid diagrams ⭐
 - **[API Reference](./docs/API.md)** - Complete API documentation
 - **[Architecture Guide](./docs/ARCHITECTURE.md)** - System design and architecture
 - **[Database Schema](./docs/DATABASE_SCHEMA.md)** - Database documentation with ERD diagrams

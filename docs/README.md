@@ -12,6 +12,7 @@ Welcome to the comprehensive documentation for CineHub Pro - a modern, full-stac
 ### For Developers
 - **[Developer Guide](DEVELOPER_GUIDE.md)** - Development workflow and best practices
 - **[Architecture](ARCHITECTURE.md)** - System design and technical architecture
+- **[Application Flow](APPLICATION_FLOW.md)** - Complete execution flow with Mermaid diagrams ⭐
 - **[Folder Structure](FOLDER_STRUCTURE.md)** - Complete project organization guide
 - **[Code Documentation](CODE_DOCUMENTATION.md)** - Coding standards and JSDoc guidelines
 - **[API Reference](API.md)** - Complete REST API documentation
