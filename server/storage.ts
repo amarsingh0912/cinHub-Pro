@@ -131,7 +131,6 @@ export interface IStorage {
     totalWatchlists: number;
   }>;
   findAdminUser(): Promise<User | undefined>;
-  updateUser(userId: string, updates: Partial<InsertUser>): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {

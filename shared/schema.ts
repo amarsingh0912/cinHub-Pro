@@ -93,7 +93,7 @@ export const socialAccounts = pgTable("social_accounts", {
 // User movie watchlists
 export const watchlists = pgTable("watchlists", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   isPublic: boolean("is_public").default(false),
@@ -104,7 +104,7 @@ export const watchlists = pgTable("watchlists", {
 // Individual watchlist items
 export const watchlistItems = pgTable("watchlist_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  watchlistId: varchar("watchlist_id").notNull(),
+  watchlistId: varchar("watchlist_id").notNull().references(() => watchlists.id, { onDelete: "cascade" }),
   mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
   mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
   mediaTitle: varchar("media_title").notNull(),
@@ -116,7 +116,7 @@ export const watchlistItems = pgTable("watchlist_items", {
 // User media favorites
 export const favorites = pgTable("favorites", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
   mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
   mediaTitle: varchar("media_title").notNull(),
@@ -128,7 +128,7 @@ export const favorites = pgTable("favorites", {
 // User media ratings and reviews
 export const reviews = pgTable("reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
   mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
   rating: integer("rating").notNull(), // 1-10 scale
@@ -143,7 +143,7 @@ export const reviews = pgTable("reviews", {
 // User viewing history - tracks what users have watched
 export const viewingHistory = pgTable("viewing_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   mediaType: varchar("media_type").notNull(), // 'movie' or 'tv'
   mediaId: integer("media_id").notNull(), // TMDB movie or TV ID
   mediaTitle: varchar("media_title").notNull(),
@@ -158,7 +158,7 @@ export const viewingHistory = pgTable("viewing_history", {
 // User activity history - tracks general user activities
 export const activityHistory = pgTable("activity_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   activityType: varchar("activity_type").notNull(), // 'favorite_added', 'review_posted', 'watchlist_created', etc.
   entityType: varchar("entity_type"), // 'movie', 'tv', 'watchlist', 'review'
   entityId: varchar("entity_id"), // ID of the related entity
@@ -171,7 +171,7 @@ export const activityHistory = pgTable("activity_history", {
 // User search history - tracks search queries
 export const searchHistory = pgTable("search_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   query: varchar("query").notNull(),
   searchType: varchar("search_type").notNull(), // 'movie', 'tv', 'person', 'multi'
   resultsCount: integer("results_count"), // Number of results returned
