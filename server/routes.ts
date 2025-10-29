@@ -212,7 +212,7 @@ const upload = multer({
   storage: multerStorage,
   fileFilter: (req, file, cb) => {
     // Check MIME type and extension
-    const allowedExtensions = allowedImageTypes[file.mimetype];
+    const allowedExtensions = allowedImageTypes[file.mimetype as keyof typeof allowedImageTypes];
     const fileExt = path.extname(file.originalname).toLowerCase();
 
     if (allowedExtensions && allowedExtensions.includes(fileExt)) {
@@ -384,7 +384,7 @@ export async function registerRoutes(
   app.use(authenticateJWT);
 
   // Mount recommendations API (read-only, no CSRF required)
-  const recsRouter = (await import("./recs-api.cjs")).default;
+  const recsRouter = (await import("./recs-api.cjs" as any)).default;
   app.use("/api/recs", recsRouter);
 
   // Auth routes
@@ -2402,11 +2402,13 @@ export async function registerRoutes(
         });
       }
 
-      // Validate request body, explicitly omitting protected fields
-      const validatedData = insertWatchlistSchema
-        .omit({ id: true, userId: true, createdAt: true, updatedAt: true })
-        .partial()
-        .parse(req.body);
+      // Validate request body - only allow updating name, description, and isPublic
+      const updateSchema = z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        isPublic: z.boolean().optional(),
+      });
+      const validatedData = updateSchema.parse(req.body);
       const watchlist = await storage.updateWatchlist(
         watchlistId,
         validatedData,
