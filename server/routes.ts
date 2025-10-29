@@ -387,6 +387,12 @@ export async function registerRoutes(
   const recsRouter = (await import("./recs-api.cjs" as any)).default;
   app.use("/api/recs", recsRouter);
 
+  // Start background TMDB sync service
+  const { startPeriodicSync } = await import("./tmdb-sync.cjs" as any);
+  const syncIntervalHours = parseInt(process.env.TMDB_SYNC_INTERVAL_HOURS || '6');
+  startPeriodicSync(syncIntervalHours);
+  console.log(`🔄 TMDB background sync started (runs every ${syncIntervalHours} hours)`);
+
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {

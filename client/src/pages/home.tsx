@@ -166,106 +166,88 @@ export default function Home() {
                   Trending This Week
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                  Discover what everyone's watching - from blockbuster hits to binge-worthy series
+                  {isAuthenticated 
+                    ? "Discover what's trending based on community interactions and views"
+                    : "Discover what everyone's watching - from blockbuster hits to binge-worthy series"
+                  }
                 </p>
               </div>
             </RevealOnScroll>
             
-            <RevealOnScroll options={{...REVEAL_PRESETS.sectionContent, threshold: 0.1}}>
-              <Tabs defaultValue="movies" className="w-full" data-testid="trending-tabs">
-                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
-                  <TabsTrigger value="movies" data-testid="tab-movies">Movies</TabsTrigger>
-                  <TabsTrigger value="tv" data-testid="tab-tv">TV Shows</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="movies" data-testid="movies-tab-content">
-                  {trendingMoviesLoading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                      {Array.from({ length: 12 }, (_, index) => (
-                        <MovieCardSkeleton key={index} />
-                      ))}
-                    </div>
-                  ) : trendingMovies?.results && (
-                    <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                        {trendingMovies.results.slice(0, 12).map((movie) => (
-                          <MovieCard key={`movie-${movie.id}`} movie={movie} mediaType="movie" />
-                        ))}
-                      </div>
-                    </RevealOnScroll>
-                  )}
-                  <RevealOnScroll options={{...REVEAL_PRESETS.fadeIn, delay: 800}}>
-                    <div className="text-center mt-8">
-                      <Link href="/movies?category=trending">
-                        <Button variant="outline" data-testid="button-view-all-trending-movies">
-                          View All Trending Movies
-                        </Button>
-                      </Link>
-                    </div>
-                  </RevealOnScroll>
-                </TabsContent>
-                
-                <TabsContent value="tv" data-testid="tv-tab-content">
-                  {trendingTVShowsLoading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                      {Array.from({ length: 12 }, (_, index) => (
-                        <MovieCardSkeleton key={index} />
-                      ))}
-                    </div>
-                  ) : trendingTVShows?.results && (
-                    <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                        {trendingTVShows.results.slice(0, 12).map((show) => (
-                          <MovieCard key={`tv-${show.id}`} movie={show} mediaType="tv" />
-                        ))}
-                      </div>
-                    </RevealOnScroll>
-                  )}
-                  <RevealOnScroll options={{...REVEAL_PRESETS.fadeIn, delay: 800}}>
-                    <div className="text-center mt-8">
-                      <Link href="/tv-shows?category=trending">
-                        <Button variant="outline" data-testid="button-view-all-trending-tv">
-                          View All Trending TV Shows
-                        </Button>
-                      </Link>
-                    </div>
-                  </RevealOnScroll>
-                </TabsContent>
-              </Tabs>
-            </RevealOnScroll>
-          </div>
-        </section>
-
-        {/* Recommendations Section - Only for logged-in users */}
-        {isAuthenticated && (
-          <section className="py-20 bg-muted/30" data-testid="recommendations-section">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <RevealOnScroll options={REVEAL_PRESETS.sectionHeader}>
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 bg-purple-500/10 rounded-full px-4 py-2 mb-6">
-                    <Star className="w-5 h-5 text-purple-500" />
-                    <span className="text-sm font-medium text-purple-500">Personalized For You</span>
-                  </div>
-                  
-                  <h2 className="text-4xl md:text-5xl font-display font-bold mb-6" data-testid="recommendations-title">
-                    Recommended Movies
-                  </h2>
-                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                    Discover movies curated just for you based on viewing patterns and popularity
-                  </p>
-                </div>
-              </RevealOnScroll>
-              
+            {isAuthenticated ? (
               <RevealOnScroll options={{...REVEAL_PRESETS.sectionContent, threshold: 0.1}}>
                 <RecommendationCarousel 
-                  title="Trending Now" 
+                  title="Trending Movies from Our Community" 
                   endpoint="/api/recs/trending"
-                  onMovieClick={(movie) => navigate(`/movie/${movie.id}`)}
+                  onMovieClick={(movie: any) => navigate(`/movie/${movie.id}`)}
                 />
               </RevealOnScroll>
-            </div>
-          </section>
-        )}
+            ) : (
+              <RevealOnScroll options={{...REVEAL_PRESETS.sectionContent, threshold: 0.1}}>
+                <Tabs defaultValue="movies" className="w-full" data-testid="trending-tabs">
+                  <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
+                    <TabsTrigger value="movies" data-testid="tab-movies">Movies</TabsTrigger>
+                    <TabsTrigger value="tv" data-testid="tab-tv">TV Shows</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="movies" data-testid="movies-tab-content">
+                    {trendingMoviesLoading ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {Array.from({ length: 12 }, (_, index) => (
+                          <MovieCardSkeleton key={index} />
+                        ))}
+                      </div>
+                    ) : trendingMovies?.results && (
+                      <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                          {trendingMovies.results.slice(0, 12).map((movie) => (
+                            <MovieCard key={`movie-${movie.id}`} movie={movie} mediaType="movie" />
+                          ))}
+                        </div>
+                      </RevealOnScroll>
+                    )}
+                    <RevealOnScroll options={{...REVEAL_PRESETS.fadeIn, delay: 800}}>
+                      <div className="text-center mt-8">
+                        <Link href="/movies?category=trending">
+                          <Button variant="outline" data-testid="button-view-all-trending-movies">
+                            View All Trending Movies
+                          </Button>
+                        </Link>
+                      </div>
+                    </RevealOnScroll>
+                  </TabsContent>
+                  
+                  <TabsContent value="tv" data-testid="tv-tab-content">
+                    {trendingTVShowsLoading ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {Array.from({ length: 12 }, (_, index) => (
+                          <MovieCardSkeleton key={index} />
+                        ))}
+                      </div>
+                    ) : trendingTVShows?.results && (
+                      <RevealOnScroll options={REVEAL_PRESETS.staggeredFadeIn}>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                          {trendingTVShows.results.slice(0, 12).map((show) => (
+                            <MovieCard key={`tv-${show.id}`} movie={show} mediaType="tv" />
+                          ))}
+                        </div>
+                      </RevealOnScroll>
+                    )}
+                    <RevealOnScroll options={{...REVEAL_PRESETS.fadeIn, delay: 800}}>
+                      <div className="text-center mt-8">
+                        <Link href="/tv-shows?category=trending">
+                          <Button variant="outline" data-testid="button-view-all-trending-tv">
+                            View All Trending TV Shows
+                          </Button>
+                        </Link>
+                      </div>
+                    </RevealOnScroll>
+                  </TabsContent>
+                </Tabs>
+              </RevealOnScroll>
+            )}
+          </div>
+        </section>
 
         {/* Community & Features Section */}
         <section className="py-20 relative overflow-hidden" data-testid="community-section">

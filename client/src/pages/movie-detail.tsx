@@ -256,14 +256,14 @@ export default function MovieDetail() {
         submitReviewPending={submitReviewMutation.isPending}
       />
       
-      {/* Similar Movies Recommendations */}
-      {id && !movieLoading && (
+      {/* Similar Movies Recommendations - Only visible when logged in */}
+      {id && !movieLoading && isAuthenticated && (
         <section className="py-12 bg-muted/20" data-testid="similar-movies-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <RecommendationCarousel 
               title="Similar Movies" 
               endpoint={`/api/recs/similar/${id}`}
-              onMovieClick={(movie) => navigate(`/movie/${movie.id}`)}
+              onMovieClick={(movie: any) => navigate(`/movie/${movie.id}`)}
             />
           </div>
         </section>

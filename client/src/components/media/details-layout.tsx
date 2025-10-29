@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useCacheStatus } from "@/hooks/useCacheStatus";
 import { useOfflineDetection } from "@/hooks/useOfflineDetection";
+import { useQuery } from "@tanstack/react-query";
 import type { MovieDetails, TVShowDetails } from "@/types/movie";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -208,14 +209,47 @@ export default function DetailsLayout({
   
   const hasTrailer = trailers.length > 0;
 
-  // Similar content - normalize between movie and TV
-  const similarContent = type === 'movie' 
-    ? (data as MovieDetails).similar?.results || []
-    : (data as TVShowDetails).similar?.results || [];
+  // Fetch similar movies from local DB when logged in
+  const { data: localSimilarMovies } = useQuery<any[]>({
+    queryKey: ["/api/recs/similar", data?.id?.toString() || ""],
+    enabled: !!data?.id && isAuthenticated && type === 'movie',
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
 
-  const recommendations = type === 'movie'
-    ? (data as MovieDetails).recommendations?.results || []
-    : (data as TVShowDetails).recommendations?.results || [];
+  // Fetch recommended movies from trending for logged in users
+  const { data: localTrendingMovies } = useQuery<any[]>({
+    queryKey: ["/api/recs/trending"],
+    enabled: isAuthenticated && type === 'movie',
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  // Similar content - use local DB when logged in for movies, otherwise use TMDB data
+  const similarContent = isAuthenticated && type === 'movie' && localSimilarMovies
+    ? localSimilarMovies.map((movie: any) => ({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_url ? movie.poster_url.replace('https://image.tmdb.org/t/p/w500', '') : null,
+        release_date: movie.year ? `${movie.year}-01-01` : null,
+        vote_average: movie.avg_rating || 0,
+        overview: movie.description || ''
+      }))
+    : type === 'movie' 
+      ? (data as MovieDetails).similar?.results || []
+      : (data as TVShowDetails).similar?.results || [];
+
+  // Recommendations - use trending from local DB for logged in users, otherwise use TMDB
+  const recommendations = isAuthenticated && type === 'movie' && localTrendingMovies
+    ? localTrendingMovies.slice(0, 12).map((movie: any) => ({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_url ? movie.poster_url.replace('https://image.tmdb.org/t/p/w500', '') : null,
+        release_date: movie.year ? `${movie.year}-01-01` : null,
+        vote_average: movie.avg_rating || 0,
+        overview: movie.description || ''
+      }))
+    : type === 'movie'
+      ? (data as MovieDetails).recommendations?.results || []
+      : (data as TVShowDetails).recommendations?.results || [];
 
   const handleSubmitReview = () => {
     if (!reviewText.trim() || !reviewRating) return;
@@ -804,55 +838,57 @@ export default function DetailsLayout({
             </TabsContent>
           </Tabs>
 
-          {/* Always Visible Similar & Recommended Section */}
-          <div className="mt-16">
-            <Tabs defaultValue="similar" className="w-full">
-              <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid grid-cols-2 w-fit">
-                  <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar">
-                    <Film className="w-4 h-4" />
-                    Similar
-                  </TabsTrigger>
-                  <TabsTrigger value="recommended" className="flex items-center gap-2" data-testid="tab-recommended">
-                    <Star className="w-4 h-4" />
-                    Recommended
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+          {/* Similar & Recommended Section - Only visible when logged in */}
+          {isAuthenticated && (
+            <div className="mt-16">
+              <Tabs defaultValue="similar" className="w-full">
+                <div className="flex items-center justify-between mb-6">
+                  <TabsList className="grid grid-cols-2 w-fit">
+                    <TabsTrigger value="similar" className="flex items-center gap-2" data-testid="tab-similar">
+                      <Film className="w-4 h-4" />
+                      Similar
+                    </TabsTrigger>
+                    <TabsTrigger value="recommended" className="flex items-center gap-2" data-testid="tab-recommended">
+                      <Star className="w-4 h-4" />
+                      Recommended
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              {/* Similar Content Tab */}
-              <TabsContent value="similar" className="mt-0" data-testid="content-similar">
-                {similarContent.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
-                    {similarContent.slice(0, 12).map((item: any) => (
-                      <MovieCard key={item.id} movie={item} mediaType={type} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="no-similar">
-                    <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No similar {type === 'movie' ? 'movies' : 'TV shows'} available.</p>
-                  </div>
-                )}
-              </TabsContent>
+                {/* Similar Content Tab */}
+                <TabsContent value="similar" className="mt-0" data-testid="content-similar">
+                  {similarContent.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="similar-grid">
+                      {similarContent.slice(0, 12).map((item: any) => (
+                        <MovieCard key={item.id} movie={item} mediaType={type} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12" data-testid="no-similar">
+                      <Film className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No similar {type === 'movie' ? 'movies' : 'TV shows'} available.</p>
+                    </div>
+                  )}
+                </TabsContent>
 
-              {/* Recommended Content Tab */}
-              <TabsContent value="recommended" className="mt-0" data-testid="content-recommended">
-                {recommendations.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
-                    {recommendations.slice(0, 12).map((item: any) => (
-                      <MovieCard key={item.id} movie={item} mediaType={type} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12" data-testid="no-recommendations">
-                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">No recommendations available.</p>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
+                {/* Recommended Content Tab */}
+                <TabsContent value="recommended" className="mt-0" data-testid="content-recommended">
+                  {recommendations.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4" data-testid="recommendations-grid">
+                      {recommendations.slice(0, 12).map((item: any) => (
+                        <MovieCard key={item.id} movie={item} mediaType={type} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12" data-testid="no-recommendations">
+                      <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No recommendations available.</p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
         </div>
       </section>
 
