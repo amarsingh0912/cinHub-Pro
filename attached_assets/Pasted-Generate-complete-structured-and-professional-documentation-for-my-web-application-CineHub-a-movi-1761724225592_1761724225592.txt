@@ -1,0 +1,16 @@
+Generate complete, structured, and professional documentation for my web application CineHub, a movie streaming and recommendation platform similar to Netflix or the Vodi theme. The documentation should include all technical, architectural, and user-facing aspects. Organize the output into multiple well-formatted markdown documents, suitable for a GitHub project’s /docs folder. Include:
+	1.	Project Overview – mission, features, and technology stack (React/Angular frontend, Node/Java backend, database, APIs, etc.).
+	2.	Architecture Diagram and Explanation – high-level app architecture, modules (UI, API, DB, Recommendation Engine, Auth), and component-level structure.
+	3.	Setup Guide – step-by-step instructions for local setup, installation, environment variables, and running frontend/backend servers.
+	4.	Folder Structure Documentation – describe each folder (components, pages, hooks, utils, API, assets, etc.) and its purpose.
+	5.	API Documentation – detailed REST endpoints, request/response examples, authentication mechanism, and error handling format.
+	6.	Database Schema – entity relationship diagrams, table structure, and migration notes.
+	7.	AI Recommendation Engine – explain how recommendations are generated, data sources, algorithms (e.g., collaborative/content-based filtering), and how to implement a free AI API integration.
+	8.	Testing Documentation – how to run npm test, structure of test files, writing new test cases, CI/CD integration, and coverage reporting.
+	9.	Deployment Guide – instructions for deploying CineHub to AWS EC2 (with .pem/.ppk), GitHub Actions workflow, and environment setup for production.
+	10.	Contributing Guidelines – how new developers can contribute, branching conventions, pull request rules, and coding standards.
+	11.	User Guide – explain how end users interact with CineHub (search, filter, watchlist, recommendations, etc.).
+	12.	Changelog and Future Enhancements – maintain a versioned changelog and list upcoming planned features (AI recommendations, dark/light themes, etc.).
+	13.	License and Credits – open-source license type, contributor credits, and acknowledgment of tools/resources used.
+
+Write the documentation using clear headings, code examples, diagrams (in Mermaid if possible), and markdown formatting. Ensure the tone is professional, developer-friendly, and suitable for GitHub Pages or Notion export.
