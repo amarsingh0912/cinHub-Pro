@@ -6,6 +6,22 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 29, 2025 (Local Recommendations Integration):**
+- Integrated local SQLite-based recommendations database with CineHub Pro
+  - **Home Page:** Authenticated users see trending movies from local DB via RecommendationCarousel component
+  - **Movie Details Page:** 
+    - Similar tab fetches genre-based recommendations from `/api/recs/similar/:movieId`
+    - Recommended tab shows trending movies from `/api/recs/trending`
+    - Non-authenticated users do not see the similar movies carousel section
+  - **Background Sync Service:** Created `tmdb-sync.cjs` that syncs trending content from TMDB to local DB
+    - Runs automatically every 6 hours (configurable via TMDB_SYNC_INTERVAL_HOURS env var)
+    - Syncs both trending movies and TV shows
+    - Updates existing entries and adds new ones
+    - Initial sync completed successfully with 39 items
+  - Created TypeScript declaration file for RecommendationCarousel to support TypeScript integration
+  - All queries use proper TanStack Query array format with cache invalidation support
+  - Zero TypeScript errors after implementation
+
 **October 29, 2025 (Bug Fixes):**
 - Fixed critical database integrity issues by adding foreign key constraints
   - Added cascading delete constraints to watchlists, favorites, reviews, viewingHistory, activityHistory, and searchHistory tables
