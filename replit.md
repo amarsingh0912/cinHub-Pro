@@ -6,6 +6,19 @@ CineHub Pro is a modern, full-stack movie and TV show discovery platform built w
 
 ## Recent Changes
 
+**October 29, 2025 (Bug Fixes):**
+- Fixed critical database integrity issues by adding foreign key constraints
+  - Added cascading delete constraints to watchlists, favorites, reviews, viewingHistory, activityHistory, and searchHistory tables
+  - Ensures data consistency when users are deleted (all related data is automatically removed)
+  - Applied database migration successfully with `npm run db:push`
+- Resolved TypeScript compilation errors
+  - Fixed type safety in file upload MIME type validation
+  - Corrected watchlist update schema validation
+  - Added missing type definitions for cookie-parser and compression packages
+- Code quality improvements
+  - Removed duplicate `updateUser` method declaration in IStorage interface
+  - All LSP diagnostics resolved (zero TypeScript errors)
+
 **October 28, 2025 (Mobile Optimization):**
 - Implemented comprehensive mobile and tablet optimizations across CineHub Pro
   - **Dialog & Modal Components:** Updated all dialogs with mobile-responsive widths, proper padding, and max-heights for small screens
