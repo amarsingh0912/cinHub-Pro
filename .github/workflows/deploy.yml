@@ -26,77 +26,102 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
       - name: Create deployment archive
         run: |
           tar -czf deployment.tar.gz \
             dist/ \
             package.json \
             package-lock.json \
-            node_modules/ \
-            uploads/ \
             drizzle.config.ts \
             shared/ \
-            server/ \
-            --exclude=node_modules/.cache
+            server/
 
       - name: Deploy to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          APP_DIR: ${{ secrets.APP_DIR || '/home/ec2-user/app' }}
+          EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
+          APP_DIR: ${{ secrets.APP_DIR || '/var/www/cinehub-pro' }}
+          APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
         run: |
           # Copy deployment archive to server
-          scp -i private_key.pem \
+          scp -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             deployment.tar.gz ${EC2_USER}@${EC2_HOST}:~/
 
           # Deploy on server
-          ssh -i private_key.pem \
+          ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+            ${EC2_USER}@${EC2_HOST} << ENDSSH
+            set -e
             
             # Create app directory if it doesn't exist
-            mkdir -p ${APP_DIR}
+            sudo mkdir -p ${APP_DIR}
+            sudo chown -R ${EC2_USER}:${EC2_USER} ${APP_DIR}
+            
+            # Create backup before deployment
+            if [ -d "${APP_DIR}/dist" ]; then
+              TIMESTAMP=\$(date +%Y%m%d-%H%M%S)
+              mkdir -p ${APP_DIR}/backups
+              echo "Creating backup..."
+              tar -czf ${APP_DIR}/backups/backup-\${TIMESTAMP}.tar.gz \
+                -C ${APP_DIR} dist package.json .env 2>/dev/null || true
+              
+              # Keep only last 5 backups
+              ls -t ${APP_DIR}/backups/backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs rm -f || true
+            fi
             
             # Extract deployment archive
             cd ${APP_DIR}
             tar -xzf ~/deployment.tar.gz
             rm ~/deployment.tar.gz
-                     
+          
             # Install production dependencies
-            npm ci --omit=dev
+            echo "Installing dependencies..."
+            npm ci --production --omit=dev
             
             # Run database migrations
-            npm run db:push
+            echo "Running database migrations..."
+            npm run db:push || echo "Warning: Database migration failed"
             
             # Restart application with PM2
+            echo "Restarting application..."
             if command -v pm2 &> /dev/null; then
-              pm2 delete app || true
-              pm2 start npm --name "app" -- start
+              pm2 delete ${APP_NAME} 2>/dev/null || true
+              pm2 start npm --name "${APP_NAME}" -- start
               pm2 save
+              echo "Application restarted successfully!"
             else
-              echo "PM2 not found. Please install PM2 or use another process manager."
+              echo "Error: PM2 not found. Please install PM2 first:"
+              echo "sudo npm install -g pm2@latest"
               exit 1
             fi
             
             echo "Deployment completed successfully!"
             ENDSSH
 
-      - name: Cleanup
-        if: always()
-        run: |
-          rm -f private_key.pem deployment.tar.gz
-
       - name: Verify deployment
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
+          APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
         run: |
-          ssh -i private_key.pem \
+          ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+            ${EC2_USER}@${EC2_HOST} << ENDSSH
+            echo "Checking application status..."
             pm2 status
+            pm2 info ${APP_NAME}
             ENDSSH
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key deployment.tar.gz
