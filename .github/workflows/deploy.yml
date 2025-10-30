@@ -105,7 +105,6 @@ jobs:
             fi
             
             echo "Deployment completed successfully!"
-            ENDSSH
 
       - name: Verify deployment
         env:
@@ -120,7 +119,6 @@ jobs:
             echo "Checking application status..."
             pm2 status
             pm2 info ${APP_NAME}
-            ENDSSH
 
       - name: Cleanup
         if: always()
