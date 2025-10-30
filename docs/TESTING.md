@@ -1,54 +1,71 @@
-# Testing Guide
+# Testing Documentation
 
-Comprehensive guide for writing and running tests in CineHub Pro.
+This document provides comprehensive information about the testing setup and best practices for the CineHub project.
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Testing Stack](#testing-stack)
+- [Test Stack](#test-stack)
+- [Project Structure](#project-structure)
 - [Running Tests](#running-tests)
 - [Writing Tests](#writing-tests)
-- [Test Coverage](#test-coverage)
+- [Coverage Requirements](#coverage-requirements)
+- [CI/CD Pipeline](#cicd-pipeline)
 - [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
 
 ## Overview
 
-CineHub Pro uses a comprehensive testing strategy with multiple test types:
+The CineHub project implements a comprehensive testing strategy that includes:
+- **Unit Tests**: Testing individual components, hooks, and utility functions
+- **Integration Tests**: Testing interactions between different parts of the application
+- **End-to-End (E2E) Tests**: Testing complete user flows using Cypress
+- **Accessibility Tests**: Ensuring the application is accessible to all users
 
-- **Unit Tests**: Test individual functions and modules in isolation
-- **Integration Tests**: Test API endpoints and service interactions
-- **Component Tests**: Test React components with user interactions
-- **E2E Tests**: Test complete user workflows and scenarios
+## Test Stack
 
-## Testing Stack
+### Core Testing Libraries
 
-### Core Testing Framework
+- **Vitest**: Fast unit test framework with native ESM support
+- **React Testing Library**: Component testing with focus on user behavior
+- **Cypress**: E2E testing framework for complete user flows
+- **MSW (Mock Service Worker)**: API mocking for consistent test data
+- **@testing-library/jest-dom**: Custom matchers for DOM assertions
+- **cypress-axe**: Accessibility testing with axe-core
 
-- **Vitest**: Fast unit test framework (Jest alternative)
-- **Testing Library**: React component testing utilities
-- **Supertest**: HTTP assertion library for API testing
-- **jsdom**: DOM implementation for Node.js
+### Development Tools
 
-### Configuration
+- **@faker-js/faker**: Generate realistic test data
+- **@vitest/coverage-v8**: Code coverage reporting
+- **@vitest/ui**: Interactive test UI
 
-Test configuration is in `vitest.config.ts`:
+## Project Structure
 
-```typescript
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./client/src/__tests__/setup.ts'],
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './client/src'),
-      '@shared': path.resolve(__dirname, './shared'),
-    },
-  },
-});
+```
+├── client/src/__tests__/          # Test utilities and setup
+│   ├── fixtures/                  # Test data fixtures
+│   │   ├── factories.ts          # Data factories for generating test data
+│   │   └── movies.ts             # Movie and TV show fixtures
+│   ├── mocks/                    # MSW handlers
+│   │   ├── browser.ts            # Browser MSW setup
+│   │   ├── handlers.ts           # API mock handlers
+│   │   └── server.ts             # Node MSW setup
+│   ├── utils/                    # Test utilities
+│   │   └── test-utils.tsx        # Custom render functions
+│   └── setup.ts                  # Global test setup
+├── tests/                        # Test files
+│   ├── components/               # Component tests
+│   ├── hooks/                    # Hook tests
+│   ├── pages/                    # Page tests
+│   ├── unit/                     # Unit tests
+│   ├── integration/              # Integration tests
+│   └── e2e/                      # E2E tests
+├── cypress/                      # Cypress configuration
+│   ├── e2e/                      # E2E test specs
+│   ├── support/                  # Cypress support files
+│   │   ├── commands.ts           # Custom commands
+│   │   └── e2e.ts               # E2E setup
+│   └── fixtures/                 # Cypress fixtures
+└── vitest.config.ts              # Vitest configuration
 ```
 
 ## Running Tests
@@ -56,7 +73,7 @@ export default defineConfig({
 ### All Tests
 
 ```bash
-# Run all tests once
+# Run all tests
 npm test
 
 # Run tests in watch mode
@@ -69,696 +86,311 @@ npm run test:ui
 ### Specific Test Suites
 
 ```bash
-# Unit tests only
+# Run only unit tests
 npm run test:unit
 
-# Integration tests only
+# Run only integration tests
 npm run test:integration
 
-# Component tests only
+# Run only component tests
 npm run test:components
 
-# E2E tests only
+# Run only E2E tests
 npm run test:e2e
 ```
 
-### Coverage Reports
+### Coverage
 
 ```bash
-# Generate coverage report
+# Run tests with coverage
 npm run test:coverage
 
-# View coverage in browser
-open coverage/index.html
+# Run tests for CI with coverage
+npm run test:ci
 ```
 
-### Filtering Tests
+### Cypress E2E Tests
 
 ```bash
-# Run tests matching pattern
-npm test -- auth
+# Open Cypress Test Runner (interactive)
+npm run cypress
 
-# Run specific test file
-npm test -- tests/unit/auth.test.ts
+# Run Cypress tests headlessly
+npm run cypress:headless
 
-# Run tests in specific folder
-npm test -- tests/integration/
+# Run E2E tests with server
+npm run e2e
+```
+
+### Quick Tests
+
+```bash
+# Run only changed tests
+npm run test:quick
+
+# Run tests in debug mode
+npm run test:debug
 ```
 
 ## Writing Tests
 
-### Unit Tests
-
-Unit tests focus on testing individual functions or modules in isolation.
-
-**Location**: `tests/unit/`
-
-**Example - Testing utility functions**:
-
-```typescript
-// tests/unit/auth.test.ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { hashPassword, verifyPassword } from '../../server/auth';
-
-describe('Password Hashing', () => {
-  it('should hash a password', async () => {
-    const password = 'testPassword123';
-    const hashed = await hashPassword(password);
-    
-    expect(hashed).toBeTruthy();
-    expect(hashed).not.toBe(password);
-  });
-
-  it('should verify correct password', async () => {
-    const password = 'testPassword123';
-    const hashed = await hashPassword(password);
-    const isValid = await verifyPassword(password, hashed);
-    
-    expect(isValid).toBe(true);
-  });
-
-  it('should reject incorrect password', async () => {
-    const password = 'testPassword123';
-    const hashed = await hashPassword(password);
-    const isValid = await verifyPassword('wrongPassword', hashed);
-    
-    expect(isValid).toBe(false);
-  });
-});
-```
-
-**Example - Testing services**:
-
-```typescript
-// tests/unit/tmdb-cache.test.ts
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { tmdbCacheService } from '../../server/services/tmdbCacheService';
-
-// Mock external dependencies
-vi.mock('../../server/db', () => ({
-  db: {
-    select: vi.fn(),
-    insert: vi.fn(),
-  },
-}));
-
-describe('TMDB Cache Service', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should return cached data if available and fresh', async () => {
-    const cachedData = {
-      id: '1',
-      type: 'movie',
-      tmdbId: 550,
-      data: { title: 'Fight Club' },
-      expiresAt: new Date(Date.now() + 3600000),
-    };
-
-    const result = await tmdbCacheService.get('movie', 550);
-    
-    expect(result).toEqual(cachedData.data);
-  });
-
-  it('should return null if cache is expired', async () => {
-    const expiredData = {
-      id: '1',
-      type: 'movie',
-      tmdbId: 550,
-      data: { title: 'Fight Club' },
-      expiresAt: new Date(Date.now() - 3600000), // 1 hour ago
-    };
-
-    const result = await tmdbCacheService.get('movie', 550);
-    
-    expect(result).toBeNull();
-  });
-});
-```
-
-### Integration Tests
-
-Integration tests verify API endpoints and database interactions.
-
-**Location**: `tests/integration/`
-
-**Example - Testing API endpoints**:
-
-```typescript
-// tests/integration/movies-api.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import request from 'supertest';
-import express, { Express } from 'express';
-import { registerRoutes } from '../../server/routes';
-
-describe('Movies API', () => {
-  let app: Express;
-  let server: any;
-  let authToken: string;
-
-  beforeAll(async () => {
-    app = express();
-    app.use(express.json());
-    server = await registerRoutes(app);
-
-    // Get auth token for protected endpoints
-    const response = await request(app)
-      .post('/api/auth/signin')
-      .send({
-        identifier: 'test@example.com',
-        password: 'testPassword123',
-      });
-    authToken = response.body.accessToken;
-  });
-
-  afterAll(async () => {
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
-    }
-  });
-
-  describe('GET /api/movies/trending', () => {
-    it('should return trending movies', async () => {
-      const response = await request(app)
-        .get('/api/movies/trending')
-        .query({ page: 1 })
-        .expect(200);
-
-      expect(response.body).toHaveProperty('results');
-      expect(Array.isArray(response.body.results)).toBe(true);
-      expect(response.body.results.length).toBeGreaterThan(0);
-    });
-
-    it('should support pagination', async () => {
-      const page1 = await request(app)
-        .get('/api/movies/trending')
-        .query({ page: 1 });
-
-      const page2 = await request(app)
-        .get('/api/movies/trending')
-        .query({ page: 2 });
-
-      expect(page1.body.results[0].id).not.toBe(page2.body.results[0].id);
-    });
-  });
-
-  describe('POST /api/favorites', () => {
-    it('should add movie to favorites (authenticated)', async () => {
-      const response = await request(app)
-        .post('/api/favorites')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          mediaType: 'movie',
-          mediaId: 550,
-        })
-        .expect(201);
-
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.mediaId).toBe(550);
-    });
-
-    it('should reject unauthenticated requests', async () => {
-      await request(app)
-        .post('/api/favorites')
-        .send({
-          mediaType: 'movie',
-          mediaId: 550,
-        })
-        .expect(401);
-    });
-  });
-});
-```
-
 ### Component Tests
 
-Component tests verify React component behavior and user interactions.
-
-**Location**: `tests/components/`
-
-**Example - Testing components**:
-
 ```typescript
-// tests/components/movie-card.test.tsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MovieCard from '../../client/src/components/movie/movie-card';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@/__tests__/utils/test-utils';
+import { MovieCard } from '@/components/movie/movie-card';
+import { createMovie } from '@/__tests__/fixtures/factories';
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-};
-
-describe('MovieCard Component', () => {
-  const mockMovie = {
-    id: 550,
-    title: 'Fight Club',
-    overview: 'A ticking-time-bomb insomniac...',
-    poster_path: '/path/to/poster.jpg',
-    vote_average: 8.4,
-    release_date: '1999-10-15',
-  };
-
-  it('renders movie title', () => {
-    render(<MovieCard movie={mockMovie} />, { wrapper: createWrapper() });
-    expect(screen.getByText('Fight Club')).toBeInTheDocument();
-  });
-
-  it('displays movie rating', () => {
-    render(<MovieCard movie={mockMovie} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/8.4/)).toBeInTheDocument();
-  });
-
-  it('handles favorite button click', () => {
-    const onFavoriteToggle = vi.fn();
-    render(
-      <MovieCard movie={mockMovie} onFavoriteToggle={onFavoriteToggle} />,
-      { wrapper: createWrapper() }
-    );
-
-    const favoriteButton = screen.getByTestId('button-favorite-550');
-    fireEvent.click(favoriteButton);
-
-    expect(onFavoriteToggle).toHaveBeenCalledWith(550);
-  });
-
-  it('displays fallback image when poster is missing', () => {
-    const movieWithoutPoster = { ...mockMovie, poster_path: null };
-    render(<MovieCard movie={movieWithoutPoster} />, { wrapper: createWrapper() });
+describe('MovieCard', () => {
+  it('should render movie title', () => {
+    const movie = createMovie({ title: 'Test Movie' });
+    render(<MovieCard movie={movie} />);
     
-    const image = screen.getByAltText('Fight Club');
-    expect(image).toHaveAttribute('src', expect.stringContaining('placeholder'));
+    expect(screen.getByText('Test Movie')).toBeInTheDocument();
+  });
+
+  it('should be keyboard accessible', () => {
+    const movie = createMovie();
+    render(<MovieCard movie={movie} />);
+    
+    const card = screen.getByTestId(`card-movie-${movie.id}`);
+    card.focus();
+    expect(document.activeElement).toBe(card);
   });
 });
 ```
 
-**Example - Testing forms**:
+### Hook Tests
 
 ```typescript
-// tests/components/login-form.test.tsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import LoginForm from '../../client/src/components/auth/login-form';
+import { describe, it, expect } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { useAuth } from '@/hooks/useAuth';
 
-describe('LoginForm Component', () => {
-  it('renders all form fields', () => {
-    render(<LoginForm />);
+describe('useAuth', () => {
+  it('should return user when authenticated', async () => {
+    const { result } = renderHook(() => useAuth());
     
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
-  });
-
-  it('validates required fields', async () => {
-    render(<LoginForm />);
-    
-    const submitButton = screen.getByRole('button', { name: /sign in/i });
-    fireEvent.click(submitButton);
-
     await waitFor(() => {
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
-    });
-  });
-
-  it('submits form with valid data', async () => {
-    const onSubmit = vi.fn();
-    render(<LoginForm onSubmit={onSubmit} />);
-    
-    const user = userEvent.setup();
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123',
-      });
+      expect(result.current.isAuthenticated).toBe(true);
     });
   });
 });
 ```
 
-### E2E Tests
-
-End-to-end tests verify complete user workflows.
-
-**Location**: `tests/e2e/`
-
-**Example - Testing user flows**:
+### E2E Tests (Cypress)
 
 ```typescript
-// tests/e2e/authentication-flow.test.tsx
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { App } from '../../client/src/App';
-
-describe('Authentication Flow', () => {
-  beforeEach(() => {
-    // Clear local storage
-    localStorage.clear();
-  });
-
-  it('allows user to sign up, login, and access protected content', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    // Navigate to signup
-    await user.click(screen.getByText(/sign up/i));
-
-    // Fill signup form
-    await user.type(screen.getByLabelText(/email/i), 'newuser@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'SecurePass123!');
-    await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
-    await user.click(screen.getByRole('button', { name: /create account/i }));
-
-    // Should redirect to email verification
-    await waitFor(() => {
-      expect(screen.getByText(/verify your email/i)).toBeInTheDocument();
-    });
-
-    // Simulate verification (in real test, would check email)
-    // ... verification steps
-
-    // Login
-    await user.click(screen.getByText(/sign in/i));
-    await user.type(screen.getByLabelText(/email/i), 'newuser@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'SecurePass123!');
-    await user.click(screen.getByRole('button', { name: /sign in/i }));
-
-    // Should access dashboard
-    await waitFor(() => {
-      expect(screen.getByText(/dashboard/i)).toBeInTheDocument();
-    });
+describe('Movie Details Flow', () => {
+  it('should display movie details and allow adding to favorites', () => {
+    cy.visit('/movie/550');
+    cy.waitForPageLoad();
+    
+    cy.get('[data-testid="text-movie-title"]').should('be.visible');
+    cy.get('[data-testid="button-favorite"]').click();
+    cy.get('[data-testid="toast-success"]').should('be.visible');
   });
 });
 ```
 
-## Test Coverage
+### Using Test Utilities
 
-### Coverage Goals
+```typescript
+// Use custom render with all providers
+import { render, waitFor } from '@/__tests__/utils/test-utils';
 
-- **Overall**: Minimum 80% coverage
-- **Critical paths**: 95%+ coverage (auth, payments, data operations)
-- **UI components**: 70%+ coverage
+// Use test data factories
+import { createMovie, createMovies } from '@/__tests__/fixtures/factories';
+
+// Use mock fixtures
+import { mockMovie, mockUser } from '@/__tests__/fixtures/movies';
+```
+
+### Accessibility Testing
+
+```typescript
+import { checkAccessibility } from '@/__tests__/utils/test-utils';
+
+it('should be accessible', async () => {
+  const { container } = render(<MyComponent />);
+  await checkAccessibility(container);
+});
+```
+
+## Coverage Requirements
+
+The project enforces a minimum code coverage of **90%** for all metrics:
+
+- **Statements**: 90%
+- **Branches**: 90%
+- **Functions**: 90%
+- **Lines**: 90%
+
+### Coverage Reports
+
+Coverage reports are generated in multiple formats:
+- **Terminal**: Text summary in console
+- **HTML**: Interactive report at `coverage/index.html`
+- **JSON**: Machine-readable at `coverage/coverage-final.json`
+- **LCOV**: For CI tools at `coverage/lcov.info`
 
 ### Viewing Coverage
 
 ```bash
-# Generate coverage report
+# Generate and open HTML coverage report
 npm run test:coverage
-
-# Coverage files generated in:
-# - coverage/index.html (visual report)
-# - coverage/lcov.info (for CI tools)
+open coverage/index.html
 ```
 
-### Coverage Reports
+## CI/CD Pipeline
 
-The coverage report shows:
-- **Statements**: % of code statements executed
-- **Branches**: % of conditional branches tested
-- **Functions**: % of functions called
-- **Lines**: % of code lines executed
+### GitHub Actions Workflow
 
-### Improving Coverage
+The project uses GitHub Actions for continuous integration with multiple parallel jobs:
 
-1. Identify uncovered code in coverage report
-2. Add tests for missing scenarios
-3. Focus on edge cases and error paths
-4. Test both success and failure cases
+1. **Lint and Type Check**: TypeScript type checking
+2. **Unit and Integration Tests**: Runs all unit/integration tests with coverage
+3. **E2E Tests**: Runs Cypress tests in headless mode
+4. **Accessibility Tests**: Runs accessibility-focused tests
+5. **Build**: Builds the application if all tests pass
+
+### Workflow Triggers
+
+- **Push**: Runs on `main` and `develop` branches
+- **Pull Request**: Runs on PRs targeting `main` and `develop`
+
+### Coverage Enforcement
+
+The CI pipeline will **fail** if coverage falls below 90% for any metric.
 
 ## Best Practices
 
 ### General Guidelines
 
-1. **Follow AAA Pattern**:
-   ```typescript
-   it('should do something', () => {
-     // Arrange - Set up test data
-     const data = { id: 1, name: 'Test' };
-     
-     // Act - Execute the code
-     const result = processData(data);
-     
-     // Assert - Verify the result
-     expect(result).toBe(expected);
-   });
-   ```
+1. **Write tests first** (TDD) or immediately after implementing features
+2. **Test behavior, not implementation** - Focus on what users see and do
+3. **Use descriptive test names** - Test names should explain what's being tested
+4. **Keep tests focused** - One assertion per test when possible
+5. **Avoid test interdependence** - Each test should run independently
 
-2. **One assertion concept per test**:
-   ```typescript
-   // Good
-   it('should add user to database', async () => {
-     const user = await createUser({ name: 'John' });
-     expect(user.id).toBeDefined();
-   });
+### Component Testing
 
-   it('should hash user password', async () => {
-     const user = await createUser({ password: 'secret' });
-     expect(user.password).not.toBe('secret');
-   });
+1. **Test user interactions** - Click, type, hover, etc.
+2. **Test accessibility** - Keyboard navigation, ARIA attributes, screen readers
+3. **Test edge cases** - Empty states, error states, loading states
+4. **Use data-testid** - Add data-testid to all interactive and meaningful elements
+5. **Test responsive behavior** - Test different screen sizes when relevant
 
-   // Bad - multiple unrelated assertions
-   it('should create user', async () => {
-     const user = await createUser({ name: 'John', password: 'secret' });
-     expect(user.id).toBeDefined();
-     expect(user.password).not.toBe('secret');
-     expect(user.email).toBeDefined();
-   });
-   ```
+### Mock Data
 
-3. **Use descriptive test names**:
-   ```typescript
-   // Good
-   it('should return 404 when movie does not exist', () => {});
-   it('should add movie to watchlist for authenticated user', () => {});
+1. **Use factories** for generating test data with realistic values
+2. **Use fixtures** for consistent, predefined test data
+3. **Use MSW** for mocking API calls instead of mocking fetch directly
 
-   // Bad
-   it('test movie', () => {});
-   it('should work', () => {});
-   ```
+### Async Testing
 
-4. **Mock external dependencies**:
-   ```typescript
-   // Mock TMDB API
-   vi.mock('../../server/services/tmdbService', () => ({
-     getTrendingMovies: vi.fn().mockResolvedValue({
-       results: [{ id: 1, title: 'Test Movie' }],
-     }),
-   }));
-   ```
+1. **Use waitFor** for async operations
+2. **Set appropriate timeouts** for slow operations
+3. **Clean up** after tests to prevent memory leaks
 
-5. **Clean up after tests**:
-   ```typescript
-   afterEach(() => {
-     vi.clearAllMocks();
-     localStorage.clear();
-   });
-   ```
+### E2E Testing
 
-### Testing React Components
+1. **Test complete user flows** - Login → Browse → Add to favorites → Logout
+2. **Use custom commands** for repeated actions (login, search, etc.)
+3. **Test critical paths** - Focus on user journeys that must work
+4. **Keep E2E tests stable** - Use reliable selectors (data-testid)
 
-1. **Use Testing Library queries** (in order of preference):
-   - `getByRole` - Most accessible
-   - `getByLabelText` - For form fields
-   - `getByText` - For text content
-   - `getByTestId` - Last resort
+### Accessibility
 
-2. **Test user behavior, not implementation**:
-   ```typescript
-   // Good - test what user sees/does
-   it('should show error message when login fails', async () => {
-     render(<LoginForm />);
-     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
-     expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
-   });
+1. **Test keyboard navigation** on all interactive components
+2. **Check ARIA attributes** for semantic meaning
+3. **Verify color contrast** meets WCAG standards
+4. **Test with screen readers** when possible
 
-   // Bad - test implementation details
-   it('should call setError when login fails', async () => {
-     const setError = vi.fn();
-     render(<LoginForm setError={setError} />);
-     // ...
-     expect(setError).toHaveBeenCalled();
-   });
-   ```
+### Performance
 
-3. **Use userEvent over fireEvent**:
-   ```typescript
-   // Good - simulates real user interaction
-   const user = userEvent.setup();
-   await user.click(button);
-   await user.type(input, 'text');
-
-   // Bad - synthetic events
-   fireEvent.click(button);
-   fireEvent.change(input, { target: { value: 'text' } });
-   ```
-
-### Testing Async Code
-
-1. **Use waitFor for async assertions**:
-   ```typescript
-   it('should load and display movies', async () => {
-     render(<MovieList />);
-     
-     await waitFor(() => {
-       expect(screen.getByText('Fight Club')).toBeInTheDocument();
-     });
-   });
-   ```
-
-2. **Test loading states**:
-   ```typescript
-   it('should show loading spinner while fetching', () => {
-     render(<MovieList />);
-     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-   });
-   ```
-
-3. **Test error states**:
-   ```typescript
-   it('should display error message when fetch fails', async () => {
-     vi.mocked(fetchMovies).mockRejectedValue(new Error('Network error'));
-     
-     render(<MovieList />);
-     
-     await waitFor(() => {
-       expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-     });
-   });
-   ```
+1. **Use parallel test execution** when tests are independent
+2. **Mock expensive operations** (API calls, heavy computations)
+3. **Clean up resources** (timers, event listeners, etc.)
+4. **Optimize test data** - Use minimal data needed for tests
 
 ## Troubleshooting
 
-### Common Issues
+### Tests Failing Locally
 
-#### Tests Timing Out
+1. Clear test cache: `npm run test -- --clearCache`
+2. Update snapshots: `npm run test -- -u`
+3. Check for port conflicts (default: 5000)
+4. Ensure dependencies are installed: `npm ci`
 
-**Problem**: Tests take too long or timeout
+### Coverage Issues
 
-**Solutions**:
-```typescript
-// Increase timeout for specific test
-it('should handle long operation', async () => {
-  // ...
-}, 10000); // 10 seconds
+1. Check which files are missing coverage: Review HTML report
+2. Add tests for uncovered branches and functions
+3. Exclude generated or config files from coverage
 
-// Or configure globally in vitest.config.ts
-test: {
-  testTimeout: 10000
-}
-```
+### Updating Snapshots
 
-#### Mock Not Working
-
-**Problem**: Mocked function still calls real implementation
-
-**Solutions**:
-```typescript
-// Ensure mock is before imports
-vi.mock('./module', () => ({
-  myFunction: vi.fn(),
-}));
-
-// Or use vi.hoisted for setup
-const mocks = vi.hoisted(() => ({
-  myFunction: vi.fn(),
-}));
-
-vi.mock('./module', () => mocks);
-```
-
-#### Database Connection Errors
-
-**Problem**: Tests fail due to database connection
-
-**Solutions**:
-```typescript
-// Use test database URL
-beforeAll(async () => {
-  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
-  await setupTestDatabase();
-});
-
-afterAll(async () => {
-  await teardownTestDatabase();
-});
-```
-
-#### React Component Not Found
-
-**Problem**: `Cannot find module` when importing component
-
-**Solutions**:
-```typescript
-// Check path alias in vitest.config.ts
-resolve: {
-  alias: {
-    '@': path.resolve(__dirname, './client/src'),
-  },
-}
-
-// Use correct import
-import Component from '@/components/Component';
-```
-
-### Debugging Tests
+If component snapshots need to be updated:
 
 ```bash
-# Run single test file in debug mode
-node --inspect-brk node_modules/.bin/vitest tests/unit/auth.test.ts
+# Update all snapshots
+npm run test -- -u
 
-# Use console.log in tests
-it('should work', () => {
-  console.log('Debug value:', myValue);
-  expect(myValue).toBe(expected);
-});
+# Update snapshots for a specific file
+npm run test path/to/test.test.tsx -- -u
 
-# Use screen.debug() for component tests
-it('should render', () => {
-  render(<Component />);
-  screen.debug(); // Prints current DOM
-});
+# Review snapshot changes before committing
+git diff -- '*.snap'
 ```
 
-## CI/CD Integration
+### Interpreting Coverage Reports
 
-Tests automatically run in GitHub Actions:
+When viewing the HTML coverage report (`coverage/index.html`):
 
-```yaml
-# .github/workflows/test.yml
-- name: Run tests
-  run: npm test
-  env:
-    DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-```
+- **Green**: Well-tested code (>90% coverage)
+- **Yellow**: Partially tested code (50-90% coverage)
+- **Red**: Untested code (<50% coverage)
 
-## Additional Resources
+Click on any file to see:
+- Line-by-line coverage
+- Uncovered branches (if statements, ternaries)
+- Uncovered functions
+
+**Common issues:**
+- **Uncovered branches**: Add tests for both `true` and `false` cases
+- **Uncovered functions**: Ensure functions are called in tests
+- **Uncovered lines**: Add tests that execute those lines
+
+### Cypress Issues
+
+1. Clear Cypress cache: `npx cypress cache clear`
+2. Reinstall Cypress: `npx cypress install`
+3. Check baseUrl in `cypress.config.ts`
+4. Ensure app is running on port 5000
+
+## Resources
 
 - [Vitest Documentation](https://vitest.dev/)
-- [Testing Library](https://testing-library.com/)
-- [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
-- [Mock Service Worker](https://mswjs.io/) - API mocking
+- [React Testing Library](https://testing-library.com/react)
+- [Cypress Documentation](https://docs.cypress.io/)
+- [MSW Documentation](https://mswjs.io/)
+- [Testing Library Best Practices](https://testing-library.com/docs/guiding-principles/)
+
+## Contributing
+
+When adding new features:
+
+1. Write tests alongside your code
+2. Ensure all tests pass: `npm test`
+3. Verify coverage requirements: `npm run test:coverage`
+4. Run E2E tests: `npm run e2e`
+5. Check accessibility: Add accessibility tests for new components
 
 ## Questions?
 
-If you have questions about testing:
-1. Check this documentation
-2. Look at existing tests for examples
-3. Ask in GitHub Discussions
-4. Reach out on Discord
+If you have questions about testing or need help writing tests, please:
+1. Review this documentation
+2. Check existing tests for examples
+3. Reach out to the team
