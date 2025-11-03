@@ -161,6 +161,20 @@ export default function DetailsLayout({
   // Review expansion state - track which reviews are expanded
   const [expandedReviews, setExpandedReviews] = useState<Set<string | number>>(new Set());
 
+  // Fetch similar movies from local DB when logged in - MUST be called before conditional returns
+  const { data: localSimilarMovies } = useQuery<any[]>({
+    queryKey: ["/api/recs/similar", data?.id?.toString() || ""],
+    enabled: !!data?.id && isAuthenticated && type === 'movie',
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  // Fetch recommended movies from trending for logged in users - MUST be called before conditional returns
+  const { data: localTrendingMovies } = useQuery<any[]>({
+    queryKey: ["/api/recs/trending"],
+    enabled: isAuthenticated && type === 'movie',
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
   // Error state - check AFTER all hooks
   if (error) {
     return (
@@ -208,20 +222,6 @@ export default function DetailsLayout({
   ) || [];
   
   const hasTrailer = trailers.length > 0;
-
-  // Fetch similar movies from local DB when logged in
-  const { data: localSimilarMovies } = useQuery<any[]>({
-    queryKey: ["/api/recs/similar", data?.id?.toString() || ""],
-    enabled: !!data?.id && isAuthenticated && type === 'movie',
-    staleTime: 1000 * 60 * 30, // 30 minutes
-  });
-
-  // Fetch recommended movies from trending for logged in users
-  const { data: localTrendingMovies } = useQuery<any[]>({
-    queryKey: ["/api/recs/trending"],
-    enabled: isAuthenticated && type === 'movie',
-    staleTime: 1000 * 60 * 30, // 30 minutes
-  });
 
   // Similar content - use local DB when logged in for movies, otherwise use TMDB data
   const similarContent = isAuthenticated && type === 'movie' && localSimilarMovies
