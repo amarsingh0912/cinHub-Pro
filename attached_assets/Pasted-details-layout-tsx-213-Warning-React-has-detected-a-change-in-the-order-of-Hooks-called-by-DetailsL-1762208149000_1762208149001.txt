@@ -1,0 +1,71 @@
+details-layout.tsx:213 Warning: React has detected a change in the order of Hooks called by DetailsLayout. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useContext                 useContext
+4. useEffect                  useEffect
+5. useState                   useState
+6. useCallback                useCallback
+7. useSyncExternalStore       useSyncExternalStore
+8. useEffect                  useEffect
+9. useState                   useState
+10. useState                  useState
+11. useEffect                 useEffect
+12. useEffect                 useEffect
+13. useState                  useState
+14. useState                  useState
+15. useRef                    useRef
+16. useContext                useContext
+17. useRef                    useRef
+18. useEffect                 useEffect
+19. useEffect                 useEffect
+20. useEffect                 useEffect
+21. useState                  useState
+22. useState                  useState
+23. useState                  useState
+24. useState                  useState
+25. useState                  useState
+26. useState                  useState
+27. undefined                 useContext
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    at DetailsLayout (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/components/media/details-layout.tsx:159:3)
+    at div
+    at MovieDetail (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/pages/movie-detail.tsx:32:18)
+    at Route (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=4528cd60:323:16)
+    at Switch (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=4528cd60:379:17)
+    at Router (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/App.tsx?v=PWiATI88oUSSBjNQjmoXs:48:42)
+    at Provider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…unner/workspace/node_modules/.vite/deps/chunk-E7IAXTU4.js?v=4528cd60:38:15)
+    at TooltipProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=4528cd60:63:5)
+    at FilterProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/contexts/FilterContext.tsx:20:34)
+    at ThemeProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…runner/workspace/node_modules/.vite/deps/chunk-QRVZQDL5.js?v=4528cd60:44:3)
+    at App
+chunk-RPCDYKBN.js?v=4528cd60:11678 Uncaught Error: Rendered more hooks than during the previous render.
+    at DetailsLayout (details-layout.tsx:213:40)
+chunk-RPCDYKBN.js?v=4528cd60:11678 Uncaught Error: Rendered more hooks than during the previous render.
+    at DetailsLayout (details-layout.tsx:213:40)
+useMediaDetails.ts:74 The above error occurred in the <DetailsLayout> component:
+
+    at DetailsLayout (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/components/media/details-layout.tsx:159:3)
+    at div
+    at MovieDetail (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/pages/movie-detail.tsx:32:18)
+    at Route (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=4528cd60:323:16)
+    at Switch (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=4528cd60:379:17)
+    at Router (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/App.tsx?v=PWiATI88oUSSBjNQjmoXs:48:42)
+    at Provider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…unner/workspace/node_modules/.vite/deps/chunk-E7IAXTU4.js?v=4528cd60:38:15)
+    at TooltipProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=4528cd60:63:5)
+    at FilterProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/contexts/FilterContext.tsx:20:34)
+    at ThemeProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.…runner/workspace/node_modules/.vite/deps/chunk-QRVZQDL5.js?v=4528cd60:44:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js?v=4528cd60:11678 Uncaught Error: Rendered more hooks than during the previous render.
+    at DetailsLayout (details-layout.tsx:213:40)
+queryClient.ts:64 
+ GET https://bec579ec-3431-4431-a761-750550b34ee6-00-2sjma5v5oep53.sisko.replit.dev/api/auth/user 401 (Unauthorized)
+﻿
