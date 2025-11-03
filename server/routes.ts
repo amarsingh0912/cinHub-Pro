@@ -384,7 +384,7 @@ export async function registerRoutes(
   app.use(authenticateJWT);
 
   // Mount recommendations API (read-only, no CSRF required)
-  const recsRouter = (await import("./recs-api.cjs" as any)).default;
+  const recsRouter = (await import("./recs-api")).default;
   app.use("/api/recs", recsRouter);
 
   // Start background TMDB sync service

@@ -2,19 +2,23 @@
 // Zero-cost, rule-based movie recommendations using SQLite
 // Uses better-sqlite3 for synchronous, fast local database access
 
-const express = require('express');
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+import express from 'express';
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
 
 // ==================== TMDB FALLBACK & BACKGROUND SYNC ====================
 
+// Initialize SQLite database
+const dbPath = path.join(import.meta.dirname, 'cinehub.db');
+const db = new Database(dbPath);
+
 /**
  * Add a movie to the local database in the background
  */
-function syncMovieToDatabase(movie) {
+function syncMovieToDatabase(movie: any) {
   try {
     // Check if movie already exists
     const existing = db.prepare('SELECT id FROM movies WHERE id = ?').get(movie.id);
@@ -46,7 +50,7 @@ function syncMovieToDatabase(movie) {
 /**
  * Fetch movie details from TMDB and sync to local database
  */
-async function fetchAndSyncMovieFromTMDB(movieId) {
+async function fetchAndSyncMovieFromTMDB(movieId: number) {
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) {
     return null;
@@ -70,7 +74,7 @@ async function fetchAndSyncMovieFromTMDB(movieId) {
         ? `https://image.tmdb.org/t/p/w500${data.poster_path}`
         : null,
       year: data.release_date ? new Date(data.release_date).getFullYear() : null,
-      genres: (data.genres || []).map(g => g.name).join(','),
+      genres: (data.genres || []).map((g: any) => g.name).join(','),
       description: data.overview || '',
       views: 0,
       likes: 0,
@@ -90,7 +94,7 @@ async function fetchAndSyncMovieFromTMDB(movieId) {
 /**
  * Fetch similar movies from TMDB API as fallback
  */
-async function fetchSimilarFromTMDB(movieId) {
+async function fetchSimilarFromTMDB(movieId: number) {
   const apiKey = process.env.TMDB_API_KEY;
   if (!apiKey) {
     return [];
@@ -111,7 +115,7 @@ async function fetchSimilarFromTMDB(movieId) {
     const data = await response.json();
     
     // Transform TMDB results to match our format
-    const movies = (data.results || []).slice(0, 12).map(movie => ({
+    const movies = (data.results || []).slice(0, 12).map((movie: any) => ({
       id: movie.id,
       title: movie.title,
       poster_url: movie.poster_path 
@@ -127,7 +131,7 @@ async function fetchSimilarFromTMDB(movieId) {
 
     // Sync similar movies to database in background (non-blocking)
     setImmediate(() => {
-      movies.forEach(movie => syncMovieToDatabase(movie));
+      movies.forEach((movie: any) => syncMovieToDatabase(movie));
     });
 
     return movies;
@@ -137,13 +141,9 @@ async function fetchSimilarFromTMDB(movieId) {
   }
 }
 
-// Initialize SQLite database
-const dbPath = path.join(__dirname, 'cinehub.db');
-const db = new Database(dbPath);
-
 // Initialize schema if database is new
 function initializeDatabase() {
-  const schemaPath = path.join(__dirname, 'schema.sql');
+  const schemaPath = path.join(import.meta.dirname, 'schema.sql');
   if (fs.existsSync(schemaPath)) {
     const schema = fs.readFileSync(schemaPath, 'utf8');
     db.exec(schema);
@@ -160,7 +160,7 @@ initializeDatabase();
  * Formula: (likes * 2 + views) / (age_hours + 2)
  * Adjust weights here: likes=2, views=1, age decay with +2 smoothing
  */
-function calculateTrendingScore(movie, popularity) {
+function calculateTrendingScore(movie: any, popularity: any) {
   const likes = popularity?.likes || 0;
   const views = popularity?.views || 0;
   const createdAt = new Date(movie.created_at);
@@ -175,7 +175,7 @@ function calculateTrendingScore(movie, popularity) {
  * Check if two movies share genres
  * Simple CSV overlap check
  */
-function hasOverlappingGenres(genres1, genres2) {
+function hasOverlappingGenres(genres1: string, genres2: string) {
   if (!genres1 || !genres2) return false;
   const g1 = genres1.split(',').map(g => g.trim().toLowerCase());
   const g2 = genres2.split(',').map(g => g.trim().toLowerCase());
@@ -185,7 +185,7 @@ function hasOverlappingGenres(genres1, genres2) {
 /**
  * Get movie with full details
  */
-function getMovieDetails(movieId) {
+function getMovieDetails(movieId: number) {
   const stmt = db.prepare(`
     SELECT m.*, p.views, p.likes, p.avg_rating
     FROM movies m
@@ -198,7 +198,7 @@ function getMovieDetails(movieId) {
 /**
  * Format movie object for API response
  */
-function formatMovie(movie) {
+function formatMovie(movie: any) {
   return {
     id: movie.id,
     title: movie.title,
@@ -227,9 +227,9 @@ router.get('/trending', (req, res) => {
     const precomputed = db.prepare('SELECT movie_ids FROM precomputed_recs WHERE key = ?').get('trending');
     
     if (precomputed) {
-      const movieIds = precomputed.movie_ids.split(',').map(id => parseInt(id.trim()));
+      const movieIds = (precomputed as any).movie_ids.split(',').map((id: string) => parseInt(id.trim()));
       const movies = movieIds
-        .map(id => getMovieDetails(id))
+        .map((id: number) => getMovieDetails(id))
         .filter(Boolean)
         .map(formatMovie);
       
@@ -245,7 +245,7 @@ router.get('/trending', (req, res) => {
     `).all();
     
     // Calculate trending scores and sort
-    const scored = movies.map(movie => {
+    const scored = (movies as any[]).map(movie => {
       const popularity = {
         views: movie.views || 0,
         likes: movie.likes || 0
@@ -287,9 +287,9 @@ router.get('/similar/:movieId', async (req, res) => {
       .get(`similar_${movieId}`);
     
     if (precomputed) {
-      const movieIds = precomputed.movie_ids.split(',').map(id => parseInt(id.trim()));
+      const movieIds = (precomputed as any).movie_ids.split(',').map((id: string) => parseInt(id.trim()));
       const movies = movieIds
-        .map(id => getMovieDetails(id))
+        .map((id: number) => getMovieDetails(id))
         .filter(Boolean)
         .map(formatMovie);
       
@@ -297,7 +297,7 @@ router.get('/similar/:movieId', async (req, res) => {
     }
     
     // Compute similar on-the-fly
-    const sourceMovie = getMovieDetails(movieId);
+    const sourceMovie = getMovieDetails(movieId) as any;
     
     // If movie not in local database, use TMDB fallback
     if (!sourceMovie) {
@@ -321,7 +321,7 @@ router.get('/similar/:movieId', async (req, res) => {
     `).all(movieId);
     
     // Filter by genre overlap and calculate popularity
-    const similar = allMovies
+    const similar = (allMovies as any[])
       .filter(movie => hasOverlappingGenres(sourceMovie.genres, movie.genres))
       .map(movie => ({
         ...movie,
@@ -368,8 +368,8 @@ router.get('/because/:userId', (req, res) => {
       return res.json([]);
     }
     
-    const lastMovieId = lastView.movie_id;
-    const sourceMovie = getMovieDetails(lastMovieId);
+    const lastMovieId = (lastView as any).movie_id;
+    const sourceMovie = getMovieDetails(lastMovieId) as any;
     
     if (!sourceMovie || !sourceMovie.genres) {
       return res.json([]);
@@ -382,7 +382,7 @@ router.get('/because/:userId', (req, res) => {
       WHERE user_id = ? AND event_type = 'view'
     `).all(userId);
     
-    const watchedIds = watchedMovies.map(row => row.movie_id);
+    const watchedIds = (watchedMovies as any[]).map(row => row.movie_id);
     
     // Find similar movies excluding watched ones
     const allMovies = db.prepare(`
@@ -391,7 +391,7 @@ router.get('/because/:userId', (req, res) => {
       LEFT JOIN movie_popularity p ON m.id = p.movie_id
     `).all();
     
-    const recommendations = allMovies
+    const recommendations = (allMovies as any[])
       .filter(movie => 
         !watchedIds.includes(movie.id) && 
         hasOverlappingGenres(sourceMovie.genres, movie.genres)
@@ -421,11 +421,11 @@ router.get('/health', (req, res) => {
     res.json({
       status: 'ok',
       database: dbPath,
-      movies: movieCount.count,
-      interactions: interactionCount.count
+      movies: (movieCount as any).count,
+      interactions: (interactionCount as any).count
     });
   } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
+    res.status(500).json({ status: 'error', message: (error as Error).message });
   }
 });
 
@@ -435,4 +435,4 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-module.exports = router;
+export default router;
