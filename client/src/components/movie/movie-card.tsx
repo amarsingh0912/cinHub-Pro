@@ -146,10 +146,12 @@ export default function MovieCard({ movie, size = 'normal', mediaType }: MovieCa
               </motion.h3>
               <div className="flex items-center gap-2">
                 <motion.p 
-                  className="text-xs font-semibold text-muted-foreground/70 tracking-wider uppercase"
+                  className={cn(
+                    "text-xs font-semibold tracking-wider uppercase transition-colors duration-300",
+                    isHovered ? "text-muted-foreground" : "text-muted-foreground/70"
+                  )}
                   data-testid={`year-${movie.id}`}
                   animate={{ 
-                    color: isHovered ? 'hsl(var(--muted-foreground))' : 'hsl(var(--muted-foreground) / 0.7)',
                     scale: isHovered ? 1.05 : 1
                   }}
                   transition={{ duration: 0.3 }}
