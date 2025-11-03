@@ -105,6 +105,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [otpPurpose, setOtpPurpose] = useState<'signup' | 'reset'>('signup');
   const [signinError, setSigninError] = useState<string>("");
   const [otpDigits, setOtpDigits] = useState<string[]>(new Array(6).fill(""));
+  const [showSuccessState, setShowSuccessState] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>(new Array(6).fill(null));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast} = useToast();
@@ -219,12 +220,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     },
     onSuccess: () => {
       setSigninError("");
-      toast({
-        title: "Success!",
-        description: "You have been signed in successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      onClose();
+      setShowSuccessState(true);
+      
+      setTimeout(() => {
+        toast({
+          title: "Success!",
+          description: "You have been signed in successfully.",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        setShowSuccessState(false);
+        onClose();
+      }, 1000);
     },
     onError: (error: any) => {
       if (error.status === 403 && error.body?.requiresVerification) {
@@ -289,13 +295,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return response.json();
     },
     onSuccess: (data) => {
-      setMode("otp-verification");
-      setOtpSentTo(data.verificationTarget || signupForm.getValues().email || signupForm.getValues().phoneNumber || "");
-      setOtpPurpose('signup');
-      toast({
-        title: "Verify Your Account",
-        description: "Verification code sent to your email. Please check your inbox and spam folder.",
-      });
+      setShowSuccessState(true);
+      
+      setTimeout(() => {
+        setMode("otp-verification");
+        setOtpSentTo(data.verificationTarget || signupForm.getValues().email || signupForm.getValues().phoneNumber || "");
+        setOtpPurpose('signup');
+        setShowSuccessState(false);
+        toast({
+          title: "Verify Your Account",
+          description: "Verification code sent to your email. Please check your inbox and spam folder.",
+        });
+      }, 1000);
     },
     onError: (error: Error) => {
       toast({
@@ -312,13 +323,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return response.json();
     },
     onSuccess: () => {
-      setMode("otp-verification");
-      setOtpSentTo(forgotPasswordForm.getValues().identifier);
-      setOtpPurpose('reset');
-      toast({
-        title: "Reset Code Sent",
-        description: "Password reset code sent to your email. Please check your inbox and spam folder.",
-      });
+      setShowSuccessState(true);
+      
+      setTimeout(() => {
+        setMode("otp-verification");
+        setOtpSentTo(forgotPasswordForm.getValues().identifier);
+        setOtpPurpose('reset');
+        setShowSuccessState(false);
+        toast({
+          title: "Reset Code Sent",
+          description: "Password reset code sent to your email. Please check your inbox and spam folder.",
+        });
+      }, 1000);
     },
     onError: (error: Error) => {
       toast({
@@ -339,20 +355,26 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return response.json();
     },
     onSuccess: (data) => {
-      if (data.type === 'signup') {
-        toast({
-          title: "Account Verified!",
-          description: "Your account has been verified and you are now signed in.",
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-        onClose();
-      } else if (data.type === 'reset') {
-        toast({
-          title: "Verification Complete!",
-          description: "You can now set your new password.",
-        });
-        setMode("reset-password");
-      }
+      setShowSuccessState(true);
+      
+      setTimeout(() => {
+        if (data.type === 'signup') {
+          toast({
+            title: "Account Verified!",
+            description: "Your account has been verified and you are now signed in.",
+          });
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+          setShowSuccessState(false);
+          onClose();
+        } else if (data.type === 'reset') {
+          toast({
+            title: "Verification Complete!",
+            description: "You can now set your new password.",
+          });
+          setMode("reset-password");
+          setShowSuccessState(false);
+        }
+      }, 1000);
     },
     onError: (error: Error) => {
       toast({
@@ -373,14 +395,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return response.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Password Reset Successfully!",
-        description: "Your password has been updated. You can now sign in with your new password.",
-      });
-      setMode("signin");
-      resetPasswordForm.reset();
-      otpForm.reset();
-      forgotPasswordForm.reset();
+      setShowSuccessState(true);
+      
+      setTimeout(() => {
+        toast({
+          title: "Password Reset Successfully!",
+          description: "Your password has been updated. You can now sign in with your new password.",
+        });
+        setMode("signin");
+        resetPasswordForm.reset();
+        otpForm.reset();
+        forgotPasswordForm.reset();
+        setShowSuccessState(false);
+      }, 1000);
     },
     onError: (error: Error) => {
       toast({
@@ -561,11 +588,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || showSuccessState}
                     className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg shadow-primary/30"
                     data-testid="button-submit"
                   >
-                    {isLoading ? (
+                    {showSuccessState ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Success!
+                      </>
+                    ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Signing in...
@@ -823,11 +855,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || showSuccessState}
                     className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg shadow-primary/30"
                     data-testid="button-submit"
                   >
-                    {isLoading ? (
+                    {showSuccessState ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Account created!
+                      </>
+                    ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Creating account...
@@ -876,11 +913,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || showSuccessState}
                     className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg shadow-primary/30"
                     data-testid="button-submit"
                   >
-                    {isLoading ? (
+                    {showSuccessState ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Code sent!
+                      </>
+                    ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Sending code...
@@ -921,11 +963,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    disabled={isLoading || otpDigits.some(digit => !digit)}
+                    disabled={isLoading || showSuccessState || otpDigits.some(digit => !digit)}
                     className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg shadow-primary/30"
                     data-testid="button-verify-otp"
                   >
-                    {isLoading ? (
+                    {showSuccessState ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Verified!
+                      </>
+                    ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Verifying...
@@ -1014,11 +1061,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                   <Button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || showSuccessState}
                     className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-semibold hover:from-primary/90 hover:to-primary/70 transition-all duration-300 shadow-lg shadow-primary/30"
                     data-testid="button-reset-password"
                   >
-                    {isLoading ? (
+                    {showSuccessState ? (
+                      <>
+                        <Check className="mr-2 h-5 w-5" />
+                        Password reset!
+                      </>
+                    ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Resetting...
