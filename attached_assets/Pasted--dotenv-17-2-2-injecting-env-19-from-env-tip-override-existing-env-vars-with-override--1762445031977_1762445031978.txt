@@ -1,0 +1,50 @@
+[dotenv@17.2.2] injecting env (19) from .env -- tip: ⚙️  override existing env vars with { override: true }
+SendGrid configured successfully
+Cloudinary configured successfully
+Cache queue worker started
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.2] injecting env (19) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+SendGrid configured successfully
+Cloudinary configured successfully
+Cache queue worker started
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+📊 TMDB Sync Service connected to database
+⏰ Scheduled trending content sync every 6 hours
+🚀 Starting TMDB trending content sync...
+🔄 Starting trending movies sync...
+🔄 TMDB background sync started (runs every 6 hours)
+WebSocket server initialized on /ws/cache-status
+✅ Trending movies sync complete: 0 new, 20 updated
+🔄 Starting trending TV shows sync...
+✅ Trending TV shows sync complete: 0 new, 20 updated
+🎬 Total sync complete: 0 new items, 40 updated
+2025-11-06T15:46:02: [dotenv@17.2.2] injecting env (19) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-11-06T15:46:02: SendGrid configured successfully
+2025-11-06T15:46:02: Cloudinary configured successfully
+2025-11-06T15:46:02: Cache queue worker started
+2025-11-06T15:46:02: [dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+2025-11-06T15:46:02: 📊 TMDB Sync Service connected to database
+2025-11-06T15:46:02: ⏰ Scheduled trending content sync every 6 hours
+2025-11-06T15:46:02: 🚀 Starting TMDB trending content sync...
+2025-11-06T15:46:02: 🔄 Starting trending movies sync...
+2025-11-06T15:46:02: 🔄 TMDB background sync started (runs every 6 hours)
+2025-11-06T15:46:02: WebSocket server initialized on /ws/cache-status
+2025-11-06T15:46:03: ✅ Trending movies sync complete: 0 new, 20 updated
+2025-11-06T15:46:03: 🔄 Starting trending TV shows sync...
+2025-11-06T15:46:03: ✅ Trending TV shows sync complete: 0 new, 20 updated
+2025-11-06T15:46:03: 🎬 Total sync complete: 0 new items, 40 updated
+2025-11-06T16:00:15: [dotenv@17.2.2] injecting env (19) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-11-06T16:00:15: SendGrid configured successfully
+2025-11-06T16:00:15: Cloudinary configured successfully
+2025-11-06T16:00:15: Cache queue worker started
+2025-11-06T16:00:15: [dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+2025-11-06T16:00:15: 📊 TMDB Sync Service connected to database
+2025-11-06T16:00:15: ⏰ Scheduled trending content sync every 6 hours
+2025-11-06T16:00:15: 🚀 Starting TMDB trending content sync...
+2025-11-06T16:00:15: 🔄 Starting trending movies sync...
+2025-11-06T16:00:15: 🔄 TMDB background sync started (runs every 6 hours)
+2025-11-06T16:00:15: WebSocket server initialized on /ws/cache-status
+2025-11-06T16:00:15: ✅ Trending movies sync complete: 0 new, 20 updated
+2025-11-06T16:00:15: 🔄 Starting trending TV shows sync...
+2025-11-06T16:00:15: ✅ Trending TV shows sync complete: 0 new, 20 updated
+2025-11-06T16:00:15: 🎬 Total sync complete: 0 new items, 40 updated
