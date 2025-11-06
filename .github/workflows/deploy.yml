@@ -80,22 +80,31 @@ jobs:
           APP_NAME: ${{ secrets.APP_NAME }}
           KEEP_RELEASES: 5
         run: |
-          # Set defaults for variables
-          EC2_USER_VAR="${EC2_USER:-ec2-user}"
-          APP_DIR_VAR="${APP_DIR:-/var/www/cinehub-pro}"
-          APP_NAME_VAR="${APP_NAME:-cinehub-pro}"
-          KEEP_RELEASES_VAR="${KEEP_RELEASES:-5}"
+          # Set defaults for empty or unset variables
+          EC2_USER_VAR="${EC2_USER}"
+          [ -z "$EC2_USER_VAR" ] && EC2_USER_VAR="ec2-user"
+          
+          APP_DIR_VAR="${APP_DIR}"
+          [ -z "$APP_DIR_VAR" ] && APP_DIR_VAR="/var/www/cinehub-pro"
+          
+          APP_NAME_VAR="${APP_NAME}"
+          [ -z "$APP_NAME_VAR" ] && APP_NAME_VAR="cinehub-pro"
+          
+          KEEP_RELEASES_VAR="${KEEP_RELEASES}"
+          [ -z "$KEEP_RELEASES_VAR" ] && KEEP_RELEASES_VAR="5"
+          
+          echo "Deploying to: $APP_DIR_VAR as $EC2_USER_VAR"
           
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER_VAR}@${EC2_HOST} "bash -s" <<EOF
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "$KEEP_RELEASES_VAR" <<'ENDSSH'
           set -euo pipefail
           
-          APP_DIR="${APP_DIR_VAR}"
-          APP_NAME="${APP_NAME_VAR}"
-          EC2_USER="${EC2_USER_VAR}"
-          KEEP_RELEASES=${KEEP_RELEASES_VAR}
+          APP_DIR="$1"
+          APP_NAME="$2"
+          EC2_USER="$3"
+          KEEP_RELEASES="$4"
 
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           RELEASE_DIR="${APP_DIR}/releases/${TIMESTAMP}"
@@ -167,7 +176,7 @@ jobs:
             | sed -n "$((KEEP_RELEASES+1)),\$p" | xargs -r rm -rf || true
 
           echo "Deployment completed to ${CURRENT_LINK}"
-          EOF
+          ENDSSH
 
       - name: Verify deployment & SSR
         env:
@@ -176,19 +185,24 @@ jobs:
           APP_PORT: ${{ secrets.APP_PORT }}
           APP_NAME: ${{ secrets.APP_NAME }}
         run: |
-          # Set defaults for variables
-          EC2_USER_VAR="${EC2_USER:-ec2-user}"
-          APP_PORT_VAR="${APP_PORT:-5000}"
-          APP_NAME_VAR="${APP_NAME:-cinehub-pro}"
+          # Set defaults for empty or unset variables
+          EC2_USER_VAR="${EC2_USER}"
+          [ -z "$EC2_USER_VAR" ] && EC2_USER_VAR="ec2-user"
+          
+          APP_PORT_VAR="${APP_PORT}"
+          [ -z "$APP_PORT_VAR" ] && APP_PORT_VAR="5000"
+          
+          APP_NAME_VAR="${APP_NAME}"
+          [ -z "$APP_NAME_VAR" ] && APP_NAME_VAR="cinehub-pro"
           
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER_VAR}@${EC2_HOST} "bash -s" <<EOF
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_PORT_VAR" "$APP_NAME_VAR" <<'ENDSSH'
           set -euo pipefail
           
-          APP_PORT="${APP_PORT_VAR}"
-          APP_NAME="${APP_NAME_VAR}"
+          APP_PORT="$1"
+          APP_NAME="$2"
 
           echo "Checking pm2 status for ${APP_NAME}"
           pm2 status "${APP_NAME}" || pm2 status
@@ -218,7 +232,7 @@ jobs:
           fi
 
           pm2 logs "${APP_NAME}" --lines 100 --nostream || true
-          EOF
+          ENDSSH
 
       - name: Cleanup
         if: always()
