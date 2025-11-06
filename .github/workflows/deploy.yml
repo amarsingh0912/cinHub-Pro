@@ -83,8 +83,13 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} "bash -se" <<'EOF'
+            ${EC2_USER}@${EC2_HOST} "bash -s" <<EOF
           set -euo pipefail
+          
+          APP_DIR="${APP_DIR}"
+          APP_NAME="${APP_NAME}"
+          EC2_USER="${EC2_USER}"
+          KEEP_RELEASES=${KEEP_RELEASES}
 
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           RELEASE_DIR="${APP_DIR}/releases/${TIMESTAMP}"
@@ -155,7 +160,8 @@ jobs:
           ls -1dt "${APP_DIR}/releases"/* 2>/dev/null \
             | sed -n "$((KEEP_RELEASES+1)),\$p" | xargs -r rm -rf || true
 
-          echo "Deployment completed to ${CURRENT_LINK}"EOF
+          echo "Deployment completed to ${CURRENT_LINK}"
+          EOF
 
       - name: Verify deployment & SSR
         env:
@@ -167,8 +173,11 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} "bash -se" <<'EOF'
+            ${EC2_USER}@${EC2_HOST} "bash -s" <<EOF
           set -euo pipefail
+          
+          APP_PORT="${APP_PORT}"
+          APP_NAME="${APP_NAME}"
 
           echo "Checking pm2 status for ${APP_NAME}"
           pm2 status "${APP_NAME}" || pm2 status
@@ -197,7 +206,8 @@ jobs:
             echo "⚠️ Could not conclusively detect SSR"
           fi
 
-          pm2 logs "${APP_NAME}" --lines 100 --nostream || true EOF
+          pm2 logs "${APP_NAME}" --lines 100 --nostream || true
+          EOF
 
       - name: Cleanup
         if: always()
