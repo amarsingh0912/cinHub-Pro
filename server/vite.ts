@@ -83,3 +83,61 @@ export function serveStatic(app: Express) {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
+
+/**
+ * Serve the app with SSR in production
+ * This handles both static assets and server-side rendered HTML
+ */
+export async function serveSSR(app: Express) {
+  const distPath = path.resolve(import.meta.dirname, "../dist/public");
+
+  if (!fs.existsSync(distPath)) {
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+    );
+  }
+
+  // Import the renderer module
+  const { initRenderer, renderPage, isSSREnabled } = await import('./renderer.js');
+  
+  // Initialize the SSR renderer
+  await initRenderer();
+
+  // Serve static client assets with caching
+  app.use(express.static(distPath, {
+    maxAge: '1y',
+    immutable: true,
+    index: false, // Don't serve index.html automatically
+  }));
+
+  // SSR catch-all route for all non-API requests
+  app.use("*", async (req, res, next) => {
+    try {
+      // Check if SSR is enabled
+      if (!isSSREnabled()) {
+        // Fall back to static index.html if SSR is disabled
+        return res.sendFile(path.resolve(distPath, "index.html"));
+      }
+
+      // Render the page with SSR
+      const html = await renderPage(req.originalUrl);
+      
+      if (html) {
+        // Successfully rendered with SSR
+        res.status(200)
+          .set({ 
+            'Content-Type': 'text/html',
+            'Cache-Control': 'no-cache', // Disable caching for HTML to ensure fresh content
+          })
+          .end(html);
+      } else {
+        // SSR failed, fall back to static HTML
+        res.sendFile(path.resolve(distPath, "index.html"));
+      }
+    } catch (error) {
+      console.error('SSR error:', error);
+      // Fall back to static HTML on error
+      res.sendFile(path.resolve(distPath, "index.html"));
+    }
+  });
+}

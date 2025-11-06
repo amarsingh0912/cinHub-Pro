@@ -50,6 +50,7 @@ A modern, full-stack movie and TV show discovery platform with advanced filterin
 For detailed information about the recommendations system, see [RECOMMENDATIONS_README.md](./RECOMMENDATIONS_README.md)
 
 ### Technical Features
+- **Server-Side Rendering (SSR)** - Full SSR in production for better SEO and performance
 - **Real-time Updates** - WebSocket notifications for cache job status
 - **Image Processing** - Automatic image upload and optimization to Cloudinary
 - **Background Jobs** - Queue-based image caching with priority system
@@ -61,7 +62,8 @@ For detailed information about the recommendations system, see [RECOMMENDATIONS_
 
 ### Frontend
 - **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite 5
+- **Build Tool**: Vite 5 with SSR support
+- **Rendering**: Server-Side Rendering (SSR) in production, client-side in development
 - **Routing**: Wouter (lightweight alternative to React Router)
 - **State Management**: TanStack Query (React Query v5) for server state
 - **UI Components**: Radix UI primitives

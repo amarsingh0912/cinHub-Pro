@@ -28,20 +28,21 @@ CineHub Pro is a full-stack movie and TV show discovery platform built with mode
 ┌─────────────────────────────────────────────────────────┐
 │                    Client (Browser)                      │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │          React SPA (Vite + TypeScript)           │   │
+│  │     React App (Vite + TypeScript + SSR)          │   │
 │  │  ┌────────────┐  ┌────────────┐  ┌───────────┐  │   │
 │  │  │   Pages    │  │ Components │  │   Hooks   │  │   │
 │  │  └────────────┘  └────────────┘  └───────────┘  │   │
 │  │  ┌─────────────────────────────────────────────┐│   │
 │  │  │    TanStack Query (State Management)        ││   │
 │  │  └─────────────────────────────────────────────┘│   │
+│  │  SSR: Hydration | Dev: Client-side rendering    │   │
 │  └──────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────┘
                            │
                   HTTPS / WebSocket
                            │
 ┌─────────────────────────────────────────────────────────┐
-│                Express.js Server (Node.js)               │
+│         Express.js Server (Node.js + SSR Renderer)       │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │                  API Routes                       │   │
 │  │  ┌──────────┐  ┌──────────┐  ┌────────────────┐  │   │
@@ -78,7 +79,7 @@ CineHub Pro is a full-stack movie and TV show discovery platform built with mode
 |------------|---------|---------|
 | **React** | UI framework | 18.x |
 | **TypeScript** | Type safety | 5.x |
-| **Vite** | Build tool | 5.x |
+| **Vite** | Build tool with SSR | 5.x |
 | **TanStack Query** | Server state management | 5.x |
 | **Wouter** | Routing | 3.x |
 | **Tailwind CSS** | Styling | 4.x |
@@ -124,6 +125,8 @@ CineHub Pro follows a layered architecture pattern:
 - UI/UX logic
 - Client-side routing
 - State management
+- SSR hydration (production)
+- Client-side rendering (development)
 
 #### 2. API Layer (Server Routes)
 - Request validation

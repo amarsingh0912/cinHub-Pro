@@ -10,6 +10,14 @@ CineHub Pro is a full-stack movie and TV show discovery platform built with Reac
 - Server URL: http://localhost:5000
 
 ## Recent Changes
+- **2025-11-06**: Implemented Server-Side Rendering (SSR)
+  - Added Vite SSR support with dual builds (client + server)
+  - Created SSR entry points (entry-client.tsx, entry-server.tsx)
+  - Integrated SSR renderer module for production
+  - Updated build scripts for SSR workflow
+  - Development uses client-side rendering, production uses SSR
+  - See `docs/SSR_IMPLEMENTATION.md` for details
+  
 - **2025-11-03**: Migrated from GitHub import to Replit environment
   - Set up PostgreSQL database connection
   - Configured all required API secrets (TMDB, Cloudinary, JWT, Session)
@@ -22,7 +30,7 @@ CineHub Pro is a full-stack movie and TV show discovery platform built with Reac
 ### Tech Stack
 **Frontend:**
 - React 18 with TypeScript
-- Vite 5 for build tooling
+- Vite 5 with SSR support (Server-Side Rendering in production)
 - Wouter for routing
 - TanStack Query (React Query) for server state management
 - Radix UI components
@@ -141,8 +149,11 @@ npm run cypress            # E2E tests
 
 ### Build for Production
 ```bash
-npm run build              # Build frontend + backend
-npm start                  # Run production server
+npm run build              # Build client + SSR server + backend
+npm run build:client       # Build client bundle only
+npm run build:server       # Build SSR server bundle only
+npm run build:backend      # Build backend only
+npm start                  # Run production server with SSR
 ```
 
 ## Important Notes
@@ -216,6 +227,7 @@ All required secrets are automatically available in production through Replit Se
 - **API Reference**: `/docs/API.md`
 - **Database Schema**: `/docs/DATABASE_SCHEMA.md`
 - **Architecture**: `/docs/ARCHITECTURE.md`
+- **SSR Implementation**: `/docs/SSR_IMPLEMENTATION.md`
 - **Testing Guide**: `TESTING.md`
 
 ### External Services
@@ -251,6 +263,6 @@ node precompute.cjs        # Precompute recommendations
 
 ---
 
-**Last Updated**: 2025-11-03
-**Status**: ✅ Production Ready
+**Last Updated**: 2025-11-06
+**Status**: ✅ Production Ready with SSR
 **Deployed**: Replit Environment

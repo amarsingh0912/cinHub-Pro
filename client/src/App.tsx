@@ -27,7 +27,7 @@ import TermsOfService from "@/pages/terms-of-service";
 import NotificationsDemo from "@/pages/notifications-demo";
 import DiscoverExamples from "@/pages/discover-examples";
 
-function Router() {
+function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
 
@@ -91,7 +91,7 @@ function App() {
         <FilterProvider>
           <TooltipProvider>
             <Toaster />
-            <Router />
+            <AppRoutes />
           </TooltipProvider>
         </FilterProvider>
       </ThemeProvider>

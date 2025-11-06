@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { hydrateRoot } from "react-dom/client";
 import { Router } from "wouter";
 import App from "./App";
 import "./index.css";
@@ -11,10 +11,10 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 });
 
-// Development: Client-side rendering with Router wrapper
-// Production: Uses entry-client.tsx for SSR hydration
-createRoot(document.getElementById("root")!).render(
+// Hydrate the server-rendered HTML
+// Wrap in Router to match server-side structure
+hydrateRoot(document.getElementById("root")!, (
   <Router>
     <App />
   </Router>
-);
+));

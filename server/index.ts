@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic, serveSSR, log } from "./vite";
 import { initializeAdminUser } from "./auth";
 import { websocketService } from "./services/websocketService";
 
@@ -81,7 +81,8 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Use SSR in production for better SEO and performance
+    await serveSSR(app);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
