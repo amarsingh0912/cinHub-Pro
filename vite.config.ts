@@ -23,11 +23,6 @@ export default defineConfig(({ command, mode }) => {
         : path.resolve(import.meta.dirname, "dist/public"),
       emptyOutDir: true,
       ssr: isSSRBuild ? path.resolve(import.meta.dirname, "client/src/entry-server.tsx") : undefined,
-      rollupOptions: {
-        input: isSSRBuild 
-          ? undefined 
-          : "index.html",
-      },
       manifest: !isSSRBuild, // Generate manifest for client build only
     },
     server: {
