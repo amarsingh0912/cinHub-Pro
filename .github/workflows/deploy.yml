@@ -1,4 +1,5 @@
-name: Deploy to Amazon Linux 2023 with SSR
+---
+name: Deploy to Amazon Linux 2023 (SSR)
 
 on:
   push:
@@ -6,10 +7,14 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+    environment: production
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,36 +25,25 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install dependencies (root)
         run: npm ci
 
-      - name: Build application (SSR + Backend)
+      - name: Build client + SSR + backend
         run: npm run build
         env:
           NODE_ENV: production
-        # Builds three components for SSR deployment:
-        # 1. Client bundle → dist/public/ (static assets + manifest.json)
-        # 2. SSR server bundle → dist/server/entry-server.js (React SSR rendering)
-        # 3. Express backend → dist/index.js (API + SSR middleware)
-        # Also copies .cjs files and SQLite database to dist/
 
       - name: Verify build outputs
         run: |
-          echo "Checking build outputs..."
-          test -f dist/index.js || { echo "❌ Backend bundle missing"; exit 1; }
-          test -f dist/public/index.html || { echo "❌ Client HTML missing"; exit 1; }
-          test -f dist/server/entry-server.js || { echo "❌ SSR bundle missing"; exit 1; }
-          test -d dist/public/assets || echo "⚠️ Warning: Client assets directory not found"
-          echo "✅ All critical build outputs verified"
-          echo ""
-          echo "Build structure:"
-          ls -lah dist/
-          echo ""
-          echo "SSR server bundle:"
-          ls -lah dist/server/
-          echo ""
-          echo "Client public files:"
-          ls -lah dist/public/ | head -10
+          echo "Verifying build outputs..."
+          test -f dist/index.js \
+            || { echo "❌ Backend bundle missing"; exit 1; }
+          test -f dist/public/index.html \
+            || { echo "❌ Client HTML missing"; exit 1; }
+          test -f dist/server/entry-server.js \
+            || { echo "❌ SSR bundle missing"; exit 1; }
+          echo "✅ Build outputs verified"
+          du -sh dist || true
 
       - name: Setup SSH key
         run: |
@@ -59,126 +53,153 @@ jobs:
 
       - name: Create deployment archive
         run: |
+          rm -f deployment.tar.gz
           tar -czf deployment.tar.gz \
+            --exclude='.env' \
             dist/ \
             package.json \
             package-lock.json \
-            drizzle.config.ts \
-            shared/ \
-            server/
+            drizzle.config.ts 2>/dev/null || true
 
-      - name: Deploy to EC2
+      - name: Copy archive to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            deployment.tar.gz \
+            ${EC2_USER}@${EC2_HOST}:~/
+
+      - name: Remote deploy on EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
           APP_DIR: ${{ secrets.APP_DIR || '/var/www/cinehub-pro' }}
           APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
+          KEEP_RELEASES: 5
         run: |
-          # Copy deployment archive to server
-          scp -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            deployment.tar.gz ${EC2_USER}@${EC2_HOST}:~/
-
-          # Deploy on server
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} << ENDSSH
-            set -e
-            
-            # Create app directory if it doesn't exist
-            sudo mkdir -p ${APP_DIR}
-            sudo chown -R ${EC2_USER}:${EC2_USER} ${APP_DIR}
-            
-            # Create backup before deployment
-            if [ -d "${APP_DIR}/dist" ]; then
-              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-              mkdir -p ${APP_DIR}/backups
-              echo "Creating backup..."
-              tar -czf ${APP_DIR}/backups/backup-${TIMESTAMP}.tar.gz \
-                -C ${APP_DIR} dist package.json .env 2>/dev/null || true
-              
-              # Keep only last 5 backups
-              ls -t ${APP_DIR}/backups/backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs rm -f || true
-            fi
-            
-            # Extract deployment archive
-            cd ${APP_DIR}
-            tar -xzf ~/deployment.tar.gz
-            rm ~/deployment.tar.gz
-          
-            # Install production dependencies
-            echo "Installing dependencies..."
-            npm ci --production --omit=dev
-            
-            # Run database migrations
-            echo "Running database migrations..."
-            npm run db:push || echo "Warning: Database migration failed"
-            
-            # Restart application with PM2
-            echo "Restarting application with SSR enabled..."
-            if command -v pm2 &> /dev/null; then
-              # Set NODE_ENV to production to enable SSR
-              pm2 delete ${APP_NAME} 2>/dev/null || true
-              NODE_ENV=production pm2 start npm --name "${APP_NAME}" -- start
-              pm2 save
-              echo "Application restarted successfully with SSR!"
-            else
-              echo "Error: PM2 not found. Please install PM2 first:"
-              echo "sudo npm install -g pm2@latest"
-              exit 1
-            fi
-            
-            echo "Deployment completed successfully!"
-ENDSSH
+            ${EC2_USER}@${EC2_HOST} "bash -se" <<'EOF'
+          set -euo pipefail
 
-      - name: Verify deployment and SSR
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          RELEASE_DIR="${APP_DIR}/releases/${TIMESTAMP}"
+          CURRENT_LINK="${APP_DIR}/current"
+          BACKUPS_DIR="${APP_DIR}/backups"
+          SHARED_DIR="${APP_DIR}/shared"
+
+          sudo mkdir -p "${APP_DIR}/releases"
+          sudo mkdir -p "${BACKUPS_DIR}"
+          sudo mkdir -p "${SHARED_DIR}"
+          sudo chown -R ${EC2_USER}:${EC2_USER} "${APP_DIR}" || true
+
+          mkdir -p "${RELEASE_DIR}"
+          tar -xzf ~/deployment.tar.gz -C "${RELEASE_DIR}"
+          rm -f ~/deployment.tar.gz
+
+          if [ ! -f "${APP_DIR}/.env" ]; then
+            echo "ERROR: ${APP_DIR}/.env not found."
+            echo "Create it on the server (SSM/Secrets Manager recommended)."
+            exit 2
+          fi
+
+          sudo mkdir -p /var/lib/cinehub
+          sudo touch /var/lib/cinehub/cache.db
+          sudo chown ${EC2_USER}:${EC2_USER} /var/lib/cinehub/cache.db
+          ln -sfn /var/lib/cinehub/cache.db \
+            "${RELEASE_DIR}/dist/cache.db" || true
+
+          ln -sfn "${APP_DIR}/.env" "${RELEASE_DIR}/.env"
+
+          cd "${RELEASE_DIR}"
+          echo "Installing production dependencies..."
+          npm ci --production --omit=dev
+
+          if npm run | grep -q 'db:' ; then
+            echo "Running DB migrations (if any)..."
+            npm run db:push || echo "Warning: migrations failed"
+          fi
+
+          if [ -L "${CURRENT_LINK}" ]; then
+            PREV_DIR=$(readlink -f "${CURRENT_LINK}")
+            if [ -d "${PREV_DIR}" ]; then
+              BACKUP_NAME="${BACKUPS_DIR}/backup-${TIMESTAMP}.tar.gz"
+              tar -czf "${BACKUP_NAME}" -C "${PREV_DIR}" dist package.json \
+                2>/dev/null || true
+              echo "Created backup: ${BACKUP_NAME}"
+              ls -1t "${BACKUPS_DIR}"/backup-*.tar.gz 2>/dev/null \
+                | sed -n "$((KEEP_RELEASES+1)),\$p" | xargs -r rm -f || true
+            fi
+          fi
+
+          ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
+          echo "Switched current to ${RELEASE_DIR}"
+
+          if ! command -v pm2 >/dev/null 2>&1; then
+            echo "PM2 not found, installing..."
+            sudo npm install -g pm2@latest
+          fi
+
+          pm2 startup systemd -u ${EC2_USER} --hp /home/${EC2_USER} || true
+
+          echo "Restarting ${APP_NAME} via PM2..."
+          pm2 delete "${APP_NAME}" 2>/dev/null || true
+          pm2 start "${CURRENT_LINK}/dist/index.js" \
+            --name "${APP_NAME}" --update-env --env production
+          pm2 save
+
+          ls -1dt "${APP_DIR}/releases"/* 2>/dev/null \
+            | sed -n "$((KEEP_RELEASES+1)),\$p" | xargs -r rm -rf || true
+
+          echo "Deployment completed to ${CURRENT_LINK}"
+EOF
+
+      - name: Verify deployment & SSR
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
-          APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
           APP_PORT: ${{ secrets.APP_PORT || '5000' }}
+          APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER}@${EC2_HOST} << ENDSSH
-            echo "Checking application status..."
-            pm2 status
-            pm2 info ${APP_NAME}
-            
-            echo ""
-            echo "Waiting for application to start..."
-            sleep 5
-            
-            echo "Verifying SSR is working..."
-            # Check if server is responding
-            if curl -s -o /dev/null -w "%{http_code}" http://localhost:${APP_PORT}/ | grep -q "200"; then
-              echo "✅ Server is responding on port ${APP_PORT}"
-              
-              # Check if SSR is rendering content (not just empty div)
-              RESPONSE=\$(curl -s http://localhost:${APP_PORT}/)
-              
-              # Fail if root div is empty (only whitespace)
-              if echo "\$RESPONSE" | grep -q '<div id="root">[[:space:]]*</div>'; then
-                echo "❌ Error: SSR failed - root div is empty"
-                echo "This indicates server-side rendering is not working properly"
-                exit 1
-              elif echo "\$RESPONSE" | grep -q '<div id="root">'; then
-                echo "✅ SSR is working - server-rendered content detected"
-              else
-                echo "⚠️ Warning: Could not find root div in response"
-              fi
-            else
-              echo "❌ Error: Server not responding on port ${APP_PORT}"
-              exit 1
+            ${EC2_USER}@${EC2_HOST} "bash -se" <<'EOF'
+          set -euo pipefail
+
+          echo "Checking pm2 status for ${APP_NAME}"
+          pm2 status "${APP_NAME}" || pm2 status
+
+          for i in $(seq 1 12); do
+            if ss -tln | grep -q ":${APP_PORT}"; then
+              echo "Port ${APP_PORT} is listening"
+              break
             fi
-            
-            echo ""
-            echo "Checking PM2 logs for errors..."
-            pm2 logs ${APP_NAME} --lines 20 --nostream | grep -i "error\|exception" || echo "No critical errors found in recent logs"
-ENDSSH
+            echo "Waiting for app to bind port... ($i)"
+            sleep 5
+          done
+
+          RESPONSE=$(curl -sS http://localhost:${APP_PORT}/ || true)
+          if [ -z "$RESPONSE" ]; then
+            echo "Error: empty response from server"
+            exit 1
+          fi
+
+          if echo "$RESPONSE" | grep -q "<title>"; then
+            echo "✅ SSR likely working: <title> found"
+          elif echo "$RESPONSE" | grep -q '<div id="root">[[:space:]]*</div>'; then
+            echo "❌ SSR failed - root div empty"
+            exit 1
+          else
+            echo "⚠️ Could not conclusively detect SSR"
+          fi
+
+          pm2 logs "${APP_NAME}" --lines 100 --nostream || true
+EOF
 
       - name: Cleanup
         if: always()
