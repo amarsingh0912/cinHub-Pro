@@ -1,0 +1,52 @@
+[ec2-user@ip-172-31-4-86 cinehub-pro]$ pm2 logs
+[TAILING] Tailing last 15 lines for [all] processes (change the value with --lines option)
+/home/ec2-user/.pm2/pm2.log last 15 lines:
+PM2        | 2025-11-06T10:55:14: PM2 log: Script /usr/bin/npm had too many unstable restarts (16). Stopped. "errored"
+PM2        | 2025-11-06T13:01:52: PM2 log: Stopping app:cinehub-pro id:0
+PM2        | 2025-11-06T13:01:52: PM2 error: app=cinehub-pro id=0 does not have a pid
+PM2        | 2025-11-06T13:01:52: PM2 log: App [cinehub-pro:0] starting in -fork mode-
+PM2        | 2025-11-06T13:01:52: PM2 log: App [cinehub-pro:0] online
+PM2        | 2025-11-06T13:10:47: PM2 log: Stopping app:cinehub-pro id:0
+PM2        | 2025-11-06T13:10:47: PM2 log: App [cinehub-pro:0] exited with code [0] via signal [SIGINT]
+PM2        | 2025-11-06T13:10:48: PM2 log: pid=1000226 msg=process killed
+PM2        | 2025-11-06T13:10:48: PM2 log: App [cinehub-pro:0] starting in -fork mode-
+PM2        | 2025-11-06T13:10:48: PM2 log: App [cinehub-pro:0] online
+PM2        | 2025-11-06T15:35:55: PM2 log: Stopping app:cinehub-pro id:0
+PM2        | 2025-11-06T15:35:55: PM2 log: App [cinehub-pro:0] exited with code [0] via signal [SIGINT]
+PM2        | 2025-11-06T15:35:55: PM2 log: pid=1001058 msg=process killed
+PM2        | 2025-11-06T15:45:58: PM2 log: App [cinehub-pro:0] starting in -fork mode-
+PM2        | 2025-11-06T15:45:58: PM2 log: App [cinehub-pro:0] online
+
+/home/ec2-user/.pm2/logs/cinehub-pro-error.log last 15 lines:
+0|cinehub- | 2025-11-06T15:46:02: Error: Build failed with 1 error:
+0|cinehub- | 2025-11-06T15:46:02: error: Could not resolve "/var/www/cinehub-pro/releases/20251106-154434/vite.config.ts"
+0|cinehub- | 2025-11-06T15:46:02:     at failureErrorWithLog (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+0|cinehub- | 2025-11-06T15:46:02:     at /var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+0|cinehub- | 2025-11-06T15:46:02:     at runOnEndCallbacks (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+0|cinehub- | 2025-11-06T15:46:02:     at buildResponseToResult (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+0|cinehub- | 2025-11-06T15:46:02:     at /var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:970:16
+0|cinehub- | 2025-11-06T15:46:02:     at responseCallbacks.<computed> (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:622:9)
+0|cinehub- | 2025-11-06T15:46:02:     at handleIncomingPacket (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:677:12)
+0|cinehub- | 2025-11-06T15:46:02:     at Socket.readFromStdout (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+0|cinehub- | 2025-11-06T15:46:02:     at Socket.emit (node:events:524:28)
+0|cinehub- | 2025-11-06T15:46:02:     at addChunk (node:internal/streams/readable:561:12) {
+0|cinehub- | 2025-11-06T15:46:02:   errors: [Getter/Setter],
+0|cinehub- | 2025-11-06T15:46:02:   warnings: [Getter/Setter]
+0|cinehub- | 2025-11-06T15:46:02: }
+
+/home/ec2-user/.pm2/logs/cinehub-pro-out.log last 15 lines:
+0|cinehub- | 2025-11-06T15:46:02: [dotenv@17.2.2] injecting env (19) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+0|cinehub- | 2025-11-06T15:46:02: SendGrid configured successfully
+0|cinehub- | 2025-11-06T15:46:02: Cloudinary configured successfully
+0|cinehub- | 2025-11-06T15:46:02: Cache queue worker started
+0|cinehub- | 2025-11-06T15:46:02: [dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+0|cinehub- | 2025-11-06T15:46:02: 📊 TMDB Sync Service connected to database
+0|cinehub- | 2025-11-06T15:46:02: ⏰ Scheduled trending content sync every 6 hours
+0|cinehub- | 2025-11-06T15:46:02: 🚀 Starting TMDB trending content sync...
+0|cinehub- | 2025-11-06T15:46:02: 🔄 Starting trending movies sync...
+0|cinehub- | 2025-11-06T15:46:02: 🔄 TMDB background sync started (runs every 6 hours)
+0|cinehub- | 2025-11-06T15:46:02: WebSocket server initialized on /ws/cache-status
+0|cinehub- | 2025-11-06T15:46:03: ✅ Trending movies sync complete: 0 new, 20 updated
+0|cinehub- | 2025-11-06T15:46:03: 🔄 Starting trending TV shows sync...
+0|cinehub- | 2025-11-06T15:46:03: ✅ Trending TV shows sync complete: 0 new, 20 updated
+0|cinehub- | 2025-11-06T15:46:03: 🎬 Total sync complete: 0 new items, 40 updated

@@ -73,7 +73,9 @@ export function serveStatic(app: Express) {
  * This handles both static assets and server-side rendered HTML
  */
 export async function serveSSR(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../dist/public");
+  // In production, the bundled code runs from dist/index.js
+  // So the public directory is at ./public relative to dist
+  const distPath = path.resolve(import.meta.dirname, "./public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(

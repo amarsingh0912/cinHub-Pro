@@ -17,21 +17,23 @@ let render: ((url: string) => string) | null = null;
  */
 export async function initRenderer() {
   if (isProduction) {
-    // Load the HTML template
-    const templatePath = path.resolve(__dirname, '../dist/public/index.html');
+    // In production, the bundled code runs from dist/index.js
+    // So paths should be relative to the dist directory
+    const templatePath = path.resolve(__dirname, './public/index.html');
     template = fs.readFileSync(templatePath, 'utf-8');
     
     // For production SSR: ensure the template uses entry-client for hydration
     // The build process outputs hashed bundle names, so we don't need to modify script tags
     
     // Load the SSR manifest
-    const manifestPath = path.resolve(__dirname, '../dist/public/.vite/manifest.json');
+    const manifestPath = path.resolve(__dirname, './public/.vite/manifest.json');
     if (fs.existsSync(manifestPath)) {
       ssrManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
     }
     
-    // Import the SSR bundle
-    const entryServer = await import('../dist/server/entry-server.js');
+    // Import the SSR bundle - use dynamic path to prevent bundler from resolving at build time
+    const ssrPath = path.resolve(__dirname, './server/entry-server.js');
+    const entryServer = await import(/* @vite-ignore */ ssrPath);
     render = entryServer.render;
     
     console.log('✅ SSR renderer initialized in production mode');
