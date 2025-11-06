@@ -155,8 +155,7 @@ jobs:
           ls -1dt "${APP_DIR}/releases"/* 2>/dev/null \
             | sed -n "$((KEEP_RELEASES+1)),\$p" | xargs -r rm -rf || true
 
-          echo "Deployment completed to ${CURRENT_LINK}"
-EOF
+          echo "Deployment completed to ${CURRENT_LINK}"EOF
 
       - name: Verify deployment & SSR
         env:
@@ -198,8 +197,7 @@ EOF
             echo "⚠️ Could not conclusively detect SSR"
           fi
 
-          pm2 logs "${APP_NAME}" --lines 100 --nostream || true
-EOF
+          pm2 logs "${APP_NAME}" --lines 100 --nostream || true EOF
 
       - name: Cleanup
         if: always()
