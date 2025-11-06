@@ -1,0 +1,36 @@
+2025-11-06T15:46:02: ✘ [ERROR] Could not resolve "/var/www/cinehub-pro/releases/20251106-154434/vite.config.ts"
+2025-11-06T15:46:02:
+2025-11-06T15:46:02: failed to load config from /var/www/cinehub-pro/releases/20251106-154434/vite.config.ts
+2025-11-06T15:46:02: Error: Build failed with 1 error:
+2025-11-06T15:46:02: error: Could not resolve "/var/www/cinehub-pro/releases/20251106-154434/vite.config.ts"
+2025-11-06T15:46:02:     at failureErrorWithLog (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+2025-11-06T15:46:02:     at /var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+2025-11-06T15:46:02:     at runOnEndCallbacks (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+2025-11-06T15:46:02:     at buildResponseToResult (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+2025-11-06T15:46:02:     at /var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:970:16
+2025-11-06T15:46:02:     at responseCallbacks.<computed> (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:622:9)
+2025-11-06T15:46:02:     at handleIncomingPacket (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:677:12)
+2025-11-06T15:46:02:     at Socket.readFromStdout (/var/www/cinehub-pro/releases/20251106-154434/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+2025-11-06T15:46:02:     at Socket.emit (node:events:524:28)
+2025-11-06T15:46:02:     at addChunk (node:internal/streams/readable:561:12) {
+2025-11-06T15:46:02:   errors: [Getter/Setter],
+2025-11-06T15:46:02:   warnings: [Getter/Setter]
+2025-11-06T15:46:02: }
+2025-11-06T16:00:15: ✘ [ERROR] Could not resolve "/var/www/cinehub-pro/releases/20251106-155835/vite.config.ts"
+2025-11-06T16:00:15:
+2025-11-06T16:00:15: failed to load config from /var/www/cinehub-pro/releases/20251106-155835/vite.config.ts
+2025-11-06T16:00:15: Error: Build failed with 1 error:
+2025-11-06T16:00:15: error: Could not resolve "/var/www/cinehub-pro/releases/20251106-155835/vite.config.ts"
+2025-11-06T16:00:15:     at failureErrorWithLog (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+2025-11-06T16:00:15:     at /var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+2025-11-06T16:00:15:     at runOnEndCallbacks (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+2025-11-06T16:00:15:     at buildResponseToResult (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+2025-11-06T16:00:15:     at /var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:970:16
+2025-11-06T16:00:15:     at responseCallbacks.<computed> (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:622:9)
+2025-11-06T16:00:15:     at handleIncomingPacket (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:677:12)
+2025-11-06T16:00:15:     at Socket.readFromStdout (/var/www/cinehub-pro/releases/20251106-155835/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+2025-11-06T16:00:15:     at Socket.emit (node:events:524:28)
+2025-11-06T16:00:15:     at addChunk (node:internal/streams/readable:561:12) {
+2025-11-06T16:00:15:   errors: [Getter/Setter],
+2025-11-06T16:00:15:   warnings: [Getter/Setter]
+2025-11-06T16:00:15: }
