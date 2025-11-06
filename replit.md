@@ -10,13 +10,18 @@ CineHub Pro is a full-stack movie and TV show discovery platform built with Reac
 - Server URL: http://localhost:5000
 
 ## Recent Changes
-- **2025-11-06**: Implemented Server-Side Rendering (SSR)
+- **2025-11-06**: Implemented Server-Side Rendering (SSR) + Updated Deployment
   - Added Vite SSR support with dual builds (client + server)
   - Created SSR entry points (entry-client.tsx, entry-server.tsx)
   - Integrated SSR renderer module for production
   - Updated build scripts for SSR workflow
   - Development uses client-side rendering, production uses SSR
-  - See `docs/SSR_IMPLEMENTATION.md` for details
+  - **Updated GitHub Actions workflow** for SSR deployment:
+    - Added build verification step for SSR bundles
+    - Enhanced deployment verification with SSR health checks
+    - Updated PM2 restart to ensure NODE_ENV=production for SSR
+    - Added server-rendered content validation
+  - See `docs/SSR_IMPLEMENTATION.md` for SSR details
   
 - **2025-11-03**: Migrated from GitHub import to Replit environment
   - Set up PostgreSQL database connection

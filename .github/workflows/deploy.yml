@@ -1,4 +1,4 @@
-name: Deploy to Amazon Linux 2023
+name: Deploy to Amazon Linux 2023 with SSR
 
 on:
   push:
@@ -23,8 +23,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build application
+      - name: Build application (SSR + Backend)
         run: npm run build
+        env:
+          NODE_ENV: production
+        # Builds three components for SSR deployment:
+        # 1. Client bundle → dist/public/ (static assets + manifest.json)
+        # 2. SSR server bundle → dist/server/entry-server.js (React SSR rendering)
+        # 3. Express backend → dist/index.js (API + SSR middleware)
+        # Also copies .cjs files and SQLite database to dist/
+
+      - name: Verify build outputs
+        run: |
+          echo "Checking build outputs..."
+          test -f dist/index.js || { echo "❌ Backend bundle missing"; exit 1; }
+          test -f dist/public/index.html || { echo "❌ Client HTML missing"; exit 1; }
+          test -f dist/server/entry-server.js || { echo "❌ SSR bundle missing"; exit 1; }
+          test -d dist/public/assets || echo "⚠️ Warning: Client assets directory not found"
+          echo "✅ All critical build outputs verified"
+          echo ""
+          echo "Build structure:"
+          ls -lah dist/
+          echo ""
+          echo "SSR server bundle:"
+          ls -lah dist/server/
+          echo ""
+          echo "Client public files:"
+          ls -lah dist/public/ | head -10
 
       - name: Setup SSH key
         run: |
@@ -68,10 +93,10 @@ jobs:
             
             # Create backup before deployment
             if [ -d "${APP_DIR}/dist" ]; then
-              TIMESTAMP=\$(date +%Y%m%d-%H%M%S)
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
               mkdir -p ${APP_DIR}/backups
               echo "Creating backup..."
-              tar -czf ${APP_DIR}/backups/backup-\${TIMESTAMP}.tar.gz \
+              tar -czf ${APP_DIR}/backups/backup-${TIMESTAMP}.tar.gz \
                 -C ${APP_DIR} dist package.json .env 2>/dev/null || true
               
               # Keep only last 5 backups
@@ -92,12 +117,13 @@ jobs:
             npm run db:push || echo "Warning: Database migration failed"
             
             # Restart application with PM2
-            echo "Restarting application..."
+            echo "Restarting application with SSR enabled..."
             if command -v pm2 &> /dev/null; then
+              # Set NODE_ENV to production to enable SSR
               pm2 delete ${APP_NAME} 2>/dev/null || true
-              pm2 start npm --name "${APP_NAME}" -- start
+              NODE_ENV=production pm2 start npm --name "${APP_NAME}" -- start
               pm2 save
-              echo "Application restarted successfully!"
+              echo "Application restarted successfully with SSR!"
             else
               echo "Error: PM2 not found. Please install PM2 first:"
               echo "sudo npm install -g pm2@latest"
@@ -105,12 +131,14 @@ jobs:
             fi
             
             echo "Deployment completed successfully!"
+ENDSSH
 
-      - name: Verify deployment
+      - name: Verify deployment and SSR
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER || 'ec2-user' }}
           APP_NAME: ${{ secrets.APP_NAME || 'cinehub-pro' }}
+          APP_PORT: ${{ secrets.APP_PORT || '5000' }}
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
@@ -119,6 +147,38 @@ jobs:
             echo "Checking application status..."
             pm2 status
             pm2 info ${APP_NAME}
+            
+            echo ""
+            echo "Waiting for application to start..."
+            sleep 5
+            
+            echo "Verifying SSR is working..."
+            # Check if server is responding
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:${APP_PORT}/ | grep -q "200"; then
+              echo "✅ Server is responding on port ${APP_PORT}"
+              
+              # Check if SSR is rendering content (not just empty div)
+              RESPONSE=\$(curl -s http://localhost:${APP_PORT}/)
+              
+              # Fail if root div is empty (only whitespace)
+              if echo "\$RESPONSE" | grep -q '<div id="root">[[:space:]]*</div>'; then
+                echo "❌ Error: SSR failed - root div is empty"
+                echo "This indicates server-side rendering is not working properly"
+                exit 1
+              elif echo "\$RESPONSE" | grep -q '<div id="root">'; then
+                echo "✅ SSR is working - server-rendered content detected"
+              else
+                echo "⚠️ Warning: Could not find root div in response"
+              fi
+            else
+              echo "❌ Error: Server not responding on port ${APP_PORT}"
+              exit 1
+            fi
+            
+            echo ""
+            echo "Checking PM2 logs for errors..."
+            pm2 logs ${APP_NAME} --lines 20 --nostream | grep -i "error\|exception" || echo "No critical errors found in recent logs"
+ENDSSH
 
       - name: Cleanup
         if: always()
