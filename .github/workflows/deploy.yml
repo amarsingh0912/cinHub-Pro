@@ -54,9 +54,14 @@ jobs:
       - name: Create deployment archive
         run: |
           rm -f deployment.tar.gz
+          # Create server directory with only .cjs files for runtime
+          mkdir -p server_runtime
+          cp server/*.cjs server_runtime/ 2>/dev/null || true
+          cp server/cinehub.db server_runtime/ 2>/dev/null || true
           tar -czf deployment.tar.gz \
             --exclude='.env' \
             dist/ \
+            server_runtime/ \
             package.json \
             package-lock.json \
             drizzle.config.ts 2>/dev/null || true
@@ -120,6 +125,11 @@ jobs:
           mkdir -p "${RELEASE_DIR}"
           tar -xzf ~/deployment.tar.gz -C "${RELEASE_DIR}"
           rm -f ~/deployment.tar.gz
+          
+          # Move server_runtime to server for correct paths
+          if [ -d "${RELEASE_DIR}/server_runtime" ]; then
+            mv "${RELEASE_DIR}/server_runtime" "${RELEASE_DIR}/server"
+          fi
 
           if [ ! -f "${APP_DIR}/.env" ]; then
             echo "ERROR: ${APP_DIR}/.env not found."
