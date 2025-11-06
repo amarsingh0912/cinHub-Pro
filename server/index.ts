@@ -9,6 +9,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, serveSSR, log } from "./vite";
 import { initializeAdminUser } from "./auth";
 import { websocketService } from "./services/websocketService";
+import { error as logError } from "./utils/logger.js";
 
 const app = express();
 
@@ -62,12 +63,9 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
     
     // Log the error safely without exposing sensitive data
-    console.error(`Error ${status}:`, {
-      message: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-      url: _req.url,
-      method: _req.method
-    });
+    logError(`Error ${status}: ${err.message} - ${_req.method} ${_req.url}`, 'express', 
+      process.env.NODE_ENV === 'development' ? err : undefined
+    );
 
     // Send error response and end - don't throw to avoid crashing process
     if (!res.headersSent) {

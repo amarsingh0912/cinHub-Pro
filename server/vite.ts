@@ -4,16 +4,10 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
+import { log as logWithTimestamp } from "./utils/logger.js";
 
 export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-
-  console.log(`${formattedTime} [${source}] ${message}`);
+  logWithTimestamp(message, source);
 }
 
 export async function setupVite(app: Express, server: Server) {
@@ -51,6 +45,7 @@ export async function setupVite(app: Express, server: Server) {
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
+      console.error('[ERROR]', e);
       next(e);
     }
   });
@@ -124,7 +119,8 @@ export async function serveSSR(app: Express) {
         res.sendFile(path.resolve(distPath, "index.html"));
       }
     } catch (error) {
-      console.error('SSR error:', error);
+      const { error: logError } = await import('./utils/logger.js');
+      logError('SSR rendering failed', 'ssr', error);
       // Fall back to static HTML on error
       res.sendFile(path.resolve(distPath, "index.html"));
     }

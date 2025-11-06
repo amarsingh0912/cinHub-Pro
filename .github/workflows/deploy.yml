@@ -54,10 +54,11 @@ jobs:
       - name: Create deployment archive
         run: |
           rm -f deployment.tar.gz
-          # Create server directory with only .cjs files for runtime
-          mkdir -p server_runtime
+          # Create server directory with only .cjs files and utils for runtime
+          mkdir -p server_runtime/utils
           cp server/*.cjs server_runtime/ 2>/dev/null || true
           cp server/cinehub.db server_runtime/ 2>/dev/null || true
+          cp server/utils/*.js server_runtime/utils/ 2>/dev/null || true
           tar -czf deployment.tar.gz \
             --exclude='.env' \
             dist/ \
@@ -179,7 +180,11 @@ jobs:
           echo "Restarting ${APP_NAME} via PM2..."
           pm2 delete "${APP_NAME}" 2>/dev/null || true
           pm2 start "${CURRENT_LINK}/dist/index.js" \
-            --name "${APP_NAME}" --update-env --env production
+            --name "${APP_NAME}" \
+            --update-env \
+            --env production \
+            --time \
+            --log-date-format "YYYY-MM-DD HH:mm:ss Z"
           pm2 save
 
           ls -1dt "${APP_DIR}/releases"/* 2>/dev/null \
