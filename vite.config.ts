@@ -26,8 +26,7 @@ export default defineConfig(({ command, mode }) => {
       rollupOptions: {
         input: isSSRBuild 
           ? undefined 
-          : path.resolve(import.meta.dirname, "client/index.html"),
-        // No need to override input for client build - Vite will process index.html
+          : "index.html",
       },
       manifest: !isSSRBuild, // Generate manifest for client build only
     },
