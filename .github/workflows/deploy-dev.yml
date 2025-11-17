@@ -1,0 +1,213 @@
+---
+name: Deploy to EC2 (Development Mode)
+
+on:
+  push:
+    branches:
+      - develop
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Deploy to EC2 in development mode
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          APP_DIR: ${{ secrets.APP_DIR }}
+          APP_NAME: ${{ secrets.APP_NAME }}
+          GIT_REPO: ${{ secrets.GIT_REPO }}
+          GIT_BRANCH: ${{ secrets.GIT_BRANCH }}
+        run: |
+          # Set defaults for empty or unset variables
+          EC2_USER_VAR="${EC2_USER}"
+          [ -z "$EC2_USER_VAR" ] && EC2_USER_VAR="ec2-user"
+          
+          APP_DIR_VAR="${APP_DIR}"
+          [ -z "$APP_DIR_VAR" ] && APP_DIR_VAR="/var/www/cinehub-pro-dev"
+          
+          APP_NAME_VAR="${APP_NAME}"
+          [ -z "$APP_NAME_VAR" ] && APP_NAME_VAR="cinehub-pro-dev"
+          
+          GIT_BRANCH_VAR="${GIT_BRANCH}"
+          [ -z "$GIT_BRANCH_VAR" ] && GIT_BRANCH_VAR="develop"
+          
+          echo "Deploying to: $APP_DIR_VAR as $EC2_USER_VAR (development mode)"
+          
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "$GIT_REPO" "$GIT_BRANCH_VAR" <<'ENDSSH'
+          set -euo pipefail
+          
+          APP_DIR="$1"
+          APP_NAME="$2"
+          EC2_USER="$3"
+          GIT_REPO="$4"
+          GIT_BRANCH="$5"
+
+          echo "=== Development Deployment Started ==="
+          echo "App Directory: ${APP_DIR}"
+          echo "App Name: ${APP_NAME}"
+          echo "Git Branch: ${GIT_BRANCH}"
+          
+          # Create app directory if it doesn't exist
+          sudo mkdir -p "${APP_DIR}"
+          sudo chown -R ${EC2_USER}:${EC2_USER} "${APP_DIR}"
+          
+          # Clone or update repository
+          if [ ! -d "${APP_DIR}/.git" ]; then
+            echo "Cloning repository..."
+            if [ -n "$GIT_REPO" ]; then
+              git clone -b "${GIT_BRANCH}" "${GIT_REPO}" "${APP_DIR}"
+            else
+              echo "ERROR: GIT_REPO secret not set. Cannot clone repository."
+              exit 1
+            fi
+          else
+            echo "Updating existing repository..."
+            cd "${APP_DIR}"
+            git fetch origin
+            git reset --hard origin/${GIT_BRANCH}
+            git clean -fd
+          fi
+          
+          cd "${APP_DIR}"
+          
+          # Verify .env file exists
+          if [ ! -f "${APP_DIR}/.env" ]; then
+            echo "WARNING: ${APP_DIR}/.env not found."
+            echo "Please create environment file with development settings."
+            echo "You may need to manually create this file before the app runs correctly."
+          fi
+          
+          # Install Node.js if not present (for Amazon Linux 2023)
+          if ! command -v node >/dev/null 2>&1; then
+            echo "Installing Node.js..."
+            curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+            sudo yum install -y nodejs
+          fi
+          
+          # Verify Node.js version
+          echo "Node.js version: $(node --version)"
+          echo "npm version: $(npm --version)"
+          
+          # Install dependencies
+          echo "Installing dependencies..."
+          npm install
+          
+          # Install PM2 globally if not present
+          if ! command -v pm2 >/dev/null 2>&1; then
+            echo "Installing PM2..."
+            sudo npm install -g pm2@latest
+          fi
+          
+          # Setup PM2 startup script
+          pm2 startup systemd -u ${EC2_USER} --hp /home/${EC2_USER} || true
+          
+          # Stop existing process if running
+          echo "Stopping existing ${APP_NAME} process..."
+          pm2 delete "${APP_NAME}" 2>/dev/null || echo "No existing process found"
+          
+          # Start application in development mode
+          echo "Starting ${APP_NAME} in development mode..."
+          pm2 start npm \
+            --name "${APP_NAME}" \
+            --interpreter none \
+            -- run dev \
+            --update-env \
+            --time \
+            --log-date-format "YYYY-MM-DD HH:mm:ss Z" \
+            --watch false
+          
+          # Save PM2 configuration
+          pm2 save
+          
+          echo "=== Development Deployment Completed ==="
+          echo "Application is running in development mode"
+          echo ""
+          echo "Useful PM2 commands:"
+          echo "  pm2 status ${APP_NAME}  - View app status"
+          echo "  pm2 logs ${APP_NAME}    - View app logs"
+          echo "  pm2 restart ${APP_NAME} - Restart app"
+          echo "  pm2 stop ${APP_NAME}    - Stop app"
+          ENDSSH
+
+      - name: Verify deployment
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+          APP_NAME: ${{ secrets.APP_NAME }}
+        run: |
+          # Set defaults for empty or unset variables
+          EC2_USER_VAR="${EC2_USER}"
+          [ -z "$EC2_USER_VAR" ] && EC2_USER_VAR="ec2-user"
+          
+          APP_PORT_VAR="${APP_PORT}"
+          [ -z "$APP_PORT_VAR" ] && APP_PORT_VAR="5000"
+          
+          APP_NAME_VAR="${APP_NAME}"
+          [ -z "$APP_NAME_VAR" ] && APP_NAME_VAR="cinehub-pro-dev"
+          
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_PORT_VAR" "$APP_NAME_VAR" <<'ENDSSH'
+          set -euo pipefail
+          
+          APP_PORT="$1"
+          APP_NAME="$2"
+
+          echo "=== Verifying Deployment ==="
+          echo "Checking PM2 status for ${APP_NAME}"
+          pm2 status "${APP_NAME}"
+          
+          echo ""
+          echo "Waiting for application to start..."
+          for i in $(seq 1 12); do
+            if ss -tln | grep -q ":${APP_PORT}"; then
+              echo "✅ Application is listening on port ${APP_PORT}"
+              break
+            fi
+            echo "Waiting for app to bind port... ($i/12)"
+            sleep 5
+          done
+          
+          if ! ss -tln | grep -q ":${APP_PORT}"; then
+            echo "❌ Application failed to bind to port ${APP_PORT}"
+            echo "Recent logs:"
+            pm2 logs "${APP_NAME}" --lines 50 --nostream || true
+            exit 1
+          fi
+          
+          echo ""
+          echo "Testing HTTP response..."
+          RESPONSE=$(curl -sS http://localhost:${APP_PORT}/ || true)
+          if [ -z "$RESPONSE" ]; then
+            echo "❌ Empty response from server"
+            exit 1
+          fi
+          
+          echo "✅ Server is responding"
+          echo ""
+          echo "Recent application logs:"
+          pm2 logs "${APP_NAME}" --lines 30 --nostream || true
+          ENDSSH
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

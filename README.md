@@ -494,9 +494,18 @@ This creates:
 npm start
 ```
 
-### Deploy to EC2
+### Deploy to EC2 with GitHub Actions
 
-See [DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed EC2 deployment instructions with GitHub Actions.
+CineHub Pro includes automated deployment workflows for Amazon Linux 2023 EC2 instances:
+
+- **Production Deployment** - Optimized builds with SSR (triggers on push to `main`)
+- **Development Deployment** - Hot reload development mode (triggers on push to `develop`/`dev`)
+
+**Quick Setup:**
+1. Configure GitHub Secrets (SSH key, EC2 host, etc.)
+2. Push to your branch - deployment happens automatically!
+
+See [DEPLOYMENT.md](./.github/DEPLOYMENT.md) for detailed setup instructions or [QUICK_SETUP.md](./.github/QUICK_SETUP.md) for a 5-minute setup guide.
 
 ### Environment Variables for Production
 
