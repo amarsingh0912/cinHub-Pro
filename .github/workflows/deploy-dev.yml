@@ -46,13 +46,13 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "$GIT_REPO" <<'ENDSSH'
-          set -euo pipefail
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "${GIT_REPO:-}" <<'ENDSSH'
+          set -eo pipefail
           
-          APP_DIR="$1"
-          APP_NAME="$2"
-          EC2_USER="$3"
-          GIT_REPO="$4"
+          APP_DIR="${1:-}"
+          APP_NAME="${2:-}"
+          EC2_USER="${3:-}"
+          GIT_REPO="${4:-}"
 
           echo "=== Development Deployment Started ==="
           echo "App Directory: ${APP_DIR}"
