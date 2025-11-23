@@ -30,7 +30,6 @@ jobs:
           APP_DIR: ${{ secrets.APP_DIR }}
           APP_NAME: ${{ secrets.APP_NAME }}
           GIT_REPO: ${{ secrets.GIT_REPO }}
-          GIT_BRANCH: ${{ secrets.GIT_BRANCH }}
         run: |
           # Set defaults for empty or unset variables
           EC2_USER_VAR="${EC2_USER}"
@@ -42,27 +41,22 @@ jobs:
           APP_NAME_VAR="${APP_NAME}"
           [ -z "$APP_NAME_VAR" ] && APP_NAME_VAR="cinehub-pro-dev"
           
-          GIT_BRANCH_VAR="${GIT_BRANCH}"
-          [ -z "$GIT_BRANCH_VAR" ] && GIT_BRANCH_VAR="develop"
-          
           echo "Deploying to: $APP_DIR_VAR as $EC2_USER_VAR (development mode)"
           
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "$GIT_REPO" "$GIT_BRANCH_VAR" <<'ENDSSH'
+            ${EC2_USER_VAR}@${EC2_HOST} bash -s "$APP_DIR_VAR" "$APP_NAME_VAR" "$EC2_USER_VAR" "$GIT_REPO" <<'ENDSSH'
           set -euo pipefail
           
           APP_DIR="$1"
           APP_NAME="$2"
           EC2_USER="$3"
           GIT_REPO="$4"
-          GIT_BRANCH="$5"
 
           echo "=== Development Deployment Started ==="
           echo "App Directory: ${APP_DIR}"
           echo "App Name: ${APP_NAME}"
-          echo "Git Branch: ${GIT_BRANCH}"
           
           # Create app directory if it doesn't exist
           sudo mkdir -p "${APP_DIR}"
@@ -72,7 +66,7 @@ jobs:
           if [ ! -d "${APP_DIR}/.git" ]; then
             echo "Cloning repository..."
             if [ -n "$GIT_REPO" ]; then
-              git clone -b "${GIT_BRANCH}" "${GIT_REPO}" "${APP_DIR}"
+              git clone "${GIT_REPO}" "${APP_DIR}"
             else
               echo "ERROR: GIT_REPO secret not set. Cannot clone repository."
               exit 1
@@ -81,7 +75,7 @@ jobs:
             echo "Updating existing repository..."
             cd "${APP_DIR}"
             git fetch origin
-            git reset --hard origin/${GIT_BRANCH}
+            git pull
             git clean -fd
           fi
           
